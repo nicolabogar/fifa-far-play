@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FutManager">
+  <meta name="theme-color" content="#16a34a">
+  <title>FutManager</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    html, body { height: 100%; overscroll-behavior: none; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .view { display: none; }
+    .view.active { display: block; }
+    .nav-btn.ativo { color: #16a34a !important; }
+    .nav-btn.ativo span:first-child { transform: scale(1.15); }
+    input[type=number]::-webkit-inner-spin-button { opacity: 1; }
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .animate-slide { animation: slideUp 0.25s ease-out; }
+    .animate-fade { animation: fadeIn 0.2s ease-out; }
+    #modal-box { animation: slideUp 0.3s ease-out; }
+    .card-hover:active { transform: scale(0.98); }
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+  </style>
+</head>
+<body class="bg-gray-900 text-white">
+
+  <!-- ===== TELA DE LOGIN ===== -->
+  <div id="tela-login" class="min-h-screen flex flex-col items-center justify-center p-8">
+    <div class="text-center mb-12 animate-fade">
+      <div class="text-8xl mb-4">⚽</div>
+      <h1 class="text-4xl font-bold text-green-400 tracking-tight">FutManager</h1>
+      <p class="text-gray-400 mt-3 text-base">Campeonatos e amistosos com seus amigos</p>
+    </div>
+    <button id="btn-login" class="flex items-center gap-3 bg-white text-gray-800 font-semibold px-7 py-4 rounded-2xl shadow-xl hover:bg-gray-50 active:scale-95 transition-all duration-150">
+      <svg width="22" height="22" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Entrar com Google
+    </button>
+    <p id="msg-login" class="text-red-400 text-sm mt-6 hidden"></p>
+    <p class="text-gray-600 text-xs mt-8 text-center">Apenas usuários autorizados têm acesso</p>
+  </div>
+
+  <!-- ===== LOADING ===== -->
+  <div id="tela-loading" class="hidden min-h-screen flex items-center justify-center">
+    <div class="text-center">
+      <div class="text-5xl mb-4 animate-bounce">⚽</div>
+      <p class="text-gray-400">Carregando...</p>
+    </div>
+  </div>
+
+  <!-- ===== APP PRINCIPAL ===== -->
+  <div id="app" class="hidden flex-col" style="height: 100dvh; height: 100vh;">
+
+    <!-- Header -->
+    <header class="bg-gray-800 border-b border-gray-700 px-4 py-3 flex items-center justify-between flex-shrink-0 safe-top">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">⚽</span>
+        <span class="font-bold text-green-400 text-lg">FutManager</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
+          <img id="user-foto" class="w-8 h-8 rounded-full bg-gray-600" src="" alt="" onerror="this.src=''">
+          <span id="user-nome" class="text-sm text-gray-300 hidden sm:block"></span>
+        </div>
+        <button id="btn-sair" class="text-gray-500 hover:text-red-400 text-xs transition-colors px-2 py-1 rounded-lg hover:bg-gray-700">Sair</button>
+      </div>
+    </header>
+
+    <!-- Conteúdo principal -->
+    <main class="flex-1 overflow-y-auto" id="main-content">
+
+      <!-- View: Home / Dashboard -->
+      <div id="view-home" class="view active p-4 pb-24 animate-slide">
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold">Olá! 👋</h2>
+          <p class="text-gray-400 text-sm mt-1">Resumo do FutManager</p>
+        </div>
+
+        <!-- Stats cards -->
+        <div class="grid grid-cols-2 gap-3 mb-6">
+          <div class="bg-gray-800 rounded-2xl p-4 text-center card-hover">
+            <div id="stat-jogadores" class="text-3xl font-bold text-green-400">0</div>
+            <div class="text-gray-400 text-xs mt-1">Jogadores</div>
+          </div>
+          <div class="bg-gray-800 rounded-2xl p-4 text-center card-hover">
+            <div id="stat-amistosos" class="text-3xl font-bold text-blue-400">0</div>
+            <div class="text-gray-400 text-xs mt-1">Amistosos</div>
+          </div>
+          <div class="bg-gray-800 rounded-2xl p-4 text-center card-hover">
+            <div id="stat-campeonatos" class="text-3xl font-bold text-yellow-400">0</div>
+            <div class="text-gray-400 text-xs mt-1">Campeonatos</div>
+          </div>
+          <div class="bg-gray-800 rounded-2xl p-4 text-center card-hover">
+            <div id="stat-partidas" class="text-3xl font-bold text-purple-400">0</div>
+            <div class="text-gray-400 text-xs mt-1">Partidas</div>
+          </div>
+        </div>
+
+        <!-- Top 3 Ranking -->
+        <div class="mb-2 flex items-center justify-between">
+          <h3 class="font-bold text-gray-200">🏆 Top Ranking</h3>
+          <button onclick="mostrarView('ranking')" class="text-green-400 text-xs">Ver todos →</button>
+        </div>
+        <div id="home-ranking" class="space-y-2">
+          <div class="text-gray-500 text-center py-6 text-sm">Nenhuma partida registrada</div>
+        </div>
+      </div>
+
+      <!-- View: Jogadores -->
+      <div id="view-jogadores" class="view p-4 pb-24">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-xl font-bold">Jogadores</h2>
+          <button id="btn-add-jogador" class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-xl text-sm font-semibold active:scale-95 transition-all flex items-center gap-1">
+            <span>+</span> Adicionar
+          </button>
+        </div>
+        <div id="lista-jogadores">
+          <div class="text-gray-500 text-center py-12 text-sm">Nenhum jogador cadastrado</div>
+        </div>
+      </div>
+
+      <!-- View: Amistosos -->
+      <div id="view-amistosos" class="view p-4 pb-24">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-xl font-bold">Amistosos</h2>
+          <button id="btn-criar-amistoso" class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-xl text-sm font-semibold active:scale-95 transition-all">
+            + Criar
+          </button>
+        </div>
+        <div id="lista-amistosos">
+          <div class="text-gray-500 text-center py-12 text-sm">Nenhum amistoso registrado</div>
+        </div>
+      </div>
+
+      <!-- View: Campeonatos -->
+      <div id="view-campeonatos" class="view p-4 pb-24">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-xl font-bold">Campeonatos</h2>
+          <button id="btn-criar-campeonato" class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-xl text-sm font-semibold active:scale-95 transition-all">
+            + Criar
+          </button>
+        </div>
+        <div id="lista-campeonatos">
+          <div class="text-gray-500 text-center py-12 text-sm">Nenhum campeonato criado</div>
+        </div>
+      </div>
+
+      <!-- View: Ranking -->
+      <div id="view-ranking" class="view p-4 pb-24">
+        <h2 class="text-xl font-bold mb-5">📊 Ranking Geral</h2>
+        <div id="lista-ranking">
+          <div class="text-gray-500 text-center py-12 text-sm">Nenhuma partida registrada</div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 flex z-40" style="padding-bottom: env(safe-area-inset-bottom);">
+      <button class="nav-btn ativo flex-1 flex flex-col items-center py-3 text-green-400 transition-colors" data-view="home">
+        <span class="text-2xl leading-none">🏠</span>
+        <span class="text-[10px] mt-1 font-medium">Início</span>
+      </button>
+      <button class="nav-btn flex-1 flex flex-col items-center py-3 text-gray-500 transition-colors" data-view="jogadores">
+        <span class="text-2xl leading-none">👥</span>
+        <span class="text-[10px] mt-1 font-medium">Jogadores</span>
+      </button>
+      <button class="nav-btn flex-1 flex flex-col items-center py-3 text-gray-500 transition-colors" data-view="amistosos">
+        <span class="text-2xl leading-none">⚽</span>
+        <span class="text-[10px] mt-1 font-medium">Amistosos</span>
+      </button>
+      <button class="nav-btn flex-1 flex flex-col items-center py-3 text-gray-500 transition-colors" data-view="campeonatos">
+        <span class="text-2xl leading-none">🏆</span>
+        <span class="text-[10px] mt-1 font-medium">Campeonatos</span>
+      </button>
+      <button class="nav-btn flex-1 flex flex-col items-center py-3 text-gray-500 transition-colors" data-view="ranking">
+        <span class="text-2xl leading-none">📊</span>
+        <span class="text-[10px] mt-1 font-medium">Ranking</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ===== MODAL ===== -->
+  <div id="modal-overlay" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-end">
+    <div id="modal-box" class="bg-gray-800 w-full rounded-t-3xl max-h-[92vh] overflow-y-auto">
+      <div class="w-10 h-1 bg-gray-600 rounded-full mx-auto mt-3 mb-1"></div>
+      <div id="modal-conteudo" class="p-5 pb-8"></div>
+    </div>
+  </div>
+
+  <!-- ===== TOAST ===== -->
+  <div id="toast" class="hidden fixed top-safe left-4 right-4 z-[100] text-center text-sm font-semibold px-4 py-3 rounded-2xl shadow-xl" style="top: max(1rem, env(safe-area-inset-top))"></div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import {
+      getFirestore, collection, addDoc, getDocs, deleteDoc,
+      doc, updateDoc, query, orderBy, serverTimestamp
+    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import {
+      getAuth, signInWithPopup, signInWithRedirect, getRedirectResult,
+      GoogleAuthProvider, signOut, onAuthStateChanged
+    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+    // ── Firebase Config ──────────────────────────────────────────────
+    const firebaseConfig = {
+      apiKey: "AIzaSyB2FF0TT2ZIEn91DkjhPYqcDABK52Tx2-I",
+      authDomain: "fut-manager-6bd85.firebaseapp.com",
+      projectId: "fut-manager-6bd85",
+      storageBucket: "fut-manager-6bd85.firebasestorage.app",
+      messagingSenderId: "999602703550",
+      appId: "1:999602703550:web:57cbf17b03f30baf02e2ef"
+    };
+
+    const fbApp  = initializeApp(firebaseConfig);
+    const db     = getFirestore(fbApp);
+    const auth   = getAuth(fbApp);
+    const gProvider = new GoogleAuthProvider();
+
+    // ── Estado Global ────────────────────────────────────────────────
+    let usuarioAtual  = null;
+    let jogadores     = [];
+    let amistosos     = [];
+    let campeonatos   = [];
+    let _partidasDisp = [];    // para sorteio de partidas de grupo
+
+    // ── Dados: Times e Seleções ──────────────────────────────────────
+    const SELECOES = [
+      '🇧🇷 Brasil','🇦🇷 Argentina','🇫🇷 França','🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra','🇪🇸 Espanha',
+      '🇩🇪 Alemanha','🇵🇹 Portugal','🇮🇹 Itália','🇳🇱 Holanda','🇧🇪 Bélgica',
+      '🇺🇾 Uruguai','🇭🇷 Croácia','🇲🇦 Marrocos','🇯🇵 Japão','🇲🇽 México',
+      '🇨🇴 Colômbia','🇨🇱 Chile','🇪🇨 Equador','🇵🇱 Polônia','🇷🇸 Sérvia',
+      '🇸🇳 Senegal','🇩🇰 Dinamarca','🇨🇭 Suíça','🇺🇸 EUA','🇦🇺 Austrália',
+      '🇰🇷 Coreia do Sul','🇵🇪 Peru','🇳🇬 Nigéria','🇬🇭 Gana','🇨🇮 Costa do Marfim'
+    ];
+    const TIMES_BR = [
+      'Flamengo','Corinthians','Palmeiras','São Paulo','Santos','Grêmio',
+      'Internacional','Cruzeiro','Atlético MG','Vasco','Botafogo','Fluminense',
+      'Bahia','Fortaleza','Sport','Athletico PR','Ceará','Coritiba'
+    ];
+    const TIMES_EU = [
+      'Real Madrid','Barcelona','Manchester City','Liverpool','Chelsea',
+      'Arsenal','Atlético Madrid','Borussia Dortmund','Bayern Munich',
+      'Inter Milan','Juventus','Milan','PSG','Benfica','Porto','Ajax'
+    ];
+    const TIMES_SA = [
+      'River Plate','Boca Juniors','Flamengo','Palmeiras','Santos',
+      'Nacional','Peñarol','LDU','Racing','Independiente','San Lorenzo','Olimpia'
+    ];
+
+    const CAMP_INFO = {
+      'champions':      { nome: 'Champions League', emoji: '⭐', times: TIMES_EU  },
+      'brasileirao':    { nome: 'Brasileirão',       emoji: '🇧🇷', times: TIMES_BR  },
+      'paulistao':      { nome: 'Paulistão',         emoji: '🐍', times: TIMES_BR  },
+      'copa-brasil':    { nome: 'Copa do Brasil',    emoji: '🏆', times: TIMES_BR  },
+      'libertadores':   { nome: 'Libertadores',      emoji: '🌎', times: TIMES_SA  },
+      'copa-do-mundo':  { nome: 'Copa do Mundo',     emoji: '🌍', times: SELECOES  },
+    };
+
+    // ── Helpers de UI ────────────────────────────────────────────────
+    function mostrarView(nome) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      const v = document.getElementById('view-' + nome);
+      if (v) { v.classList.add('active'); v.classList.add('animate-slide'); setTimeout(() => v.classList.remove('animate-slide'), 300); }
+      document.querySelectorAll('.nav-btn').forEach(b => {
+        b.classList.remove('ativo', 'text-green-400');
+        b.classList.add('text-gray-500');
+      });
+      const nb = document.querySelector(`.nav-btn[data-view="${nome}"]`);
+      if (nb) { nb.classList.add('ativo', 'text-green-400'); nb.classList.remove('text-gray-500'); }
+    }
+    window.mostrarView = mostrarView;
+
+    document.querySelectorAll('.nav-btn').forEach(b => {
+      b.addEventListener('click', () => mostrarView(b.dataset.view));
+    });
+
+    function abrirModal(html) {
+      document.getElementById('modal-conteudo').innerHTML = html;
+      const ov = document.getElementById('modal-overlay');
+      ov.classList.remove('hidden');
+      ov.classList.add('flex');
+    }
+    function fecharModal() {
+      const ov = document.getElementById('modal-overlay');
+      ov.classList.add('hidden');
+      ov.classList.remove('flex');
+    }
+    window.fecharModal = fecharModal;
+
+    document.getElementById('modal-overlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('modal-overlay')) fecharModal();
+    });
+
+    let toastTimer;
+    function toast(msg, tipo = 'ok') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = `fixed left-4 right-4 z-[100] text-center text-sm font-semibold px-4 py-3 rounded-2xl shadow-xl ${tipo === 'erro' ? 'bg-red-600' : 'bg-green-600'}`;
+      t.style.top = 'max(1rem, env(safe-area-inset-top))';
+      t.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.add('hidden'), 3000);
+    }
+
+    function fmt(data) {
+      if (!data) return '';
+      const d = data.toDate ? data.toDate() : new Date(data);
+      return d.toLocaleDateString('pt-BR');
+    }
+
+    function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+
+    // ── Autenticação ─────────────────────────────────────────────────
+    document.getElementById('btn-login').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-login');
+      btn.disabled = true;
+      btn.textContent = 'Entrando...';
+      try {
+        // Tenta popup; se falhar (mobile bloqueado), usa redirect
+        await signInWithPopup(auth, gProvider);
+      } catch (err) {
+        if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user') {
+          await signInWithRedirect(auth, gProvider);
+        } else {
+          const msg = document.getElementById('msg-login');
+          msg.textContent = 'Erro: ' + err.message;
+          msg.classList.remove('hidden');
+          btn.disabled = false;
+          btn.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Entrar com Google`;
+        }
+      }
+    });
+
+    document.getElementById('btn-sair').addEventListener('click', async () => {
+      await signOut(auth);
+    });
+
+    // Tratar redirect de volta
+    getRedirectResult(auth).catch(() => {});
+
+    onAuthStateChanged(auth, async user => {
+      document.getElementById('tela-loading').classList.add('hidden');
+      if (user) {
+        usuarioAtual = user;
+        document.getElementById('tela-login').classList.add('hidden');
+        const appEl = document.getElementById('app');
+        appEl.classList.remove('hidden');
+        appEl.classList.add('flex');
+        if (user.photoURL) document.getElementById('user-foto').src = user.photoURL;
+        document.getElementById('user-nome').textContent = user.displayName?.split(' ')[0] || '';
+        await carregarDados();
+      } else {
+        usuarioAtual = null;
+        document.getElementById('tela-login').classList.remove('hidden');
+        document.getElementById('app').classList.add('hidden');
+        document.getElementById('app').classList.remove('flex');
+      }
+    });
+
+    // ── Carregamento de Dados ────────────────────────────────────────
+    async function carregarDados() {
+      await Promise.all([carregarJogadores(), carregarAmistosos(), carregarCampeonatos()]);
+      atualizarDashboard();
+    }
+
+    // ── JOGADORES ────────────────────────────────────────────────────
+    async function carregarJogadores() {
+      const snap = await getDocs(query(collection(db, 'jogadores'), orderBy('nome')));
+      jogadores = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderJogadores();
+    }
+
+    function renderJogadores() {
+      const el = document.getElementById('lista-jogadores');
+      if (!jogadores.length) {
+        el.innerHTML = '<div class="text-gray-500 text-center py-12 text-sm">Nenhum jogador cadastrado</div>';
+        return;
+      }
+      el.innerHTML = `<div class="space-y-3">${jogadores.map(j => `
+        <div class="bg-gray-800 rounded-2xl p-4 flex items-center gap-4 card-hover">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center text-2xl flex-shrink-0">
+            ${j.emoji || j.nome.charAt(0).toUpperCase()}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="font-semibold">${j.nome}</div>
+            <div class="text-gray-400 text-xs">${j.posicao || 'Jogador'}</div>
+          </div>
+          <button onclick="excluirJogador('${j.id}','${j.nome}')" class="text-gray-600 hover:text-red-400 p-2 transition-colors">🗑️</button>
+        </div>`).join('')}</div>`;
+    }
+
+    window.excluirJogador = async (id, nome) => {
+      abrirModal(`
+        <h3 class="text-xl font-bold mb-3">Remover Jogador</h3>
+        <p class="text-gray-400 mb-6">Deseja remover <strong class="text-white">${nome}</strong>? Esta ação não pode ser desfeita.</p>
+        <div class="flex gap-3">
+          <button onclick="fecharModal()" class="flex-1 bg-gray-700 py-3 rounded-xl font-semibold">Cancelar</button>
+          <button onclick="confirmarExcluirJogador('${id}')" class="flex-1 bg-red-600 py-3 rounded-xl font-semibold">Remover</button>
+        </div>`);
+    };
+
+    window.confirmarExcluirJogador = async (id) => {
+      await deleteDoc(doc(db, 'jogadores', id));
+      fecharModal();
+      await carregarJogadores();
+      atualizarDashboard();
+      toast('Jogador removido');
+    };
+
+    document.getElementById('btn-add-jogador').addEventListener('click', () => {
+      const emojis = ['⚽','🏆','🎯','🔥','⚡','🦁','🐺','🦊','🐻','🦅','🦉','🐯','🦈','🐉','👑','💎','🚀','🌟'];
+      abrirModal(`
+        <h3 class="text-xl font-bold mb-5">Adicionar Jogador</h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-gray-400 text-xs mb-2 uppercase tracking-wider">Nome *</label>
+            <input id="in-nome" type="text" placeholder="Nome do jogador" autocomplete="off"
+              class="w-full bg-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-green-500">
+          </div>
+          <div>
+            <label class="block text-gray-400 text-xs mb-2 uppercase tracking-wider">Posição</label>
+            <select id="in-posicao" class="w-full bg-gray-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-green-500">
+              <option>Atacante</option><option>Meia</option><option>Defensor</option><option>Goleiro</option><option>Jogador</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-gray-400 text-xs mb-2 uppercase tracking-wider">Ícone</label>
+            <div class="grid grid-cols-9 gap-2">
+              ${emojis.map((e, i) => `<button type="button" onclick="selecionarEmoji('${e}',this)"
+                class="emoji-op text-2xl p-1.5 rounded-xl hover:bg-gray-600 transition-colors ${i===0?'bg-green-800 ring-2 ring-green-500':''}">${e}</button>`).join('')}
+            </div>
+            <input type="hidden" id="in-emoji" value="${emojis[0]}">
+          </div>
+        </div>
+        <div class="flex gap-3 mt-6">
+          <button onclick="fecharModal()" class="flex-1 bg-gray-700 py-3 rounded-xl font-semibold">Cancelar</button>
+          <button onclick="salvarJogador()" class="flex-1 bg-green-600 py-3 rounded-xl font-semibold">Salvar ✓</button>
+        </div>`);
+    });
+
+    window.selecionarEmoji = (emoji, el) => {
+      document.getElementById('in-emoji').value = emoji;
+      document.querySelectorAll('.emoji-op').forEach(b => { b.classList.remove('bg-green-800','ring-2','ring-green-500'); });
+      el.classList.add('bg-green-800','ring-2','ring-green-500');
+    };
+
+    window.salvarJogador = async () => {
+      const nome = document.getElementById('in-nome').value.trim();
+      if (!nome) { toast('Digite o nome do jogador', 'erro'); return; }
+      await addDoc(collection(db, 'jogadores'), {
+        nome,
+        posicao: document.getElementById('in-posicao').value,
+        emoji: document.getElementById('in-emoji').value,
+        criadoEm: serverTimestamp()
+      });
+      fecharModal();
+      await carregarJogadores();
+      atualizarDashboard();
+      toast('Jogador adicionado! 🎉');
+    };
+
+    // ── AMISTOSOS ────────────────────────────────────────────────────
+    async function carregarAmistosos() {
+      const snap = await getDocs(query(collection(db, 'amistosos'), orderBy('criadoEm', 'desc')));
+      amistosos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderAmistosos();
+    }
+
+    function renderAmistosos() {
+      const el = document.getElementById('lista-amistosos');
+      if (!amistosos.length) {
+        el.innerHTML = '<div class="text-gray-500 text-center py-12 text-sm">Nenhum amistoso registrado</div>';
+        return;
+      }
+      el.innerHTML = `<div class="space-y-3">${amistosos.map(a => {
+        const temRes = a.resultado != null;
+        return `
+        <div class="bg-gray-800 rounded-2xl p-4 card-hover">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs text-gray-500">${fmt(a.criadoEm)} • ${a.tipoTimes || 'Seleções'}</span>
+            <span class="text-xs px-2 py-0.5 rounded-full ${temRes ? 'bg-gray-700 text-gray-400' : 'bg-blue-900 text-blue-300'}">
+              ${temRes ? 'Finalizado' : 'Registrar resultado'}
+            </span>
+          </div>
+          <div class="flex items-center">
+            <div class="flex-1 text-center">
+              <div class="font-bold text-sm leading-tight">${a.time1?.nome || 'Time 1'}</div>
+              <div class="text-gray-500 text-xs mt-1">${(a.time1?.jogadores || []).join(' • ')}</div>
+            </div>
+            <div class="px-4 text-center flex-shrink-0">
+              ${temRes
+                ? `<div class="text-2xl font-bold text-white">${a.resultado.g1} <span class="text-gray-500 text-lg">x</span> ${a.resultado.g2}</div>`
+                : `<button onclick="registrarResultadoAmistoso('${a.id}')" class="bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded-xl text-xs font-semibold">Placar</button>`}
+            </div>
+            <div class="flex-1 text-center">
+              <div class="font-bold text-sm leading-tight">${a.time2?.nome || 'Time 2'}</div>
+              <div class="text-gray-500 text-xs mt-1">${(a.time2?.jogadores || []).join(' • ')}</div>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}</div>`;
+    }
+
+    document.getElementById('btn-criar-amistoso').addEventListener('click', () => {
+      if (jogadores.length < 2) { toast('Cadastre pelo menos 2 jogadores', 'erro'); return; }
+      abrirModal(`
+        <h3 class="text-xl font-bold mb-4">Criar Amistoso</h3>
+        <p class="text-gray-400 text-sm mb-4">Selecione os jogadores e sorteie os times</p>
+        <div class="mb-4">
+          <label class="block text-gray-400 text-xs mb-2 uppercase tracking-wider">Jogadores</label>
+          <div class="space-y-2">
+            ${jogadores.map(j => `
+              <label class="flex items-center gap-3 bg-gray-700 rounded-xl p-3 cursor-pointer">
+                <input type="checkbox" value="${j.id}" data-nome="${j.nome}" class="jog-check w-5 h-5 accent-green-500 flex-shrink-0">
+                <span class="text-xl">${j.emoji || '⚽'}</span>
+                <span class="font-medium">${j.nome}</span>
+              </label>`).join('')}
+          </div>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-400 text-xs mb-2 uppercase tracking-wider">Tipo de times</label>
+          <select id="tipo-times" class="w-full bg-gray-700 rounded-xl px-4 py-3 text-white outline-none">
+            <option value="selecoes">🌍 Seleções Nacionais</option>
+            <option value="brasileiros">🇧🇷 Times Brasileiros</option>
+            <option value="europeus">⭐ Times Europeus</option>
+            <option value="sulamericanos">🌎 Times Sul-Americanos</option>
+          </select>
+        </div>
+        <div id="res-sorteio" class="hidden bg-gray-700 rounded-2xl p-4 mb-4"></div>
+        <div class="flex gap-3">
+          <button onclick="fecharModal()" class="flex-1 bg-gray-700 py-3 rounded-xl font-semibold">Cancelar</button>
+          <button onclick="sortearTimesAmistoso()" class="flex-1 bg-blue-600 py-3 rounded-xl font-semibold">🎲 Sortear</button>
+          <button id="btn-salvar-amistoso" onclick="salvarAmistoso()" class="hidden flex-1 bg-green-600 py-3 rounded-xl font-semibold">Salvar ✓</button>
+        </div>`);
+    });
+
+    let sorteioAmistoso = null;
+
+    window.sortearTimesAmistoso = () => {
+      const checks = [...document.querySelectorAll('.jog-check:checked')];
+      if (checks.length < 2) { toast('Selecione pelo menos 2 jogadores', 'erro'); return; }
+      const tipo = document.getElementById('tipo-times').value;
+      const lista = tipo === 'brasileiros' ? TIMES_BR : tipo === 'europeus' ? TIMES_EU : tipo === 'sulamericanos' ? TIMES_SA : SELECOES;
+      const nomeTipo = document.getElementById('tipo-times').options[document.getElementById('tipo-times').selectedIndex].text;
+
+      const jogsSel = shuffle(checks.map(c => ({ id: c.value, nome: c.dataset.nome })));
+      const meio = Math.ceil(jogsSel.length / 2);
+      const t1Jogs = jogsSel.slice(0, meio);
+      const t2Jogs = jogsSel.slice(meio);
+      const [nomeT1, nomeT2] = shuffle(lista);
+
+      sorteioAmistoso = {
+        time1: { nome: nomeT1, jogadores: t1Jogs.map(j => j.nome), jogadoresIds: t1Jogs.map(j => j.id) },
+        time2: { nome: nomeT2, jogadores: t2Jogs.map(j => j.nome), jogadoresIds: t2Jogs.map(j => j.id) },
+        tipoTimes: nomeTipo
+      };
+
+      const res = document.getElementById('res-sorteio');
+      res.classList.remove('hidden');
+      res.innerHTML = `
+        <p class="text-green-400 text-sm font-semibold text-center mb-3">🎲 Times sorteados!</p>
+        <div class="flex gap-3">
+          <div class="flex-1 text-center">
+            <div class="font-bold text-sm">${nomeT1}</div>
+            ${t1Jogs.map(j => `<div class="text-gray-400 text-xs mt-0.5">${j.nome}</div>`).join('')}
+          </div>
+          <div class="text-gray-500 font-bold self-center text-lg">VS</div>
+          <div class="flex-1 text-center">
+            <div class="font-bold text-sm">${nomeT2}</div>
+            ${t2Jogs.map(j => `<div class="text-gray-400 text-xs mt-0.5">${j.nome}</div>`).join('')}
+          </div>
+        </div>`;
+      document.getElementById('btn-salvar-amistoso').classList.remove('hidden');
+    };
+
+    window.salvarAmistoso = async () => {
+      if (!sorteioAmistoso) return;
+      await addDoc(collection(db, 'amistosos'), { ...sorteioAmistoso, criadoEm: serverTimestamp() });
+      fecharModal();
+      sorteioAmistoso = null;
+      await carregarAmistosos();
+      atualizarDashboard();
+      toast('Amistoso criado! ⚽');
+    };
+
+    window.registrarResultadoAmistoso = (id) => {
+      const a = amistosos.find(x => x.id === id);
+      if (!a) return;
+      abrirModal(`
+        <h3 class="text-xl font-bold mb-6">Registrar Resultado</h3>
+        <div class="flex items-center gap-4 mb-6">
+          <div class="flex-1 text-center">
+            <p class="text-sm font-bold mb-2 text-gray-300">${a.time1?.nome}</p>
+            <input id="g1" type="number" min="0" max="99" value="0"
+              class="w-20 bg-gray-700 rounded-xl px-3 py-3 text-center text-3xl font-bold outline-none focus:ring-2 focus:ring-green-500 mx-auto block">
+          </div>
+          <div class="text-gray-500 text-2xl font-bold">×</div>
+          <div class="flex-1 text-center">
+            <p class="text-sm font-bold mb-2 text-gray-300">${a.time2?.nome}</p>
+            <input id="g2" type="number" min="0" max="99" value="0"
+              class="w-20 bg-gray-700 rounded-xl px-3 py-3 text-center text-3xl font-bold outline-none focus:ring-2 focus:ring-green-500 mx-auto block">
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <button onclick="fecharModal()" class="flex-1 bg-gray-700 py-3 rounded-xl font-semibold">Cancelar</button>
+          <button onclick="salvarResultadoAmistoso('${id}')" class="flex-1 bg-green-600 py-3 rounded-xl font-semibold">Salvar ✓</button>
+        </div>`);
+    };
+
+    window.salvarResultadoAmistoso = async (id) => {
+      const g1 = parseInt(document.getElementById('g1').value) || 0;
+      const g2 = parseInt(document.getElementById('g2').value) || 0;
+      await updateDoc(doc(db, 'amistosos', id), { resultado: { g1, g2 } });
+      fecharModal();
+      await carregarAmistosos();
+      atualizarDashboard();
+      toast('Resultado registrado! 🏆');
+    };
+
+    // ── CAMPEONATOS ──────────────────────────────────────────────────
+    async function carregarCampeonatos() {
+      const snap = await getDocs(query(collection(db, 'campeonatos'), orderBy('criadoEm', 'desc')));
+      campeonatos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderCampeonatos();
+    }
+
+    function renderCampeonatos() {
+      const el = document.getElementById('lista-campeonatos');
+      if (!campeonatos.length) {
+        el.innerHTML = '<div class="text-gray-500 text-center py-12 text-sm">Nenhum campeonato criado</div>';
+        return;
+      }
+      el.innerHTML = `<div class="space-y-3">${campeonatos.map(c => {
+        const info = CAMP_INFO[c.tipo] || { nome: c.tipo, emoji: '🏆' };
+        return `
+        <div class="bg-gray-800 rounded-2xl p-4 card-hover cursor-pointer" onclick="abrirCampeonato('${c.id}')">
+          <div class="flex items-center gap-3">
+            <span class="text-4xl">${info.emoji}</span>
+            <div class="flex-1">
+              <div class="font-bold">${c.nome}</div>
+              <div class="text-gray-400 text-xs mt-0.5">${info.nome} • ${c.participantes?.length || 0} participantes</div>
+            </div>
+            <div class="text-right">
+              <span class="text-xs px-2 py-1 rounded-full ${c.status === 'finalizado' ? 'bg-gray-700 text-gray-400' : 'bg-green-900 text-green-400'}">
+                ${c.status === 'finalizado' ? 'Finalizado' : 'Em andamento'}
+              </span>
+              <div class="text-gray-500 text-xs mt-2">→</div>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}</div>`;
+    }
+
+    document.getElementById('btn-criar-campeonato').addEventListener('click', () => {
+      if (jogadores.length < 2) { toast('Cadastre pelo menos 2 jogadores', 'erro'); return; }
+      abrirModal(`
+        <h3 class="text-xl font-bold mb-5">Criar Campeonato</h3>
+        <div class="mb-4">
+          <label class="block text-gray-400 text-xs mb-2 uppercase tracking-wider">Nome *</label>
+          <input id="camp-nome" type="text" placeholder="Ex: Champions dos Amigos 2024" autocomplete="off"
+            class="w-full bg-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-green-500">
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-400 text-xs mb-2 uppercase tracking-wider">Formato</label>
+          <div class="grid grid-cols-3 gap-2">
+            ${Object.entries(CAMP_INFO).map(([k, v]) => `
+              <button type="button" data-tipo="${k}" onclick="selecionarTipoCamp('${k}', this)"
+                class="tipo-camp bg-gray-700 rounded-xl py-3 px-2 text-center hover:bg-gray-600 transition-all">
+                <div class="text-2xl">${v.emoji}</div>
+                <div class="text-xs mt-1 leading-tight">${v.nome}</div>
+              </button>`).join('')}
+          </div>
+          <input type="hidden" id="camp-tipo" value="champions">
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-400 text-xs mb-2 uppercase tracking-wider">Participantes</label>
+          <div class="space-y-2">
+            ${jogadores.map(j => `
+              <label class="flex items-center gap-3 bg-gray-700 rounded-xl p-3 cursor-pointer">
+                <input type="checkbox" value="${j.id}" data-nome="${j.nome}" class="camp-check w-5 h-5 accent-green-500 flex-shrink-0">
+                <span class="text-xl">${j.emoji || '⚽'}</span>
+                <span class="font-medium">${j.nome}</span>
+              </label>`).join('')}
+          </div>
+        </div>
+        <div class="flex gap-3 mt-5">
+          <button onclick="fecharModal()" class="flex-1 bg-gray-700 py-3 rounded-xl font-semibold">Cancelar</button>
+          <button onclick="criarCampeonato()" class="flex-1 bg-green-600 py-3 rounded-xl font-semibold">Criar 🏆</button>
+        </div>`);
+      setTimeout(() => selecionarTipoCamp('champions', document.querySelector('[data-tipo="champions"]')), 50);
+    });
+
+    window.selecionarTipoCamp = (tipo, el) => {
+      document.querySelectorAll('.tipo-camp').forEach(b => {
+        b.classList.remove('ring-2','ring-green-500','bg-green-900');
+        b.classList.add('bg-gray-700');
+      });
+      if (el) { el.classList.add('ring-2','ring-green-500','bg-green-900'); el.classList.remove('bg-gray-700'); }
+      document.getElementById('camp-tipo').value = tipo;
+    };
+
+    window.criarCampeonato = async () => {
+      const nome = document.getElementById('camp-nome').value.trim();
+      const tipo = document.getElementById('camp-tipo').value;
+      const checks = [...document.querySelectorAll('.camp-check:checked')];
+      if (!nome) { toast('Digite o nome do campeonato', 'erro'); return; }
+      if (checks.length < 2) { toast('Selecione pelo menos 2 participantes', 'erro'); return; }
+
+      const info = CAMP_INFO[tipo];
+      const timesShuf = shuffle(info.times);
+      const participantes = checks.map((c, i) => ({
+        jogadorId: c.value,
+        nome: c.dataset.nome,
+        time: timesShuf[i % timesShuf.length]
+      }));
+
+      const grupos = gerarGrupos(participantes, tipo);
+
+      await addDoc(collection(db, 'campeonatos'), {
+        nome, tipo, participantes, grupos,
+        fase: 'grupos', status: 'ativo',
+        criadoEm: serverTimestamp()
+      });
+      fecharModal();
+      await carregarCampeonatos();
+      atualizarDashboard();
+      toast('Campeonato criado! 🏆');
+    };
+
+    function gerarGrupos(participantes, tipo) {
+      const n = participantes.length;
+      const numGrupos = tipo === 'brasileirao' || tipo === 'copa-brasil' ? 1
+        : n <= 4 ? 1 : n <= 8 ? 2 : n <= 16 ? 4 : 8;
+      const shuf = shuffle(participantes);
+      return Array.from({ length: numGrupos }, (_, g) => ({
+        nome: `Grupo ${String.fromCharCode(65 + g)}`,
+        membros: shuf.filter((_, i) => i % numGrupos === g).map(p => ({
+          ...p, pts: 0, vit: 0, emp: 0, der: 0, gp: 0, gc: 0
+        })),
+        partidas: []
+      }));
+    }
+
+    window.abrirCampeonato = (id) => {
+      const c = campeonatos.find(x => x.id === id);
+      if (!c) return;
+      const info = CAMP_INFO[c.tipo] || { emoji: '🏆', nome: c.tipo };
+
+      const gruposHTML = (c.grupos || []).map((g, gi) => {
+        const ord = [...g.membros].sort((a, b) => {
+          if (b.pts !== a.pts) return b.pts - a.pts;
+          if ((b.gp - b.gc) !== (a.gp - a.gc)) return (b.gp - b.gc) - (a.gp - a.gc);
+          return b.gp - a.gp;
+        });
+
+        // Partidas disponíveis
+        const disponiveis = [];
+        for (let i = 0; i < g.membros.length; i++) {
+          for (let j = i + 1; j < g.membros.length; j++) {
+            const m1 = g.membros[i], m2 = g.membros[j];
+            const feita = (g.partidas || []).some(p =>
+              (p.j1Id === m1.jogadorId && p.j2Id === m2.jogadorId) ||
+              (p.j1Id === m2.jogadorId && p.j2Id === m1.jogadorId));
+            if (!feita) disponiveis.push({ m1, m2 });
+          }
+        }
+
+        const tabela = ord.map((m, idx) => `
+          <tr class="border-t border-gray-600 ${idx < 2 ? 'text-green-400' : ''}">
+            <td class="py-2 pr-2 text-xs text-gray-400">${idx + 1}</td>
+            <td class="py-2 font-medium text-sm">${m.nome}</td>
+            <td class="py-2 text-center text-xs text-gray-400">${m.vit + m.emp + m.der}</td>
+            <td class="py-2 text-center text-xs text-gray-400">${m.vit}V ${m.emp}E ${m.der}D</td>
+            <td class="py-2 text-center text-xs text-gray-400">${m.gp}:${m.gc}</td>
+            <td class="py-2 text-center font-bold text-sm">${m.pts}</td>
+          </tr>`).join('');
+
+        const partidasFeitas = (g.partidas || []).map(p => `
+          <div class="flex items-center text-xs py-1.5 border-b border-gray-600 last:border-0">
+            <span class="flex-1 text-right text-gray-300">${p.j1Nome}</span>
+            <span class="px-3 font-bold text-green-400 flex-shrink-0">${p.g1} × ${p.g2}</span>
+            <span class="flex-1 text-gray-300">${p.j2Nome}</span>
+          </div>`).join('');
+
+        return `
+          <div class="bg-gray-700 rounded-2xl p-4 mb-3">
+            <h4 class="font-bold mb-3 text-gray-200">${g.nome}</h4>
+            <table class="w-full text-sm mb-3">
+              <thead><tr class="text-gray-500 text-xs">
+                <th class="text-left pb-1">#</th><th class="text-left pb-1">Jogador</th>
+                <th class="text-center pb-1">J</th><th class="text-center pb-1">V/E/D</th>
+                <th class="text-center pb-1">GP</th><th class="text-center pb-1">Pts</th>
+              </tr></thead>
+              <tbody>${tabela}</tbody>
+            </table>
+            ${partidasFeitas ? `<div class="mb-3">${partidasFeitas}</div>` : ''}
+            ${disponiveis.length > 0
+              ? `<button onclick="registrarPartidaGrupo('${c.id}',${gi})"
+                   class="w-full bg-blue-700 hover:bg-blue-600 py-2.5 rounded-xl text-sm font-semibold active:scale-95 transition-all">
+                   + Registrar Partida (${disponiveis.length} restantes)
+                 </button>`
+              : `<div class="text-center text-green-400 text-xs py-1">✅ Grupo concluído</div>`}
+          </div>`;
+      }).join('');
+
+      abrirModal(`
+        <div class="flex items-center gap-3 mb-5">
+          <span class="text-5xl">${info.emoji}</span>
+          <div>
+            <h3 class="text-xl font-bold">${c.nome}</h3>
+            <p class="text-gray-400 text-sm">${info.nome} • ${c.participantes?.length} participantes</p>
+          </div>
+        </div>
+        <div class="mb-5">
+          <h4 class="font-bold text-gray-300 text-sm mb-3 uppercase tracking-wider">🎽 Times Sorteados</h4>
+          <div class="space-y-2">
+            ${(c.participantes || []).map(p => `
+              <div class="flex items-center justify-between bg-gray-700 rounded-xl px-4 py-2.5">
+                <span class="font-semibold text-sm">${p.nome}</span>
+                <span class="text-xs text-gray-400">${p.time}</span>
+              </div>`).join('')}
+          </div>
+        </div>
+        <h4 class="font-bold text-gray-300 text-sm mb-3 uppercase tracking-wider">📊 Classificação</h4>
+        ${gruposHTML}
+        <button onclick="fecharModal()" class="w-full bg-gray-700 py-3 rounded-xl font-semibold mt-2">Fechar</button>`);
+    };
+
+    window.registrarPartidaGrupo = (campId, gi) => {
+      const c = campeonatos.find(x => x.id === campId);
+      if (!c) return;
+      const g = c.grupos[gi];
+      const disponiveis = [];
+      for (let i = 0; i < g.membros.length; i++) {
+        for (let j = i + 1; j < g.membros.length; j++) {
+          const m1 = g.membros[i], m2 = g.membros[j];
+          const feita = (g.partidas || []).some(p =>
+            (p.j1Id === m1.jogadorId && p.j2Id === m2.jogadorId) ||
+            (p.j1Id === m2.jogadorId && p.j2Id === m1.jogadorId));
+          if (!feita) disponiveis.push({ m1, m2 });
+        }
+      }
+      _partidasDisp = disponiveis;
+      abrirModal(`
+        <h3 class="text-xl font-bold mb-5">Registrar Partida — ${g.nome}</h3>
+        <div class="mb-4">
+          <label class="block text-gray-400 text-xs mb-2 uppercase tracking-wider">Confronto</label>
+          <select id="sel-partida" class="w-full bg-gray-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-green-500">
+            ${disponiveis.map((p, i) => `<option value="${i}">${p.m1.nome} × ${p.m2.nome}</option>`).join('')}
+          </select>
+        </div>
+        <div class="flex items-center gap-4 mb-6">
+          <div class="flex-1 text-center">
+            <input id="pg1" type="number" min="0" max="99" value="0"
+              class="w-20 bg-gray-700 rounded-xl px-3 py-4 text-center text-3xl font-bold outline-none focus:ring-2 focus:ring-green-500 mx-auto block">
+          </div>
+          <div class="text-gray-500 text-2xl font-bold">×</div>
+          <div class="flex-1 text-center">
+            <input id="pg2" type="number" min="0" max="99" value="0"
+              class="w-20 bg-gray-700 rounded-xl px-3 py-4 text-center text-3xl font-bold outline-none focus:ring-2 focus:ring-green-500 mx-auto block">
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <button onclick="abrirCampeonato('${campId}')" class="flex-1 bg-gray-700 py-3 rounded-xl font-semibold">Voltar</button>
+          <button onclick="salvarPartidaGrupo('${campId}',${gi})" class="flex-1 bg-green-600 py-3 rounded-xl font-semibold">Salvar ✓</button>
+        </div>`);
+    };
+
+    window.salvarPartidaGrupo = async (campId, gi) => {
+      const c = campeonatos.find(x => x.id === campId);
+      if (!c) return;
+      const sel = parseInt(document.getElementById('sel-partida').value);
+      const { m1, m2 } = _partidasDisp[sel];
+      const g1 = parseInt(document.getElementById('pg1').value) || 0;
+      const g2 = parseInt(document.getElementById('pg2').value) || 0;
+
+      const grupos = c.grupos.map((g, idx) => {
+        if (idx !== gi) return g;
+        const novaPartida = { j1Id: m1.jogadorId, j1Nome: m1.nome, j2Id: m2.jogadorId, j2Nome: m2.nome, g1, g2 };
+        const membros = g.membros.map(m => {
+          const mm = { ...m };
+          if (m.jogadorId === m1.jogadorId) {
+            mm.gp += g1; mm.gc += g2; mm.vit += g1 > g2 ? 1 : 0; mm.emp += g1 === g2 ? 1 : 0; mm.der += g1 < g2 ? 1 : 0;
+            mm.pts += g1 > g2 ? 3 : g1 === g2 ? 1 : 0;
+          } else if (m.jogadorId === m2.jogadorId) {
+            mm.gp += g2; mm.gc += g1; mm.vit += g2 > g1 ? 1 : 0; mm.emp += g1 === g2 ? 1 : 0; mm.der += g2 < g1 ? 1 : 0;
+            mm.pts += g2 > g1 ? 3 : g1 === g2 ? 1 : 0;
+          }
+          return mm;
+        });
+        return { ...g, membros, partidas: [...(g.partidas || []), novaPartida] };
+      });
+
+      await updateDoc(doc(db, 'campeonatos', campId), { grupos });
+      await carregarCampeonatos();
+      atualizarDashboard();
+      toast('Partida registrada! ⚽');
+      abrirCampeonato(campId);
+    };
+
+    // ── RANKING ──────────────────────────────────────────────────────
+    function calcularRanking() {
+      const stats = {};
+      jogadores.forEach(j => {
+        stats[j.id] = { nome: j.nome, emoji: j.emoji || '⚽', vit: 0, emp: 0, der: 0, gp: 0, gc: 0, pts: 0, jogos: 0 };
+      });
+
+      // Amistosos
+      amistosos.forEach(a => {
+        if (!a.resultado) return;
+        const { g1, g2 } = a.resultado;
+        const addStat = (ids, gf, gc) => ids?.forEach(id => {
+          if (!stats[id]) return;
+          stats[id].gp += gf; stats[id].gc += gc; stats[id].jogos++;
+          stats[id].vit += gf > gc ? 1 : 0; stats[id].emp += gf === gc ? 1 : 0; stats[id].der += gf < gc ? 1 : 0;
+          stats[id].pts += gf > gc ? 3 : gf === gc ? 1 : 0;
+        });
+        addStat(a.time1?.jogadoresIds, g1, g2);
+        addStat(a.time2?.jogadoresIds, g2, g1);
+      });
+
+      // Campeonatos
+      campeonatos.forEach(c => {
+        (c.grupos || []).forEach(g => {
+          g.membros.forEach(m => {
+            if (!stats[m.jogadorId]) return;
+            stats[m.jogadorId].pts += m.pts; stats[m.jogadorId].vit += m.vit;
+            stats[m.jogadorId].emp += m.emp; stats[m.jogadorId].der += m.der;
+            stats[m.jogadorId].gp += m.gp; stats[m.jogadorId].gc += m.gc;
+            stats[m.jogadorId].jogos += m.vit + m.emp + m.der;
+          });
+        });
+      });
+
+      return Object.values(stats).filter(s => s.jogos > 0).sort((a, b) => {
+        if (b.pts !== a.pts) return b.pts - a.pts;
+        if ((b.gp - b.gc) !== (a.gp - a.gc)) return (b.gp - b.gc) - (a.gp - a.gc);
+        return b.gp - a.gp;
+      });
+    }
+
+    function renderRanking(ranking) {
+      const medals = ['🥇','🥈','🥉'];
+      const listaHTML = ranking.length === 0
+        ? '<div class="text-gray-500 text-center py-12 text-sm">Nenhuma partida registrada</div>'
+        : `<div class="space-y-3">${ranking.map((p, i) => `
+            <div class="bg-gray-800 rounded-2xl p-4 flex items-center gap-4 card-hover">
+              <div class="text-2xl w-8 text-center flex-shrink-0">${medals[i] || `${i+1}°`}</div>
+              <div class="text-2xl flex-shrink-0">${p.emoji}</div>
+              <div class="flex-1 min-w-0">
+                <div class="font-bold">${p.nome}</div>
+                <div class="text-gray-500 text-xs mt-0.5">${p.jogos} jogos • ${p.vit}V ${p.emp}E ${p.der}D • ${p.gp}:${p.gc}</div>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <div class="font-bold text-green-400 text-lg">${p.pts}</div>
+                <div class="text-gray-600 text-xs">pontos</div>
+              </div>
+            </div>`).join('')}</div>`;
+
+      document.getElementById('lista-ranking').innerHTML = listaHTML;
+      document.getElementById('home-ranking').innerHTML = ranking.slice(0, 3).length === 0
+        ? '<div class="text-gray-500 text-center py-4 text-sm">Nenhuma partida registrada</div>'
+        : `<div class="space-y-2">${ranking.slice(0, 3).map((p, i) => `
+            <div class="bg-gray-800 rounded-xl p-3 flex items-center gap-3">
+              <span>${medals[i]}</span>
+              <span>${p.emoji}</span>
+              <span class="flex-1 font-semibold text-sm">${p.nome}</span>
+              <span class="font-bold text-green-400 text-sm">${p.pts} pts</span>
+            </div>`).join('')}</div>`;
+    }
+
+    function atualizarDashboard() {
+      document.getElementById('stat-jogadores').textContent = jogadores.length;
+      document.getElementById('stat-amistosos').textContent = amistosos.length;
+      document.getElementById('stat-campeonatos').textContent = campeonatos.length;
+      const totalPartidas = amistosos.filter(a => a.resultado).length
+        + campeonatos.reduce((s, c) => s + (c.grupos || []).reduce((ss, g) => ss + (g.partidas || []).length, 0), 0);
+      document.getElementById('stat-partidas').textContent = totalPartidas;
+      renderRanking(calcularRanking());
+    }
+
+    // ── Service Worker ───────────────────────────────────────────────
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+    }
+  </script>
+</body>
+</html>
