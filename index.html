@@ -219,10 +219,17 @@
     <p style="color: var(--text-muted); margin-top: 8px; font-size: 15px;">Seus campeonatos. Seu ranking. Sua glória.</p>
   </div>
 
-  <button id="btn-login" style="display:flex; align-items:center; justify-content:center; gap:12px; background:#fff; color:#1a1a2e; font-weight:800; font-size:16px; padding:16px 32px; border-radius:18px; border:none; cursor:pointer; width:100%; max-width:320px; transition: transform 0.1s, box-shadow 0.2s; box-shadow: 0 8px 32px rgba(0,0,0,0.4);" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform=''" ontouchend="this.style.transform=''">
-    <svg width="22" height="22" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-    Entrar com Google
-  </button>
+  <div style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:320px;">
+    <button id="btn-login" style="display:flex; align-items:center; justify-content:center; gap:12px; background:#fff; color:#1a1a2e; font-weight:800; font-size:16px; padding:16px 24px; border-radius:18px; border:none; cursor:pointer; width:100%; transition: transform 0.1s, box-shadow 0.2s; box-shadow: 0 8px 32px rgba(0,0,0,0.4);" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform=''" ontouchend="this.style.transform=''">
+      <svg width="22" height="22" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Entrar com Google
+    </button>
+
+    <button id="btn-apple" style="display:flex; align-items:center; justify-content:center; gap:12px; background:#000; color:#fff; font-weight:800; font-size:16px; padding:16px 24px; border-radius:18px; border:1px solid rgba(255,255,255,0.15); cursor:pointer; width:100%; transition: transform 0.1s, box-shadow 0.2s; box-shadow: 0 8px 32px rgba(0,0,0,0.4);" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform=''" ontouchend="this.style.transform=''">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+      Entrar com Apple
+    </button>
+  </div>
 
   <p id="login-erro" style="color:#FCA5A5; font-size:13px; margin-top:16px; display:none; text-align:center;"></p>
   <p style="color: var(--text-muted); font-size: 12px; margin-top: 32px; text-align:center;">Acesso exclusivo · Dados protegidos</p>
@@ -250,10 +257,17 @@
 
     <!-- ── HOME ── -->
     <div id="view-home" class="view active">
-      <div style="padding: 8px 0 20px;">
+      <div style="padding: 8px 0 16px;">
         <p style="color: var(--text-muted); font-size:13px;">Bem-vindo ao</p>
         <h2 style="font-size:26px; font-weight:900; letter-spacing:-0.5px;" class="grad">FutManager</h2>
       </div>
+
+      <!-- Iniciar Partida CTA -->
+      <button onclick="iniciarPartida()" style="width:100%;background:linear-gradient(135deg,#7C3AED,#06B6D4);border:none;color:#fff;padding:20px 24px;border-radius:22px;font-size:17px;font-weight:900;cursor:pointer;margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:14px;box-shadow:0 8px 32px rgba(139,92,246,0.45);transition:opacity 0.15s,transform 0.1s;letter-spacing:-0.3px;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform=''" ontouchend="this.style.transform=''">
+        <span style="font-size:26px;filter:drop-shadow(0 0 8px rgba(255,255,255,0.5))">⚡</span>
+        <span>Iniciar Partida</span>
+        <span style="font-size:22px;">⚽</span>
+      </button>
 
       <!-- Stats -->
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:24px;">
@@ -402,7 +416,7 @@
 import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, serverTimestamp, setDoc, getDoc }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged }
+import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, OAuthProvider, signOut, onAuthStateChanged }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 // ─── CONFIG ─────────────────────────────────────────────────────────
@@ -417,51 +431,60 @@ const FB = initializeApp({
 const db   = getFirestore(FB);
 const auth = getAuth(FB);
 const gp   = new GoogleAuthProvider();
+const ap   = new OAuthProvider('apple.com');
+ap.addScope('email');
+ap.addScope('name');
 
 // ─── DATABASE DE TIMES EA FC 26 ──────────────────────────────────────
 const CLUBES_DEFAULT = [
-  // La Liga
-  { id:'real-madrid',   nome:'Real Madrid',       forca:88, bandeira:'🇪🇸', liga:'La Liga',        logo:'👑' },
-  { id:'barcelona',     nome:'Barcelona',          forca:87, bandeira:'🇪🇸', liga:'La Liga',        logo:'🔵🔴' },
-  { id:'atletico-mad',  nome:'Atlético Madrid',    forca:84, bandeira:'🇪🇸', liga:'La Liga',        logo:'🔴⚪' },
-  // Premier League
-  { id:'man-city',      nome:'Manchester City',    forca:87, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🔵' },
-  { id:'liverpool',     nome:'Liverpool',          forca:86, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🔴' },
-  { id:'arsenal',       nome:'Arsenal',            forca:85, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🔴⚪' },
-  { id:'chelsea',       nome:'Chelsea',            forca:83, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🔵' },
-  { id:'man-utd',       nome:'Manchester United',  forca:82, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🔴' },
-  { id:'tottenham',     nome:'Tottenham',          forca:81, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'⚪' },
-  { id:'newcastle',     nome:'Newcastle',          forca:80, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'⚫⚪' },
-  // Bundesliga
-  { id:'bayern',        nome:'Bayern Munich',      forca:86, bandeira:'🇩🇪', liga:'Bundesliga',     logo:'🔴⚪' },
-  { id:'leverkusen',    nome:'B. Leverkusen',      forca:83, bandeira:'🇩🇪', liga:'Bundesliga',     logo:'🔴⚫' },
-  { id:'dortmund',      nome:'Borussia Dortmund',  forca:82, bandeira:'🇩🇪', liga:'Bundesliga',     logo:'🟡⚫' },
-  // Serie A
-  { id:'inter',         nome:'Inter Milan',        forca:84, bandeira:'🇮🇹', liga:'Serie A',        logo:'🔵⚫' },
-  { id:'milan',         nome:'AC Milan',           forca:83, bandeira:'🇮🇹', liga:'Serie A',        logo:'🔴⚫' },
-  { id:'napoli',        nome:'Napoli',             forca:82, bandeira:'🇮🇹', liga:'Serie A',        logo:'🔵' },
-  { id:'juventus',      nome:'Juventus',           forca:82, bandeira:'🇮🇹', liga:'Serie A',        logo:'⚫⚪' },
-  // Ligue 1
-  { id:'psg',           nome:'PSG',                forca:85, bandeira:'🇫🇷', liga:'Ligue 1',        logo:'🔵🔴' },
-  // Portugal
-  { id:'benfica',       nome:'Benfica',            forca:81, bandeira:'🇵🇹', liga:'Primeira Liga',  logo:'🔴' },
-  { id:'porto',         nome:'Porto',              forca:80, bandeira:'🇵🇹', liga:'Primeira Liga',  logo:'🔵⚪' },
-  // Brasileirão
-  { id:'flamengo',      nome:'Flamengo',           forca:79, bandeira:'🇧🇷', liga:'Brasileirão',    logo:'🔴⚫' },
-  { id:'palmeiras',     nome:'Palmeiras',          forca:79, bandeira:'🇧🇷', liga:'Brasileirão',    logo:'🟢' },
-  { id:'atletico-mg',   nome:'Atlético MG',        forca:77, bandeira:'🇧🇷', liga:'Brasileirão',    logo:'⚫' },
-  { id:'botafogo',      nome:'Botafogo',           forca:76, bandeira:'🇧🇷', liga:'Brasileirão',    logo:'⚫⚪' },
-  { id:'corinthians',   nome:'Corinthians',        forca:75, bandeira:'🇧🇷', liga:'Brasileirão',    logo:'⚫⚪' },
-  { id:'sao-paulo',     nome:'São Paulo',          forca:75, bandeira:'🇧🇷', liga:'Brasileirão',    logo:'🔴⚫' },
-  { id:'gremio',        nome:'Grêmio',             forca:75, bandeira:'🇧🇷', liga:'Brasileirão',    logo:'🔵⚫' },
-  { id:'internacional', nome:'Internacional',      forca:74, bandeira:'🇧🇷', liga:'Brasileirão',    logo:'🔴' },
-  { id:'fluminense',    nome:'Fluminense',         forca:74, bandeira:'🇧🇷', liga:'Brasileirão',    logo:'🟢🔴' },
-  { id:'vasco',         nome:'Vasco',              forca:73, bandeira:'🇧🇷', liga:'Brasileirão',    logo:'🔱' },
+  // La Liga 🇪🇸
+  { id:'real-madrid',   nome:'Real Madrid',        forca:89, bandeira:'🇪🇸', liga:'La Liga',        logo:'👑' },
+  { id:'barcelona',     nome:'Barcelona',           forca:87, bandeira:'🇪🇸', liga:'La Liga',        logo:'🔵🔴' },
+  { id:'atletico-mad',  nome:'Atlético Madrid',     forca:84, bandeira:'🇪🇸', liga:'La Liga',        logo:'🔴⚪' },
+  { id:'real-sociedad', nome:'Real Sociedad',       forca:80, bandeira:'🇪🇸', liga:'La Liga',        logo:'🔵⚪' },
+  { id:'villarreal',    nome:'Villarreal',          forca:79, bandeira:'🇪🇸', liga:'La Liga',        logo:'🟡' },
+  { id:'sevilla',       nome:'Sevilla',             forca:78, bandeira:'🇪🇸', liga:'La Liga',        logo:'🔴⚪' },
+  // Premier League 🏴󠁧󠁢󠁥󠁮󠁧󠁿
+  { id:'man-city',      nome:'Manchester City',     forca:88, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🩵' },
+  { id:'liverpool',     nome:'Liverpool',           forca:87, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🔴' },
+  { id:'arsenal',       nome:'Arsenal',             forca:86, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🔫' },
+  { id:'chelsea',       nome:'Chelsea',             forca:83, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🦁' },
+  { id:'man-utd',       nome:'Manchester United',   forca:82, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'👹' },
+  { id:'tottenham',     nome:'Tottenham',           forca:81, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🐓' },
+  { id:'newcastle',     nome:'Newcastle',           forca:81, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'⚫⚪' },
+  { id:'aston-villa',   nome:'Aston Villa',         forca:82, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🦁' },
+  { id:'west-ham',      nome:'West Ham',            forca:79, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'⚒️' },
+  // Bundesliga 🇩🇪
+  { id:'bayern',        nome:'Bayern Munich',       forca:87, bandeira:'🇩🇪', liga:'Bundesliga',     logo:'🔴⚪' },
+  { id:'leverkusen',    nome:'Bayer Leverkusen',    forca:84, bandeira:'🇩🇪', liga:'Bundesliga',     logo:'⚫🔴' },
+  { id:'dortmund',      nome:'Borussia Dortmund',   forca:83, bandeira:'🇩🇪', liga:'Bundesliga',     logo:'🟡⚫' },
+  { id:'leipzig',       nome:'RB Leipzig',          forca:81, bandeira:'🇩🇪', liga:'Bundesliga',     logo:'🔵🔴' },
+  // Serie A 🇮🇹
+  { id:'inter',         nome:'Inter Milan',         forca:85, bandeira:'🇮🇹', liga:'Serie A',        logo:'🔵⚫' },
+  { id:'milan',         nome:'AC Milan',            forca:83, bandeira:'🇮🇹', liga:'Serie A',        logo:'🔴⚫' },
+  { id:'napoli',        nome:'Napoli',              forca:82, bandeira:'🇮🇹', liga:'Serie A',        logo:'🔵' },
+  { id:'juventus',      nome:'Juventus',            forca:82, bandeira:'🇮🇹', liga:'Serie A',        logo:'⚫⚪' },
+  { id:'roma',          nome:'AS Roma',             forca:80, bandeira:'🇮🇹', liga:'Serie A',        logo:'🟡🔴' },
+  { id:'lazio',         nome:'Lazio',               forca:79, bandeira:'🇮🇹', liga:'Serie A',        logo:'🦅' },
+  // Ligue 1 🇫🇷
+  { id:'psg',           nome:'PSG',                 forca:86, bandeira:'🇫🇷', liga:'Ligue 1',        logo:'🗼' },
+  { id:'monaco',        nome:'Monaco',              forca:80, bandeira:'🇫🇷', liga:'Ligue 1',        logo:'🎲' },
+  // Portugal 🇵🇹
+  { id:'benfica',       nome:'Benfica',             forca:81, bandeira:'🇵🇹', liga:'Primeira Liga',  logo:'🦅' },
+  { id:'porto',         nome:'Porto',               forca:80, bandeira:'🇵🇹', liga:'Primeira Liga',  logo:'🐉' },
+  { id:'sporting',      nome:'Sporting CP',         forca:79, bandeira:'🇵🇹', liga:'Primeira Liga',  logo:'🦁' },
+  // Holanda 🇳🇱
+  { id:'ajax',          nome:'Ajax',                forca:79, bandeira:'🇳🇱', liga:'Eredivisie',     logo:'🔴⚪' },
+  { id:'feyenoord',     nome:'Feyenoord',           forca:78, bandeira:'🇳🇱', liga:'Eredivisie',     logo:'🔴⚫' },
+  // Escócia 🏴󠁧󠁢󠁳󠁣󠁴󠁿
+  { id:'celtic',        nome:'Celtic',              forca:78, bandeira:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', liga:'Scottish Prem',  logo:'🍀' },
+  { id:'rangers',       nome:'Rangers',             forca:77, bandeira:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', liga:'Scottish Prem',  logo:'🦁' },
+  // Turquia 🇹🇷
+  { id:'galatasaray',   nome:'Galatasaray',         forca:79, bandeira:'🇹🇷', liga:'Süper Lig',      logo:'🔴🟡' },
 ];
 
 const SELECOES_DEFAULT = [
   { id:'franca',     nome:'França',         forca:86, bandeira:'🇫🇷' },
-  { id:'brasil',     nome:'Brasil',         forca:85, bandeira:'🇧🇷' },
   { id:'argentina',  nome:'Argentina',      forca:85, bandeira:'🇦🇷' },
   { id:'inglaterra', nome:'Inglaterra',     forca:84, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
   { id:'espanha',    nome:'Espanha',        forca:84, bandeira:'🇪🇸' },
@@ -641,21 +664,19 @@ const usarRedirect = isIOS || isPWA; // No iPhone/PWA o popup é bloqueado — u
 // Processa retorno do redirect (caso o usuário já tenha feito login via redirect)
 getRedirectResult(auth).catch(() => {});
 
-document.getElementById('btn-login').addEventListener('click', async () => {
-  const btn = document.getElementById('btn-login');
+async function fazerLogin(provider, btnId) {
+  const btn = document.getElementById(btnId);
   btn.style.opacity = '0.7';
   btn.style.pointerEvents = 'none';
   try {
     if (usarRedirect) {
-      // iPhone/PWA: redirect é o único método confiável
-      await signInWithRedirect(auth, gp);
+      await signInWithRedirect(auth, provider);
     } else {
-      // Desktop: tenta popup, cai para redirect se bloqueado
-      await signInWithPopup(auth, gp);
+      await signInWithPopup(auth, provider);
     }
   } catch (e) {
     if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
-      await signInWithRedirect(auth, gp);
+      await signInWithRedirect(auth, provider);
     } else if (e.code !== 'auth/cancelled-popup-request') {
       const el = document.getElementById('login-erro');
       el.textContent = 'Erro ao entrar. Tente novamente.';
@@ -664,7 +685,10 @@ document.getElementById('btn-login').addEventListener('click', async () => {
       btn.style.pointerEvents = '';
     }
   }
-});
+}
+
+document.getElementById('btn-login').addEventListener('click', () => fazerLogin(gp, 'btn-login'));
+document.getElementById('btn-apple').addEventListener('click', () => fazerLogin(ap, 'btn-apple'));
 
 document.getElementById('btn-sair').addEventListener('click', () => signOut(auth));
 
@@ -721,10 +745,10 @@ function renderJogadores() {
   if (!jogadores.length) { c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">Nenhum jogador cadastrado</p>'; return; }
   c.innerHTML = jogadores.map(j => `
     <div class="entity-card" style="margin-bottom:10px;">
-      <div class="avatar">${j.emoji || j.nome[0]}</div>
+      <div class="avatar" style="font-size:26px;">${j.emoji || '⚽'}</div>
       <div style="flex:1;">
         <div style="font-weight:700;font-size:15px;">${j.nome}</div>
-        <div style="color:var(--text-muted);font-size:12px;margin-top:2px;">${j.posicao || 'Jogador'}</div>
+        <div style="color:var(--text-muted);font-size:12px;margin-top:2px;">👤 Jogador</div>
       </div>
       <button onclick="excluirJogador('${j.id}','${j.nome.replace(/'/g,'')}')" style="background:rgba(239,68,68,0.12);border:none;color:#FCA5A5;border-radius:10px;padding:8px 12px;cursor:pointer;font-size:13px;">🗑️</button>
     </div>`).join('');
@@ -744,25 +768,22 @@ window.confirmarExcluirJog = async id => {
 };
 
 document.getElementById('btn-add-jog').addEventListener('click', () => {
-  const emojis = ['⚽','🏆','🎯','🔥','⚡','🦁','🐺','🦊','🐻','🦅','🦉','🐯','🦈','🐉','👑','💎','🚀','🌟','🎮','🏅'];
+  const emojis = ['⚽','🏆','🎯','🔥','⚡','🦁','🐺','🦊','🐻','🦅','🦉','🐯','🦈','🐉','👑','💎','🚀','🌟','🎮','🏅','😎','🤩','💪','🕹️','🏋️','🥊','🎽','🥅','🎪','🃏'];
   modal(`<p class="modal-title">Adicionar Jogador</p>
-    <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">Adicione um amigo que vai participar dos jogos e campeonatos</p>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">Digite o nome do amigo que vai participar dos jogos</p>
     <div style="display:flex;flex-direction:column;gap:14px;">
-      <input class="input" id="i-nome" placeholder="Nome do amigo (ex: Nicola)" autocomplete="off">
-      <select class="input" id="i-pos">
-        <option>Atacante</option><option>Meia</option><option>Defensor</option><option>Goleiro</option><option>Jogador</option>
-      </select>
+      <input class="input" id="i-nome" placeholder="Nome completo (ex: Nicola Bogar)" autocomplete="off">
       <div>
-        <p style="color:var(--text-muted);font-size:12px;margin-bottom:8px;">ÍCONE</p>
-        <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:6px;">
-          ${emojis.map((e,i) => `<button type="button" onclick="selEmoji('${e}',this)" style="font-size:20px;padding:8px;border-radius:10px;border:none;background:${i===0?'rgba(139,92,246,0.3)':'rgba(255,255,255,0.05)'};cursor:pointer;transition:background 0.15s;" ${i===0?'id="sel-emoji-btn"':''}>${e}</button>`).join('')}
+        <p style="color:var(--text-muted);font-size:12px;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Escolha um ícone</p>
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;">
+          ${emojis.map((e,i) => `<button type="button" onclick="selEmoji('${e}',this)" style="font-size:24px;padding:10px;border-radius:12px;border:none;background:${i===0?'rgba(139,92,246,0.3)':'rgba(255,255,255,0.05)'};cursor:pointer;transition:background 0.15s;" ${i===0?'id="sel-emoji-btn"':''}>${e}</button>`).join('')}
         </div>
         <input type="hidden" id="i-emoji" value="${emojis[0]}">
       </div>
     </div>
     <div style="display:flex;gap:10px;margin-top:20px;">
       <button class="btn-ghost" onclick="fecharModal()">Cancelar</button>
-      <button class="btn-primary" onclick="salvarJogador()">Salvar ✓</button>
+      <button class="btn-primary" onclick="salvarJogador()">Adicionar ✓</button>
     </div>`);
 });
 
@@ -774,8 +795,8 @@ window.selEmoji = (e, el) => {
 window.salvarJogador = async () => {
   const nome = document.getElementById('i-nome').value.trim();
   if (!nome) { toast('Digite o nome','erro'); return; }
-  await addDoc(collection(db, 'jogadores'), { nome, posicao: document.getElementById('i-pos').value, emoji: document.getElementById('i-emoji').value, criadoEm: serverTimestamp() });
-  fecharModal(); await carregarJogadores(); atualizarDash(); toast('Jogador adicionado! 🎉');
+  await addDoc(collection(db, 'jogadores'), { nome, emoji: document.getElementById('i-emoji').value, criadoEm: serverTimestamp() });
+  fecharModal(); await carregarJogadores(); atualizarDash(); toast(`${document.getElementById('i-emoji').value} ${nome} adicionado! 🎉`);
 };
 
 // ─── AMISTOSOS ───────────────────────────────────────────────────────
@@ -785,12 +806,22 @@ async function carregarAmistosos() {
   renderAmistosos();
 }
 
+function getTimeIcon(timeId, tipo) {
+  const pool = tipo === 'selecoes' ? selecoes : clubes;
+  const t = pool.find(x => x.id === timeId);
+  if (!t) return '⚽';
+  if (tipo === 'selecoes') return t.bandeira || '🌍';
+  return `${t.logo||'⚽'}${t.bandeira||''}`;
+}
+
 function renderAmistosos() {
   const c = document.getElementById('lista-ami');
   if (!amistosos.length) { c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">Nenhum amistoso registrado</p>'; return; }
   c.innerHTML = amistosos.map(a => {
     const temRes = a.resultado != null;
     const diff = temRes ? Math.abs(a.resultado.g1 - a.resultado.g2) : null;
+    const ico1 = getTimeIcon(a.time1?.timeId, a.tipo);
+    const ico2 = getTimeIcon(a.time2?.timeId, a.tipo);
     return `<div class="match-card" style="margin-bottom:10px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <span style="font-size:11px;color:var(--text-muted);">${fmt(a.criadoEm)} · ${a.tipo === 'selecoes' ? '🌍 Seleções' : '⚽ Clubes'}</span>
@@ -798,6 +829,7 @@ function renderAmistosos() {
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="flex:1;text-align:right;">
+          <div style="font-size:20px;margin-bottom:2px;">${ico1}</div>
           <div style="font-weight:800;font-size:14px;">${a.time1?.nome || '?'}</div>
           <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${(a.time1?.jogadores||[]).join(' · ')}</div>
           ${a.time1?.forca ? `<div style="margin-top:4px;">${forcaBadge(a.time1.forca)}</div>` : ''}
@@ -809,6 +841,7 @@ function renderAmistosos() {
             : `<button onclick="abrirPlacar('${a.id}')" style="background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;padding:8px 10px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">Placar</button>`}
         </div>
         <div style="flex:1;text-align:left;">
+          <div style="font-size:20px;margin-bottom:2px;">${ico2}</div>
           <div style="font-weight:800;font-size:14px;">${a.time2?.nome || '?'}</div>
           <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${(a.time2?.jogadores||[]).join(' · ')}</div>
           ${a.time2?.forca ? `<div style="margin-top:4px;">${forcaBadge(a.time2.forca)}</div>` : ''}
@@ -821,7 +854,7 @@ function renderAmistosos() {
 document.getElementById('btn-criar-ami').addEventListener('click', () => {
   if (jogadores.length < 2) { toast('Cadastre pelo menos 2 jogadores', 'erro'); return; }
   modal(`<p class="modal-title">Novo Amistoso</p>
-    <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">Selecione os jogadores e sorteio balanceado de times</p>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">Selecione os jogadores para o sorteio balanceado de times</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
       <div class="tipo-btn sel" id="tp-clubes" onclick="selTipoAmi('clubes')">⚽<br><span style="font-size:12px;font-weight:700;">Clubes</span></div>
       <div class="tipo-btn" id="tp-selecoes" onclick="selTipoAmi('selecoes')">🌍<br><span style="font-size:12px;font-weight:700;">Seleções</span></div>
@@ -829,7 +862,7 @@ document.getElementById('btn-criar-ami').addEventListener('click', () => {
     <input type="hidden" id="ami-tipo" value="clubes">
     <p style="color:var(--text-muted);font-size:12px;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Jogadores</p>
     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;" id="ami-jogs">
-      ${jogadores.map(j => `<label class="check-row"><input type="checkbox" class="jc" value="${j.id}" data-nome="${j.nome}"><span style="font-size:18px">${j.emoji||'⚽'}</span><span style="font-weight:600;">${j.nome}</span></label>`).join('')}
+      ${jogadores.map(j => `<label class="check-row"><input type="checkbox" class="jc" value="${j.id}" data-nome="${j.nome}"><span style="font-size:20px">${j.emoji||'⚽'}</span><span style="font-weight:700;">${j.nome}</span></label>`).join('')}
     </div>
     <div id="ami-sorteio" style="display:none;margin-bottom:16px;"></div>
     <div style="display:flex;gap:10px;">
@@ -838,6 +871,69 @@ document.getElementById('btn-criar-ami').addEventListener('click', () => {
       <button id="btn-ami-salvar" style="display:none;" class="btn-primary" onclick="salvarAmistoso()">Salvar ✓</button>
     </div>`);
 });
+
+// ─── INICIAR PARTIDA (botão home) ────────────────────────────────────
+window.iniciarPartida = () => {
+  if (jogadores.length < 2) { toast('Cadastre pelo menos 2 jogadores', 'erro'); return; }
+  modal(`<div style="text-align:center;margin-bottom:20px;">
+    <div style="font-size:48px;margin-bottom:8px;filter:drop-shadow(0 0 16px rgba(139,92,246,0.7))">⚡</div>
+    <p class="modal-title" style="margin-bottom:4px;">Iniciar Partida</p>
+    <p style="color:var(--text-muted);font-size:13px;">Selecione os jogadores e sortearemos os times!</p>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+    <div class="tipo-btn sel" id="tp-clubes" onclick="selTipoAmi('clubes')">⚽<br><span style="font-size:12px;font-weight:700;">Clubes</span></div>
+    <div class="tipo-btn" id="tp-selecoes" onclick="selTipoAmi('selecoes')">🌍<br><span style="font-size:12px;font-weight:700;">Seleções</span></div>
+  </div>
+  <input type="hidden" id="ami-tipo" value="clubes">
+  <p style="color:var(--text-muted);font-size:12px;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Selecionar Jogadores</p>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;" id="ami-jogs">
+    ${jogadores.map(j => `<label class="check-row"><input type="checkbox" class="jc" value="${j.id}" data-nome="${j.nome}"><span style="font-size:22px">${j.emoji||'⚽'}</span><span style="font-weight:700;font-size:15px;">${j.nome}</span></label>`).join('')}
+  </div>
+  <div id="ami-sorteio" style="display:none;margin-bottom:16px;"></div>
+  <div style="display:flex;gap:10px;">
+    <button class="btn-ghost" onclick="fecharModal()">Cancelar</button>
+    <button class="btn-primary" style="background:linear-gradient(135deg,#7C3AED,#06B6D4);" onclick="sortearAmistoso()">🎲 Sortear Times!</button>
+    <button id="btn-ami-salvar" style="display:none;" class="btn-primary" onclick="salvarAmistoso()">Salvar ✓</button>
+  </div>`);
+};
+
+function vsCardTime(t, jogadoresList, pool) {
+  const timeData = pool.find(x => x.id === t.timeId) || {};
+  const isSel = pool === selecoes;
+  const icone = isSel
+    ? `<div style="font-size:36px;line-height:1;margin-bottom:4px;">${timeData.bandeira||t.bandeira||'🌍'}</div>`
+    : `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;margin-bottom:4px;"><span style="font-size:28px;line-height:1;">${timeData.logo||t.logo||'⚽'}</span><span style="font-size:16px;line-height:1;">${timeData.bandeira||t.bandeira||''}</span></div>`;
+  return `<div style="flex:1;text-align:center;">
+    ${icone}
+    <div class="vs-team">${t.nome}</div>
+    <div style="margin:4px 0;">${forcaBadge(t.forca)}</div>
+    ${jogadoresList.map(j => `<div class="vs-label">👤 ${j.nome}</div>`).join('')}
+  </div>`;
+}
+
+function compartilharWhatsApp(sorteio) {
+  const t1 = sorteio.time1, t2 = sorteio.time2;
+  const diff = Math.abs(t1.forca - t2.forca);
+  const eq = diff <= 2 ? '✅ Equilibrado' : diff <= 5 ? '⚠️ Levemente desigual' : '🔴 Desigual';
+  const pool = sorteio.tipo === 'selecoes' ? selecoes : clubes;
+  const td1 = pool.find(x => x.id === t1.timeId) || {};
+  const td2 = pool.find(x => x.id === t2.timeId) || {};
+  const icone1 = sorteio.tipo === 'selecoes' ? (td1.bandeira||'') : `${td1.logo||'⚽'} ${td1.bandeira||''}`;
+  const icone2 = sorteio.tipo === 'selecoes' ? (td2.bandeira||'') : `${td2.logo||'⚽'} ${td2.bandeira||''}`;
+  const texto =
+    `⚽ *FutManager — Nova Partida!*\n\n` +
+    `${icone1} *${t1.nome}*\n` +
+    `👥 ${t1.jogadores.join(', ')}\n` +
+    `💪 Força: ${t1.forca}\n\n` +
+    `⚔️  *VS*  ⚔️\n\n` +
+    `${icone2} *${t2.nome}*\n` +
+    `👥 ${t2.jogadores.join(', ')}\n` +
+    `💪 Força: ${t2.forca}\n\n` +
+    `${eq} (Diferença: ${diff} pts)\n\n` +
+    `📱 _FutManager App_`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+}
+window.compartilharWhatsApp = compartilharWhatsApp;
 
 window.selTipoAmi = tipo => {
   document.getElementById('ami-tipo').value = tipo;
@@ -865,27 +961,40 @@ window.sortearAmistoso = () => {
     time2: { nome: t2.nome, timeId: t2.id, forca: t2.forca, jogadores: j2.map(j => j.nome), jogadoresIds: j2.map(j => j.id) },
   };
 
+  const t1ico = tipo === 'selecoes'
+    ? `<div style="font-size:36px;line-height:1;margin-bottom:4px;">${t1.bandeira||pool.find(x=>x.id===t1.id)?.bandeira||'🌍'}</div>`
+    : `<div style="display:flex;flex-direction:column;align-items:center;gap:1px;margin-bottom:4px;"><span style="font-size:28px;line-height:1;">${t1.logo||pool.find(x=>x.id===t1.id)?.logo||'⚽'}</span><span style="font-size:16px;line-height:1;">${t1.bandeira||pool.find(x=>x.id===t1.id)?.bandeira||''}</span></div>`;
+  const t2ico = tipo === 'selecoes'
+    ? `<div style="font-size:36px;line-height:1;margin-bottom:4px;">${t2.bandeira||pool.find(x=>x.id===t2.id)?.bandeira||'🌍'}</div>`
+    : `<div style="display:flex;flex-direction:column;align-items:center;gap:1px;margin-bottom:4px;"><span style="font-size:28px;line-height:1;">${t2.logo||pool.find(x=>x.id===t2.id)?.logo||'⚽'}</span><span style="font-size:16px;line-height:1;">${t2.bandeira||pool.find(x=>x.id===t2.id)?.bandeira||''}</span></div>`;
+
   const box = document.getElementById('ami-sorteio');
   box.style.display = '';
   box.innerHTML = `<div class="vs-card">
-    <div style="text-align:center;margin-bottom:12px;"><span class="tag tag-green">🎲 Times Sorteados · ${eq}</span></div>
-    <div style="display:flex;align-items:center;gap:8px;">
+    <div style="text-align:center;margin-bottom:14px;"><span class="tag tag-green">🎲 Times Sorteados · ${eq}</span></div>
+    <div style="display:flex;align-items:flex-start;gap:8px;">
       <div style="flex:1;text-align:center;">
+        ${t1ico}
         <div class="vs-team">${t1.nome}</div>
         <div style="margin:4px 0;">${forcaBadge(t1.forca)}</div>
-        ${j1.map(j => `<div class="vs-label">${j.nome}</div>`).join('')}
+        ${j1.map(j => `<div class="vs-label">👤 ${j.nome}</div>`).join('')}
       </div>
-      <div class="vs-divider"><span class="vs-text">VS</span></div>
+      <div class="vs-divider" style="padding-top:20px;"><span class="vs-text">VS</span></div>
       <div style="flex:1;text-align:center;">
+        ${t2ico}
         <div class="vs-team">${t2.nome}</div>
         <div style="margin:4px 0;">${forcaBadge(t2.forca)}</div>
-        ${j2.map(j => `<div class="vs-label">${j.nome}</div>`).join('')}
+        ${j2.map(j => `<div class="vs-label">👤 ${j.nome}</div>`).join('')}
       </div>
     </div>
     <div style="margin-top:12px;">
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:4px;"><span>Força ${t1.forca}</span><span>Diferença: ${diff} pts</span><span>Força ${t2.forca}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:4px;"><span>Força ${t1.forca}</span><span>Dif: ${diff} pts</span><span>Força ${t2.forca}</span></div>
       <div class="balance-bar"><div class="balance-fill" style="left:0;width:${Math.round((t1.forca/(t1.forca+t2.forca))*100)}%;background:linear-gradient(90deg,var(--purple),var(--cyan));"></div></div>
     </div>
+    <button onclick="compartilharWhatsApp(_sorteioAmi)" style="width:100%;margin-top:14px;background:#25D366;border:none;color:#fff;padding:12px;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+      Compartilhar no WhatsApp
+    </button>
   </div>`;
   document.getElementById('btn-ami-salvar').style.display = '';
 };
@@ -1172,12 +1281,23 @@ window.filtrarTimes = tipo => {
   renderTimesEdit();
 };
 
+function avatarTime(t) {
+  if (abaTimesAtual === 'selecoes' || t.tipo === 'selecao') {
+    return `<div style="width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(6,182,212,0.2),rgba(139,92,246,0.2));font-size:30px;flex-shrink:0;">${t.bandeira||'🌍'}</div>`;
+  }
+  return `<div style="width:50px;height:50px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(6,182,212,0.2));flex-shrink:0;gap:1px;">
+    <span style="font-size:18px;line-height:1;">${t.logo||'⚽'}</span>
+    <span style="font-size:13px;line-height:1;">${t.bandeira||''}</span>
+  </div>`;
+}
+window.avatarTime = avatarTime;
+
 function renderTimesEdit() {
   const pool = abaTimesAtual === 'clubes' ? clubes : selecoes;
   const el = document.getElementById('lista-times-edit');
   el.innerHTML = pool.map(t => `
     <div class="entity-card" style="margin-bottom:8px;">
-      <div class="avatar" style="font-size:26px;">${t.bandeira||t.logo||'🏆'}</div>
+      ${avatarTime(t)}
       <div style="flex:1;">
         <div style="font-weight:700;font-size:14px;">${t.nome}</div>
         <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${t.liga||''}</div>
