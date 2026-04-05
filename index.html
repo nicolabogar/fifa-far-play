@@ -247,10 +247,6 @@
       Entrar com Google
     </button>
 
-    <button id="btn-apple" style="display:flex; align-items:center; justify-content:center; gap:12px; background:#1a1a2e; color:#fff; font-weight:800; font-size:16px; padding:16px 24px; border-radius:18px; border:1px solid rgba(255,255,255,0.15); cursor:pointer; width:100%; transition: transform 0.1s, box-shadow 0.2s, background 0.2s; box-shadow: 0 8px 32px rgba(0,0,0,0.4);" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform=''" ontouchend="this.style.transform=''" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='#1a1a2e'">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-      Entrar com Apple
-    </button>
   </div>
 
   <p id="login-erro" style="color:#FCA5A5; font-size:13px; margin-top:16px; display:none; text-align:center;"></p>
@@ -459,7 +455,7 @@
 import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, serverTimestamp, setDoc, getDoc }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, OAuthProvider, signOut, onAuthStateChanged }
+import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 // ─── CONFIG ─────────────────────────────────────────────────────────
@@ -474,15 +470,7 @@ const FB = initializeApp({
 const db   = getFirestore(FB);
 const auth = getAuth(FB);
 
-let gp, ap;
-try {
-  gp = new GoogleAuthProvider();
-  ap = new OAuthProvider('apple.com');
-  ap.addScope('email');
-  ap.addScope('name');
-} catch (e) {
-  console.error('[Firebase] Erro ao criar providers:', e);
-}
+const gp = new GoogleAuthProvider();
 
 // ─── DATABASE DE TIMES EA FC 26 ──────────────────────────────────────
 const CLUBES_DEFAULT = [
@@ -845,45 +833,21 @@ function toast(msg, tipo = 'ok') {
 function fmt(ts) { try { return (ts?.toDate ? ts.toDate() : new Date(ts)).toLocaleDateString('pt-BR'); } catch { return ''; } }
 
 // ─── AUTH ────────────────────────────────────────────────────────────
-// Detecta iPhone/iPad
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-// Detecta PWA instalada
-const isPWA = window.navigator.standalone === true ||
-              (typeof window.matchMedia !== 'undefined' &&
-               window.matchMedia('(display-mode: standalone)').matches);
-
-// Usa redirect em iOS ou em PWA (popups não funcionam)
-let usarRedirect = isIOS || isPWA;
-
 async function fazerLogin(provider, btnId) {
   const btn = document.getElementById(btnId);
-  if (!btn || !provider || !auth) {
-    mostraErro('Erro na configuração. Recarregue a página.');
-    return;
-  }
   btn.style.opacity = '0.7';
   btn.style.pointerEvents = 'none';
   try {
-    if (usarRedirect) {
-      await signInWithRedirect(auth, provider);
-    } else {
-      await signInWithPopup(auth, provider);
-    }
+    await signInWithPopup(auth, provider);
   } catch (e) {
-    if (e && (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user')) {
-      // Popup falhou, tenta redirect como fallback
+    if (e.code === 'auth/popup-blocked') {
       try {
         await signInWithRedirect(auth, provider);
       } catch (e2) {
-        mostraErro('Erro ao fazer login. Tente novamente.');
         btn.style.opacity = '1';
         btn.style.pointerEvents = '';
       }
-    } else if (!e || (e.code && e.code !== 'auth/cancelled-popup-request')) {
-      mostraErro('Erro ao entrar. Tente novamente.');
-      btn.style.opacity = '1';
-      btn.style.pointerEvents = '';
-    } else {
+    } else if (e.code !== 'auth/cancelled-popup-request') {
       btn.style.opacity = '1';
       btn.style.pointerEvents = '';
     }
@@ -898,107 +862,26 @@ function mostraErro(msg) {
   }
 }
 
-try {
-  const btnLogin = document.getElementById('btn-login');
-  const btnApple = document.getElementById('btn-apple');
-  const btnSair = document.getElementById('btn-sair');
+document.getElementById('btn-login').addEventListener('click', () => fazerLogin(gp, 'btn-login'));
+document.getElementById('btn-sair').addEventListener('click', () => signOut(auth));
 
-  if (btnLogin) btnLogin.addEventListener('click', () => fazerLogin(gp, 'btn-login'));
-  if (btnApple) btnApple.addEventListener('click', () => fazerLogin(ap, 'btn-apple'));
-  if (btnSair) btnSair.addEventListener('click', () => signOut(auth));
-} catch (e) {
-  console.error('[Auth] Erro ao conectar event listeners:', e);
-}
+getRedirectResult(auth).catch(() => {});
 
-try {
-  // Processa retorno de redirect QUANDO o auth state muda
-  // Isso garante que o resultado está pronto antes de tentar usar
-  let redirectProcessado = false;
-
-  onAuthStateChanged(auth, async u => {
-    window.__AUTH_READY = true;
-
-    // Processa redirect result na primeira vez que onAuthStateChanged é chamado
-    if (!redirectProcessado) {
-      redirectProcessado = true;
-      try {
-        const redirectResult = await getRedirectResult(auth);
-        if (redirectResult && redirectResult.user) {
-          console.log('[Auth] ✓ Redirect result capturado:', redirectResult.user.email);
-          // O 'u' já será o usuário autenticado aqui
-        }
-      } catch (e) {
-        if (e.code && !e.code.includes('cancelled')) {
-          console.warn('[Auth] Erro ao processar redirect:', e.code);
-        }
-      }
-    }
-
-    try {
-      if (u) {
-        usuario = u;
-        const loginScreen = document.getElementById('login-screen');
-        const appEl = document.getElementById('app');
-        if (loginScreen) loginScreen.style.display = 'none';
-        if (appEl) appEl.style.display = 'flex';
-
-        const userFoto = document.getElementById('user-foto');
-        if (u.photoURL && userFoto) {
-          userFoto.src = u.photoURL;
-          userFoto.style.display = '';
-        }
-
-        await carregarTimes();
-        await carregarDados();
-      } else {
-        usuario = null;
-
-        // Se voltou de redirect mas não tem usuário ainda, espera um pouco
-        // (pode estar processando ainda no iOS)
-        if (redirectProcessado && usarRedirect) {
-          console.log('[Auth] Voltou de redirect mas sem usuário — aguardando...');
-          // Tenta novamente em 500ms
-          setTimeout(async () => {
-            try {
-              const pendingResult = await getRedirectResult(auth);
-              if (pendingResult && pendingResult.user) {
-                console.log('[Auth] ✓ Usuário processado após delay:', pendingResult.user.email);
-                // onAuthStateChanged vai disparar novamente com o usuário
-                return;
-              }
-            } catch (e) {
-              // Continua normal
-            }
-            // Se ainda não tem usuário, mostra login
-            const loginScreen = document.getElementById('login-screen');
-            const appEl = document.getElementById('app');
-            if (loginScreen) loginScreen.style.display = 'flex';
-            if (appEl) appEl.style.display = 'none';
-          }, 500);
-        } else {
-          const loginScreen = document.getElementById('login-screen');
-          const appEl = document.getElementById('app');
-          if (loginScreen) loginScreen.style.display = 'flex';
-          if (appEl) appEl.style.display = 'none';
-        }
-
-        // Restaura botões
-        const btnLogin = document.getElementById('btn-login');
-        const btnApple = document.getElementById('btn-apple');
-        if (btnLogin) { btnLogin.style.opacity = '1'; btnLogin.style.pointerEvents = ''; }
-        if (btnApple) { btnApple.style.opacity = '1'; btnApple.style.pointerEvents = ''; }
-      }
-    } catch (e) {
-      console.error('[Auth] Erro em onAuthStateChanged:', e);
-      const loginScreen = document.getElementById('login-screen');
-      if (loginScreen) loginScreen.style.display = 'flex';
-    }
-  });
-} catch (e) {
-  console.error('[Auth] Erro ao configurar onAuthStateChanged:', e);
-  const loginScreen = document.getElementById('login-screen');
-  if (loginScreen) loginScreen.style.display = 'flex';
-}
+onAuthStateChanged(auth, async u => {
+  if (u) {
+    usuario = u;
+    document.getElementById('login-screen').style.display = 'none';
+    const app = document.getElementById('app');
+    app.style.display = 'flex';
+    if (u.photoURL) { document.getElementById('user-foto').src = u.photoURL; document.getElementById('user-foto').style.display = ''; }
+    await carregarTimes();
+    await carregarDados();
+  } else {
+    usuario = null;
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+});
 
 // ─── TIMES (FIRESTORE) ───────────────────────────────────────────────
 async function carregarTimes() {
