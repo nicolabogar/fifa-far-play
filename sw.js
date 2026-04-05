@@ -15,25 +15,31 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   const url = e.request.url;
-  // Deixa Firebase, Google, CDNs e APIs passarem direto
-  if (url.includes('firebase') || url.includes('google') || url.includes('gstatic') || url.includes('flagcdn')) {
+
+  // Deixa requisições de API e auth passarem direto (network only)
+  if (url.includes('firebase') || url.includes('google') || url.includes('gstatic') || url.includes('flagcdn') || url.includes('/__/auth')) {
     return;
   }
-  // Network-first para HTML (sempre pega versão nova quando online)
+
+  // Network-first para HTML/navegação (sempre busca versão mais nova)
   if (e.request.mode === 'navigate' || url.endsWith('.html') || url.endsWith('/')) {
     e.respondWith(
       fetch(e.request)
         .then(resp => {
-          const copy = resp.clone();
-          caches.open(CACHE).then(c => c.put(e.request, copy));
+          // Só cache se for sucesso
+          if (resp && resp.status === 200) {
+            const copy = resp.clone();
+            caches.open(CACHE).then(c => c.put(e.request, copy));
+          }
           return resp;
         })
         .catch(() => caches.match(e.request).then(c => c || caches.match('./index.html')))
     );
     return;
   }
-  // Cache-first para outros assets estáticos
+
+  // Cache-first para assets estáticos
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request).catch(() => caches.match('./index.html')))
+    caches.match(e.request).then(cached => cached || fetch(e.request))
   );
 });
