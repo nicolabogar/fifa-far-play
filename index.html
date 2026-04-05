@@ -307,12 +307,9 @@
         </div>
       </div>
 
-      <!-- Partidas em andamento -->
+      <!-- Em andamento: amistosos + campeonatos -->
       <div id="home-abertos-sec" style="display:none;margin-bottom:24px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <p class="sec-title">🟢 Em Andamento</p>
-          <button onclick="irPara('amistosos')" style="background:none;border:none;color:var(--purple);font-size:12px;font-weight:700;cursor:pointer;">Ver todos →</button>
-        </div>
+        <p class="sec-title" style="margin-bottom:10px;">🟢 Em Andamento</p>
         <div id="home-abertos"></div>
       </div>
 
@@ -457,6 +454,8 @@ import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, q
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 
 // ─── CONFIG ─────────────────────────────────────────────────────────
 const FB = initializeApp({
@@ -467,8 +466,9 @@ const FB = initializeApp({
   messagingSenderId: "999602703550",
   appId: "1:999602703550:web:57cbf17b03f30baf02e2ef"
 });
-const db   = getFirestore(FB);
-const auth = getAuth(FB);
+const db      = getFirestore(FB);
+const auth    = getAuth(FB);
+const storage = getStorage(FB);
 
 const gp = new GoogleAuthProvider();
 
@@ -672,11 +672,23 @@ function flagImg(paisCode, w=20) {
   return `<img src="https://flagcdn.com/w${ww}/${paisCode}.png" alt="" loading="lazy" decoding="async" style="border-radius:3px;vertical-align:middle;width:${w}px;height:auto;" onerror="this.style.display='none'">`;
 }
 
+/** Brasão SVG em forma de escudo para clube */
+function shieldClube(timeId, nomeTime, size=56) {
+  const d = TEAM_DATA[timeId] || { abrev:(nomeTime||'?').slice(0,3).toUpperCase(), fundo:'#1E1E35', cor:'#AAAAAA' };
+  const h = Math.round(size * 1.15);
+  const fs = size > 50 ? 15 : 11;
+  return `<svg width="${size}" height="${h}" viewBox="0 0 56 64" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.4))">
+    <path d="M28 2 L54 11 L54 40 Q54 56 28 63 Q2 56 2 40 L2 11 Z" fill="${d.fundo}" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+    <path d="M28 6 L50 14 L50 39 Q50 53 28 59 Q6 53 6 39 L6 14 Z" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <text x="28" y="${Math.round(h*0.58)}" text-anchor="middle" dominant-baseline="middle" fill="${d.cor}" font-weight="900" font-size="${fs}" font-family="system-ui,-apple-system,sans-serif" letter-spacing="-0.5">${d.abrev}</text>
+  </svg>`;
+}
+
 /** Badge de clube: quadrado colorido com abreviação + bandeira + nome do país */
 function badgeClube(timeId, nomeTime) {
   const d = TEAM_DATA[timeId] || { abrev:(nomeTime||'?').slice(0,3).toUpperCase(), fundo:'#1E1E35', cor:'#AAAAAA', pais:'eu', paisNome:'' };
   return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-    <div style="width:48px;height:48px;border-radius:12px;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:${d.cor};letter-spacing:-0.5px;flex-shrink:0;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 8px rgba(0,0,0,0.3);">${d.abrev}</div>
+    ${shieldClube(timeId, nomeTime, 48)}
     <div style="display:flex;align-items:center;gap:3px;white-space:nowrap;">
       ${flagImg(d.pais, 20)}
       <span style="font-size:9px;color:var(--text-muted);font-weight:600;">${d.paisNome}</span>
@@ -925,21 +937,40 @@ async function carregarJogadores() {
   renderJogadores();
 }
 
+function avatarJogador(j, size=46) {
+  if (j.fotoUrl) return `<img src="${j.fotoUrl}" style="width:${size}px;height:${size}px;border-radius:${Math.round(size*0.3)}px;object-fit:cover;flex-shrink:0;" onerror="this.outerHTML='${avatarSvg(size)}'">`;
+  return avatarSvg(size);
+}
+function avatarSvg(size=46) {
+  return `<div style="width:${size}px;height:${size}px;border-radius:${Math.round(size*0.3)}px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:linear-gradient(135deg,rgba(139,92,246,0.3),rgba(6,182,212,0.3));"><svg width="${Math.round(size*0.48)}" height="${Math.round(size*0.48)}" viewBox="0 0 24 24" fill="none" stroke="#C7B8FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1"/></svg></div>`;
+}
+
+function getMaster() { return jogadores.find(j => j.master); }
+function temPermissao() {
+  const master = getMaster();
+  if (!master) return true; // sem master definido → todos podem
+  return usuario?.email && master.email && usuario.email.toLowerCase() === master.email.toLowerCase();
+}
+
 function renderJogadores() {
   const c = document.getElementById('lista-jog');
   if (!jogadores.length) { c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">Nenhum jogador cadastrado</p>'; return; }
+  const master = getMaster();
+  const podeMudar = temPermissao();
   c.innerHTML = jogadores.map(j => `
     <div class="entity-card" style="margin-bottom:10px;">
-      <div class="avatar" style="background:linear-gradient(135deg,rgba(139,92,246,0.25),rgba(6,182,212,0.25));display:flex;align-items:center;justify-content:center;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C7B8FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1"/></svg>
+      ${avatarJogador(j, 46)}
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-weight:700;font-size:15px;">${j.nome}</span>
+          ${j.master ? `<span class="tag tag-yellow" style="font-size:10px;">⭐ Master</span>` : ''}
+        </div>
+        <div style="color:var(--text-muted);font-size:11px;margin-top:2px;">${j.email||'Sem e-mail vinculado'}</div>
       </div>
-      <div style="flex:1;">
-        <div style="font-weight:700;font-size:15px;">${j.nome}</div>
-        <div style="color:var(--text-muted);font-size:12px;margin-top:2px;">Jogador</div>
-      </div>
-      <button onclick="excluirJogador('${j.id}','${j.nome.replace(/'/g,'')}')" title="Remover" style="background:rgba(239,68,68,0.12);border:none;color:#FCA5A5;border-radius:10px;padding:8px 10px;cursor:pointer;display:flex;align-items:center;">
+      ${podeMudar ? `
+      <button onclick="excluirJogador('${j.id}','${j.nome.replace(/'/g,'').replace(/"/g,'')}')" title="Remover" style="background:rgba(239,68,68,0.12);border:none;color:#FCA5A5;border-radius:10px;padding:8px 10px;cursor:pointer;display:flex;align-items:center;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-      </button>
+      </button>` : ''}
     </div>`).join('');
 }
 
@@ -957,23 +988,75 @@ window.confirmarExcluirJog = async id => {
 };
 
 document.getElementById('btn-add-jog').addEventListener('click', () => {
+  if (!temPermissao()) { toast('Apenas o usuário Master pode adicionar jogadores','erro'); return; }
+  const master = getMaster();
+  const semMaster = !master;
   modal(`<p class="modal-title">Adicionar Jogador</p>
-    <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">Digite o nome do amigo que vai participar</p>
-    <div style="display:flex;flex-direction:column;gap:14px;">
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <!-- Avatar -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:4px;">
+        <div id="prev-avatar" style="width:72px;height:72px;border-radius:22px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(139,92,246,0.3),rgba(6,182,212,0.3));overflow:hidden;cursor:pointer;" onclick="document.getElementById('i-foto').click()">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C7B8FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1"/></svg>
+        </div>
+        <label style="font-size:12px;color:var(--purple);font-weight:700;cursor:pointer;" onclick="document.getElementById('i-foto').click()">📷 Escolher foto</label>
+        <input type="file" id="i-foto" accept="image/*" style="display:none;" onchange="previewFoto(this)">
+      </div>
       <input class="input" id="i-nome" placeholder="Nome completo (ex: Nicola Bogar)" autocomplete="off">
+      <input class="input" id="i-email" placeholder="E-mail Google (ex: nicola@gmail.com)" type="email" autocomplete="off">
+      ${semMaster ? `<label style="display:flex;align-items:center;gap:10px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:12px;cursor:pointer;">
+        <input type="checkbox" id="i-master" style="width:18px;height:18px;accent-color:var(--yellow);">
+        <div>
+          <div style="font-weight:700;font-size:13px;color:var(--yellow);">⭐ Definir como Master</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">O Master controla jogadores, times e campeonatos</div>
+        </div>
+      </label>` : ''}
     </div>
-    <div style="display:flex;gap:10px;margin-top:20px;">
+    <div style="display:flex;gap:10px;margin-top:18px;">
       <button class="btn-ghost" onclick="fecharModal()">Cancelar</button>
-      <button class="btn-primary" onclick="salvarJogador()">Adicionar ✓</button>
+      <button class="btn-primary" id="btn-salvar-jog" onclick="salvarJogador()">Adicionar ✓</button>
     </div>`);
   setTimeout(() => document.getElementById('i-nome')?.focus(), 100);
 });
 
+window.previewFoto = (input) => {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const prev = document.getElementById('prev-avatar');
+    if (prev) prev.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+  };
+  reader.readAsDataURL(file);
+};
+
 window.salvarJogador = async () => {
-  const nome = document.getElementById('i-nome').value.trim();
+  const nome  = document.getElementById('i-nome')?.value.trim();
+  const email = document.getElementById('i-email')?.value.trim().toLowerCase();
+  const isMaster = document.getElementById('i-master')?.checked || false;
   if (!nome) { toast('Digite o nome','erro'); return; }
-  await addDoc(collection(db, 'jogadores'), { nome, criadoEm: serverTimestamp() });
-  fecharModal(); await carregarJogadores(); atualizarDash(); toast(`${nome} adicionado!`);
+  const btn = document.getElementById('btn-salvar-jog');
+  if (btn) { btn.textContent = 'Salvando...'; btn.disabled = true; }
+  try {
+    let fotoUrl = '';
+    const fotoInput = document.getElementById('i-foto');
+    if (fotoInput?.files?.[0]) {
+      const file = fotoInput.files[0];
+      const sRef = storageRef(storage, `avatars/${Date.now()}_${file.name}`);
+      const snap = await uploadBytes(sRef, file);
+      fotoUrl = await getDownloadURL(snap.ref);
+    }
+    // Se marcou como master, remove master de outros
+    if (isMaster) {
+      const masterAtual = getMaster();
+      if (masterAtual) await updateDoc(doc(db,'jogadores',masterAtual.id), { master: false });
+    }
+    await addDoc(collection(db, 'jogadores'), { nome, email: email||'', master: isMaster, fotoUrl, criadoEm: serverTimestamp() });
+    fecharModal(); await carregarJogadores(); atualizarDash(); toast(`${nome} adicionado! ${isMaster?'⭐ Master definido':''}`);
+  } catch(e) {
+    console.error(e);
+    toast('Erro ao salvar jogador','erro');
+    if (btn) { btn.textContent = 'Adicionar ✓'; btn.disabled = false; }
+  }
 };
 
 // ─── AMISTOSOS ───────────────────────────────────────────────────────
@@ -990,8 +1073,8 @@ function cardAmistoso(a, compact=false) {
   const b2 = compact ? badgeTimeCompact(a.time2?.timeId, a.time2?.nome, a.tipo) : badgeTime(a.time2?.timeId, a.time2?.nome, a.tipo);
   const nomeJogo = `${a.time1?.nome||'?'} vs ${a.time2?.nome||'?'}`;
   return `<div class="match-card" style="margin-bottom:10px;${compact?'padding:12px;':''}">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-      <span style="font-size:11px;color:var(--text-muted);">${fmt(a.criadoEm)} · ${a.tipo === 'selecoes' ? '🌍 Seleções' : '⚽ Clubes'}</span>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${compact?'8':'10'}px;">
+      <span style="font-size:10px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:0.05em;">🤝 Amistoso · ${a.tipo === 'selecoes' ? '🌍 Seleções' : '⚽ Clubes'}</span>
       <div style="display:flex;align-items:center;gap:6px;">
         ${temRes ? `<span class="tag tag-gray">Finalizado</span>` : `<span class="tag tag-purple">🟢 Em Aberto</span>`}
         <button onclick="excluirJogo('${a.id}','${nomeJogo.replace(/'/g,"\\'")}',this)" title="Excluir partida" style="background:none;border:none;cursor:pointer;padding:2px;color:var(--text-muted);display:flex;align-items:center;opacity:0.7;transition:opacity 0.2s;" onmouseover="this.style.opacity=1;this.style.color='#ef4444'" onmouseout="this.style.opacity=0.7;this.style.color='var(--text-muted)'">
@@ -1578,16 +1661,47 @@ function atualizarDash() {
   document.getElementById('s-par').textContent = par;
   renderRanking(calcularRanking());
 
-  // Jogos em aberto na home
-  const abertos = amistosos.filter(a => !a.resultado);
+  // Amistosos e campeonatos em andamento na home
+  const amistososAbertos = amistosos.filter(a => !a.resultado);
+  const campsAndamento   = campeonatos.filter(c => c.status !== 'finalizado');
   const sec = document.getElementById('home-abertos-sec');
   const el  = document.getElementById('home-abertos');
-  if (abertos.length > 0) {
+  if (amistososAbertos.length > 0 || campsAndamento.length > 0) {
     sec.style.display = '';
-    el.innerHTML = abertos.slice(0,5).map(a => cardAmistoso(a, true)).join('');
+    let html = '';
+    amistososAbertos.slice(0,3).forEach(a => { html += cardAmistoso(a, true); });
+    campsAndamento.slice(0,3).forEach(c  => { html += cardCampHome(c); });
+    el.innerHTML = html;
   } else {
     sec.style.display = 'none';
   }
+}
+
+function cardCampHome(c) {
+  const meta = CAMP_META[c.tipo] || { emoji:'🏆', nome: c.tipo };
+  const totalGrupos = (c.grupos||[]).length;
+  const totalParts  = (c.grupos||[]).reduce((s,g)=>s+(g.partidas||[]).length,0);
+  const totalPoss   = (c.grupos||[]).reduce((s,g)=>{const m=g.membros?.length||0; return s+m*(m-1)/2;},0);
+  const pct = totalPoss > 0 ? Math.round((totalParts/totalPoss)*100) : 0;
+  return `<div class="match-card" style="margin-bottom:10px;padding:12px;cursor:pointer;" onclick="irPara('campeonatos')">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <span style="font-size:10px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:0.05em;">🏆 Campeonato</span>
+      <span class="tag tag-yellow">Em andamento</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:32px;">${meta.emoji}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.nome}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${meta.nome} · ${c.participantes?.length||0} jogadores</div>
+        <div style="margin-top:6px;display:flex;align-items:center;gap:6px;">
+          <div style="flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--yellow),var(--green));border-radius:2px;"></div>
+          </div>
+          <span style="font-size:10px;color:var(--text-muted);white-space:nowrap;">${totalParts}/${totalPoss} jogos</span>
+        </div>
+      </div>
+    </div>
+  </div>`;
 }
 
 // ─── GERENCIAR TIMES ─────────────────────────────────────────────────
@@ -1604,21 +1718,39 @@ function renderTimesEdit() {
   const pool = abaTimesAtual === 'clubes' ? clubes : selecoes;
   const isSel = abaTimesAtual === 'selecoes';
   const el = document.getElementById('lista-times-edit');
+  if (!pool.length) { el.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:32px 0;font-size:14px;">Nenhum time</p>'; return; }
   el.innerHTML = pool.map(t => {
-    const badge = isSel ? badgeSel(t.id, t.nome) : badgeClube(t.id, t.nome);
-    return `
-    <div class="entity-card" style="margin-bottom:8px;align-items:flex-start;gap:14px;">
-      ${badge}
-      <div style="flex:1;">
-        <div style="font-weight:800;font-size:15px;">${t.nome}</div>
-        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${t.liga||''}</div>
-        <div style="margin-top:6px;display:flex;align-items:center;gap:8px;">
-          ${forcaBadge(t.forca)}
-          <div style="flex:1;max-width:80px;">${forcaRating(t.forca)}</div>
+    if (isSel) {
+      const d = SELECAO_PAIS[t.id] || { pais:'', paisNome: t.nome };
+      const flagHtml = d.pais
+        ? `<img src="https://flagcdn.com/w80/${d.pais}.png" loading="lazy" style="width:72px;height:54px;object-fit:cover;border-radius:8px;box-shadow:0 3px 10px rgba(0,0,0,0.4);" onerror="this.parentElement.innerHTML='<span style=\\'font-size:40px;\\'>🌍</span>'">`
+        : `<span style="font-size:40px;">🌍</span>`;
+      return `<div class="entity-card" style="margin-bottom:8px;align-items:center;gap:14px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;">${flagHtml}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:800;font-size:16px;">${t.nome}</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${d.paisNome||''}</div>
+          <div style="margin-top:6px;">${forcaBadge(t.forca)}</div>
         </div>
-      </div>
-      <button onclick="excluirTime('${t.id}')" style="background:rgba(239,68,68,0.12);border:none;color:#FCA5A5;border-radius:10px;padding:8px 12px;cursor:pointer;font-size:13px;flex-shrink:0;">🗑️</button>
-    </div>`}).join('');
+        <button onclick="excluirTime('${t.id}')" style="background:rgba(239,68,68,0.12);border:none;color:#FCA5A5;border-radius:10px;padding:8px 12px;cursor:pointer;font-size:13px;flex-shrink:0;">🗑️</button>
+      </div>`;
+    } else {
+      const d = TEAM_DATA[t.id] || { abrev:(t.nome||'?').slice(0,3).toUpperCase(), fundo:'#1E1E35', cor:'#AAAAAA', pais:'', paisNome:'' };
+      return `<div class="entity-card" style="margin-bottom:8px;align-items:center;gap:14px;">
+        <div style="flex-shrink:0;">${shieldClube(t.id, t.nome, 56)}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:800;font-size:16px;">${t.nome}</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${t.liga||''}</div>
+          <div style="margin-top:4px;display:flex;align-items:center;gap:6px;">
+            ${flagImg(d.pais, 18)}
+            <span style="font-size:11px;color:var(--text-muted);">${d.paisNome}</span>
+          </div>
+          <div style="margin-top:6px;">${forcaBadge(t.forca)}</div>
+        </div>
+        <button onclick="excluirTime('${t.id}')" style="background:rgba(239,68,68,0.12);border:none;color:#FCA5A5;border-radius:10px;padding:8px 12px;cursor:pointer;font-size:13px;flex-shrink:0;">🗑️</button>
+      </div>`;
+    }
+  }).join('');
 }
 
 document.getElementById('btn-add-time').addEventListener('click', () => {
