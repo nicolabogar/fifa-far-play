@@ -1,7 +1,19 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from '@vite-pwa/vite-plugin';
+import path from 'path';
 
 export default defineConfig({
+  root: '.',
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      '@config': path.resolve(__dirname, './src/config'),
+      '@domain': path.resolve(__dirname, './src/domain'),
+      '@ui': path.resolve(__dirname, './src/ui'),
+      '@utils': path.resolve(__dirname, './src/utils'),
+      '@infrastructure': path.resolve(__dirname, './src/infrastructure'),
+    },
+  },
   server: {
     port: 5173,
     https: true,
