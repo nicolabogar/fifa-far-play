@@ -1,9 +1,12 @@
 import { torneioService } from '@domain/torneios/TorneioService';
+import { jogadorService } from '@domain/jogadores/JogadorService';
 import { Button } from '@ui/components/Button';
 import { TORNEIO_META } from '@config/constants';
-import type { Torneio } from '@config/types';
+import type { Torneio, Jogador } from '@config/types';
 
 export class TorneiosView {
+  private static jogadoresSelecionados: Jogador[] = [];
+
   static async render(container: HTMLElement): Promise<void> {
     const view = document.createElement('div');
     view.style.cssText = `
@@ -33,7 +36,7 @@ export class TorneiosView {
     container.appendChild(view);
 
     const btnCriar = view.querySelector('#btn-criar-torneio') as HTMLButtonElement;
-    btnCriar.addEventListener('click', () => this.abrirModal());
+    btnCriar.addEventListener('click', () => this.abrirModal()); // agora async, ok
 
     await this.carregarTorneios(view);
   }
@@ -254,30 +257,23 @@ export class TorneiosView {
     }
   }
 
-  private static abrirModal(): void {
+  private static async abrirModal(): Promise<void> {
+    this.jogadoresSelecionados = [];
+    let todosJogadores: Jogador[] = [];
+    try { todosJogadores = await jogadorService.listar(); } catch {}
+
     const modal = document.createElement('div');
     modal.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      position: fixed; inset: 0;
       background: rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       z-index: 1000;
     `;
 
     const content = document.createElement('div');
     content.style.cssText = `
-      background: white;
-      border-radius: 8px;
-      padding: 24px;
-      max-width: 500px;
-      width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
+      background: white; border-radius: 8px; padding: 24px;
+      max-width: 520px; width: 90%; max-height: 85vh; overflow-y: auto;
     `;
 
     content.innerHTML = `
@@ -285,26 +281,13 @@ export class TorneiosView {
 
       <div style="margin-bottom: 16px;">
         <label style="display: block; font-weight: 500; margin-bottom: 8px;">Nome:</label>
-        <input type="text" id="input-nome" placeholder="Ex: Meu Torneio" style="
-          width: 100%;
-          padding: 10px;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          font-size: 14px;
-          box-sizing: border-box;
-        " />
+        <input type="text" id="input-nome" placeholder="Ex: Meu Torneio"
+          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;" />
       </div>
 
       <div style="margin-bottom: 16px;">
-        <label style="display: block; font-weight: 500; margin-bottom: 8px;">Tipo:</label>
-        <select id="select-tipo" style="
-          width: 100%;
-          padding: 10px;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          font-size: 14px;
-          box-sizing: border-box;
-        ">
+        <label style="display: block; font-weight: 500; margin-bottom: 8px;">Formato:</label>
+        <select id="select-tipo" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
           <option value="champions">Champions League</option>
           <option value="libertadores">Libertadores</option>
           <option value="brasileirao">Brasileirão</option>
@@ -316,57 +299,114 @@ export class TorneiosView {
 
       <div style="margin-bottom: 16px;">
         <label style="display: block; font-weight: 500; margin-bottom: 8px;">Número de Grupos:</label>
-        <input type="number" id="input-grupos" value="4" min="2" max="8" style="
-          width: 100%;
-          padding: 10px;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          font-size: 14px;
-          box-sizing: border-box;
-        " />
+        <input type="number" id="input-grupos" value="4" min="2" max="8"
+          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;" />
       </div>
 
-      <div style="display: flex; gap: 8px;">
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; font-weight: 500; margin-bottom: 8px;">Jogadores:</label>
+        <input type="text" id="busca-jogador" placeholder="Buscar jogador..."
+          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box; margin-bottom: 6px;" />
+        <div id="dropdown-jogadores" style="
+          border: 1px solid #ddd; border-radius: 4px;
+          max-height: 160px; overflow-y: auto; display: none;
+          background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        "></div>
+        <div id="tags-jogadores" style="
+          display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;
+        "></div>
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-top: 8px;">
         <button id="btn-criar-modal" style="
-          flex: 1;
-          background: #007bff;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          padding: 10px;
-          cursor: pointer;
-          font-weight: 500;
-        ">Criar</button>
+          flex: 1; background: #007bff; color: white;
+          border: none; border-radius: 4px; padding: 10px;
+          cursor: pointer; font-weight: 500; font-size: 14px;">Criar</button>
         <button id="btn-cancelar-modal" style="
-          flex: 1;
-          background: #6c757d;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          padding: 10px;
-          cursor: pointer;
-          font-weight: 500;
-        ">Cancelar</button>
+          flex: 1; background: #6c757d; color: white;
+          border: none; border-radius: 4px; padding: 10px;
+          cursor: pointer; font-weight: 500; font-size: 14px;">Cancelar</button>
       </div>
     `;
 
     modal.appendChild(content);
     document.body.appendChild(modal);
 
-    const btnCriar = content.querySelector('#btn-criar-modal') as HTMLButtonElement;
-    btnCriar.addEventListener('click', async () => {
-      const nome = (content.querySelector('#input-nome') as HTMLInputElement).value;
+    // Lógica do dropdown pesquisável de jogadores
+    const buscaInput = content.querySelector('#busca-jogador') as HTMLInputElement;
+    const dropdown = content.querySelector('#dropdown-jogadores') as HTMLElement;
+    const tagsContainer = content.querySelector('#tags-jogadores') as HTMLElement;
+
+    const renderTags = () => {
+      tagsContainer.innerHTML = this.jogadoresSelecionados.map(j => `
+        <span style="
+          display: inline-flex; align-items: center; gap: 6px;
+          padding: 4px 10px; background: #e7f3ff;
+          border: 1px solid #007bff; border-radius: 14px; font-size: 13px;
+        ">
+          ${j.nome}
+          <button data-id="${j.id}" style="
+            background: none; border: none; cursor: pointer;
+            color: #007bff; font-size: 16px; padding: 0; line-height: 1;
+          ">×</button>
+        </span>
+      `).join('');
+
+      tagsContainer.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          this.jogadoresSelecionados = this.jogadoresSelecionados.filter(j => j.id !== btn.dataset.id);
+          renderTags();
+        });
+      });
+    };
+
+    const renderDropdown = (filtro: string) => {
+      const naoSelecionados = todosJogadores.filter(j =>
+        j.nome.toLowerCase().includes(filtro.toLowerCase()) &&
+        !this.jogadoresSelecionados.find(s => s.id === j.id)
+      );
+      if (!filtro || naoSelecionados.length === 0) {
+        dropdown.style.display = 'none';
+        return;
+      }
+      dropdown.style.display = 'block';
+      dropdown.innerHTML = naoSelecionados.map(j => `
+        <div data-id="${j.id}" data-nome="${j.nome}" style="
+          padding: 10px 14px; cursor: pointer; font-size: 14px;
+          border-bottom: 1px solid #f0f0f0;
+        " onmouseover="this.style.background='#f0f7ff'" onmouseout="this.style.background='white'">
+          ${j.nome}
+        </div>
+      `).join('');
+
+      dropdown.querySelectorAll('div').forEach(item => {
+        item.addEventListener('click', () => {
+          const j = todosJogadores.find(x => x.id === item.dataset.id);
+          if (j) { this.jogadoresSelecionados.push(j); }
+          buscaInput.value = '';
+          dropdown.style.display = 'none';
+          renderTags();
+        });
+      });
+    };
+
+    buscaInput.addEventListener('input', () => renderDropdown(buscaInput.value));
+    buscaInput.addEventListener('focus', () => { if (buscaInput.value) renderDropdown(buscaInput.value); });
+    document.addEventListener('click', (e) => {
+      if (!content.contains(e.target as Node)) dropdown.style.display = 'none';
+    });
+
+    (content.querySelector('#btn-criar-modal') as HTMLButtonElement).addEventListener('click', async () => {
+      const nome = (content.querySelector('#input-nome') as HTMLInputElement).value.trim();
       const tipo = (content.querySelector('#select-tipo') as HTMLSelectElement).value;
       const numGrupos = parseInt((content.querySelector('#input-grupos') as HTMLInputElement).value);
 
-      if (!nome.trim()) {
-        alert('Digite o nome do torneio');
-        return;
-      }
+      if (!nome) { alert('Digite o nome do torneio'); return; }
+      if (this.jogadoresSelecionados.length < 2) { alert('Selecione pelo menos 2 jogadores'); return; }
 
       try {
-        const participantes = Array.from({ length: numGrupos * 4 }, (_, i) => `equipe-${i + 1}`);
-        await torneioService.criar(nome, tipo as any, participantes, numGrupos);
+        const ids = this.jogadoresSelecionados.map(j => j.id);
+        await torneioService.criar(nome, tipo as any, ids, numGrupos);
         modal.remove();
         location.reload();
       } catch (error) {
@@ -375,9 +415,6 @@ export class TorneiosView {
       }
     });
 
-    const btnCancelar = content.querySelector('#btn-cancelar-modal') as HTMLButtonElement;
-    btnCancelar.addEventListener('click', () => {
-      modal.remove();
-    });
+    (content.querySelector('#btn-cancelar-modal') as HTMLButtonElement).addEventListener('click', () => modal.remove());
   }
 }
