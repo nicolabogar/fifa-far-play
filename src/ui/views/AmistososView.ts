@@ -31,7 +31,7 @@ export class AmistososView {
           cursor: pointer;
           font-size: 14px;
           font-weight: 500;
-        ">Criar</button>
+        ">+ Criar</button>
       </div>
 
       <div id="amistosos-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;"></div>

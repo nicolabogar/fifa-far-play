@@ -27,9 +27,8 @@ export class HomeView {
           cursor: pointer;
           transition: transform 0.2s, box-shadow 0.2s;
         ">
-          <div style="font-size: 32px; margin-bottom: 12px;">⚽</div>
           <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Amistosos</div>
-          <div id="amistosos-count" style="font-size: 24px; font-weight: 700; color: #007bff; margin-bottom: 8px;">0</div>
+          <div id="amistosos-count" style="font-size: 32px; font-weight: 700; color: #007bff; margin-bottom: 8px;">0</div>
           <div style="font-size: 12px; color: #666;">Clique para gerenciar</div>
         </div>
 
@@ -41,9 +40,8 @@ export class HomeView {
           cursor: pointer;
           transition: transform 0.2s, box-shadow 0.2s;
         ">
-          <div style="font-size: 32px; margin-bottom: 12px;">🏆</div>
           <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Torneios</div>
-          <div id="torneios-count" style="font-size: 24px; font-weight: 700; color: #ffc107; margin-bottom: 8px;">0</div>
+          <div id="torneios-count" style="font-size: 32px; font-weight: 700; color: #ffc107; margin-bottom: 8px;">0</div>
           <div style="font-size: 12px; color: #666;">Clique para gerenciar</div>
         </div>
 
@@ -55,9 +53,8 @@ export class HomeView {
           cursor: pointer;
           transition: transform 0.2s, box-shadow 0.2s;
         ">
-          <div style="font-size: 32px; margin-bottom: 12px;">👥</div>
           <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Jogadores</div>
-          <div id="jogadores-count" style="font-size: 24px; font-weight: 700; color: #28a745; margin-bottom: 8px;">0</div>
+          <div id="jogadores-count" style="font-size: 32px; font-weight: 700; color: #28a745; margin-bottom: 8px;">0</div>
           <div style="font-size: 12px; color: #666;">Clique para gerenciar</div>
         </div>
 
@@ -69,9 +66,8 @@ export class HomeView {
           cursor: pointer;
           transition: transform 0.2s, box-shadow 0.2s;
         ">
-          <div style="font-size: 32px; margin-bottom: 12px;">📊</div>
           <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Ranking</div>
-          <div id="ranking-count" style="font-size: 24px; font-weight: 700; color: #dc3545; margin-bottom: 8px;">0</div>
+          <div id="ranking-count" style="font-size: 32px; font-weight: 700; color: #dc3545; margin-bottom: 8px;">0</div>
           <div style="font-size: 12px; color: #666;">Clique para visualizar</div>
         </div>
       </div>
