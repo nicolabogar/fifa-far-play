@@ -3,6 +3,15 @@ import { jogadorService } from '../jogadores/JogadorService';
 import { sortearBalanceado, shuffle } from '@utils/algorithms';
 import { CLUBES_DEFAULT, SELECOES_DEFAULT } from '@config/constants';
 import type { Amistoso, Jogador, ClubePadrao, SelecaoPadrao } from '@config/types';
+// Import lazy para evitar dependência circular
+let _rankingService: any = null;
+const getRankingService = async () => {
+  if (!_rankingService) {
+    const mod = await import('../ranking/RankingService');
+    _rankingService = mod.rankingService;
+  }
+  return _rankingService;
+};
 
 export class AmistosoService {
   async listar(): Promise<Amistoso[]> {
@@ -88,6 +97,7 @@ export class AmistosoService {
     placarTime1: number,
     placarTime2: number
   ): Promise<void> {
+    const amistoso = await amistosoRepository.getById(id);
     const vencedor = placarTime1 > placarTime2 ? 'time1' : placarTime1 < placarTime2 ? 'time2' : 'empate';
 
     await amistosoRepository.update(id, {
@@ -98,6 +108,51 @@ export class AmistosoService {
         placar: { time1: placarTime1, time2: placarTime2 },
       },
     } as any);
+
+    // Registrar resultado no ranking para cada jogador
+    if (amistoso) {
+      const ranking = await getRankingService();
+      const tipo = amistoso.emModoDupla ? 'dupla' : 'amistoso';
+
+      const time1Jogadores = amistoso.time1.jogadores ?? [];
+      const time2Jogadores = amistoso.time2.jogadores ?? [];
+
+      const resultadoTime1 = vencedor === 'time1' ? 'vitoria' : vencedor === 'time2' ? 'derrota' : 'empate';
+      const resultadoTime2 = vencedor === 'time2' ? 'vitoria' : vencedor === 'time1' ? 'derrota' : 'empate';
+
+      const adversarioTime1 = time2Jogadores.map((j: any) => j.nome).join(' & ') || amistoso.time2.nome;
+      const adversarioTime2 = time1Jogadores.map((j: any) => j.nome).join(' & ') || amistoso.time1.nome;
+
+      if (time1Jogadores.length > 0) {
+        await ranking.registrarResultado({
+          jogadorIds: time1Jogadores.map((j: any) => j.id),
+          nomes: time1Jogadores.map((j: any) => j.nome),
+          resultado: resultadoTime1,
+          tipo,
+          adversarioNome: adversarioTime1,
+          gp: placarTime1,
+          gc: placarTime2,
+          placarTime1,
+          placarTime2,
+          emDupla: amistoso.emModoDupla,
+        });
+      }
+
+      if (time2Jogadores.length > 0) {
+        await ranking.registrarResultado({
+          jogadorIds: time2Jogadores.map((j: any) => j.id),
+          nomes: time2Jogadores.map((j: any) => j.nome),
+          resultado: resultadoTime2,
+          tipo,
+          adversarioNome: adversarioTime2,
+          gp: placarTime2,
+          gc: placarTime1,
+          placarTime1,
+          placarTime2,
+          emDupla: amistoso.emModoDupla,
+        });
+      }
+    }
   }
 
   async deletar(id: string): Promise<void> {
