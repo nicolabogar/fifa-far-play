@@ -1,0 +1,60 @@
+:root {
+  --bg: #08080F;
+  --bg2: #0F0F1E;
+  --card: rgba(255, 255, 255, 0.04);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --purple: #8B5CF6;
+  --purple-dark: #6D28D9;
+  --cyan: #06B6D4;
+  --green: #10B981;
+  --red: #EF4444;
+  --yellow: #F59E0B;
+  --text: #F1F5F9;
+  --text-muted: #64748B;
+  --text-dim: #94A3B8;
+  --nav-h: 68px;
+  --header-h: 56px;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  overscroll-behavior: none;
+}
+
+::-webkit-scrollbar {
+  width: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--purple);
+  border-radius: 4px;
+}
+
+.glass {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.grad {
+  background: linear-gradient(135deg, var(--purple), var(--cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glow-border {
+  box-shadow: 0 0 0 1px var(--purple), 0 0 20px rgba(139, 92, 246, 0.2);
+}

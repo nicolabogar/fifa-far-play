@@ -1,0 +1,27 @@
+{
+  "name": "fut-manager",
+  "version": "2.0.0",
+  "description": "Gerencie torneios e amistosos com seus amigos",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "type-check": "tsc --noEmit",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "firebase": "^10.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@vitejs/plugin-basic-ssl": "^1.0.0",
+    "@vite-pwa/vite-plugin": "^0.20.0",
+    "@vitest/ui": "^1.0.0",
+    "typescript": "^5.3.0",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}
