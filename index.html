@@ -1,43 +1,1559 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="FutManager">
-    <meta name="theme-color" content="#0D0D1A">
-    <title>FutManager</title>
-    <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/icon-192.png">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
-  </head>
-  <body>
-    <!-- Login Screen -->
-    <div id="login-screen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg, #08080F); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; color: white;">
-      <div style="text-align: center;">
-        <h1 style="font-size: 48px; margin-bottom: 20px;">⚽ FutManager</h1>
-        <p style="color: #aaa; margin-bottom: 30px;">Gerencie torneios com seus amigos</p>
-        <button id="login-btn" style="
-          background: #4285f4;
-          color: white;
-          border: none;
-          border-radius: 8px;
-          padding: 14px 28px;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          width: 220px;
-        ">Entrar com Google</button>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FutManager">
+  <meta name="theme-color" content="#0D0D1A">
+  <title>FutManager</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    :root {
+      --bg: #08080F;
+      --bg2: #0F0F1E;
+      --card: rgba(255,255,255,0.04);
+      --card-border: rgba(255,255,255,0.08);
+      --purple: #8B5CF6;
+      --purple-dark: #6D28D9;
+      --cyan: #06B6D4;
+      --green: #10B981;
+      --red: #EF4444;
+      --yellow: #F59E0B;
+      --text: #F1F5F9;
+      --text-muted: #64748B;
+      --text-dim: #94A3B8;
+      --nav-h: 68px;
+      --header-h: 56px;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif; overscroll-behavior: none; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 4px; }
+
+    /* Glass card */
+    .glass {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    /* Gradient text */
+    .grad { background: linear-gradient(135deg, var(--purple), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    /* Gradient border glow */
+    .glow-border { box-shadow: 0 0 0 1px var(--purple), 0 0 20px rgba(139,92,246,0.2); }
+
+    /* Buttons */
+    .btn-primary {
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      border: none; color: white; font-weight: 700; cursor: pointer;
+      border-radius: 14px; padding: 14px 20px; font-size: 15px;
+      transition: opacity 0.15s, transform 0.1s; width: 100%; display: block; text-align: center;
+    }
+    .btn-primary:active { opacity: 0.85; transform: scale(0.98); }
+
+    .btn-ghost {
+      background: var(--card); border: 1px solid var(--card-border);
+      color: var(--text-dim); font-weight: 600; cursor: pointer;
+      border-radius: 14px; padding: 14px 20px; font-size: 15px;
+      transition: background 0.15s, transform 0.1s; width: 100%; display: block; text-align: center;
+    }
+    .btn-ghost:active { transform: scale(0.98); }
+
+    .btn-icon {
+      background: var(--card); border: 1px solid var(--card-border);
+      color: var(--text); cursor: pointer; border-radius: 12px;
+      padding: 8px 14px; font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; gap: 6px; transition: all 0.15s;
+    }
+    .btn-icon:active { transform: scale(0.95); }
+
+    /* Inputs */
+    .input {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--card-border);
+      border-radius: 14px; padding: 14px 16px; color: var(--text);
+      font-size: 15px; width: 100%; outline: none; transition: border 0.2s;
+      -webkit-appearance: none;
+    }
+    .input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(139,92,246,0.15); }
+    .input::placeholder { color: var(--text-muted); }
+
+    select.input option { background: #1E1E35; color: var(--text); }
+
+    label.check-row {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--card); border: 1px solid var(--card-border);
+      border-radius: 14px; padding: 12px 14px; cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    label.check-row:has(input:checked) { border-color: var(--purple); }
+    input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--purple); cursor: pointer; flex-shrink: 0; }
+    input[type=number] { -webkit-appearance: none; }
+
+    /* Tags / badges */
+    .tag { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.02em; }
+    .tag-purple { background: rgba(139,92,246,0.2); color: #A78BFA; }
+    .tag-cyan { background: rgba(6,182,212,0.2); color: #67E8F9; }
+    .tag-green { background: rgba(16,185,129,0.2); color: #6EE7B7; }
+    .tag-yellow { background: rgba(245,158,11,0.2); color: #FCD34D; }
+    .tag-gray { background: rgba(100,116,139,0.2); color: #94A3B8; }
+    .tag-red { background: rgba(239,68,68,0.2); color: #FCA5A5; }
+
+    /* Rating bar */
+    .rating-bar { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+    .rating-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--purple), var(--cyan)); }
+
+    /* Views */
+    .view { display: none; padding: 16px 16px 100px; }
+    .view.active { display: block; }
+
+    /* Animations */
+    @keyframes fadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+    .anim-up { animation: fadeUp 0.25s ease-out; }
+    .anim-fade { animation: fadeIn 0.3s ease-out; }
+
+    /* Navigation */
+    #nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(8,8,15,0.95); backdrop-filter: blur(20px);
+      border-top: 1px solid var(--card-border);
+      display: flex; z-index: 40;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 4px; cursor: pointer; background: none; border: none; color: var(--text-muted); transition: color 0.2s; gap: 3px; }
+    .nav-btn .nav-ico { font-size: 22px; line-height: 1; transition: transform 0.2s; }
+    .nav-btn .nav-lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.02em; }
+    .nav-btn.ativo { color: var(--purple); }
+    .nav-btn.ativo .nav-ico { transform: scale(1.1); }
+
+    /* Header */
+    #header {
+      position: sticky; top: 0; z-index: 30;
+      background: rgba(8,8,15,0.92); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 0 16px; height: var(--header-h);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    /* Stats card */
+    .stat-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 18px; padding: 18px 14px; text-align: center; }
+    .stat-num { font-size: 28px; font-weight: 800; }
+    .stat-lbl { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-top: 3px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+    /* Player/Team card */
+    .entity-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 18px; padding: 14px; display: flex; align-items: center; gap: 12px; transition: border-color 0.2s; }
+    .entity-card:active { transform: scale(0.99); }
+    .avatar { width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; background: linear-gradient(135deg, rgba(139,92,246,0.3), rgba(6,182,212,0.3)); }
+
+    /* Section title */
+    .sec-title { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+
+    /* Modal */
+    #modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 50; align-items: flex-end; backdrop-filter: blur(4px); }
+    #modal-overlay.open { display: flex; }
+    #modal-box { background: #0F0F20; border: 1px solid var(--card-border); border-radius: 28px 28px 0 0; width: 100%; max-height: 92vh; overflow-y: auto; padding: 0 18px 40px; animation: fadeUp 0.3s ease-out; }
+    .modal-handle { width: 36px; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; margin: 14px auto 20px; }
+    .modal-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; }
+
+    /* Toast */
+    #toast { position: fixed; left: 16px; right: 16px; z-index: 100; border-radius: 16px; padding: 14px 18px; font-size: 14px; font-weight: 700; text-align: center; display: none; box-shadow: 0 8px 32px rgba(0,0,0,0.4); backdrop-filter: blur(12px); top: max(16px, env(safe-area-inset-top)); }
+
+    /* Sorteio result */
+    .vs-card { background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.3); border-radius: 18px; padding: 16px; }
+    .vs-team { font-size: 15px; font-weight: 800; }
+    .vs-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .vs-divider { display: flex; align-items: center; justify-content: center; padding: 0 12px; }
+    .vs-text { font-size: 13px; font-weight: 800; color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 6px 10px; border-radius: 8px; }
+
+    /* Forca badge */
+    .forca-badge { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 8px; }
+    .forca-elite { background: rgba(245,158,11,0.25); color: #FCD34D; }
+    .forca-top { background: rgba(139,92,246,0.25); color: #C4B5FD; }
+    .forca-mid { background: rgba(6,182,212,0.25); color: #67E8F9; }
+    .forca-base { background: rgba(100,116,139,0.25); color: #94A3B8; }
+
+    /* Match card */
+    .match-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 18px; padding: 14px; }
+
+    /* Ranking medal */
+    .rank-pos { font-size: 20px; width: 36px; text-align: center; flex-shrink: 0; }
+
+    /* Tipo selector */
+    .tipo-btn { background: var(--card); border: 1px solid var(--card-border); border-radius: 14px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.15s; }
+    .tipo-btn.sel { border-color: var(--purple); background: rgba(139,92,246,0.15); }
+    .tipo-btn:active { transform: scale(0.97); }
+
+    /* Balance indicator */
+    .balance-bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.06); overflow: hidden; position: relative; }
+    .balance-fill { position: absolute; top: 0; height: 100%; border-radius: 3px; transition: all 0.5s; }
+
+    /* Login screen */
+    #login-screen { min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px; background: radial-gradient(ellipse at 50% -20%, rgba(139,92,246,0.25) 0%, transparent 65%), var(--bg); }
+
+    /* Orb decorations */
+    .orb { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; }
+    .orb-1 { width: 250px; height: 250px; background: rgba(139,92,246,0.25); top: -80px; right: -60px; }
+    .orb-2 { width: 200px; height: 200px; background: rgba(6,182,212,0.15); bottom: 60px; left: -80px; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     TELA DE LOGIN
+═══════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div style="text-align:center; margin-bottom: 48px;" class="anim-fade">
+    <div style="font-size: 72px; margin-bottom: 16px; filter: drop-shadow(0 0 24px rgba(139,92,246,0.6))">⚽</div>
+    <h1 style="font-size: 38px; font-weight: 900; letter-spacing: -1px;" class="grad">FutManager</h1>
+    <p style="color: var(--text-muted); margin-top: 8px; font-size: 15px;">Seus campeonatos. Seu ranking. Sua glória.</p>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:320px;">
+    <button id="btn-login" style="display:flex; align-items:center; justify-content:center; gap:12px; background:#fff; color:#1a1a2e; font-weight:800; font-size:16px; padding:16px 24px; border-radius:18px; border:none; cursor:pointer; width:100%; transition: transform 0.1s, box-shadow 0.2s; box-shadow: 0 8px 32px rgba(0,0,0,0.4);" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform=''" ontouchend="this.style.transform=''">
+      <svg width="22" height="22" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Entrar com Google
+    </button>
+
+    <button id="btn-apple" style="display:flex; align-items:center; justify-content:center; gap:12px; background:#000; color:#fff; font-weight:800; font-size:16px; padding:16px 24px; border-radius:18px; border:1px solid rgba(255,255,255,0.15); cursor:pointer; width:100%; transition: transform 0.1s, box-shadow 0.2s; box-shadow: 0 8px 32px rgba(0,0,0,0.4);" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform=''" ontouchend="this.style.transform=''">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+      Entrar com Apple
+    </button>
+  </div>
+
+  <p id="login-erro" style="color:#FCA5A5; font-size:13px; margin-top:16px; display:none; text-align:center;"></p>
+  <p style="color: var(--text-muted); font-size: 12px; margin-top: 32px; text-align:center;">Acesso exclusivo · Dados protegidos</p>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     APP PRINCIPAL
+═══════════════════════════════════════════ -->
+<div id="app" style="display:none; flex-direction:column; height:100dvh; position:relative;">
+
+  <!-- HEADER -->
+  <header id="header">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span style="font-size:22px; filter:drop-shadow(0 0 8px rgba(139,92,246,0.7))">⚽</span>
+      <span style="font-weight:900; font-size:18px; letter-spacing:-0.5px;" class="grad">FutManager</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <img id="user-foto" style="width:32px; height:32px; border-radius:50%; border:2px solid var(--purple); display:none;" src="" alt="">
+      <button id="btn-sair" style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); color:#FCA5A5; border-radius:10px; padding:6px 12px; font-size:12px; font-weight:700; cursor:pointer;">Sair</button>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO -->
+  <main style="flex:1; overflow-y:auto;" id="main">
+
+    <!-- ── HOME ── -->
+    <div id="view-home" class="view active">
+      <div style="padding: 8px 0 16px;">
+        <p style="color: var(--text-muted); font-size:13px;">Bem-vindo ao</p>
+        <h2 style="font-size:26px; font-weight:900; letter-spacing:-0.5px;" class="grad">FutManager</h2>
+      </div>
+
+      <!-- Iniciar Partida CTA -->
+      <button onclick="iniciarPartida()" style="width:100%;background:linear-gradient(135deg,#7C3AED,#06B6D4);border:none;color:#fff;padding:20px 24px;border-radius:22px;font-size:17px;font-weight:900;cursor:pointer;margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:14px;box-shadow:0 8px 32px rgba(139,92,246,0.45);transition:opacity 0.15s,transform 0.1s;letter-spacing:-0.3px;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform=''" ontouchend="this.style.transform=''">
+        <span style="font-size:26px;filter:drop-shadow(0 0 8px rgba(255,255,255,0.5))">⚡</span>
+        <span>Iniciar Partida</span>
+        <span style="font-size:22px;">⚽</span>
+      </button>
+
+      <!-- Stats -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:24px;">
+        <div class="stat-card">
+          <div class="stat-num" style="color: var(--green);" id="s-jog">0</div>
+          <div class="stat-lbl">Jogadores</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" style="color: var(--cyan);" id="s-ami">0</div>
+          <div class="stat-lbl">Amistosos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" style="color: var(--yellow);" id="s-cam">0</div>
+          <div class="stat-lbl">Campeonatos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" style="color: var(--purple);" id="s-par">0</div>
+          <div class="stat-lbl">Partidas</div>
+        </div>
+      </div>
+
+      <!-- Jogos em aberto -->
+      <div id="home-abertos-sec" style="display:none;margin-bottom:24px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <p class="sec-title">🟢 Jogos em Aberto</p>
+          <button onclick="irPara('amistosos')" style="background:none;border:none;color:var(--purple);font-size:12px;font-weight:700;cursor:pointer;">Ver todos →</button>
+        </div>
+        <div id="home-abertos"></div>
+      </div>
+
+      <!-- Top Ranking -->
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+        <p class="sec-title">🏆 Top Ranking</p>
+        <button onclick="irPara('ranking')" style="background:none; border:none; color:var(--purple); font-size:12px; font-weight:700; cursor:pointer;">Ver todos →</button>
+      </div>
+      <div id="home-ranking">
+        <p style="color:var(--text-muted); text-align:center; padding:24px 0; font-size:14px;">Nenhuma partida ainda</p>
       </div>
     </div>
 
-    <!-- App Container -->
-    <div id="app" style="display: none; width: 100%; height: 100vh;"></div>
+    <!-- ── JOGADORES ── -->
+    <div id="view-jogadores" class="view">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 0 4px;">
+        <h2 style="font-size:22px; font-weight:900;">Jogadores</h2>
+        <button class="btn-icon" id="btn-add-jog">+ Adicionar</button>
+      </div>
+      <p style="color:var(--text-muted); font-size:13px; margin-bottom:20px;">Seus amigos que participam dos jogos — ex: Nicola, Beto, Fabio</p>
+      <div id="lista-jog">
+        <div style="background:rgba(139,92,246,0.08);border:1px dashed rgba(139,92,246,0.3);border-radius:18px;padding:32px 20px;text-align:center;">
+          <div style="font-size:40px;margin-bottom:12px;">👥</div>
+          <p style="font-weight:700;margin-bottom:6px;">Nenhum jogador ainda</p>
+          <p style="color:var(--text-muted);font-size:13px;">Adicione os amigos que vão jogar.<br>Ex: Nicola, Beto, Fabio...</p>
+        </div>
+      </div>
+    </div>
 
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+    <!-- ── AMISTOSOS ── -->
+    <div id="view-amistosos" class="view">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 0 20px;">
+        <h2 style="font-size:22px; font-weight:900;">Amistosos</h2>
+        <button class="btn-icon" id="btn-criar-ami">+ Criar</button>
+      </div>
+      <div id="lista-ami">
+        <p style="color:var(--text-muted); text-align:center; padding:48px 0; font-size:14px;">Nenhum amistoso registrado</p>
+      </div>
+    </div>
+
+    <!-- ── CAMPEONATOS ── -->
+    <div id="view-campeonatos" class="view">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 0 20px;">
+        <h2 style="font-size:22px; font-weight:900;">Campeonatos</h2>
+        <button class="btn-icon" id="btn-criar-camp">+ Criar</button>
+      </div>
+      <div id="lista-camp">
+        <p style="color:var(--text-muted); text-align:center; padding:48px 0; font-size:14px;">Nenhum campeonato criado</p>
+      </div>
+    </div>
+
+    <!-- ── RANKING ── -->
+    <div id="view-ranking" class="view">
+      <div style="padding:8px 0 20px;">
+        <h2 style="font-size:22px; font-weight:900;">Ranking Geral</h2>
+      </div>
+      <div id="lista-rank">
+        <p style="color:var(--text-muted); text-align:center; padding:48px 0; font-size:14px;">Nenhuma partida registrada</p>
+      </div>
+    </div>
+
+    <!-- ── TIMES ── -->
+    <div id="view-times" class="view">
+      <div style="padding:8px 0 16px;">
+        <h2 style="font-size:22px; font-weight:900;">Gerenciar Times</h2>
+        <p style="color:var(--text-muted); font-size:13px; margin-top:4px;">Dados baseados no EA FC 26</p>
+      </div>
+
+      <!-- Tabs -->
+      <div style="display:flex; gap:8px; margin-bottom:16px; background:var(--card); border:1px solid var(--card-border); border-radius:14px; padding:4px;">
+        <button id="tab-clubes" onclick="filtrarTimes('clubes')" style="flex:1; padding:9px; border-radius:10px; border:none; background:var(--purple); color:#fff; font-weight:700; font-size:13px; cursor:pointer;">⚽ Clubes</button>
+        <button id="tab-selecoes" onclick="filtrarTimes('selecoes')" style="flex:1; padding:9px; border-radius:10px; border:none; background:none; color:var(--text-muted); font-weight:700; font-size:13px; cursor:pointer;">🌍 Seleções</button>
+      </div>
+
+      <button class="btn-icon" id="btn-add-time" style="margin-bottom:14px; width:100%; justify-content:center;">+ Adicionar Time</button>
+
+      <div id="lista-times-edit"></div>
+    </div>
+
+  </main>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <button class="nav-btn ativo" data-view="home">
+      <span class="nav-ico">🏠</span>
+      <span class="nav-lbl">Início</span>
+    </button>
+    <button class="nav-btn" data-view="jogadores">
+      <span class="nav-ico">👥</span>
+      <span class="nav-lbl">Jogadores</span>
+    </button>
+    <button class="nav-btn" data-view="amistosos">
+      <span class="nav-ico">⚽</span>
+      <span class="nav-lbl">Amistosos</span>
+    </button>
+    <button class="nav-btn" data-view="campeonatos">
+      <span class="nav-ico">🏆</span>
+      <span class="nav-lbl">Campeonatos</span>
+    </button>
+    <button class="nav-btn" data-view="ranking">
+      <span class="nav-ico">📊</span>
+      <span class="nav-lbl">Ranking</span>
+    </button>
+    <button class="nav-btn" data-view="times">
+      <span class="nav-ico">🛠️</span>
+      <span class="nav-lbl">Times</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODAL
+═══════════════════════════════════════════ -->
+<div id="modal-overlay">
+  <div id="modal-box">
+    <div class="modal-handle"></div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ═══════════════════════════════════════════
+     SCRIPT PRINCIPAL
+═══════════════════════════════════════════ -->
+<script type="module">
+import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, serverTimestamp, setDoc, getDoc }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, OAuthProvider, signOut, onAuthStateChanged }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+// ─── CONFIG ─────────────────────────────────────────────────────────
+const FB = initializeApp({
+  apiKey: "AIzaSyB2FF0TT2ZIEn91DkjhPYqcDABK52Tx2-I",
+  authDomain: "fut-manager-6bd85.firebaseapp.com",
+  projectId: "fut-manager-6bd85",
+  storageBucket: "fut-manager-6bd85.firebasestorage.app",
+  messagingSenderId: "999602703550",
+  appId: "1:999602703550:web:57cbf17b03f30baf02e2ef"
+});
+const db   = getFirestore(FB);
+const auth = getAuth(FB);
+const gp   = new GoogleAuthProvider();
+const ap   = new OAuthProvider('apple.com');
+ap.addScope('email');
+ap.addScope('name');
+
+// ─── DATABASE DE TIMES EA FC 26 ──────────────────────────────────────
+const CLUBES_DEFAULT = [
+  // La Liga 🇪🇸
+  { id:'real-madrid',   nome:'Real Madrid',        forca:89, bandeira:'🇪🇸', liga:'La Liga',        logo:'👑' },
+  { id:'barcelona',     nome:'Barcelona',           forca:87, bandeira:'🇪🇸', liga:'La Liga',        logo:'🔵🔴' },
+  { id:'atletico-mad',  nome:'Atlético Madrid',     forca:84, bandeira:'🇪🇸', liga:'La Liga',        logo:'🔴⚪' },
+  { id:'real-sociedad', nome:'Real Sociedad',       forca:80, bandeira:'🇪🇸', liga:'La Liga',        logo:'🔵⚪' },
+  { id:'villarreal',    nome:'Villarreal',          forca:79, bandeira:'🇪🇸', liga:'La Liga',        logo:'🟡' },
+  { id:'sevilla',       nome:'Sevilla',             forca:78, bandeira:'🇪🇸', liga:'La Liga',        logo:'🔴⚪' },
+  // Premier League 🏴󠁧󠁢󠁥󠁮󠁧󠁿
+  { id:'man-city',      nome:'Manchester City',     forca:88, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🩵' },
+  { id:'liverpool',     nome:'Liverpool',           forca:87, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🔴' },
+  { id:'arsenal',       nome:'Arsenal',             forca:86, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🔫' },
+  { id:'chelsea',       nome:'Chelsea',             forca:83, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🦁' },
+  { id:'man-utd',       nome:'Manchester United',   forca:82, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'👹' },
+  { id:'tottenham',     nome:'Tottenham',           forca:81, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🐓' },
+  { id:'newcastle',     nome:'Newcastle',           forca:81, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'⚫⚪' },
+  { id:'aston-villa',   nome:'Aston Villa',         forca:82, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🦁' },
+  { id:'west-ham',      nome:'West Ham',            forca:79, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'⚒️' },
+  // Bundesliga 🇩🇪
+  { id:'bayern',        nome:'Bayern Munich',       forca:87, bandeira:'🇩🇪', liga:'Bundesliga',     logo:'🔴⚪' },
+  { id:'leverkusen',    nome:'Bayer Leverkusen',    forca:84, bandeira:'🇩🇪', liga:'Bundesliga',     logo:'⚫🔴' },
+  { id:'dortmund',      nome:'Borussia Dortmund',   forca:83, bandeira:'🇩🇪', liga:'Bundesliga',     logo:'🟡⚫' },
+  { id:'leipzig',       nome:'RB Leipzig',          forca:81, bandeira:'🇩🇪', liga:'Bundesliga',     logo:'🔵🔴' },
+  // Serie A 🇮🇹
+  { id:'inter',         nome:'Inter Milan',         forca:85, bandeira:'🇮🇹', liga:'Serie A',        logo:'🔵⚫' },
+  { id:'milan',         nome:'AC Milan',            forca:83, bandeira:'🇮🇹', liga:'Serie A',        logo:'🔴⚫' },
+  { id:'napoli',        nome:'Napoli',              forca:82, bandeira:'🇮🇹', liga:'Serie A',        logo:'🔵' },
+  { id:'juventus',      nome:'Juventus',            forca:82, bandeira:'🇮🇹', liga:'Serie A',        logo:'⚫⚪' },
+  { id:'roma',          nome:'AS Roma',             forca:80, bandeira:'🇮🇹', liga:'Serie A',        logo:'🟡🔴' },
+  { id:'lazio',         nome:'Lazio',               forca:79, bandeira:'🇮🇹', liga:'Serie A',        logo:'🦅' },
+  // Ligue 1 🇫🇷
+  { id:'psg',           nome:'PSG',                 forca:86, bandeira:'🇫🇷', liga:'Ligue 1',        logo:'🗼' },
+  { id:'monaco',        nome:'Monaco',              forca:80, bandeira:'🇫🇷', liga:'Ligue 1',        logo:'🎲' },
+  // Portugal 🇵🇹
+  { id:'benfica',       nome:'Benfica',             forca:81, bandeira:'🇵🇹', liga:'Primeira Liga',  logo:'🦅' },
+  { id:'porto',         nome:'Porto',               forca:80, bandeira:'🇵🇹', liga:'Primeira Liga',  logo:'🐉' },
+  { id:'sporting',      nome:'Sporting CP',         forca:79, bandeira:'🇵🇹', liga:'Primeira Liga',  logo:'🦁' },
+  // Holanda 🇳🇱
+  { id:'ajax',          nome:'Ajax',                forca:79, bandeira:'🇳🇱', liga:'Eredivisie',     logo:'🔴⚪' },
+  { id:'feyenoord',     nome:'Feyenoord',           forca:78, bandeira:'🇳🇱', liga:'Eredivisie',     logo:'🔴⚫' },
+  // Escócia 🏴󠁧󠁢󠁳󠁣󠁴󠁿
+  { id:'celtic',        nome:'Celtic',              forca:78, bandeira:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', liga:'Scottish Prem',  logo:'🍀' },
+  { id:'rangers',       nome:'Rangers',             forca:77, bandeira:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', liga:'Scottish Prem',  logo:'🦁' },
+  // Turquia 🇹🇷
+  { id:'galatasaray',   nome:'Galatasaray',         forca:79, bandeira:'🇹🇷', liga:'Süper Lig',      logo:'🔴🟡' },
+];
+
+const SELECOES_DEFAULT = [
+  { id:'franca',     nome:'França',         forca:86, bandeira:'🇫🇷' },
+  { id:'argentina',  nome:'Argentina',      forca:85, bandeira:'🇦🇷' },
+  { id:'inglaterra', nome:'Inglaterra',     forca:84, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+  { id:'espanha',    nome:'Espanha',        forca:84, bandeira:'🇪🇸' },
+  { id:'portugal',   nome:'Portugal',       forca:83, bandeira:'🇵🇹' },
+  { id:'alemanha',   nome:'Alemanha',       forca:83, bandeira:'🇩🇪' },
+  { id:'belgica',    nome:'Bélgica',        forca:82, bandeira:'🇧🇪' },
+  { id:'holanda',    nome:'Holanda',        forca:82, bandeira:'🇳🇱' },
+  { id:'italia',     nome:'Itália',         forca:81, bandeira:'🇮🇹' },
+  { id:'croacia',    nome:'Croácia',        forca:80, bandeira:'🇭🇷' },
+  { id:'uruguai',    nome:'Uruguai',        forca:80, bandeira:'🇺🇾' },
+  { id:'colombia',   nome:'Colômbia',       forca:79, bandeira:'🇨🇴' },
+  { id:'marrocos',   nome:'Marrocos',       forca:79, bandeira:'🇲🇦' },
+  { id:'turquia',    nome:'Turquia',        forca:78, bandeira:'🇹🇷' },
+  { id:'eua',        nome:'EUA',            forca:78, bandeira:'🇺🇸' },
+  { id:'mexico',     nome:'México',         forca:78, bandeira:'🇲🇽' },
+  { id:'austria',    nome:'Áustria',        forca:77, bandeira:'🇦🇹' },
+  { id:'japao',      nome:'Japão',          forca:77, bandeira:'🇯🇵' },
+  { id:'senegal',    nome:'Senegal',        forca:77, bandeira:'🇸🇳' },
+  { id:'dinamarca',  nome:'Dinamarca',      forca:77, bandeira:'🇩🇰' },
+  { id:'suica',      nome:'Suíça',          forca:76, bandeira:'🇨🇭' },
+  { id:'chile',      nome:'Chile',          forca:75, bandeira:'🇨🇱' },
+  { id:'polonia',    nome:'Polônia',        forca:75, bandeira:'🇵🇱' },
+  { id:'australia',  nome:'Austrália',      forca:74, bandeira:'🇦🇺' },
+  { id:'nigeria',    nome:'Nigéria',        forca:74, bandeira:'🇳🇬' },
+  { id:'coreia',     nome:'Coreia do Sul',  forca:74, bandeira:'🇰🇷' },
+  { id:'equador',    nome:'Equador',        forca:73, bandeira:'🇪🇨' },
+  { id:'ghana',      nome:'Gana',           forca:72, bandeira:'🇬🇭' },
+  { id:'peru',       nome:'Peru',           forca:72, bandeira:'🇵🇪' },
+];
+
+const CAMP_META = {
+  'champions':     { nome:'Champions League', emoji:'⭐', tipo:'clubes'  },
+  'libertadores':  { nome:'Libertadores',     emoji:'🌎', tipo:'clubes'  },
+  'brasileirao':   { nome:'Brasileirão',      emoji:'🟢', tipo:'clubes'  },
+  'paulistao':     { nome:'Paulistão',        emoji:'🐍', tipo:'clubes'  },
+  'copa-brasil':   { nome:'Copa do Brasil',   emoji:'🏆', tipo:'clubes'  },
+  'copa-do-mundo': { nome:'Copa do Mundo',    emoji:'🌍', tipo:'selecoes' },
+};
+
+// ─── DADOS VISUAIS DOS TIMES ──────────────────────────────────────────
+// pais = código ISO para flagcdn.com (https://flagcdn.com/w40/{code}.png)
+const TEAM_DATA = {
+  'real-madrid':   { abrev:'RM',  fundo:'#FEFEFE', cor:'#00529F', pais:'es', paisNome:'Espanha'    },
+  'barcelona':     { abrev:'FCB', fundo:'#A50044', cor:'#FFD700', pais:'es', paisNome:'Espanha'    },
+  'atletico-mad':  { abrev:'ATM', fundo:'#CB3524', cor:'#FFFFFF', pais:'es', paisNome:'Espanha'    },
+  'real-sociedad': { abrev:'RSO', fundo:'#0066CC', cor:'#FFFFFF', pais:'es', paisNome:'Espanha'    },
+  'villarreal':    { abrev:'VIL', fundo:'#FFD700', cor:'#003366', pais:'es', paisNome:'Espanha'    },
+  'sevilla':       { abrev:'SEV', fundo:'#CC0000', cor:'#FFFFFF', pais:'es', paisNome:'Espanha'    },
+  'man-city':      { abrev:'MCI', fundo:'#6CABDD', cor:'#FFFFFF', pais:'gb-eng', paisNome:'Inglaterra' },
+  'liverpool':     { abrev:'LIV', fundo:'#C8102E', cor:'#FFD700', pais:'gb-eng', paisNome:'Inglaterra' },
+  'arsenal':       { abrev:'ARS', fundo:'#EF0107', cor:'#FFFFFF', pais:'gb-eng', paisNome:'Inglaterra' },
+  'chelsea':       { abrev:'CHE', fundo:'#034694', cor:'#FFFFFF', pais:'gb-eng', paisNome:'Inglaterra' },
+  'man-utd':       { abrev:'MNU', fundo:'#DA291C', cor:'#FFD700', pais:'gb-eng', paisNome:'Inglaterra' },
+  'tottenham':     { abrev:'TOT', fundo:'#132257', cor:'#FFFFFF', pais:'gb-eng', paisNome:'Inglaterra' },
+  'newcastle':     { abrev:'NEW', fundo:'#241F20', cor:'#FFFFFF', pais:'gb-eng', paisNome:'Inglaterra' },
+  'aston-villa':   { abrev:'AVL', fundo:'#670E36', cor:'#95BFE5', pais:'gb-eng', paisNome:'Inglaterra' },
+  'west-ham':      { abrev:'WHU', fundo:'#7A263A', cor:'#1BB1E7', pais:'gb-eng', paisNome:'Inglaterra' },
+  'bayern':        { abrev:'FCB', fundo:'#DC052D', cor:'#FFFFFF', pais:'de', paisNome:'Alemanha'   },
+  'leverkusen':    { abrev:'B04', fundo:'#E32221', cor:'#000000', pais:'de', paisNome:'Alemanha'   },
+  'dortmund':      { abrev:'BVB', fundo:'#FDE100', cor:'#000000', pais:'de', paisNome:'Alemanha'   },
+  'leipzig':       { abrev:'RBL', fundo:'#DD0741', cor:'#FFFFFF', pais:'de', paisNome:'Alemanha'   },
+  'inter':         { abrev:'INT', fundo:'#003DA5', cor:'#000000', pais:'it', paisNome:'Itália'     },
+  'milan':         { abrev:'ACM', fundo:'#FB090B', cor:'#000000', pais:'it', paisNome:'Itália'     },
+  'napoli':        { abrev:'NAP', fundo:'#12A0C3', cor:'#FFFFFF', pais:'it', paisNome:'Itália'     },
+  'juventus':      { abrev:'JUV', fundo:'#000000', cor:'#FFFFFF', pais:'it', paisNome:'Itália'     },
+  'roma':          { abrev:'ASR', fundo:'#8E1F2F', cor:'#FFD700', pais:'it', paisNome:'Itália'     },
+  'lazio':         { abrev:'LAZ', fundo:'#87CEEB', cor:'#003366', pais:'it', paisNome:'Itália'     },
+  'psg':           { abrev:'PSG', fundo:'#004170', cor:'#FFFFFF', pais:'fr', paisNome:'França'     },
+  'monaco':        { abrev:'ASM', fundo:'#EE2523', cor:'#FFFFFF', pais:'fr', paisNome:'França'     },
+  'benfica':       { abrev:'SLB', fundo:'#C8102E', cor:'#FFFFFF', pais:'pt', paisNome:'Portugal'  },
+  'porto':         { abrev:'FCP', fundo:'#003087', cor:'#FFD700', pais:'pt', paisNome:'Portugal'  },
+  'sporting':      { abrev:'SCP', fundo:'#008136', cor:'#FFD700', pais:'pt', paisNome:'Portugal'  },
+  'ajax':          { abrev:'AFC', fundo:'#C8102E', cor:'#FFFFFF', pais:'nl', paisNome:'Holanda'   },
+  'feyenoord':     { abrev:'FEY', fundo:'#C8102E', cor:'#000000', pais:'nl', paisNome:'Holanda'   },
+  'celtic':        { abrev:'CEL', fundo:'#00843D', cor:'#FFFFFF', pais:'gb-sct', paisNome:'Escócia' },
+  'rangers':       { abrev:'RFC', fundo:'#003087', cor:'#FFFFFF', pais:'gb-sct', paisNome:'Escócia' },
+  'galatasaray':   { abrev:'GS',  fundo:'#DD0000', cor:'#FFD700', pais:'tr', paisNome:'Turquia'   },
+};
+
+const SELECAO_PAIS = {
+  'franca':     { pais:'fr',    paisNome:'França'       },
+  'argentina':  { pais:'ar',    paisNome:'Argentina'    },
+  'inglaterra': { pais:'gb-eng', paisNome:'Inglaterra'  },
+  'espanha':    { pais:'es',    paisNome:'Espanha'      },
+  'portugal':   { pais:'pt',    paisNome:'Portugal'     },
+  'alemanha':   { pais:'de',    paisNome:'Alemanha'     },
+  'belgica':    { pais:'be',    paisNome:'Bélgica'      },
+  'holanda':    { pais:'nl',    paisNome:'Holanda'      },
+  'italia':     { pais:'it',    paisNome:'Itália'       },
+  'croacia':    { pais:'hr',    paisNome:'Croácia'      },
+  'uruguai':    { pais:'uy',    paisNome:'Uruguai'      },
+  'colombia':   { pais:'co',    paisNome:'Colômbia'     },
+  'marrocos':   { pais:'ma',    paisNome:'Marrocos'     },
+  'turquia':    { pais:'tr',    paisNome:'Turquia'      },
+  'eua':        { pais:'us',    paisNome:'EUA'          },
+  'mexico':     { pais:'mx',    paisNome:'México'       },
+  'austria':    { pais:'at',    paisNome:'Áustria'      },
+  'japao':      { pais:'jp',    paisNome:'Japão'        },
+  'senegal':    { pais:'sn',    paisNome:'Senegal'      },
+  'dinamarca':  { pais:'dk',    paisNome:'Dinamarca'    },
+  'suica':      { pais:'ch',    paisNome:'Suíça'        },
+  'chile':      { pais:'cl',    paisNome:'Chile'        },
+  'polonia':    { pais:'pl',    paisNome:'Polônia'      },
+  'australia':  { pais:'au',    paisNome:'Austrália'    },
+  'nigeria':    { pais:'ng',    paisNome:'Nigéria'      },
+  'coreia':     { pais:'kr',    paisNome:'Coreia do Sul'},
+  'equador':    { pais:'ec',    paisNome:'Equador'      },
+  'ghana':      { pais:'gh',    paisNome:'Gana'         },
+  'peru':       { pais:'pe',    paisNome:'Peru'         },
+};
+
+// ─── BADGE HELPERS ────────────────────────────────────────────────────
+function flagImg(paisCode, w=24) {
+  if (!paisCode) return '';
+  return `<img src="https://flagcdn.com/w${w}/${paisCode}.png" alt="" style="border-radius:3px;vertical-align:middle;" onerror="this.style.display='none'">`;
+}
+
+/** Badge de clube: quadrado colorido com abreviação + bandeira + nome do país */
+function badgeClube(timeId, nomeTime) {
+  const d = TEAM_DATA[timeId] || { abrev:(nomeTime||'?').slice(0,3).toUpperCase(), fundo:'#1E1E35', cor:'#AAAAAA', pais:'eu', paisNome:'' };
+  return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+    <div style="width:48px;height:48px;border-radius:12px;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:${d.cor};letter-spacing:-0.5px;flex-shrink:0;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 8px rgba(0,0,0,0.3);">${d.abrev}</div>
+    <div style="display:flex;align-items:center;gap:3px;white-space:nowrap;">
+      ${flagImg(d.pais, 20)}
+      <span style="font-size:9px;color:var(--text-muted);font-weight:600;">${d.paisNome}</span>
+    </div>
+  </div>`;
+}
+
+/** Badge de seleção: bandeira grande + nome do país */
+function badgeSel(timeId, nomeTime) {
+  const d = SELECAO_PAIS[timeId] || { pais:'', paisNome: nomeTime||'' };
+  return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+    <div style="width:48px;height:36px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
+      ${d.pais ? `<img src="https://flagcdn.com/w80/${d.pais}.png" alt="${nomeTime}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='🌍'">` : '<span style="font-size:28px;">🌍</span>'}
+    </div>
+    <span style="font-size:9px;color:var(--text-muted);font-weight:600;white-space:nowrap;">${d.paisNome}</span>
+  </div>`;
+}
+
+/** Retorna o badge certo conforme tipo */
+function badgeTime(timeId, nomeTime, tipo) {
+  return tipo === 'selecoes' ? badgeSel(timeId, nomeTime) : badgeClube(timeId, nomeTime);
+}
+window.badgeTime = badgeTime;
+
+// ─── ESTADO ─────────────────────────────────────────────────────────
+let usuario    = null;
+let jogadores  = [];
+let amistosos  = [];
+let campeonatos= [];
+let clubes     = [...CLUBES_DEFAULT];
+let selecoes   = [...SELECOES_DEFAULT];
+let abaTimesAtual = 'clubes';
+let _disponiveis  = []; // partidas disponíveis para registo em grupo
+
+// ─── ALGORITMO DE BALANCEAMENTO ──────────────────────────────────────
+function forcaBadge(f) {
+  if (f >= 86) return `<span class="forca-badge forca-elite">${f}</span>`;
+  if (f >= 82) return `<span class="forca-badge forca-top">${f}</span>`;
+  if (f >= 78) return `<span class="forca-badge forca-mid">${f}</span>`;
+  return `<span class="forca-badge forca-base">${f}</span>`;
+}
+
+function forcaRating(f) {
+  const pct = Math.round(((f - 65) / 25) * 100);
+  return `<div class="rating-bar"><div class="rating-fill" style="width:${pct}%"></div></div>`;
+}
+
+/**
+ * Sorteia dois times balanceados.
+ * - Nunca usa times usados nos últimos N amistosos.
+ * - Tenta encontrar par com diferença mínima de força (≤3 pts).
+ * - Aceita diferença de até 8 pts se não encontrar melhor.
+ */
+function sortearBalanceado(pool, historicoIds = []) {
+  // Filtra recentemente usados (última metade do pool)
+  const janela  = Math.max(2, Math.floor(pool.length / 2));
+  const recentes = historicoIds.slice(-janela);
+  let disp = pool.filter(t => !recentes.includes(t.id));
+  if (disp.length < 2) disp = [...pool]; // fallback: usa todos
+
+  // Busca par mais equilibrado em até 80 tentativas
+  let melhor = null, menorDiff = Infinity;
+  for (let i = 0; i < 80; i++) {
+    const shuf = shuffle(disp);
+    const t1 = shuf[0], t2 = shuf[1];
+    const diff = Math.abs(t1.forca - t2.forca);
+    if (diff < menorDiff) {
+      menorDiff = diff;
+      melhor = [t1, t2];
+      if (diff === 0) break;
+    }
+  }
+
+  // Se a melhor diferença for > 8, tenta expandir o pool
+  if (menorDiff > 8) {
+    const pares = [];
+    for (let i = 0; i < pool.length; i++) {
+      for (let j = i + 1; j < pool.length; j++) {
+        pares.push([pool[i], pool[j], Math.abs(pool[i].forca - pool[j].forca)]);
+      }
+    }
+    pares.sort((a,b) => a[2] - b[2]);
+    if (pares.length > 0) melhor = [pares[0][0], pares[0][1]];
+  }
+
+  return melhor || [disp[0], disp[1]];
+}
+
+/**
+ * Para campeonatos: distribui times entre participantes de forma balanceada.
+ * Usa draft serpentina: ordena times por força, distribui alternando.
+ */
+function distribuirTimesBalanceados(participantes, pool, usados = []) {
+  const n = participantes.length;
+  const janela = Math.max(n, Math.floor(pool.length / 2));
+  let disp = pool.filter(t => !usados.slice(-janela).includes(t.id));
+  if (disp.length < n) disp = [...pool];
+
+  // Pega n times aleatórios, depois ordena por força
+  const candidatos = shuffle(disp).slice(0, Math.max(n * 2, n + 4));
+  candidatos.sort((a, b) => b.forca - a.forca);
+  const selecionados = candidatos.slice(0, n);
+
+  // Embaralha participantes e atribui por draft serpentina
+  const ps = shuffle([...participantes]);
+  return ps.map((p, i) => ({
+    ...p,
+    time: selecionados[i] || pool[i % pool.length]
+  }));
+}
+
+function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+
+// Coleta histórico de IDs de times usados nos amistosos
+function historicoIds(tipo) {
+  return amistosos
+    .filter(a => a.tipo === tipo)
+    .flatMap(a => [a.time1?.timeId, a.time2?.timeId])
+    .filter(Boolean);
+}
+
+// ─── HELPERS UI ──────────────────────────────────────────────────────
+function irPara(view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById('view-' + view);
+  if (el) { el.classList.add('active'); el.classList.add('anim-up'); setTimeout(() => el.classList.remove('anim-up'), 300); }
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('ativo', b.dataset.view === view);
+  });
+  if (view === 'times') renderTimesEdit();
+}
+window.irPara = irPara;
+
+document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => irPara(b.dataset.view)));
+
+function modal(html) {
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function fecharModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+window.fecharModal = fecharModal;
+document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target.id === 'modal-overlay') fecharModal(); });
+
+let _toastT;
+function toast(msg, tipo = 'ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.cssText = `position:fixed;left:16px;right:16px;z-index:100;border-radius:16px;padding:14px 18px;font-size:14px;font-weight:700;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.4);backdrop-filter:blur(12px);top:max(16px,env(safe-area-inset-top));background:${tipo==='ok'?'rgba(16,185,129,0.95)':tipo==='erro'?'rgba(239,68,68,0.95)':'rgba(139,92,246,0.95)'};color:#fff;`;
+  t.style.display = 'block';
+  clearTimeout(_toastT);
+  _toastT = setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+
+function fmt(ts) { try { return (ts?.toDate ? ts.toDate() : new Date(ts)).toLocaleDateString('pt-BR'); } catch { return ''; } }
+
+// ─── AUTH ────────────────────────────────────────────────────────────
+// Detecta iPhone/iPad e modo PWA (atalho na tela inicial)
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isPWA = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+const usarRedirect = isIOS || isPWA; // No iPhone/PWA o popup é bloqueado — usa redirect
+
+// Processa retorno do redirect (caso o usuário já tenha feito login via redirect)
+getRedirectResult(auth).catch(() => {});
+
+async function fazerLogin(provider, btnId) {
+  const btn = document.getElementById(btnId);
+  btn.style.opacity = '0.7';
+  btn.style.pointerEvents = 'none';
+  try {
+    if (usarRedirect) {
+      await signInWithRedirect(auth, provider);
+    } else {
+      await signInWithPopup(auth, provider);
+    }
+  } catch (e) {
+    if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
+      await signInWithRedirect(auth, provider);
+    } else if (e.code !== 'auth/cancelled-popup-request') {
+      const el = document.getElementById('login-erro');
+      el.textContent = 'Erro ao entrar. Tente novamente.';
+      el.style.display = 'block';
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = '';
+    }
+  }
+}
+
+document.getElementById('btn-login').addEventListener('click', () => fazerLogin(gp, 'btn-login'));
+document.getElementById('btn-apple').addEventListener('click', () => fazerLogin(ap, 'btn-apple'));
+
+document.getElementById('btn-sair').addEventListener('click', () => signOut(auth));
+
+onAuthStateChanged(auth, async u => {
+  if (u) {
+    usuario = u;
+    document.getElementById('login-screen').style.display = 'none';
+    const app = document.getElementById('app');
+    app.style.display = 'flex';
+    if (u.photoURL) { document.getElementById('user-foto').src = u.photoURL; document.getElementById('user-foto').style.display = ''; }
+    await carregarTimes();
+    await carregarDados();
+  } else {
+    usuario = null;
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+});
+
+// ─── TIMES (FIRESTORE) ───────────────────────────────────────────────
+async function carregarTimes() {
+  const snap = await getDocs(collection(db, 'times'));
+  const custom = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const deletados = custom.filter(t => t._deleted).map(t => t.id);
+  const adicionados = custom.filter(t => !t._deleted);
+
+  const aplicar = (defaults, tipo) => {
+    const base = defaults.filter(t => !deletados.includes(t.id));
+    adicionados.filter(t => t.tipo === tipo).forEach(t => {
+      if (!base.find(b => b.id === t.id)) base.push(t);
+    });
+    return base;
+  };
+
+  clubes   = aplicar(CLUBES_DEFAULT, 'clube');
+  selecoes = aplicar(SELECOES_DEFAULT, 'selecao');
+}
+
+// ─── CARREGAMENTO GERAL ──────────────────────────────────────────────
+async function carregarDados() {
+  await Promise.all([carregarJogadores(), carregarAmistosos(), carregarCampeonatos()]);
+  atualizarDash();
+}
+
+// ─── JOGADORES ───────────────────────────────────────────────────────
+async function carregarJogadores() {
+  const snap = await getDocs(query(collection(db, 'jogadores'), orderBy('nome')));
+  jogadores = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderJogadores();
+}
+
+function renderJogadores() {
+  const c = document.getElementById('lista-jog');
+  if (!jogadores.length) { c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">Nenhum jogador cadastrado</p>'; return; }
+  c.innerHTML = jogadores.map(j => `
+    <div class="entity-card" style="margin-bottom:10px;">
+      <div class="avatar" style="font-size:26px;">${j.emoji || '⚽'}</div>
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:15px;">${j.nome}</div>
+        <div style="color:var(--text-muted);font-size:12px;margin-top:2px;">👤 Jogador</div>
+      </div>
+      <button onclick="excluirJogador('${j.id}','${j.nome.replace(/'/g,'')}')" style="background:rgba(239,68,68,0.12);border:none;color:#FCA5A5;border-radius:10px;padding:8px 12px;cursor:pointer;font-size:13px;">🗑️</button>
+    </div>`).join('');
+}
+
+window.excluirJogador = (id, nome) => {
+  modal(`<p class="modal-title">Remover jogador?</p>
+    <p style="color:var(--text-muted);margin-bottom:24px;">Deseja remover <strong style="color:var(--text)">${nome}</strong>? Isso não pode ser desfeito.</p>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-ghost" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);" onclick="confirmarExcluirJog('${id}')">Remover</button>
+    </div>`);
+};
+window.confirmarExcluirJog = async id => {
+  await deleteDoc(doc(db, 'jogadores', id));
+  fecharModal(); await carregarJogadores(); atualizarDash(); toast('Jogador removido');
+};
+
+document.getElementById('btn-add-jog').addEventListener('click', () => {
+  const emojis = ['⚽','🏆','🎯','🔥','⚡','🦁','🐺','🦊','🐻','🦅','🦉','🐯','🦈','🐉','👑','💎','🚀','🌟','🎮','🏅','😎','🤩','💪','🕹️','🏋️','🥊','🎽','🥅','🎪','🃏'];
+  modal(`<p class="modal-title">Adicionar Jogador</p>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">Digite o nome do amigo que vai participar dos jogos</p>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <input class="input" id="i-nome" placeholder="Nome completo (ex: Nicola Bogar)" autocomplete="off">
+      <div>
+        <p style="color:var(--text-muted);font-size:12px;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Escolha um ícone</p>
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;">
+          ${emojis.map((e,i) => `<button type="button" onclick="selEmoji('${e}',this)" style="font-size:24px;padding:10px;border-radius:12px;border:none;background:${i===0?'rgba(139,92,246,0.3)':'rgba(255,255,255,0.05)'};cursor:pointer;transition:background 0.15s;" ${i===0?'id="sel-emoji-btn"':''}>${e}</button>`).join('')}
+        </div>
+        <input type="hidden" id="i-emoji" value="${emojis[0]}">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button class="btn-ghost" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-primary" onclick="salvarJogador()">Adicionar ✓</button>
+    </div>`);
+});
+
+window.selEmoji = (e, el) => {
+  document.getElementById('i-emoji').value = e;
+  document.querySelectorAll('#modal-body button[type=button]').forEach(b => b.style.background = 'rgba(255,255,255,0.05)');
+  el.style.background = 'rgba(139,92,246,0.3)';
+};
+window.salvarJogador = async () => {
+  const nome = document.getElementById('i-nome').value.trim();
+  if (!nome) { toast('Digite o nome','erro'); return; }
+  await addDoc(collection(db, 'jogadores'), { nome, emoji: document.getElementById('i-emoji').value, criadoEm: serverTimestamp() });
+  fecharModal(); await carregarJogadores(); atualizarDash(); toast(`${document.getElementById('i-emoji').value} ${nome} adicionado! 🎉`);
+};
+
+// ─── AMISTOSOS ───────────────────────────────────────────────────────
+async function carregarAmistosos() {
+  const snap = await getDocs(query(collection(db, 'amistosos'), orderBy('criadoEm', 'desc')));
+  amistosos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderAmistosos();
+}
+
+function cardAmistoso(a, compact=false) {
+  const temRes = a.resultado != null;
+  const diff = temRes ? Math.abs(a.resultado.g1 - a.resultado.g2) : null;
+  const b1 = badgeTime(a.time1?.timeId, a.time1?.nome, a.tipo);
+  const b2 = badgeTime(a.time2?.timeId, a.time2?.nome, a.tipo);
+  return `<div class="match-card" style="margin-bottom:10px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <span style="font-size:11px;color:var(--text-muted);">${fmt(a.criadoEm)} · ${a.tipo === 'selecoes' ? '🌍 Seleções' : '⚽ Clubes'}</span>
+      ${temRes ? `<span class="tag tag-gray">Finalizado</span>` : `<span class="tag tag-purple">🟢 Em Aberto</span>`}
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:6px;">
+      <div style="flex:1;text-align:center;">
+        <div style="display:flex;justify-content:center;margin-bottom:6px;">${b1}</div>
+        <div style="font-weight:800;font-size:13px;line-height:1.2;">${a.time1?.nome || '?'}</div>
+        ${a.time1?.forca ? `<div style="margin:3px 0;">${forcaBadge(a.time1.forca)}</div>` : ''}
+        ${!compact ? `<div style="font-size:10px;color:var(--text-muted);margin-top:2px;">${(a.time1?.jogadores||[]).join(' · ')}</div>` : ''}
+      </div>
+      <div style="text-align:center;min-width:60px;padding-top:36px;">
+        ${temRes
+          ? `<div style="font-size:20px;font-weight:900;letter-spacing:1px;">${a.resultado.g1}<span style="color:var(--text-muted);font-size:12px;"> × </span>${a.resultado.g2}</div>
+             <div style="font-size:10px;color:var(--text-muted);">dif. ${diff}</div>`
+          : `<button onclick="abrirPlacar('${a.id}')" style="background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;padding:8px 10px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">⚽ Placar</button>`}
+      </div>
+      <div style="flex:1;text-align:center;">
+        <div style="display:flex;justify-content:center;margin-bottom:6px;">${b2}</div>
+        <div style="font-weight:800;font-size:13px;line-height:1.2;">${a.time2?.nome || '?'}</div>
+        ${a.time2?.forca ? `<div style="margin:3px 0;">${forcaBadge(a.time2.forca)}</div>` : ''}
+        ${!compact ? `<div style="font-size:10px;color:var(--text-muted);margin-top:2px;">${(a.time2?.jogadores||[]).join(' · ')}</div>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderAmistosos() {
+  const c = document.getElementById('lista-ami');
+  if (!amistosos.length) { c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">Nenhum amistoso registrado</p>'; return; }
+  c.innerHTML = amistosos.map(a => cardAmistoso(a)).join('');
+}
+
+document.getElementById('btn-criar-ami').addEventListener('click', () => {
+  if (jogadores.length < 2) { toast('Cadastre pelo menos 2 jogadores', 'erro'); return; }
+  modal(`<p class="modal-title">Novo Amistoso</p>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">Selecione os jogadores para o sorteio balanceado de times</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+      <div class="tipo-btn sel" id="tp-clubes" onclick="selTipoAmi('clubes')">⚽<br><span style="font-size:12px;font-weight:700;">Clubes</span></div>
+      <div class="tipo-btn" id="tp-selecoes" onclick="selTipoAmi('selecoes')">🌍<br><span style="font-size:12px;font-weight:700;">Seleções</span></div>
+    </div>
+    <input type="hidden" id="ami-tipo" value="clubes">
+    <p style="color:var(--text-muted);font-size:12px;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Jogadores</p>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;" id="ami-jogs">
+      ${jogadores.map(j => `<label class="check-row"><input type="checkbox" class="jc" value="${j.id}" data-nome="${j.nome}"><span style="font-size:20px">${j.emoji||'⚽'}</span><span style="font-weight:700;">${j.nome}</span></label>`).join('')}
+    </div>
+    <div id="ami-sorteio" style="display:none;margin-bottom:16px;"></div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-ghost" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-primary" style="background:linear-gradient(135deg,#7C3AED,#06B6D4);" onclick="sortearAmistoso()">🎲 Sortear</button>
+      <button id="btn-ami-salvar" style="display:none;" class="btn-primary" onclick="salvarAmistoso()">Salvar ✓</button>
+    </div>`);
+});
+
+// ─── INICIAR PARTIDA (botão home) ────────────────────────────────────
+window.iniciarPartida = () => {
+  if (jogadores.length < 2) { toast('Cadastre pelo menos 2 jogadores', 'erro'); return; }
+  modal(`<div style="text-align:center;margin-bottom:20px;">
+    <div style="font-size:48px;margin-bottom:8px;filter:drop-shadow(0 0 16px rgba(139,92,246,0.7))">⚡</div>
+    <p class="modal-title" style="margin-bottom:4px;">Iniciar Partida</p>
+    <p style="color:var(--text-muted);font-size:13px;">Selecione os jogadores e sortearemos os times!</p>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+    <div class="tipo-btn sel" id="tp-clubes" onclick="selTipoAmi('clubes')">⚽<br><span style="font-size:12px;font-weight:700;">Clubes</span></div>
+    <div class="tipo-btn" id="tp-selecoes" onclick="selTipoAmi('selecoes')">🌍<br><span style="font-size:12px;font-weight:700;">Seleções</span></div>
+  </div>
+  <input type="hidden" id="ami-tipo" value="clubes">
+  <p style="color:var(--text-muted);font-size:12px;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Selecionar Jogadores</p>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;" id="ami-jogs">
+    ${jogadores.map(j => `<label class="check-row"><input type="checkbox" class="jc" value="${j.id}" data-nome="${j.nome}"><span style="font-size:22px">${j.emoji||'⚽'}</span><span style="font-weight:700;font-size:15px;">${j.nome}</span></label>`).join('')}
+  </div>
+  <div id="ami-sorteio" style="display:none;margin-bottom:16px;"></div>
+  <div style="display:flex;gap:10px;">
+    <button class="btn-ghost" onclick="fecharModal()">Cancelar</button>
+    <button class="btn-primary" style="background:linear-gradient(135deg,#7C3AED,#06B6D4);" onclick="sortearAmistoso()">🎲 Sortear Times!</button>
+    <button id="btn-ami-salvar" style="display:none;" class="btn-primary" onclick="salvarAmistoso()">Salvar ✓</button>
+  </div>`);
+};
+
+function vsCardTime(t, jogadoresList, pool) {
+  const timeData = pool.find(x => x.id === t.timeId) || {};
+  const isSel = pool === selecoes;
+  const icone = isSel
+    ? `<div style="font-size:36px;line-height:1;margin-bottom:4px;">${timeData.bandeira||t.bandeira||'🌍'}</div>`
+    : `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;margin-bottom:4px;"><span style="font-size:28px;line-height:1;">${timeData.logo||t.logo||'⚽'}</span><span style="font-size:16px;line-height:1;">${timeData.bandeira||t.bandeira||''}</span></div>`;
+  return `<div style="flex:1;text-align:center;">
+    ${icone}
+    <div class="vs-team">${t.nome}</div>
+    <div style="margin:4px 0;">${forcaBadge(t.forca)}</div>
+    ${jogadoresList.map(j => `<div class="vs-label">👤 ${j.nome}</div>`).join('')}
+  </div>`;
+}
+
+function compartilharWhatsApp(sorteio) {
+  const t1 = sorteio.time1, t2 = sorteio.time2;
+  const diff = Math.abs(t1.forca - t2.forca);
+  const eq = diff <= 2 ? '✅ Equilibrado' : diff <= 5 ? '⚠️ Levemente desigual' : '🔴 Desigual';
+  const pool = sorteio.tipo === 'selecoes' ? selecoes : clubes;
+  const td1 = pool.find(x => x.id === t1.timeId) || {};
+  const td2 = pool.find(x => x.id === t2.timeId) || {};
+  const icone1 = sorteio.tipo === 'selecoes' ? (td1.bandeira||'') : `${td1.logo||'⚽'} ${td1.bandeira||''}`;
+  const icone2 = sorteio.tipo === 'selecoes' ? (td2.bandeira||'') : `${td2.logo||'⚽'} ${td2.bandeira||''}`;
+  const texto =
+    `⚽ *FutManager — Nova Partida!*\n\n` +
+    `${icone1} *${t1.nome}*\n` +
+    `👥 ${t1.jogadores.join(', ')}\n` +
+    `💪 Força: ${t1.forca}\n\n` +
+    `⚔️  *VS*  ⚔️\n\n` +
+    `${icone2} *${t2.nome}*\n` +
+    `👥 ${t2.jogadores.join(', ')}\n` +
+    `💪 Força: ${t2.forca}\n\n` +
+    `${eq} (Diferença: ${diff} pts)\n\n` +
+    `📱 _FutManager App_`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+}
+window.compartilharWhatsApp = compartilharWhatsApp;
+
+window.selTipoAmi = tipo => {
+  document.getElementById('ami-tipo').value = tipo;
+  document.getElementById('tp-clubes').classList.toggle('sel', tipo === 'clubes');
+  document.getElementById('tp-selecoes').classList.toggle('sel', tipo === 'selecoes');
+};
+
+let _sorteioAmi = null;
+window.sortearAmistoso = () => {
+  const checks = [...document.querySelectorAll('.jc:checked')];
+  if (checks.length < 2) { toast('Selecione 2+ jogadores', 'erro'); return; }
+  const tipo = document.getElementById('ami-tipo').value;
+  const pool = tipo === 'selecoes' ? selecoes : clubes;
+  const hist = historicoIds(tipo);
+  const [t1, t2] = sortearBalanceado(pool, hist);
+  const jogs = shuffle(checks.map(c => ({ id: c.value, nome: c.dataset.nome })));
+  const meio = Math.ceil(jogs.length / 2);
+  const j1 = jogs.slice(0, meio), j2 = jogs.slice(meio);
+  const diff = Math.abs(t1.forca - t2.forca);
+  const eq = diff <= 2 ? '🟢 Equilibrado' : diff <= 5 ? '🟡 Ligeiramente desigual' : '🔴 Desigual';
+
+  _sorteioAmi = {
+    tipo,
+    time1: { nome: t1.nome, timeId: t1.id, forca: t1.forca, jogadores: j1.map(j => j.nome), jogadoresIds: j1.map(j => j.id) },
+    time2: { nome: t2.nome, timeId: t2.id, forca: t2.forca, jogadores: j2.map(j => j.nome), jogadoresIds: j2.map(j => j.id) },
+  };
+
+  const box = document.getElementById('ami-sorteio');
+  box.style.display = '';
+  box.innerHTML = `<div class="vs-card">
+    <div style="text-align:center;margin-bottom:14px;"><span class="tag tag-green">🎲 Times Sorteados · ${eq}</span></div>
+    <div style="display:flex;align-items:flex-start;gap:8px;">
+      <div style="flex:1;text-align:center;">
+        <div style="display:flex;justify-content:center;margin-bottom:8px;">${badgeTime(t1.id, t1.nome, tipo)}</div>
+        <div class="vs-team">${t1.nome}</div>
+        <div style="margin:4px 0;">${forcaBadge(t1.forca)}</div>
+        ${j1.map(j => `<div class="vs-label" style="margin-top:3px;">👤 ${j.nome}</div>`).join('')}
+      </div>
+      <div class="vs-divider" style="padding-top:28px;"><span class="vs-text">VS</span></div>
+      <div style="flex:1;text-align:center;">
+        <div style="display:flex;justify-content:center;margin-bottom:8px;">${badgeTime(t2.id, t2.nome, tipo)}</div>
+        <div class="vs-team">${t2.nome}</div>
+        <div style="margin:4px 0;">${forcaBadge(t2.forca)}</div>
+        ${j2.map(j => `<div class="vs-label" style="margin-top:3px;">👤 ${j.nome}</div>`).join('')}
+      </div>
+    </div>
+    <div style="margin-top:14px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:4px;"><span>Força ${t1.forca}</span><span>Dif: ${diff} pts</span><span>Força ${t2.forca}</span></div>
+      <div class="balance-bar"><div class="balance-fill" style="left:0;width:${Math.round((t1.forca/(t1.forca+t2.forca))*100)}%;background:linear-gradient(90deg,var(--purple),var(--cyan));"></div></div>
+    </div>
+    <button onclick="compartilharWhatsApp(_sorteioAmi)" style="width:100%;margin-top:14px;background:#25D366;border:none;color:#fff;padding:12px;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+      Compartilhar no WhatsApp
+    </button>
+  </div>`;
+  document.getElementById('btn-ami-salvar').style.display = '';
+};
+
+window.salvarAmistoso = async () => {
+  if (!_sorteioAmi) return;
+  const abertos = amistosos.filter(a => !a.resultado);
+  if (abertos.length >= 5) {
+    toast('Máximo de 5 jogos em aberto! Registre um placar antes de criar novo.', 'erro');
+    return;
+  }
+  await addDoc(collection(db, 'amistosos'), { ..._sorteioAmi, criadoEm: serverTimestamp() });
+  fecharModal(); _sorteioAmi = null;
+  await carregarAmistosos(); atualizarDash(); toast('Amistoso criado! ⚽');
+};
+
+window.abrirPlacar = id => {
+  const a = amistosos.find(x => x.id === id);
+  if (!a) return;
+  modal(`<p class="modal-title">Registrar Placar</p>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+      <div style="flex:1;text-align:center;">
+        <div style="font-weight:800;font-size:14px;margin-bottom:8px;">${a.time1?.nome}</div>
+        ${a.time1?.forca ? forcaBadge(a.time1.forca) : ''}
+        <input id="pg1" type="number" min="0" max="99" value="0" class="input" style="text-align:center;font-size:32px;font-weight:900;padding:12px;margin-top:8px;">
+      </div>
+      <div style="color:var(--text-muted);font-size:28px;font-weight:900;flex-shrink:0;">×</div>
+      <div style="flex:1;text-align:center;">
+        <div style="font-weight:800;font-size:14px;margin-bottom:8px;">${a.time2?.nome}</div>
+        ${a.time2?.forca ? forcaBadge(a.time2.forca) : ''}
+        <input id="pg2" type="number" min="0" max="99" value="0" class="input" style="text-align:center;font-size:32px;font-weight:900;padding:12px;margin-top:8px;">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-ghost" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-primary" onclick="salvarPlacar('${id}')">Salvar ✓</button>
+    </div>`);
+};
+window.salvarPlacar = async id => {
+  const g1 = parseInt(document.getElementById('pg1').value) || 0;
+  const g2 = parseInt(document.getElementById('pg2').value) || 0;
+  await updateDoc(doc(db, 'amistosos', id), { resultado: { g1, g2 } });
+  fecharModal(); await carregarAmistosos(); atualizarDash(); toast('Resultado salvo! 🏆');
+};
+
+// ─── CAMPEONATOS ─────────────────────────────────────────────────────
+async function carregarCampeonatos() {
+  const snap = await getDocs(query(collection(db, 'campeonatos'), orderBy('criadoEm', 'desc')));
+  campeonatos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderCampeonatos();
+}
+
+function renderCampeonatos() {
+  const c = document.getElementById('lista-camp');
+  if (!campeonatos.length) { c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">Nenhum campeonato criado</p>'; return; }
+  c.innerHTML = campeonatos.map(camp => {
+    const meta = CAMP_META[camp.tipo] || { emoji:'🏆', nome: camp.tipo };
+    return `<div class="match-card" style="margin-bottom:10px;cursor:pointer;" onclick="abrirCampeonato('${camp.id}')">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:38px;filter:drop-shadow(0 0 8px rgba(139,92,246,0.5))">${meta.emoji}</span>
+        <div style="flex:1;">
+          <div style="font-weight:800;font-size:16px;">${camp.nome}</div>
+          <div style="color:var(--text-muted);font-size:12px;margin-top:2px;">${meta.nome} · ${camp.participantes?.length||0} jogadores</div>
+        </div>
+        <div style="text-align:right;">
+          <span class="tag ${camp.status==='finalizado'?'tag-gray':'tag-green'}">${camp.status==='finalizado'?'Finalizado':'Em andamento'}</span>
+          <div style="color:var(--text-muted);font-size:20px;margin-top:4px;">›</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('btn-criar-camp').addEventListener('click', () => {
+  if (jogadores.length < 2) { toast('Cadastre pelo menos 2 jogadores', 'erro'); return; }
+  modal(`<p class="modal-title">Novo Campeonato</p>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <input class="input" id="cn" placeholder="Nome do campeonato (ex: Champions 2025)" autocomplete="off">
+      <div>
+        <p style="color:var(--text-muted);font-size:12px;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Formato</p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+          ${Object.entries(CAMP_META).map(([k,v]) => `<div class="tipo-btn" data-ct="${k}" onclick="selCampTipo('${k}',this)" style="font-size:11px;">
+            <div style="font-size:24px;margin-bottom:4px;">${v.emoji}</div>
+            <div style="font-weight:700;line-height:1.2;">${v.nome}</div>
+            <div style="font-size:9px;color:var(--text-muted);margin-top:2px;">${v.tipo==='selecoes'?'Seleções':'Clubes'}</div>
+          </div>`).join('')}
+        </div>
+        <input type="hidden" id="ct" value="champions">
+      </div>
+      <div>
+        <p style="color:var(--text-muted);font-size:12px;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Participantes</p>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${jogadores.map(j => `<label class="check-row"><input type="checkbox" class="cc" value="${j.id}" data-nome="${j.nome}"><span style="font-size:18px">${j.emoji||'⚽'}</span><span style="font-weight:600;">${j.nome}</span></label>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button class="btn-ghost" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-primary" onclick="criarCampeonato()">Criar 🏆</button>
+    </div>`);
+  setTimeout(() => selCampTipo('champions', document.querySelector('[data-ct="champions"]')), 30);
+});
+
+window.selCampTipo = (k, el) => {
+  document.querySelectorAll('[data-ct]').forEach(b => b.classList.remove('sel'));
+  el?.classList.add('sel');
+  document.getElementById('ct').value = k;
+};
+
+window.criarCampeonato = async () => {
+  const nome = document.getElementById('cn').value.trim();
+  const tipo = document.getElementById('ct').value;
+  const checks = [...document.querySelectorAll('.cc:checked')];
+  if (!nome) { toast('Digite o nome', 'erro'); return; }
+  if (checks.length < 2) { toast('Selecione 2+ participantes', 'erro'); return; }
+  const meta = CAMP_META[tipo];
+  const pool = meta.tipo === 'selecoes' ? selecoes : clubes;
+  const hist = historicoIds(meta.tipo);
+  const partic = checks.map(c => ({ jogadorId: c.value, nome: c.dataset.nome }));
+  const distribuidos = distribuirTimesBalanceados(partic, pool, hist);
+  const grupos = gerarGrupos(distribuidos, tipo);
+  await addDoc(collection(db, 'campeonatos'), { nome, tipo, participantes: distribuidos, grupos, fase:'grupos', status:'ativo', criadoEm: serverTimestamp() });
+  fecharModal(); await carregarCampeonatos(); atualizarDash(); toast('Campeonato criado! 🏆');
+};
+
+function gerarGrupos(partic, tipo) {
+  const n = partic.length;
+  const ng = (tipo==='brasileirao'||tipo==='copa-brasil') ? 1 : n<=4?1:n<=8?2:n<=16?4:8;
+  const s = shuffle(partic);
+  return Array.from({length:ng}, (_,g) => ({
+    nome:`Grupo ${String.fromCharCode(65+g)}`,
+    membros: s.filter((_,i)=>i%ng===g).map(p=>({...p,pts:0,vit:0,emp:0,der:0,gp:0,gc:0})),
+    partidas:[]
+  }));
+}
+
+function calcularDisp(g) {
+  const disp = [];
+  for (let i=0;i<g.membros.length;i++) for (let j=i+1;j<g.membros.length;j++) {
+    const m1=g.membros[i],m2=g.membros[j];
+    if (!(g.partidas||[]).some(p=>(p.j1Id===m1.jogadorId&&p.j2Id===m2.jogadorId)||(p.j1Id===m2.jogadorId&&p.j2Id===m1.jogadorId))) disp.push({m1,m2});
+  }
+  return disp;
+}
+
+window.abrirCampeonato = (id) => {
+  const c = campeonatos.find(x=>x.id===id);
+  if (!c) return;
+  const meta = CAMP_META[c.tipo] || {emoji:'🏆',nome:c.tipo};
+  const isSel = CAMP_META[c.tipo]?.tipo === 'selecoes';
+
+  const gruposHTML = (c.grupos||[]).map((g,gi) => {
+    const ord = [...g.membros].sort((a,b)=>b.pts!==a.pts?b.pts-a.pts:(b.gp-b.gc)!==(a.gp-a.gc)?(b.gp-b.gc)-(a.gp-a.gc):b.gp-a.gp);
+    const disp = calcularDisp(g);
+    const totalJogos = g.membros.length*(g.membros.length-1)/2;
+    const jogados = (g.partidas||[]).length;
+
+    // Todos os confrontos do grupo (jogados + pendentes)
+    const todosConf = [];
+    for (let i=0;i<g.membros.length;i++) for (let j=i+1;j<g.membros.length;j++) todosConf.push({m1:g.membros[i],m2:g.membros[j]});
+
+    const jogosHTML = todosConf.map(({m1,m2}) => {
+      const played = (g.partidas||[]).find(p=>(p.j1Id===m1.jogadorId&&p.j2Id===m2.jogadorId)||(p.j1Id===m2.jogadorId&&p.j2Id===m1.jogadorId));
+      const b1 = isSel ? badgeSel(m1.time?.id||'', m1.time?.nome||'') : badgeClube(m1.time?.id||'', m1.time?.nome||'');
+      const b2 = isSel ? badgeSel(m2.time?.id||'', m2.time?.nome||'') : badgeClube(m2.time?.id||'', m2.time?.nome||'');
+      if (played) {
+        const g1r = played.j1Id===m1.jogadorId ? played.g1 : played.g2;
+        const g2r = played.j1Id===m1.jogadorId ? played.g2 : played.g1;
+        return `<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:10px;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="flex:1;text-align:center;">
+              <div style="display:flex;justify-content:center;margin-bottom:4px;transform:scale(0.8);transform-origin:top center;">${b1}</div>
+              <div style="font-size:11px;font-weight:700;line-height:1.2;">${m1.nome}</div>
+              <div style="font-size:10px;color:var(--text-muted);">${m1.time?.nome||'?'}</div>
+            </div>
+            <div style="text-align:center;min-width:52px;">
+              <div style="font-size:18px;font-weight:900;color:var(--cyan);">${g1r} × ${g2r}</div>
+              <span class="tag tag-gray" style="font-size:9px;">Finalizado</span>
+            </div>
+            <div style="flex:1;text-align:center;">
+              <div style="display:flex;justify-content:center;margin-bottom:4px;transform:scale(0.8);transform-origin:top center;">${b2}</div>
+              <div style="font-size:11px;font-weight:700;line-height:1.2;">${m2.nome}</div>
+              <div style="font-size:10px;color:var(--text-muted);">${m2.time?.nome||'?'}</div>
+            </div>
+          </div>
+        </div>`;
+      } else {
+        return `<div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.25);border-radius:12px;padding:10px;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="flex:1;text-align:center;">
+              <div style="display:flex;justify-content:center;margin-bottom:4px;transform:scale(0.8);transform-origin:top center;">${b1}</div>
+              <div style="font-size:11px;font-weight:700;line-height:1.2;">${m1.nome}</div>
+              <div style="font-size:10px;color:var(--text-muted);">${m1.time?.nome||'?'}</div>
+            </div>
+            <div style="text-align:center;min-width:52px;">
+              <div style="font-size:13px;font-weight:900;color:var(--text-muted);margin-bottom:4px;">VS</div>
+              <button onclick="regPartida('${c.id}',${gi},'${m1.jogadorId}','${m2.jogadorId}')" style="background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;padding:6px 10px;border-radius:8px;font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap;">⚽ Jogar</button>
+            </div>
+            <div style="flex:1;text-align:center;">
+              <div style="display:flex;justify-content:center;margin-bottom:4px;transform:scale(0.8);transform-origin:top center;">${b2}</div>
+              <div style="font-size:11px;font-weight:700;line-height:1.2;">${m2.nome}</div>
+              <div style="font-size:10px;color:var(--text-muted);">${m2.time?.nome||'?'}</div>
+            </div>
+          </div>
+        </div>`;
+      }
+    }).join('');
+
+    return `<div style="background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:16px;padding:14px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <p style="font-weight:800;font-size:15px;">${g.nome}</p>
+        <span class="tag ${disp.length===0?'tag-green':'tag-purple'}">${disp.length===0?'✅ Concluído':`${jogados}/${totalJogos} jogos`}</span>
+      </div>
+      <table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:14px;">
+        <tr style="color:var(--text-muted)">
+          <td style="padding:0 2px 6px;">Pos</td><td style="padding:0 2px 6px;">Jogador</td>
+          <td style="text-align:center;padding:0 2px 6px;">J</td><td style="text-align:center;padding:0 2px 6px;">V</td>
+          <td style="text-align:center;padding:0 2px 6px;">E</td><td style="text-align:center;padding:0 2px 6px;">D</td>
+          <td style="text-align:center;padding:0 2px 6px;">SG</td><td style="text-align:center;padding:0 2px 6px;font-weight:800;">Pts</td>
+        </tr>
+        ${ord.map((m,i)=>`<tr style="border-top:1px solid rgba(255,255,255,0.04);color:${i<2?'var(--cyan)':'var(--text)'}">
+          <td style="padding:5px 2px;">${i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}°`}</td>
+          <td style="padding:5px 2px;font-weight:700;font-size:11px;">${m.nome}<div style="font-size:9px;color:var(--text-muted);font-weight:400;">${m.time?.nome||'?'}</div></td>
+          <td style="text-align:center;padding:5px 2px;">${m.vit+m.emp+m.der}</td>
+          <td style="text-align:center;padding:5px 2px;">${m.vit}</td>
+          <td style="text-align:center;padding:5px 2px;">${m.emp}</td>
+          <td style="text-align:center;padding:5px 2px;">${m.der}</td>
+          <td style="text-align:center;padding:5px 2px;">${m.gp-m.gc>0?'+':''}${m.gp-m.gc}</td>
+          <td style="text-align:center;padding:5px 2px;font-weight:900;color:var(--yellow);">${m.pts}</td>
+        </tr>`).join('')}
+      </table>
+      <p style="color:var(--text-muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">📅 Jogos do Grupo</p>
+      ${jogosHTML}
+    </div>`;
+  }).join('');
+
+  modal(`<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+    <span style="font-size:44px;filter:drop-shadow(0 0 12px rgba(139,92,246,0.6))">${meta.emoji}</span>
+    <div><h3 style="font-size:19px;font-weight:900;">${c.nome}</h3><p style="color:var(--text-muted);font-size:13px;">${meta.nome} · ${c.participantes?.length} participantes</p></div>
+  </div>
+  <p class="sec-title">🎽 Times Sorteados</p>
+  <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px;">
+    ${(c.participantes||[]).map(p=>`<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:10px 14px;">
+      ${isSel ? badgeSel(p.time?.id||'',p.time?.nome||'') : badgeClube(p.time?.id||'',p.time?.nome||'')}
+      <div style="flex:1;"><div style="font-weight:700;">${p.nome}</div><div style="font-size:12px;color:var(--text-dim);">${p.time?.nome||'?'} ${p.time?.forca?`· ${forcaBadge(p.time.forca)}`:''}</div></div>
+    </div>`).join('')}
+  </div>
+  <p class="sec-title">📊 Grupos</p>
+  ${gruposHTML}
+  <button class="btn-ghost" onclick="fecharModal()" style="margin-top:8px;">Fechar</button>`);
+};
+
+window.regPartida = (cid, gi, j1Id, j2Id) => {
+  const c = campeonatos.find(x=>x.id===cid);
+  if (!c) return;
+  const g = c.grupos[gi];
+  const m1 = g.membros.find(m=>m.jogadorId===j1Id);
+  const m2 = g.membros.find(m=>m.jogadorId===j2Id);
+  if (!m1||!m2) return;
+  _disponiveis = [{m1,m2}];
+  const isSel = CAMP_META[c.tipo]?.tipo === 'selecoes';
+  const b1 = isSel ? badgeSel(m1.time?.id||'',m1.time?.nome||'') : badgeClube(m1.time?.id||'',m1.time?.nome||'');
+  const b2 = isSel ? badgeSel(m2.time?.id||'',m2.time?.nome||'') : badgeClube(m2.time?.id||'',m2.time?.nome||'');
+  modal(`<p class="modal-title" style="margin-bottom:4px;">⚽ Registrar Placar</p>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">${g.nome} · ${c.nome}</p>
+    <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:24px;">
+      <div style="flex:1;text-align:center;">
+        <div style="display:flex;justify-content:center;margin-bottom:8px;">${b1}</div>
+        <div style="font-weight:800;font-size:14px;">${m1.nome}</div>
+        <div style="font-size:11px;color:var(--text-muted);">${m1.time?.nome||'?'}</div>
+        <input id="rg1" type="number" min="0" max="99" value="0" class="input" style="text-align:center;font-size:40px;font-weight:900;padding:14px;margin-top:12px;">
+      </div>
+      <div style="color:var(--text-muted);font-size:32px;font-weight:900;padding-top:80px;flex-shrink:0;">×</div>
+      <div style="flex:1;text-align:center;">
+        <div style="display:flex;justify-content:center;margin-bottom:8px;">${b2}</div>
+        <div style="font-weight:800;font-size:14px;">${m2.nome}</div>
+        <div style="font-size:11px;color:var(--text-muted);">${m2.time?.nome||'?'}</div>
+        <input id="rg2" type="number" min="0" max="99" value="0" class="input" style="text-align:center;font-size:40px;font-weight:900;padding:14px;margin-top:12px;">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-ghost" onclick="abrirCampeonato('${cid}')">Voltar</button>
+      <button class="btn-primary" onclick="salvarPartida('${cid}',${gi})">Salvar Resultado ✓</button>
+    </div>`);
+};
+
+window.salvarPartida = async (cid, gi) => {
+  const c = campeonatos.find(x=>x.id===cid);
+  if (!c) return;
+  const {m1,m2} = _disponiveis[0];
+  const g1 = parseInt(document.getElementById('rg1').value)||0;
+  const g2 = parseInt(document.getElementById('rg2').value)||0;
+  const grupos = c.grupos.map((g,idx) => {
+    if (idx!==gi) return g;
+    const membros = g.membros.map(m => {
+      const mm={...m};
+      if (m.jogadorId===m1.jogadorId) { mm.gp+=g1;mm.gc+=g2;mm.vit+=g1>g2?1:0;mm.emp+=g1===g2?1:0;mm.der+=g1<g2?1:0;mm.pts+=g1>g2?3:g1===g2?1:0; }
+      else if (m.jogadorId===m2.jogadorId) { mm.gp+=g2;mm.gc+=g1;mm.vit+=g2>g1?1:0;mm.emp+=g1===g2?1:0;mm.der+=g2<g1?1:0;mm.pts+=g2>g1?3:g1===g2?1:0; }
+      return mm;
+    });
+    return {...g,membros,partidas:[...(g.partidas||[]),{j1Id:m1.jogadorId,j1Nome:m1.nome,j2Id:m2.jogadorId,j2Nome:m2.nome,g1,g2}]};
+  });
+  await updateDoc(doc(db,'campeonatos',cid),{grupos});
+  await carregarCampeonatos(); atualizarDash(); toast('Partida registrada! ⚽'); abrirCampeonato(cid);
+};
+
+// ─── RANKING ─────────────────────────────────────────────────────────
+function calcularRanking() {
+  const s = {};
+  jogadores.forEach(j => { s[j.id]={nome:j.nome,emoji:j.emoji||'⚽',vit:0,emp:0,der:0,gp:0,gc:0,pts:0,j:0}; });
+  amistosos.forEach(a => {
+    if (!a.resultado) return;
+    const {g1,g2}=a.resultado;
+    const add=(ids,gf,gc)=>ids?.forEach(id=>{if(!s[id])return;s[id].gp+=gf;s[id].gc+=gc;s[id].j++;s[id].vit+=gf>gc?1:0;s[id].emp+=gf===gc?1:0;s[id].der+=gf<gc?1:0;s[id].pts+=gf>gc?3:gf===gc?1:0;});
+    add(a.time1?.jogadoresIds,g1,g2); add(a.time2?.jogadoresIds,g2,g1);
+  });
+  campeonatos.forEach(c=>(c.grupos||[]).forEach(g=>g.membros.forEach(m=>{if(!s[m.jogadorId])return;s[m.jogadorId].pts+=m.pts;s[m.jogadorId].vit+=m.vit;s[m.jogadorId].emp+=m.emp;s[m.jogadorId].der+=m.der;s[m.jogadorId].gp+=m.gp;s[m.jogadorId].gc+=m.gc;s[m.jogadorId].j+=m.vit+m.emp+m.der;})));
+  return Object.values(s).filter(x=>x.j>0).sort((a,b)=>b.pts!==a.pts?b.pts-a.pts:(b.gp-b.gc)!==(a.gp-a.gc)?(b.gp-b.gc)-(a.gp-a.gc):b.gp-a.gp);
+}
+
+function renderRanking(rank) {
+  const medals=['🥇','🥈','🥉'];
+  const html = rank.length===0?'<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">Nenhuma partida registrada</p>'
+    :rank.map((p,i)=>`<div style="display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:14px;margin-bottom:8px;">
+      <div class="rank-pos">${medals[i]||`${i+1}°`}</div>
+      <div style="font-size:28px;">${p.emoji}</div>
+      <div style="flex:1;">
+        <div style="font-weight:800;font-size:15px;">${p.nome}</div>
+        <div style="color:var(--text-muted);font-size:11px;margin-top:2px;">${p.j} jogos · ${p.vit}V ${p.emp}E ${p.der}D · ${p.gp}:${p.gc}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:22px;font-weight:900;" class="grad">${p.pts}</div>
+        <div style="color:var(--text-muted);font-size:10px;">pontos</div>
+      </div>
+    </div>`).join('');
+  document.getElementById('lista-rank').innerHTML = html;
+  document.getElementById('home-ranking').innerHTML = rank.slice(0,3).length===0?'<p style="color:var(--text-muted);text-align:center;padding:16px 0;font-size:14px;">Nenhuma partida ainda</p>'
+    :rank.slice(0,3).map((p,i)=>`<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:12px;margin-bottom:8px;">
+      <span style="font-size:18px;">${medals[i]}</span><span style="font-size:22px;">${p.emoji}</span>
+      <span style="font-weight:700;flex:1;font-size:14px;">${p.nome}</span>
+      <span style="font-weight:900;font-size:15px;" class="grad">${p.pts} pts</span>
+    </div>`).join('');
+}
+
+function atualizarDash() {
+  document.getElementById('s-jog').textContent = jogadores.length;
+  document.getElementById('s-ami').textContent = amistosos.length;
+  document.getElementById('s-cam').textContent = campeonatos.length;
+  const par = amistosos.filter(a=>a.resultado).length + campeonatos.reduce((s,c)=>s+(c.grupos||[]).reduce((ss,g)=>ss+(g.partidas||[]).length,0),0);
+  document.getElementById('s-par').textContent = par;
+  renderRanking(calcularRanking());
+
+  // Jogos em aberto na home
+  const abertos = amistosos.filter(a => !a.resultado);
+  const sec = document.getElementById('home-abertos-sec');
+  const el  = document.getElementById('home-abertos');
+  if (abertos.length > 0) {
+    sec.style.display = '';
+    el.innerHTML = abertos.slice(0,5).map(a => cardAmistoso(a, true)).join('');
+  } else {
+    sec.style.display = 'none';
+  }
+}
+
+// ─── GERENCIAR TIMES ─────────────────────────────────────────────────
+window.filtrarTimes = tipo => {
+  abaTimesAtual = tipo;
+  document.getElementById('tab-clubes').style.background = tipo==='clubes'?'var(--purple)':'none';
+  document.getElementById('tab-clubes').style.color = tipo==='clubes'?'#fff':'var(--text-muted)';
+  document.getElementById('tab-selecoes').style.background = tipo==='selecoes'?'var(--purple)':'none';
+  document.getElementById('tab-selecoes').style.color = tipo==='selecoes'?'#fff':'var(--text-muted)';
+  renderTimesEdit();
+};
+
+function renderTimesEdit() {
+  const pool = abaTimesAtual === 'clubes' ? clubes : selecoes;
+  const isSel = abaTimesAtual === 'selecoes';
+  const el = document.getElementById('lista-times-edit');
+  el.innerHTML = pool.map(t => {
+    const badge = isSel ? badgeSel(t.id, t.nome) : badgeClube(t.id, t.nome);
+    return `
+    <div class="entity-card" style="margin-bottom:8px;align-items:flex-start;gap:14px;">
+      ${badge}
+      <div style="flex:1;">
+        <div style="font-weight:800;font-size:15px;">${t.nome}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${t.liga||''}</div>
+        <div style="margin-top:6px;display:flex;align-items:center;gap:8px;">
+          ${forcaBadge(t.forca)}
+          <div style="flex:1;max-width:80px;">${forcaRating(t.forca)}</div>
+        </div>
+      </div>
+      <button onclick="excluirTime('${t.id}')" style="background:rgba(239,68,68,0.12);border:none;color:#FCA5A5;border-radius:10px;padding:8px 12px;cursor:pointer;font-size:13px;flex-shrink:0;">🗑️</button>
+    </div>`}).join('');
+}
+
+document.getElementById('btn-add-time').addEventListener('click', () => {
+  modal(`<p class="modal-title">Adicionar Time</p>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div class="tipo-btn sel" id="nt-c" onclick="selTipoTime('clube')">⚽<br><span style="font-size:12px;font-weight:700;">Clube</span></div>
+        <div class="tipo-btn" id="nt-s" onclick="selTipoTime('selecao')">🌍<br><span style="font-size:12px;font-weight:700;">Seleção</span></div>
+      </div>
+      <input type="hidden" id="nt-tipo" value="clube">
+      <input class="input" id="nt-nome" placeholder="Nome do time" autocomplete="off">
+      <input class="input" id="nt-bandeira" placeholder="Bandeira/Emoji (ex: 🇧🇷)">
+      <input class="input" id="nt-liga" placeholder="Liga/Confederação (ex: La Liga)">
+      <div>
+        <label style="display:flex;justify-content:space-between;align-items:center;color:var(--text-muted);font-size:12px;margin-bottom:8px;"><span>FORÇA (EA FC 26)</span><span id="nt-forca-val" style="color:var(--cyan);font-weight:800;">80</span></label>
+        <input type="range" id="nt-forca" min="60" max="92" value="80" style="width:100%;accent-color:var(--purple);" oninput="document.getElementById('nt-forca-val').textContent=this.value">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button class="btn-ghost" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-primary" onclick="salvarNovoTime()">Adicionar ✓</button>
+    </div>`);
+});
+
+window.selTipoTime = tipo => {
+  document.getElementById('nt-tipo').value = tipo;
+  document.getElementById('nt-c').classList.toggle('sel', tipo==='clube');
+  document.getElementById('nt-s').classList.toggle('sel', tipo==='selecao');
+};
+
+window.salvarNovoTime = async () => {
+  const nome = document.getElementById('nt-nome').value.trim();
+  if (!nome) { toast('Digite o nome', 'erro'); return; }
+  const novoTime = {
+    id: nome.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'') + '-' + Date.now(),
+    nome, tipo: document.getElementById('nt-tipo').value,
+    bandeira: document.getElementById('nt-bandeira').value || '🏆',
+    liga: document.getElementById('nt-liga').value,
+    forca: parseInt(document.getElementById('nt-forca').value)
+  };
+  await setDoc(doc(db, 'times', novoTime.id), novoTime);
+  await carregarTimes();
+  fecharModal(); renderTimesEdit(); toast('Time adicionado! ✓');
+};
+
+window.excluirTime = async id => {
+  const pool = abaTimesAtual === 'clubes' ? clubes : selecoes;
+  const t = pool.find(x => x.id === id);
+  modal(`<p class="modal-title">Remover Time?</p>
+    <p style="color:var(--text-muted);margin-bottom:24px;">Deseja remover <strong style="color:var(--text)">${t?.nome}</strong>?</p>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-ghost" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);" onclick="confirmarExcluirTime('${id}')">Remover</button>
+    </div>`);
+};
+
+window.confirmarExcluirTime = async id => {
+  await setDoc(doc(db,'times',id+'_del'),{id,_deleted:true});
+  await carregarTimes(); fecharModal(); renderTimesEdit(); toast('Time removido');
+};
+
+// ─── SERVICE WORKER ──────────────────────────────────────────────────
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body>
 </html>
