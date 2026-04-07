@@ -1298,11 +1298,12 @@ function cardAmistoso(a, compact=false) {
         <div style="flex:1;min-width:0;">
           <div style="font-weight:800;font-size:14px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.time1?.nome || '?'}</div>
           ${a.time1?.forca ? `<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">FORCA ${a.time1.forca}</div>` : ''}
+          ${(a.time1?.jogadores||[]).length ? `<div style="font-size:10px;color:var(--cyan);margin-top:2px;font-weight:700;">${(a.time1.jogadores).join(' · ')}</div>` : ''}
         </div>
       </div>
       <div style="flex-shrink:0;text-align:center;">
         ${temRes
-          ? `<div style="font-size:18px;font-weight:900;letter-spacing:0.5px;">${a.resultado.g1}<span style="color:var(--text-muted);font-size:11px;"> × </span>${a.resultado.g2}</div>`
+          ? `<div style="font-size:20px;font-weight:900;letter-spacing:0.5px;">${a.resultado.g1}<span style="color:var(--text-muted);font-size:12px;"> × </span>${a.resultado.g2}</div>`
           : `<div style="display:flex;align-items:center;gap:3px;">
               <input type="number" min="0" max="99" value="0" id="pdc1-${a.id}" class="placar-input" onclick="event.stopPropagation()" style="width:32px;text-align:center;font-size:16px;font-weight:900;padding:4px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:6px;color:var(--text);-moz-appearance:textfield;">
               <span style="color:var(--text-muted);font-size:11px;font-weight:900;">×</span>
@@ -1315,24 +1316,29 @@ function cardAmistoso(a, compact=false) {
         <div style="flex:1;min-width:0;text-align:right;">
           <div style="font-weight:800;font-size:14px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.time2?.nome || '?'}</div>
           ${a.time2?.forca ? `<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">FORCA ${a.time2.forca}</div>` : ''}
+          ${(a.time2?.jogadores||[]).length ? `<div style="font-size:10px;color:var(--cyan);margin-top:2px;font-weight:700;">${(a.time2.jogadores).join(' · ')}</div>` : ''}
         </div>
       </div>
     </div>` : `
-    <div style="display:flex;align-items:flex-start;gap:6px;">
+    <div style="display:flex;align-items:flex-start;gap:8px;">
       <div style="flex:1;text-align:center;">
+        <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;">${a.time1?.nome || '?'}</div>
         <div style="display:flex;justify-content:center;margin-bottom:6px;">${b1}</div>
-        <div style="font-weight:800;font-size:15px;line-height:1.2;">${a.time1?.nome || '?'}</div>
-        ${a.time1?.forca ? `<div style="margin:3px 0;">${forcaBadge(a.time1.forca)}</div>` : ''}
-        <div style="font-size:11px;color:var(--cyan);margin-top:4px;font-weight:600;">${(a.time1?.jogadores||[]).join(' · ')}</div>
+        ${a.time1?.forca ? `<div style="margin:4px 0;">${forcaBadge(a.time1.forca)}</div>` : ''}
+        ${(a.time1?.jogadores||[]).length
+          ? `<div style="margin-top:6px;">${(a.time1.jogadores).map(n=>`<div style="font-size:12px;color:var(--cyan);font-weight:700;line-height:1.6;">${n}</div>`).join('')}</div>`
+          : ''}
       </div>
-      <div style="text-align:center;min-width:70px;padding-top:30px;">
+      <div style="text-align:center;min-width:70px;padding-top:20px;">
         ${placarDireto}
       </div>
       <div style="flex:1;text-align:center;">
+        <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;">${a.time2?.nome || '?'}</div>
         <div style="display:flex;justify-content:center;margin-bottom:6px;">${b2}</div>
-        <div style="font-weight:800;font-size:15px;line-height:1.2;">${a.time2?.nome || '?'}</div>
-        ${a.time2?.forca ? `<div style="margin:3px 0;">${forcaBadge(a.time2.forca)}</div>` : ''}
-        <div style="font-size:11px;color:var(--cyan);margin-top:4px;font-weight:600;">${(a.time2?.jogadores||[]).join(' · ')}</div>
+        ${a.time2?.forca ? `<div style="margin:4px 0;">${forcaBadge(a.time2.forca)}</div>` : ''}
+        ${(a.time2?.jogadores||[]).length
+          ? `<div style="margin-top:6px;">${(a.time2.jogadores).map(n=>`<div style="font-size:12px;color:var(--cyan);font-weight:700;line-height:1.6;">${n}</div>`).join('')}</div>`
+          : ''}
       </div>
     </div>`}
   </div>`;
@@ -1930,8 +1936,9 @@ window.criarCampeonato = async () => {
   const nome = document.getElementById('cn').value.trim();
   const tipo = document.getElementById('ct').value;
   const checks = [...document.querySelectorAll('.cc:checked')];
-  if (!nome) { toast('Digite o nome', 'erro'); return; }
-  if (checks.length < 2) { toast('Selecione 2+ participantes', 'erro'); return; }
+  if (!nome) { toast('DIGITE O NOME DO CAMPEONATO', 'erro'); return; }
+  if (campeonatos.some(c => c.nome.trim().toLowerCase() === nome.toLowerCase())) { toast('JA EXISTE UM TORNEIO COM ESSE NOME', 'erro'); return; }
+  if (checks.length < 2) { toast('SELECIONE 2+ PARTICIPANTES', 'erro'); return; }
   const meta = CAMP_META[tipo];
   const isManual = document.getElementById('manual-times')?.checked;
   const hist = historicoIds(meta.tipo);
