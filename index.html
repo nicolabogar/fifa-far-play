@@ -131,6 +131,23 @@
     .tag-yellow { background: rgba(245,158,11,0.2); color: #FCD34D; }
     .tag-gray { background: rgba(100,116,139,0.2); color: #94A3B8; }
     .tag-red { background: rgba(239,68,68,0.2); color: #FCA5A5; }
+    /* ── Agrupadores ── */
+    .grupo-header { display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:14px;cursor:pointer;margin-bottom:8px;user-select:none; }
+    .grupo-header:hover { background:rgba(255,255,255,0.07); }
+    .grupo-header .grupo-titulo { font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.07em; }
+    .grupo-header .grupo-seta { font-size:14px;color:var(--text-muted);transition:transform 0.25s;display:inline-block; }
+    .grupo-header.aberto .grupo-seta { transform:rotate(90deg); }
+    .grupo-body { overflow:hidden;transition:max-height 0.3s ease; }
+    .grupo-body.fechado { display:none; }
+    /* ── Filtros ── */
+    .filtro-row { display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px; }
+    .filtro-btn { padding:5px 12px;border-radius:20px;border:1px solid var(--card-border);background:rgba(255,255,255,0.04);color:var(--text-muted);font-size:11px;font-weight:700;cursor:pointer;text-transform:uppercase; }
+    .filtro-btn.ativo { border-color:var(--purple);background:rgba(139,92,246,0.15);color:#A78BFA; }
+    /* ── Paginação ── */
+    .pag-row { display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px; }
+    .pag-btn { padding:6px 14px;border-radius:10px;border:1px solid var(--card-border);background:rgba(255,255,255,0.05);color:var(--text-muted);font-size:12px;font-weight:700;cursor:pointer; }
+    .pag-btn:disabled { opacity:0.3;cursor:default; }
+    .pag-info { font-size:11px;color:var(--text-muted); }
 
     /* Rating bar */
     .rating-bar { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
@@ -1344,12 +1361,107 @@ window.cancelarExcluirJogo = (btn) => {
   if (banner) banner.remove();
 };
 
+// ── Estado dos filtros/paginação de finalizados ──
+const _amiState = { filtroTipo: 'todos', pag: 0 };
+const _PAG_SIZE = 10;
+
 function renderAmistosos() {
   const c = document.getElementById('lista-ami');
-  if (!amistosos.length) { c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">NENHUMA PARTIDA REGISTRADA</p>'; return; }
-  c.innerHTML = amistosos.map(a => wrapSwipeAmistoso(a, cardAmistoso(a))).join('');
-  initSwipe(c, 'amistoso');
+  if (!amistosos.length) {
+    c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">NENHUMA PARTIDA REGISTRADA</p>';
+    return;
+  }
+
+  const abertos = amistosos.filter(a => !a.resultado);
+  const finalizados = amistosos.filter(a => a.resultado != null);
+
+  let html = '';
+
+  // ── EM ANDAMENTO ──
+  if (abertos.length) {
+    html += `<div class="grupo-header aberto" onclick="toggleGrupo(this)">
+      <span class="grupo-titulo" style="color:var(--cyan);">EM ANDAMENTO <span style="color:var(--text-muted);font-weight:600;">(${abertos.length})</span></span>
+      <span class="grupo-seta">›</span>
+    </div>
+    <div class="grupo-body" id="grupo-ami-abertos">
+      ${abertos.map(a => wrapSwipeAmistoso(a, cardAmistoso(a))).join('')}
+    </div>`;
+  }
+
+  // ── FINALIZADOS ──
+  if (finalizados.length) {
+    html += `<div class="grupo-header" onclick="toggleGrupo(this)" style="margin-top:${abertos.length?'12':'0'}px;">
+      <span class="grupo-titulo" style="color:var(--text-muted);">FINALIZADOS <span style="color:var(--text-muted);font-weight:600;">(${finalizados.length})</span></span>
+      <span class="grupo-seta">›</span>
+    </div>
+    <div class="grupo-body fechado" id="grupo-ami-finalizados">
+      <div class="filtro-row" id="ami-filtros">
+        <button class="filtro-btn ${_amiState.filtroTipo==='todos'?'ativo':''}" onclick="_filtrarAmi('todos')">TODOS</button>
+        <button class="filtro-btn ${_amiState.filtroTipo==='clubes'?'ativo':''}" onclick="_filtrarAmi('clubes')">CLUBES</button>
+        <button class="filtro-btn ${_amiState.filtroTipo==='selecoes'?'ativo':''}" onclick="_filtrarAmi('selecoes')">SELECOES</button>
+      </div>
+      <div id="ami-fin-lista"></div>
+      <div class="pag-row" id="ami-fin-pag"></div>
+    </div>`;
+  }
+
+  c.innerHTML = html;
+
+  // Inicializa swipe nos abertos
+  const grupoAbertos = document.getElementById('grupo-ami-abertos');
+  if (grupoAbertos) initSwipe(grupoAbertos, 'amistoso');
+
+  // Renderiza finalizados
+  _renderFinalizadosAmi();
 }
+
+window.toggleGrupo = (header) => {
+  header.classList.toggle('aberto');
+  const body = header.nextElementSibling;
+  body.classList.toggle('fechado');
+};
+
+window._filtrarAmi = (tipo) => {
+  _amiState.filtroTipo = tipo;
+  _amiState.pag = 0;
+  document.querySelectorAll('#ami-filtros .filtro-btn').forEach(b => {
+    b.classList.toggle('ativo', b.textContent.trim() === tipo.toUpperCase() || (tipo==='todos' && b.textContent.trim()==='TODOS'));
+  });
+  _renderFinalizadosAmi();
+};
+
+function _renderFinalizadosAmi() {
+  const lista = document.getElementById('ami-fin-lista');
+  const pagRow = document.getElementById('ami-fin-pag');
+  if (!lista) return;
+
+  let dados = amistosos.filter(a => a.resultado != null);
+  if (_amiState.filtroTipo !== 'todos') dados = dados.filter(a => a.tipo === _amiState.filtroTipo);
+
+  const total = dados.length;
+  const totalPags = Math.ceil(total / _PAG_SIZE);
+  const pag = Math.min(_amiState.pag, Math.max(0, totalPags - 1));
+  _amiState.pag = pag;
+  const slice = dados.slice(pag * _PAG_SIZE, (pag + 1) * _PAG_SIZE);
+
+  lista.innerHTML = slice.length
+    ? slice.map(a => cardAmistoso(a)).join('')
+    : '<p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:13px;">NENHUMA PARTIDA COM ESSE FILTRO</p>';
+
+  if (totalPags > 1) {
+    pagRow.innerHTML = `
+      <button class="pag-btn" onclick="_pagAmi(-1)" ${pag===0?'disabled':''}>ANTERIOR</button>
+      <span class="pag-info">${pag+1} / ${totalPags}</span>
+      <button class="pag-btn" onclick="_pagAmi(1)" ${pag>=totalPags-1?'disabled':''}>PROXIMA</button>`;
+  } else {
+    pagRow.innerHTML = '';
+  }
+}
+
+window._pagAmi = (dir) => {
+  _amiState.pag += dir;
+  _renderFinalizadosAmi();
+};
 
 function wrapSwipeAmistoso(a, cardHtml) {
   const nomeJogo = `${a.time1?.nome||'?'} vs ${a.time2?.nome||'?'}`;
@@ -1561,26 +1673,109 @@ async function carregarCampeonatos() {
   renderCampeonatos();
 }
 
-function renderCampeonatos() {
-  const c = document.getElementById('lista-camp');
-  if (!campeonatos.length) { c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">Nenhum campeonato criado</p>'; return; }
-  c.innerHTML = campeonatos.map(camp => {
-    const meta = CAMP_META[camp.tipo] || { emoji:'🏆', nome: camp.tipo };
-    return `<div class="match-card" style="margin-bottom:10px;cursor:pointer;" onclick="abrirCampeonato('${camp.id}')">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <span style="font-size:38px;filter:drop-shadow(0 0 8px rgba(139,92,246,0.5))">${meta.emoji}</span>
-        <div style="flex:1;">
-          <div style="font-weight:800;font-size:16px;">${camp.nome}</div>
-          <div style="color:var(--text-muted);font-size:12px;margin-top:2px;">${meta.nome} · ${camp.participantes?.length||0} jogadores</div>
-        </div>
-        <div style="text-align:right;">
-          <span class="tag ${camp.status==='finalizado'?'tag-gray':'tag-green'}">${camp.status==='finalizado'?'Finalizado':'Em andamento'}</span>
-          <div style="color:var(--text-muted);font-size:20px;margin-top:4px;">›</div>
+const _campState = { filtroTipo: 'todos', pag: 0 };
+
+function _cardCampeonato(camp) {
+  const meta = CAMP_META[camp.tipo] || { emoji:'🏆', nome: camp.tipo };
+  return `<div class="match-card" style="margin-bottom:10px;cursor:pointer;" onclick="abrirCampeonato('${camp.id}')">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-size:34px;">${meta.emoji}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${camp.nome}</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+          <span class="tag tag-purple" style="font-size:9px;">${meta.nome.toUpperCase()}</span>
+          <span class="tag tag-gray" style="font-size:9px;">${camp.participantes?.length||0} JOGADORES</span>
         </div>
       </div>
-    </div>`;
-  }).join('');
+      <div style="color:var(--text-muted);font-size:22px;flex-shrink:0;">›</div>
+    </div>
+  </div>`;
 }
+
+function renderCampeonatos() {
+  const c = document.getElementById('lista-camp');
+  if (!campeonatos.length) { c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">NENHUM TORNEIO CRIADO</p>'; return; }
+
+  const andamento = campeonatos.filter(camp => camp.status !== 'finalizado');
+  const finalizados = campeonatos.filter(camp => camp.status === 'finalizado');
+  let html = '';
+
+  // ── EM ANDAMENTO ──
+  if (andamento.length) {
+    html += `<div class="grupo-header aberto" onclick="toggleGrupo(this)">
+      <span class="grupo-titulo" style="color:var(--cyan);">EM ANDAMENTO <span style="color:var(--text-muted);font-weight:600;">(${andamento.length})</span></span>
+      <span class="grupo-seta">›</span>
+    </div>
+    <div class="grupo-body" id="grupo-camp-andamento">
+      ${andamento.map(camp => _cardCampeonato(camp)).join('')}
+    </div>`;
+  }
+
+  // ── FINALIZADOS ──
+  if (finalizados.length) {
+    html += `<div class="grupo-header" onclick="toggleGrupo(this)" style="margin-top:${andamento.length?'12':'0'}px;">
+      <span class="grupo-titulo" style="color:var(--text-muted);">FINALIZADOS <span style="color:var(--text-muted);font-weight:600;">(${finalizados.length})</span></span>
+      <span class="grupo-seta">›</span>
+    </div>
+    <div class="grupo-body fechado" id="grupo-camp-finalizados">
+      <div class="filtro-row" id="camp-filtros">
+        ${Object.entries(CAMP_META).map(([k,v]) =>
+          `<button class="filtro-btn ${_campState.filtroTipo===k?'ativo':''}" onclick="_filtrarCamp('${k}')">${v.nome.toUpperCase()}</button>`
+        ).join('')}
+        <button class="filtro-btn ${_campState.filtroTipo==='todos'?'ativo':''}" onclick="_filtrarCamp('todos')">TODOS</button>
+      </div>
+      <div id="camp-fin-lista"></div>
+      <div class="pag-row" id="camp-fin-pag"></div>
+    </div>`;
+  }
+
+  c.innerHTML = html || '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">NENHUM TORNEIO CRIADO</p>';
+  _renderFinalizadosCamp();
+}
+
+window._filtrarCamp = (tipo) => {
+  _campState.filtroTipo = tipo;
+  _campState.pag = 0;
+  document.querySelectorAll('#camp-filtros .filtro-btn').forEach(b => {
+    const meta = Object.entries(CAMP_META).find(([k]) => b.textContent.trim() === CAMP_META[k]?.nome?.toUpperCase());
+    const key = meta ? meta[0] : 'todos';
+    b.classList.toggle('ativo', key === tipo || (b.textContent.trim() === 'TODOS' && tipo === 'todos'));
+  });
+  _renderFinalizadosCamp();
+};
+
+function _renderFinalizadosCamp() {
+  const lista = document.getElementById('camp-fin-lista');
+  const pagRow = document.getElementById('camp-fin-pag');
+  if (!lista) return;
+
+  let dados = campeonatos.filter(c => c.status === 'finalizado');
+  if (_campState.filtroTipo !== 'todos') dados = dados.filter(c => c.tipo === _campState.filtroTipo);
+
+  const total = dados.length;
+  const totalPags = Math.ceil(total / _PAG_SIZE);
+  const pag = Math.min(_campState.pag, Math.max(0, totalPags - 1));
+  _campState.pag = pag;
+  const slice = dados.slice(pag * _PAG_SIZE, (pag + 1) * _PAG_SIZE);
+
+  lista.innerHTML = slice.length
+    ? slice.map(camp => _cardCampeonato(camp)).join('')
+    : '<p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:13px;">NENHUM TORNEIO COM ESSE FILTRO</p>';
+
+  if (totalPags > 1) {
+    pagRow.innerHTML = `
+      <button class="pag-btn" onclick="_pagCamp(-1)" ${pag===0?'disabled':''}>ANTERIOR</button>
+      <span class="pag-info">${pag+1} / ${totalPags}</span>
+      <button class="pag-btn" onclick="_pagCamp(1)" ${pag>=totalPags-1?'disabled':''}>PROXIMA</button>`;
+  } else {
+    pagRow.innerHTML = '';
+  }
+}
+
+window._pagCamp = (dir) => {
+  _campState.pag += dir;
+  _renderFinalizadosCamp();
+};
 
 function abrirModalCriarCamp() {
   if (jogadores.length < 2) { toast('Cadastre pelo menos 2 jogadores', 'erro'); return; }
