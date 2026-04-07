@@ -1500,10 +1500,61 @@ function wrapSwipeAmistoso(a, cardHtml) {
   </div>`;
 }
 
-document.getElementById('btn-criar-ami').addEventListener('click', () => {
-  if (jogadores.length < 2) { toast('Cadastre pelo menos 2 jogadores', 'erro'); return; }
-  fullscreen('NOVO AMISTOSO', `
-    <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">SELECIONE OS JOGADORES PARA O SORTEIO BALANCEADO DE TIMES</p>
+// ── Estado dropdown jogadores no amistoso ──
+const _jcSel = new Map();
+
+function _renderTagsJC() {
+  const container = document.getElementById('jc-tags');
+  if (!container) return;
+  if (_jcSel.size === 0) {
+    container.innerHTML = '<span style="color:var(--text-muted);font-size:12px;align-self:center;padding:4px 0;">NENHUM JOGADOR SELECIONADO</span>';
+    return;
+  }
+  container.innerHTML = [..._jcSel.entries()].map(([id, nome]) =>
+    `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.35);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;">
+      ${nome}
+      <span onclick="removerJogJC('${id}')" style="cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;margin-left:2px;">×</span>
+    </span>`
+  ).join('');
+}
+
+window.filtrarJogsJC = () => {
+  const q = (document.getElementById('jc-search')?.value || '').toLowerCase();
+  const drop = document.getElementById('jc-dropdown');
+  if (!drop) return;
+  const disponiveis = jogadores.filter(j => !_jcSel.has(j.id) && (!q || j.nome.toLowerCase().includes(q)));
+  if (!disponiveis.length) { drop.style.display = 'none'; return; }
+  drop.innerHTML = disponiveis.map(j =>
+    `<div onclick="selecionarJogJC('${j.id}','${j.nome.replace(/'/g,"\\'").replace(/"/g,'&quot;')}');document.getElementById('jc-search').value='';document.getElementById('jc-dropdown').style.display='none';"
+      style="padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.05);font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;">
+      ${SVG_USER_CHIP}<span>${j.nome}</span>
+    </div>`
+  ).join('');
+  drop.style.display = 'block';
+};
+
+window.selecionarJogJC = (id, nome) => {
+  _jcSel.set(id, nome);
+  _renderTagsJC();
+  // resetar sorteio ao mudar jogadores
+  const box = document.getElementById('ami-sorteio');
+  if (box) { box.style.display = 'none'; box.innerHTML = ''; }
+  const btnSalvar = document.getElementById('btn-ami-salvar');
+  if (btnSalvar) btnSalvar.style.display = 'none';
+};
+
+window.removerJogJC = (id) => {
+  _jcSel.delete(id);
+  _renderTagsJC();
+  const box = document.getElementById('ami-sorteio');
+  if (box) { box.style.display = 'none'; box.innerHTML = ''; }
+  const btnSalvar = document.getElementById('btn-ami-salvar');
+  if (btnSalvar) btnSalvar.style.display = 'none';
+};
+
+function _htmlNovoAmistoso() {
+  return `
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">SELECIONE OS JOGADORES E SORTEAREMOS OS TIMES</p>
     <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">TIPO</label>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
       <div class="tipo-btn sel" id="tp-clubes" onclick="selTipoAmi('clubes')"><span style="font-size:12px;font-weight:700;">CLUBES</span></div>
@@ -1511,38 +1562,49 @@ document.getElementById('btn-criar-ami').addEventListener('click', () => {
     </div>
     <input type="hidden" id="ami-tipo" value="clubes">
     <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">JOGADORES</label>
-    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;" id="ami-jogs">
-      ${jogadores.map(j => `<label class="check-row"><input type="checkbox" class="jc" value="${j.id}" data-nome="${j.nome}">${SVG_USER_CHIP}<span style="font-weight:700;">${j.nome}</span></label>`).join('')}
+    <div id="jc-tags" style="display:flex;flex-wrap:wrap;gap:6px;min-height:40px;padding:8px;background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;margin-bottom:8px;">
+      <span style="color:var(--text-muted);font-size:12px;align-self:center;padding:4px 0;">NENHUM JOGADOR SELECIONADO</span>
+    </div>
+    <div style="position:relative;margin-bottom:16px;">
+      <input id="jc-search" type="text" class="input" placeholder="BUSCAR JOGADOR..." autocomplete="off"
+        oninput="filtrarJogsJC()" onfocus="filtrarJogsJC()" style="margin-bottom:0;">
+      <div id="jc-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:20;background:var(--bg);border:1px solid var(--card-border);border-radius:12px;max-height:200px;overflow-y:auto;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,0.5);"></div>
     </div>
     <div id="ami-sorteio" style="display:none;margin-bottom:16px;"></div>
     <div style="display:flex;gap:10px;">
       <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
       <button class="btn-primary" style="background:linear-gradient(135deg,#7C3AED,#06B6D4);" onclick="sortearAmistoso()">SORTEAR</button>
       <button id="btn-ami-salvar" style="display:none;" class="btn-primary" onclick="salvarAmistoso()">SALVAR</button>
-    </div>`);
+    </div>`;
+}
+
+document.getElementById('btn-criar-ami').addEventListener('click', () => {
+  if (jogadores.length < 2) { toast('Cadastre pelo menos 2 jogadores', 'erro'); return; }
+  _jcSel.clear();
+  fullscreen('NOVO AMISTOSO', _htmlNovoAmistoso());
+  setTimeout(() => {
+    document.getElementById('fullscreen-body')?.addEventListener('click', e => {
+      if (!e.target.closest('#jc-search') && !e.target.closest('#jc-dropdown')) {
+        const d = document.getElementById('jc-dropdown');
+        if (d) d.style.display = 'none';
+      }
+    }, { capture: true });
+  }, 30);
 });
 
 // ─── INICIAR PARTIDA (botão home) ────────────────────────────────────
 window.iniciarPartida = () => {
   if (jogadores.length < 2) { toast('Cadastre pelo menos 2 jogadores', 'erro'); return; }
-  fullscreen('NOVO AMISTOSO', `
-    <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">SELECIONE OS JOGADORES E SORTEAREMOS OS TIMES!</p>
-    <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">TIPO</label>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
-      <div class="tipo-btn sel" id="tp-clubes" onclick="selTipoAmi('clubes')"><span style="font-size:12px;font-weight:700;">CLUBES</span></div>
-      <div class="tipo-btn" id="tp-selecoes" onclick="selTipoAmi('selecoes')"><span style="font-size:12px;font-weight:700;">SELECOES</span></div>
-    </div>
-    <input type="hidden" id="ami-tipo" value="clubes">
-    <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">SELECIONAR JOGADORES</label>
-    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;" id="ami-jogs">
-      ${jogadores.map(j => `<label class="check-row"><input type="checkbox" class="jc" value="${j.id}" data-nome="${j.nome}">${SVG_USER_CHIP}<span style="font-weight:700;font-size:15px;">${j.nome}</span></label>`).join('')}
-    </div>
-    <div id="ami-sorteio" style="display:none;margin-bottom:16px;"></div>
-    <div style="display:flex;gap:10px;">
-      <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
-      <button class="btn-primary" style="background:linear-gradient(135deg,#7C3AED,#06B6D4);" onclick="sortearAmistoso()">SORTEAR TIMES</button>
-      <button id="btn-ami-salvar" style="display:none;" class="btn-primary" onclick="salvarAmistoso()">SALVAR</button>
-    </div>`);
+  _jcSel.clear();
+  fullscreen('NOVO AMISTOSO', _htmlNovoAmistoso());
+  setTimeout(() => {
+    document.getElementById('fullscreen-body')?.addEventListener('click', e => {
+      if (!e.target.closest('#jc-search') && !e.target.closest('#jc-dropdown')) {
+        const d = document.getElementById('jc-dropdown');
+        if (d) d.style.display = 'none';
+      }
+    }, { capture: true });
+  }, 30);
 };
 
 function vsCardTime(t, jogadoresList, pool) {
@@ -1591,13 +1653,12 @@ window.selTipoAmi = tipo => {
 
 let _sorteioAmi = null;
 window.sortearAmistoso = () => {
-  const checks = [...document.querySelectorAll('.jc:checked')];
-  if (checks.length < 2) { toast('Selecione 2+ jogadores', 'erro'); return; }
+  if (_jcSel.size < 2) { toast('SELECIONE 2+ JOGADORES', 'erro'); return; }
   const tipo = document.getElementById('ami-tipo').value;
   const pool = tipo === 'selecoes' ? selecoes : clubes;
   const hist = historicoIds(tipo);
   const [t1, t2] = sortearBalanceado(pool, hist);
-  const jogs = shuffle(checks.map(c => ({ id: c.value, nome: c.dataset.nome })));
+  const jogs = shuffle([..._jcSel.entries()].map(([id, nome]) => ({ id, nome })));
   const meio = Math.ceil(jogs.length / 2);
   const j1 = jogs.slice(0, meio), j2 = jogs.slice(meio);
   const diff = Math.abs(t1.forca - t2.forca);
