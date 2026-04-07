@@ -1058,6 +1058,7 @@ function initSwipe(container, tipo) {
         if (tipo === 'jogador') excluirJogador(id, nome);
         else if (tipo === 'time') excluirTime(id);
         else if (tipo === 'amistoso') excluirJogo(id, nome, card.querySelector('[onclick*=excluirJogo]') || card);
+        else if (tipo === 'campeonato') excluirCampeonato(id);
       } else {
         card.style.transform = 'translateX(0)';
       }
@@ -1368,7 +1369,7 @@ window.cancelarExcluirJogo = (btn) => {
 };
 
 // ── Estado dos filtros/paginação de finalizados ──
-const _amiState = { filtroTipo: 'todos', pag: 0 };
+const _amiState = { filtroTipo: 'todos', filtroJog: '', pag: 0 };
 const _PAG_SIZE = 10;
 
 function renderAmistosos() {
@@ -1406,6 +1407,10 @@ function renderAmistosos() {
         <button class="filtro-btn ${_amiState.filtroTipo==='clubes'?'ativo':''}" onclick="_filtrarAmi('clubes')">CLUBES</button>
         <button class="filtro-btn ${_amiState.filtroTipo==='selecoes'?'ativo':''}" onclick="_filtrarAmi('selecoes')">SELECOES</button>
       </div>
+      <select id="ami-filtro-jog" onchange="_filtrarAmiJog(this.value)" style="width:100%;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;margin-bottom:10px;">
+        <option value="">JOGADOR: TODOS</option>
+        ${jogadores.map(j=>`<option value="${j.id}" ${_amiState.filtroJog===j.id?'selected':''}>${j.nome.toUpperCase()}</option>`).join('')}
+      </select>
       <div id="ami-fin-lista"></div>
       <div class="pag-row" id="ami-fin-pag"></div>
     </div>`;
@@ -1436,6 +1441,12 @@ window._filtrarAmi = (tipo) => {
   _renderFinalizadosAmi();
 };
 
+window._filtrarAmiJog = (jogId) => {
+  _amiState.filtroJog = jogId;
+  _amiState.pag = 0;
+  _renderFinalizadosAmi();
+};
+
 function _renderFinalizadosAmi() {
   const lista = document.getElementById('ami-fin-lista');
   const pagRow = document.getElementById('ami-fin-pag');
@@ -1443,6 +1454,10 @@ function _renderFinalizadosAmi() {
 
   let dados = amistosos.filter(a => a.resultado != null);
   if (_amiState.filtroTipo !== 'todos') dados = dados.filter(a => a.tipo === _amiState.filtroTipo);
+  if (_amiState.filtroJog) dados = dados.filter(a =>
+    (a.time1?.jogadoresIds||[]).includes(_amiState.filtroJog) ||
+    (a.time2?.jogadoresIds||[]).includes(_amiState.filtroJog)
+  );
 
   const total = dados.length;
   const totalPags = Math.ceil(total / _PAG_SIZE);
@@ -1679,11 +1694,11 @@ async function carregarCampeonatos() {
   renderCampeonatos();
 }
 
-const _campState = { filtroTipo: 'todos', pag: 0 };
+const _campState = { filtroTipo: 'todos', filtroTipoTime: 'todos', filtroJog: '', pag: 0 };
 
 function _cardCampeonato(camp) {
   const meta = CAMP_META[camp.tipo] || { emoji:'🏆', nome: camp.tipo };
-  return `<div class="match-card" style="margin-bottom:10px;cursor:pointer;" onclick="abrirCampeonato('${camp.id}')">
+  return `<div class="match-card" style="margin-bottom:0;cursor:pointer;" onclick="abrirCampeonato('${camp.id}')">
     <div style="display:flex;align-items:center;gap:12px;">
       <span style="font-size:34px;">${meta.emoji}</span>
       <div style="flex:1;min-width:0;">
@@ -1695,6 +1710,16 @@ function _cardCampeonato(camp) {
       </div>
       <div style="color:var(--text-muted);font-size:22px;flex-shrink:0;">›</div>
     </div>
+  </div>`;
+}
+
+function _wrapSwipeCamp(camp) {
+  return `<div class="swipe-wrap" data-swipe-id="${camp.id}" data-swipe-nome="${camp.nome.replace(/"/g,'&quot;')}" style="margin-bottom:10px;">
+    <div class="swipe-bg" style="flex-direction:column;gap:2px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      <span class="swipe-bg-label">REMOVER</span>
+    </div>
+    <div style="position:relative;z-index:1;transition:transform 0.2s;">${_cardCampeonato(camp)}</div>
   </div>`;
 }
 
@@ -1713,7 +1738,7 @@ function renderCampeonatos() {
       <span class="grupo-seta">›</span>
     </div>
     <div class="grupo-body" id="grupo-camp-andamento">
-      ${andamento.map(camp => _cardCampeonato(camp)).join('')}
+      ${andamento.map(camp => _wrapSwipeCamp(camp)).join('')}
     </div>`;
   }
 
@@ -1730,12 +1755,23 @@ function renderCampeonatos() {
         ).join('')}
         <button class="filtro-btn ${_campState.filtroTipo==='todos'?'ativo':''}" onclick="_filtrarCamp('todos')">TODOS</button>
       </div>
+      <div class="filtro-row" style="margin-bottom:8px;">
+        <button class="filtro-btn ${_campState.filtroTipoTime==='todos'?'ativo':''}" onclick="_filtrarCampTipoTime('todos')">CLUBES + SELECOES</button>
+        <button class="filtro-btn ${_campState.filtroTipoTime==='clubes'?'ativo':''}" onclick="_filtrarCampTipoTime('clubes')">CLUBES</button>
+        <button class="filtro-btn ${_campState.filtroTipoTime==='selecoes'?'ativo':''}" onclick="_filtrarCampTipoTime('selecoes')">SELECOES</button>
+      </div>
+      <select id="camp-filtro-jog" onchange="_filtrarCampJog(this.value)" style="width:100%;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;margin-bottom:10px;">
+        <option value="">JOGADOR: TODOS</option>
+        ${jogadores.map(j=>`<option value="${j.id}" ${_campState.filtroJog===j.id?'selected':''}>${j.nome.toUpperCase()}</option>`).join('')}
+      </select>
       <div id="camp-fin-lista"></div>
       <div class="pag-row" id="camp-fin-pag"></div>
     </div>`;
   }
 
   c.innerHTML = html || '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">NENHUM TORNEIO CRIADO</p>';
+  const grupoAnd = document.getElementById('grupo-camp-andamento');
+  if (grupoAnd) initSwipe(grupoAnd, 'campeonato');
   _renderFinalizadosCamp();
 }
 
@@ -1750,6 +1786,26 @@ window._filtrarCamp = (tipo) => {
   _renderFinalizadosCamp();
 };
 
+window._filtrarCampTipoTime = (tipoTime) => {
+  _campState.filtroTipoTime = tipoTime;
+  _campState.pag = 0;
+  document.querySelectorAll('#camp-filtros ~ .filtro-row .filtro-btn').forEach(b => {
+    const txt = b.textContent.trim();
+    b.classList.toggle('ativo',
+      (tipoTime === 'todos' && txt === 'CLUBES + SELECOES') ||
+      (tipoTime === 'clubes' && txt === 'CLUBES') ||
+      (tipoTime === 'selecoes' && txt === 'SELECOES')
+    );
+  });
+  _renderFinalizadosCamp();
+};
+
+window._filtrarCampJog = (jogId) => {
+  _campState.filtroJog = jogId;
+  _campState.pag = 0;
+  _renderFinalizadosCamp();
+};
+
 function _renderFinalizadosCamp() {
   const lista = document.getElementById('camp-fin-lista');
   const pagRow = document.getElementById('camp-fin-pag');
@@ -1757,6 +1813,10 @@ function _renderFinalizadosCamp() {
 
   let dados = campeonatos.filter(c => c.status === 'finalizado');
   if (_campState.filtroTipo !== 'todos') dados = dados.filter(c => c.tipo === _campState.filtroTipo);
+  if (_campState.filtroTipoTime !== 'todos') dados = dados.filter(c => CAMP_META[c.tipo]?.tipo === _campState.filtroTipoTime);
+  if (_campState.filtroJog) dados = dados.filter(c =>
+    (c.participantes||[]).some(p => p.jogadorId === _campState.filtroJog)
+  );
 
   const total = dados.length;
   const totalPags = Math.ceil(total / _PAG_SIZE);
@@ -1765,8 +1825,9 @@ function _renderFinalizadosCamp() {
   const slice = dados.slice(pag * _PAG_SIZE, (pag + 1) * _PAG_SIZE);
 
   lista.innerHTML = slice.length
-    ? slice.map(camp => _cardCampeonato(camp)).join('')
+    ? slice.map(camp => _wrapSwipeCamp(camp)).join('')
     : '<p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:13px;">NENHUM TORNEIO COM ESSE FILTRO</p>';
+  if (slice.length) initSwipe(lista, 'campeonato');
 
   if (totalPags > 1) {
     pagRow.innerHTML = `
