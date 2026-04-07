@@ -1703,10 +1703,9 @@ async function carregarCampeonatos() {
 const _campState = { filtroTipo: 'todos', filtroTipoTime: 'todos', filtroJog: '', pag: 0 };
 
 function _cardCampeonato(camp) {
-  const meta = CAMP_META[camp.tipo] || { emoji:'🏆', nome: camp.tipo };
+  const meta = CAMP_META[camp.tipo] || { nome: camp.tipo };
   return `<div class="match-card" style="margin-bottom:0;cursor:pointer;" onclick="abrirCampeonato('${camp.id}')">
     <div style="display:flex;align-items:center;gap:12px;">
-      <span style="font-size:34px;">${meta.emoji}</span>
       <div style="flex:1;min-width:0;">
         <div style="font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${camp.nome}</div>
         <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
@@ -2080,7 +2079,6 @@ window.abrirCampeonato = (id) => {
 
   fullscreen(c.nome.toUpperCase(), `
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-      <span style="font-size:40px;">${meta.emoji}</span>
       <div style="flex:1;">
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
           <span class="tag tag-purple" style="font-size:10px;">${meta.nome.toUpperCase()}</span>
@@ -2546,27 +2544,23 @@ function atualizarDash() {
 }
 
 function cardCampHome(c) {
-  const meta = CAMP_META[c.tipo] || { emoji:'🏆', nome: c.tipo };
-  const totalGrupos = (c.grupos||[]).length;
+  const meta = CAMP_META[c.tipo] || { nome: c.tipo };
   const totalParts  = (c.grupos||[]).reduce((s,g)=>s+(g.partidas||[]).length,0);
   const totalPoss   = (c.grupos||[]).reduce((s,g)=>{const m=g.membros?.length||0; return s+m*(m-1)/2;},0);
   const pct = totalPoss > 0 ? Math.round((totalParts/totalPoss)*100) : 0;
   return `<div class="match-card" style="margin-bottom:10px;padding:12px;cursor:pointer;" onclick="irPara('campeonatos')">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
       <span style="font-size:10px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:0.05em;">TORNEIO</span>
-      <span class="tag tag-yellow">Em andamento</span>
+      <span class="tag tag-yellow" style="text-transform:uppercase;">EM ANDAMENTO</span>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <span style="font-size:32px;">${meta.emoji}</span>
-      <div style="flex:1;min-width:0;">
-        <div style="font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.nome}</div>
-        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${meta.nome} · ${c.participantes?.length||0} jogadores</div>
-        <div style="margin-top:6px;display:flex;align-items:center;gap:6px;">
-          <div style="flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;">
-            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--yellow),var(--green));border-radius:2px;"></div>
-          </div>
-          <span style="font-size:10px;color:var(--text-muted);white-space:nowrap;">${totalParts}/${totalPoss} jogos</span>
+    <div style="flex:1;min-width:0;">
+      <div style="font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.nome}</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:2px;text-transform:uppercase;">${meta.nome} · ${c.participantes?.length||0} JOGADORES</div>
+      <div style="margin-top:6px;display:flex;align-items:center;gap:6px;">
+        <div style="flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;">
+          <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--yellow),var(--green));border-radius:2px;"></div>
         </div>
+        <span style="font-size:10px;color:var(--text-muted);white-space:nowrap;">${totalParts}/${totalPoss} JOGOS</span>
       </div>
     </div>
   </div>`;
