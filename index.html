@@ -2204,47 +2204,215 @@ function renderRankingTorneios(rank) {
   if (el2) el2.innerHTML = rank.slice(0,5).length===0?'<p style="color:var(--text-muted);text-align:center;padding:16px 0;font-size:14px;">NENHUM TORNEIO FINALIZADO</p>':rank.slice(0,5).map((p,i)=>renderRankRow(p,i)).join('');
 }
 
-// Historico do jogador ao clicar no ranking
-window.abrirHistoricoJogador = (jogadorId, nome) => {
+// ── Estado do histórico ──
+const _histState = { jogadorId:'', nome:'', filtroTipo:'todos', filtroAdv:'', dataIni:'', dataFim:'', ordenacao:'data_desc', pag:0 };
+const _HIST_PAG = 100;
+
+function _coletarJogosJogador(jogadorId) {
   const jogos = [];
   amistosos.forEach(a => {
     if (!a.resultado) return;
     const isT1 = (a.time1?.jogadoresIds||[]).includes(jogadorId);
     const isT2 = (a.time2?.jogadoresIds||[]).includes(jogadorId);
-    if (isT1||isT2) {
-      const meuGol = isT1 ? a.resultado.g1 : a.resultado.g2;
-      const advGol = isT1 ? a.resultado.g2 : a.resultado.g1;
-      const meuTime = isT1 ? a.time1?.nome : a.time2?.nome;
-      const advTime = isT1 ? a.time2?.nome : a.time1?.nome;
-      jogos.push({tipo:'AMISTOSO',meuTime,advTime,meuGol,advGol,data:a.criadoEm,tipoTime:a.tipo==='selecoes'?'SELECAO':'CLUBE'});
-    }
+    if (!isT1 && !isT2) return;
+    const meuGol = isT1 ? a.resultado.g1 : a.resultado.g2;
+    const advGol = isT1 ? a.resultado.g2 : a.resultado.g1;
+    const res = meuGol > advGol ? 'V' : meuGol < advGol ? 'D' : 'E';
+    const ts = a.criadoEm?.seconds ? a.criadoEm.seconds * 1000 : null;
+    jogos.push({
+      tipo:'AMISTOSO', tipoTime: a.tipo==='selecoes'?'SELECAO':'CLUBE',
+      meuTime: isT1?a.time1?.nome:a.time2?.nome,
+      advTime: isT1?a.time2?.nome:a.time1?.nome,
+      meuGol, advGol, res, ts, torneio: null
+    });
   });
   campeonatos.forEach(c => (c.grupos||[]).forEach(g => (g.partidas||[]).forEach(p => {
-    const m = g.membros.find(m=>m.jogadorId===jogadorId);
+    const m = g.membros.find(mb => mb.jogadorId === jogadorId);
     if (!m) return;
-    const isJ1 = p.j1Id===jogadorId;
-    const isJ2 = p.j2Id===jogadorId;
-    if (isJ1||isJ2) {
-      const meuGol = isJ1 ? p.g1 : p.g2;
-      const advGol = isJ1 ? p.g2 : p.g1;
-      jogos.push({tipo:'TORNEIO',meuTime:m.time?.nome||'?',advTime:isJ1?p.j2Nome:p.j1Nome,meuGol,advGol,data:c.criadoEm,tipoTime:CAMP_META[c.tipo]?.tipo==='selecoes'?'SELECAO':'CLUBE',torneio:c.nome});
-    }
+    const isJ1 = p.j1Id === jogadorId;
+    const isJ2 = p.j2Id === jogadorId;
+    if (!isJ1 && !isJ2) return;
+    const meuGol = isJ1 ? p.g1 : p.g2;
+    const advGol = isJ1 ? p.g2 : p.g1;
+    const res = meuGol > advGol ? 'V' : meuGol < advGol ? 'D' : 'E';
+    const ts = c.criadoEm?.seconds ? c.criadoEm.seconds * 1000 : null;
+    jogos.push({
+      tipo:'TORNEIO', tipoTime: CAMP_META[c.tipo]?.tipo==='selecoes'?'SELECAO':'CLUBE',
+      meuTime: m.time?.nome||'?',
+      advTime: isJ1 ? p.j2Nome : p.j1Nome,
+      meuGol, advGol, res, ts, torneio: c.nome
+    });
   })));
-  const html = jogos.length===0?'<p style="color:var(--text-muted);text-align:center;padding:24px 0;">NENHUM JOGO ENCONTRADO</p>'
-    :jogos.map(j=>`<div style="background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:12px;margin-bottom:8px;">
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-        <span class="tag ${j.tipo==='AMISTOSO'?'tag-cyan':'tag-yellow'}" style="font-size:10px;">${j.tipo}</span>
-        <span class="tag tag-gray" style="font-size:10px;">${j.tipoTime}</span>
+  return jogos;
+}
+
+window.abrirHistoricoJogador = (jogadorId, nome) => {
+  _histState.jogadorId = jogadorId;
+  _histState.nome = nome;
+  _histState.filtroTipo = 'todos';
+  _histState.filtroAdv = '';
+  _histState.dataIni = '';
+  _histState.dataFim = '';
+  _histState.ordenacao = 'data_desc';
+  _histState.pag = 0;
+
+  const allJogos = _coletarJogosJogador(jogadorId);
+  const advs = [...new Set(allJogos.map(j => j.advTime).filter(Boolean))].sort();
+
+  fullscreen(`HISTORICO · ${nome.toUpperCase()}`, `
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
+      <button class="filtro-btn ativo" id="hf-todos" onclick="_hFiltro('tipo','todos')">TODOS</button>
+      <button class="filtro-btn" id="hf-amistoso" onclick="_hFiltro('tipo','AMISTOSO')">AMISTOSO</button>
+      <button class="filtro-btn" id="hf-torneio" onclick="_hFiltro('tipo','TORNEIO')">TORNEIO</button>
+      <button class="filtro-btn" id="hf-clube" onclick="_hFiltro('tipoTime','CLUBE')">CLUBE</button>
+      <button class="filtro-btn" id="hf-selecao" onclick="_hFiltro('tipoTime','SELECAO')">SELECAO</button>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center;">
+      <select id="hf-adv" onchange="_hFiltro('adv',this.value)" style="flex:1;min-width:120px;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;">
+        <option value="">ADVERSARIO: TODOS</option>
+        ${advs.map(a => `<option value="${a}">${a.toUpperCase()}</option>`).join('')}
+      </select>
+      <select id="hf-ord" onchange="_hFiltro('ord',this.value)" style="flex:1;min-width:120px;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;">
+        <option value="data_desc">DATA: RECENTE</option>
+        <option value="data_asc">DATA: ANTIGA</option>
+        <option value="gols_desc">GOLS: MAIOR</option>
+        <option value="res_v">SO VITORIAS</option>
+        <option value="res_d">SO DERROTAS</option>
+        <option value="res_e">SO EMPATES</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <div style="flex:1;">
+        <label style="display:block;font-size:10px;font-weight:700;color:var(--text-muted);margin-bottom:4px;">DATA INICIO</label>
+        <input type="date" id="hf-ini" onchange="_hFiltro('dataIni',this.value)" style="width:100%;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;">
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-weight:700;font-size:13px;">${j.meuTime}</span>
-        <span style="font-weight:900;font-size:16px;">${j.meuGol} x ${j.advGol}</span>
-        <span style="font-weight:700;font-size:13px;">${j.advTime}</span>
+      <div style="flex:1;">
+        <label style="display:block;font-size:10px;font-weight:700;color:var(--text-muted);margin-bottom:4px;">DATA FIM</label>
+        <input type="date" id="hf-fim" onchange="_hFiltro('dataFim',this.value)" style="width:100%;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;">
       </div>
-      ${j.torneio?`<div style="font-size:10px;color:var(--text-muted);margin-top:4px;">${j.torneio}</div>`:''}
-    </div>`).join('');
-  modal(`<p class="modal-title">${nome.toUpperCase()}</p><p class="sec-title" style="margin-bottom:12px;">HISTORICO DE JOGOS</p>${html}<button class="btn-primary" onclick="fecharModal()" style="margin-top:12px;">FECHAR</button>`);
+    </div>
+    <div id="hist-resumo" style="margin-bottom:12px;"></div>
+    <div id="hist-lista"></div>
+    <div class="pag-row" id="hist-pag"></div>
+  `);
+  _renderHistorico();
 };
+
+window._hFiltro = (campo, valor) => {
+  if (campo === 'tipo') {
+    _histState.filtroTipo = valor;
+    ['todos','amistoso','torneio'].forEach(k => {
+      const el = document.getElementById('hf-' + k);
+      if (el) el.classList.toggle('ativo', (valor === 'todos' && k==='todos') || valor.toLowerCase() === k);
+    });
+    // limpa filtros de tipoTime quando filtra por tipo
+    ['clube','selecao'].forEach(k => { const el = document.getElementById('hf-' + k); if (el) el.classList.remove('ativo'); });
+  } else if (campo === 'tipoTime') {
+    _histState.filtroTipo = valor;
+    ['todos','amistoso','torneio','clube','selecao'].forEach(k => {
+      const el = document.getElementById('hf-' + k);
+      if (el) el.classList.toggle('ativo', valor.toLowerCase() === k);
+    });
+  } else if (campo === 'adv') {
+    _histState.filtroAdv = valor;
+  } else if (campo === 'ord') {
+    _histState.ordenacao = valor;
+  } else if (campo === 'dataIni') {
+    _histState.dataIni = valor;
+  } else if (campo === 'dataFim') {
+    _histState.dataFim = valor;
+  }
+  _histState.pag = 0;
+  _renderHistorico();
+};
+
+window._pagHist = (dir) => { _histState.pag += dir; _renderHistorico(); };
+
+function _renderHistorico() {
+  const lista = document.getElementById('hist-lista');
+  const pagRow = document.getElementById('hist-pag');
+  const resumoEl = document.getElementById('hist-resumo');
+  if (!lista) return;
+
+  let jogos = _coletarJogosJogador(_histState.jogadorId);
+
+  // Filtros
+  if (_histState.filtroTipo === 'AMISTOSO' || _histState.filtroTipo === 'TORNEIO')
+    jogos = jogos.filter(j => j.tipo === _histState.filtroTipo);
+  else if (_histState.filtroTipo === 'CLUBE' || _histState.filtroTipo === 'SELECAO')
+    jogos = jogos.filter(j => j.tipoTime === _histState.filtroTipo);
+
+  if (_histState.filtroAdv) jogos = jogos.filter(j => j.advTime === _histState.filtroAdv);
+  if (_histState.dataIni) { const d = new Date(_histState.dataIni).getTime(); jogos = jogos.filter(j => j.ts && j.ts >= d); }
+  if (_histState.dataFim) { const d = new Date(_histState.dataFim).getTime() + 86399999; jogos = jogos.filter(j => j.ts && j.ts <= d); }
+
+  // Ordenação
+  const ord = _histState.ordenacao;
+  if (ord === 'data_desc') jogos.sort((a,b) => (b.ts||0)-(a.ts||0));
+  else if (ord === 'data_asc') jogos.sort((a,b) => (a.ts||0)-(b.ts||0));
+  else if (ord === 'gols_desc') jogos.sort((a,b) => (b.meuGol+b.advGol)-(a.meuGol+a.advGol));
+  else if (ord === 'res_v') jogos = jogos.filter(j => j.res === 'V');
+  else if (ord === 'res_d') jogos = jogos.filter(j => j.res === 'D');
+  else if (ord === 'res_e') jogos = jogos.filter(j => j.res === 'E');
+
+  // Resumo
+  const v = jogos.filter(j=>j.res==='V').length;
+  const d = jogos.filter(j=>j.res==='D').length;
+  const e = jogos.filter(j=>j.res==='E').length;
+  const gf = jogos.reduce((s,j)=>s+j.meuGol,0);
+  const gs = jogos.reduce((s,j)=>s+j.advGol,0);
+  if (resumoEl) resumoEl.innerHTML = jogos.length
+    ? `<div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="tag tag-gray">${jogos.length} JOGOS</span>
+        <span class="tag tag-green">${v}V</span>
+        <span class="tag tag-red">${d}D</span>
+        <span class="tag tag-gray">${e}E</span>
+        <span class="tag tag-cyan">${gf}GF · ${gs}GS</span>
+      </div>`
+    : '';
+
+  // Paginação
+  const total = jogos.length;
+  const totalPags = Math.max(1, Math.ceil(total / _HIST_PAG));
+  const pag = Math.min(_histState.pag, totalPags - 1);
+  _histState.pag = pag;
+  const slice = jogos.slice(pag * _HIST_PAG, (pag + 1) * _HIST_PAG);
+
+  if (!slice.length) {
+    lista.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:24px 0;">NENHUM JOGO ENCONTRADO</p>';
+    pagRow.innerHTML = '';
+    return;
+  }
+
+  lista.innerHTML = slice.map(j => {
+    const cor = j.res==='V'?'tag-green':j.res==='D'?'tag-red':'tag-gray';
+    const data = j.ts ? new Date(j.ts).toLocaleDateString('pt-BR') : '';
+    return `<div style="background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:12px;margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div style="display:flex;gap:5px;">
+          <span class="tag ${j.tipo==='AMISTOSO'?'tag-cyan':'tag-yellow'}" style="font-size:9px;">${j.tipo}</span>
+          <span class="tag tag-gray" style="font-size:9px;">${j.tipoTime}</span>
+          ${j.torneio?`<span class="tag tag-purple" style="font-size:9px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${j.torneio.toUpperCase()}</span>`:''}
+        </div>
+        <div style="display:flex;gap:5px;align-items:center;">
+          <span class="tag ${cor}" style="font-size:10px;font-weight:900;">${j.res==='V'?'VITORIA':j.res==='D'?'DERROTA':'EMPATE'}</span>
+          ${data?`<span style="font-size:10px;color:var(--text-muted);">${data}</span>`:''}
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <span style="font-weight:800;font-size:13px;flex:1;">${j.meuTime}</span>
+        <span style="font-weight:900;font-size:18px;flex-shrink:0;">${j.meuGol} <span style="color:var(--text-muted);font-size:12px;">x</span> ${j.advGol}</span>
+        <span style="font-weight:800;font-size:13px;flex:1;text-align:right;">${j.advTime}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  pagRow.innerHTML = totalPags > 1
+    ? `<button class="pag-btn" onclick="_pagHist(-1)" ${pag===0?'disabled':''}>ANTERIOR</button>
+       <span class="pag-info">${pag+1} / ${totalPags}</span>
+       <button class="pag-btn" onclick="_pagHist(1)" ${pag>=totalPags-1?'disabled':''}>PROXIMA</button>`
+    : '';
+}
 
 function atualizarDash() {
   // Ranking separados
