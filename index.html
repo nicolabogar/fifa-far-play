@@ -2707,7 +2707,7 @@ function renderTimesEdit() {
         : `<span style="font-size:40px;">🌍</span>`;
       return `<div class="swipe-wrap" data-swipe-id="${t.id}">
         <div class="swipe-bg"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></div>
-        <div class="entity-card" style="align-items:center;gap:14px;">
+        <div class="entity-card" style="align-items:center;gap:14px;cursor:pointer;" onclick="editarTime('${t.id}')">
           <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;">${flagHtml}</div>
           <div style="flex:1;min-width:0;">
             <div style="font-weight:800;font-size:16px;">${t.nome}</div>
@@ -2720,7 +2720,7 @@ function renderTimesEdit() {
       const d = TEAM_DATA[t.id] || { abrev:(t.nome||'?').slice(0,3).toUpperCase(), fundo:'#1E1E35', cor:'#AAAAAA', pais:'', paisNome:'' };
       return `<div class="swipe-wrap" data-swipe-id="${t.id}">
         <div class="swipe-bg"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></div>
-        <div class="entity-card" style="align-items:center;gap:14px;">
+        <div class="entity-card" style="align-items:center;gap:14px;cursor:pointer;" onclick="editarTime('${t.id}')">
           <div style="flex-shrink:0;">${shieldClube(t.id, t.nome, 60)}</div>
           <div style="flex:1;min-width:0;">
             <div style="font-weight:900;font-size:17px;">${t.nome}</div>
@@ -2863,7 +2863,38 @@ window.salvarNovoTime = async () => {
   await setDoc(doc(db, 'times', novoTime.id), novoTime);
   await carregarTimes();
   _selNovoTime = null;
-  fecharModal(); renderTimesEdit(); toast('Time adicionado! ✓');
+  fecharModal(); renderTimesEdit(); toast('TIME ADICIONADO!');
+};
+
+window.editarTime = (id) => {
+  const pool = abaTimesAtual === 'clubes' ? clubes : selecoes;
+  const t = pool.find(x => x.id === id);
+  if (!t) return;
+  const isSel = abaTimesAtual === 'selecoes';
+  const badgeHtml = isSel ? badgeTimeCompact(t.id, t.nome, 'selecoes') : badgeTimeCompact(t.id, t.nome, 'clubes');
+  fullscreen(t.nome.toUpperCase(), `
+    <div style="display:flex;flex-direction:column;gap:16px;max-width:400px;margin:0 auto;">
+      <div style="display:flex;justify-content:center;padding:16px 0;">${badgeHtml}</div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">FORÇA DO TIME</label>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <input type="range" id="et-forca" min="50" max="100" value="${t.forca||75}"
+            oninput="document.getElementById('et-forca-val').textContent=this.value"
+            style="flex:1;accent-color:var(--purple);">
+          <span id="et-forca-val" style="font-size:18px;font-weight:900;color:var(--cyan);min-width:32px;text-align:center;">${t.forca||75}</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
+        <button class="btn-primary" onclick="salvarEdicaoTime('${id}')">SALVAR</button>
+      </div>
+    </div>`);
+};
+
+window.salvarEdicaoTime = async (id) => {
+  const forca = parseInt(document.getElementById('et-forca')?.value) || 75;
+  await updateDoc(doc(db, 'times', id), { forca });
+  fecharFullscreen(); await carregarTimes(); renderTimesEdit(); toast('TIME ATUALIZADO!');
 };
 
 window.excluirTime = async id => {
@@ -2879,7 +2910,7 @@ window.excluirTime = async id => {
 
 window.confirmarExcluirTime = async id => {
   await setDoc(doc(db,'times',id+'_del'),{id,_deleted:true});
-  await carregarTimes(); fecharModal(); renderTimesEdit(); toast('Time removido');
+  await carregarTimes(); fecharModal(); renderTimesEdit(); toast('TIME REMOVIDO');
 };
 
 // ─── SERVICE WORKER ──────────────────────────────────────────────────
