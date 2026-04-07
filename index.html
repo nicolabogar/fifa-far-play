@@ -417,7 +417,7 @@
 </div>
 
 <!-- ═══════════════════════════════════════════
-     MODAL
+     MODAL (confirmacoes)
 ═══════════════════════════════════════════ -->
 <div id="modal-overlay">
   <div id="modal-box">
@@ -425,6 +425,18 @@
     <div class="modal-handle"></div>
     <div id="modal-body"></div>
   </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     FULLSCREEN (cadastros)
+═══════════════════════════════════════════ -->
+<div id="fullscreen-overlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:60;overflow-y:auto;">
+  <div style="position:sticky;top:0;z-index:61;background:rgba(8,8,15,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--card-border);padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;">
+    <button onclick="fecharFullscreen()" style="background:rgba(255,255,255,0.08);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;">FECHAR</button>
+    <span id="fullscreen-title" style="font-weight:900;font-size:16px;" class="grad"></span>
+    <div style="width:80px;"></div>
+  </div>
+  <div id="fullscreen-body" style="padding:16px 16px 40px;"></div>
 </div>
 
 <!-- TOAST -->
@@ -837,6 +849,18 @@ function fecharModal() { document.getElementById('modal-overlay').classList.remo
 window.fecharModal = fecharModal;
 document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target.id === 'modal-overlay') fecharModal(); });
 
+function fullscreen(title, html) {
+  document.getElementById('fullscreen-title').textContent = title;
+  document.getElementById('fullscreen-body').innerHTML = html;
+  document.getElementById('fullscreen-overlay').style.display = 'block';
+  document.getElementById('app').style.display = 'none';
+}
+function fecharFullscreen() {
+  document.getElementById('fullscreen-overlay').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+}
+window.fecharFullscreen = fecharFullscreen;
+
 let _toastT;
 function toast(msg, tipo = 'ok') {
   const t = document.getElementById('toast');
@@ -1020,7 +1044,7 @@ function renderJogadores() {
   c.innerHTML = jogadores.map(j => `
     <div class="swipe-wrap" data-swipe-id="${j.id}" data-swipe-nome="${j.nome.replace(/"/g,'&quot;')}">
       <div class="swipe-bg"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></div>
-      <div class="entity-card">
+      <div class="entity-card" onclick="editarJogador('${j.id}')" style="cursor:pointer;">
         ${avatarJogador(j, 46)}
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:6px;">
@@ -1029,9 +1053,6 @@ function renderJogadores() {
           </div>
           <div style="color:var(--text-muted);font-size:11px;margin-top:2px;">${j.email||'Sem e-mail vinculado'}</div>
         </div>
-        ${podeMudar ? `<button onclick="editarJogador('${j.id}')" style="background:rgba(139,92,246,0.15);border:none;color:#C4B5FD;border-radius:10px;padding:8px 10px;cursor:pointer;display:flex;align-items:center;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>` : ''}
       </div>
     </div>`).join('');
   if (podeMudar) initSwipe(c, 'jogador');
@@ -1040,32 +1061,36 @@ function renderJogadores() {
 window.editarJogador = (id) => {
   const j = jogadores.find(x => x.id === id);
   if (!j) return;
-  const master = getMaster();
-  const podeMudarMaster = temPermissao(); // master pode transferir o status para qualquer jogador
-  modal(`<p class="modal-title">Editar Jogador</p>
-    <div style="display:flex;flex-direction:column;gap:12px;">
-      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:4px;">
-        <div id="prev-avatar" style="width:72px;height:72px;border-radius:22px;overflow:hidden;cursor:pointer;background:linear-gradient(135deg,rgba(139,92,246,0.3),rgba(6,182,212,0.3));display:flex;align-items:center;justify-content:center;" onclick="document.getElementById('i-foto-edit').click()">
+  const podeMudarMaster = temPermissao();
+  const masterVal = j.master ? '1' : '0';
+  fullscreen('EDITAR JOGADOR', `
+    <div style="display:flex;flex-direction:column;gap:14px;max-width:400px;margin:0 auto;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:8px;">
+        <div id="prev-avatar" style="width:88px;height:88px;border-radius:22px;overflow:hidden;cursor:pointer;background:linear-gradient(135deg,rgba(139,92,246,0.3),rgba(6,182,212,0.3));display:flex;align-items:center;justify-content:center;" onclick="document.getElementById('i-foto-edit').click()">
           ${j.fotoUrl
             ? `<img src="${j.fotoUrl}" style="width:100%;height:100%;object-fit:cover;">`
-            : `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C7B8FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1"/></svg>`}
+            : `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#C7B8FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1"/></svg>`}
         </div>
-        <label style="font-size:12px;color:var(--purple);font-weight:700;cursor:pointer;" onclick="document.getElementById('i-foto-edit').click()">📷 Trocar foto</label>
+        <label style="font-size:12px;color:var(--purple);font-weight:700;cursor:pointer;" onclick="document.getElementById('i-foto-edit').click()">TROCAR FOTO</label>
         <input type="file" id="i-foto-edit" accept="image/*" style="display:none;" onchange="previewFotoEdit(this)">
       </div>
-      <input class="input" id="i-nome-edit" placeholder="Nome completo" value="${j.nome.replace(/"/g,'&quot;')}" autocomplete="off">
-      <input class="input" id="i-email-edit" placeholder="E-mail Google" type="email" value="${j.email||''}" autocomplete="off">
-      ${podeMudarMaster ? `<label style="display:flex;align-items:center;gap:10px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:12px;cursor:pointer;">
-        <input type="checkbox" id="i-master-edit" style="width:18px;height:18px;accent-color:var(--yellow);" ${j.master?'checked':''}>
-        <div>
-          <div style="font-weight:700;font-size:13px;color:var(--yellow);">USUARIO MASTER</div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Controla jogadores, times e campeonatos</div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">NOME COMPLETO</label>
+        <input class="input" id="i-nome-edit" value="${j.nome.replace(/"/g,'&quot;')}" autocomplete="off">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">EMAIL</label>
+        <input class="input" id="i-email-edit" type="email" value="${j.email||''}" autocomplete="off">
+      </div>
+      ${podeMudarMaster ? `<div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">DEFINIR COMO MASTER</label>
+        <input type="hidden" id="i-master-edit" value="${masterVal}">
+        <div style="display:flex;gap:8px;">
+          <button type="button" id="btn-medit-sim" onclick="document.getElementById('i-master-edit').value='1';this.style.background='linear-gradient(135deg,var(--purple),var(--cyan))';this.style.color='#fff';document.getElementById('btn-medit-nao').style.background='var(--card)';document.getElementById('btn-medit-nao').style.color='var(--text-muted)'" style="flex:1;padding:12px;border-radius:12px;border:1px solid var(--card-border);background:${j.master?'linear-gradient(135deg,var(--purple),var(--cyan))':'var(--card)'};color:${j.master?'#fff':'var(--text-muted)'};font-weight:700;font-size:14px;cursor:pointer;">SIM</button>
+          <button type="button" id="btn-medit-nao" onclick="document.getElementById('i-master-edit').value='0';this.style.background='linear-gradient(135deg,var(--purple),var(--cyan))';this.style.color='#fff';document.getElementById('btn-medit-sim').style.background='var(--card)';document.getElementById('btn-medit-sim').style.color='var(--text-muted)'" style="flex:1;padding:12px;border-radius:12px;border:1px solid var(--card-border);background:${j.master?'var(--card)':'linear-gradient(135deg,var(--purple),var(--cyan))'};color:${j.master?'var(--text-muted)':'#fff'};font-weight:700;font-size:14px;cursor:pointer;">NAO</button>
         </div>
-      </label>` : ''}
-    </div>
-    <div style="display:flex;gap:10px;margin-top:18px;">
-      <button class="btn-ghost" onclick="fecharModal()">Cancelar</button>
-      <button class="btn-primary" id="btn-salvar-edit" onclick="salvarEdicaoJogador('${id}')">Salvar ✓</button>
+      </div>` : ''}
+      <button class="btn-primary" id="btn-salvar-edit" onclick="salvarEdicaoJogador('${id}')" style="margin-top:10px;font-size:16px;padding:16px;">SALVAR</button>
     </div>`);
   setTimeout(() => document.getElementById('i-nome-edit')?.focus(), 100);
 };
@@ -1084,10 +1109,10 @@ window.previewFotoEdit = (input) => {
 window.salvarEdicaoJogador = async (id) => {
   const nome  = document.getElementById('i-nome-edit')?.value.trim();
   const email = document.getElementById('i-email-edit')?.value.trim().toLowerCase();
-  const isMaster = document.getElementById('i-master-edit')?.checked || false;
-  if (!nome) { toast('Digite o nome','erro'); return; }
+  const isMaster = document.getElementById('i-master-edit')?.value === '1' || document.getElementById('i-master-edit')?.checked || false;
+  if (!nome) { toast('DIGITE O NOME','erro'); return; }
   const btn = document.getElementById('btn-salvar-edit');
-  if (btn) { btn.textContent = 'Salvando...'; btn.disabled = true; }
+  if (btn) { btn.textContent = 'SALVANDO...'; btn.disabled = true; }
   try {
     let fotoUrl = jogadores.find(x=>x.id===id)?.fotoUrl || '';
     const fotoInput = document.getElementById('i-foto-edit');
@@ -1097,7 +1122,6 @@ window.salvarEdicaoJogador = async (id) => {
       const snap = await uploadBytes(sRef, file);
       fotoUrl = await getDownloadURL(snap.ref);
     }
-    // Se marcou master, remove de outro que já seja master
     if (isMaster) {
       const masterAtual = getMaster();
       if (masterAtual && masterAtual.id !== id) {
@@ -1105,11 +1129,11 @@ window.salvarEdicaoJogador = async (id) => {
       }
     }
     await updateDoc(doc(db,'jogadores',id), { nome, email: email||'', master: isMaster, fotoUrl });
-    fecharModal(); await carregarJogadores(); atualizarDash(); toast(`${nome} atualizado!`);
+    fecharFullscreen(); await carregarJogadores(); atualizarDash(); toast(`${nome} ATUALIZADO!`);
   } catch(e) {
     console.error(e);
-    toast('Erro ao salvar jogador','erro');
-    if (btn) { btn.textContent = 'Salvar ✓'; btn.disabled = false; }
+    toast('ERRO AO SALVAR JOGADOR','erro');
+    if (btn) { btn.textContent = 'SALVAR'; btn.disabled = false; }
   }
 };
 
@@ -1130,32 +1154,35 @@ window.confirmarExcluirJog = async id => {
 };
 
 document.getElementById('btn-add-jog').addEventListener('click', () => {
-  if (!temPermissao()) { toast('Apenas o usuário Master pode adicionar jogadores','erro'); return; }
+  if (!temPermissao()) { toast('APENAS O USUARIO MASTER PODE ADICIONAR JOGADORES','erro'); return; }
   const master = getMaster();
   const podeDefinirMaster = !master || temPermissao();
-  modal(`<p class="modal-title">Adicionar Jogador</p>
-    <div style="display:flex;flex-direction:column;gap:12px;">
-      <!-- Avatar -->
-      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:4px;">
-        <div id="prev-avatar" style="width:72px;height:72px;border-radius:22px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(139,92,246,0.3),rgba(6,182,212,0.3));overflow:hidden;cursor:pointer;" onclick="document.getElementById('i-foto').click()">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C7B8FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1"/></svg>
+  fullscreen('NOVO JOGADOR', `
+    <div style="display:flex;flex-direction:column;gap:14px;max-width:400px;margin:0 auto;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:8px;">
+        <div id="prev-avatar" style="width:88px;height:88px;border-radius:22px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(139,92,246,0.3),rgba(6,182,212,0.3));overflow:hidden;cursor:pointer;" onclick="document.getElementById('i-foto').click()">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#C7B8FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1"/></svg>
         </div>
-        <label style="font-size:12px;color:var(--purple);font-weight:700;cursor:pointer;" onclick="document.getElementById('i-foto').click()">📷 Escolher foto</label>
+        <label style="font-size:12px;color:var(--purple);font-weight:700;cursor:pointer;" onclick="document.getElementById('i-foto').click()">ESCOLHER FOTO</label>
         <input type="file" id="i-foto" accept="image/*" style="display:none;" onchange="previewFoto(this)">
       </div>
-      <input class="input" id="i-nome" placeholder="Nome completo (ex: Nicola Bogar)" autocomplete="off">
-      <input class="input" id="i-email" placeholder="E-mail Google (ex: nicola@gmail.com)" type="email" autocomplete="off">
-      ${podeDefinirMaster ? `<label style="display:flex;align-items:center;gap:10px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:12px;cursor:pointer;">
-        <input type="checkbox" id="i-master" style="width:18px;height:18px;accent-color:var(--yellow);">
-        <div>
-          <div style="font-weight:700;font-size:13px;color:var(--yellow);">DEFINIR COMO MASTER</div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">O Master controla jogadores, times e campeonatos</div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">NOME COMPLETO</label>
+        <input class="input" id="i-nome" autocomplete="off">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">EMAIL</label>
+        <input class="input" id="i-email" type="email" autocomplete="off">
+      </div>
+      ${podeDefinirMaster ? `<div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">DEFINIR COMO MASTER</label>
+        <input type="hidden" id="i-master" value="0">
+        <div style="display:flex;gap:8px;">
+          <button type="button" id="btn-master-sim" onclick="document.getElementById('i-master').value='1';this.style.background='linear-gradient(135deg,var(--purple),var(--cyan))';this.style.color='#fff';document.getElementById('btn-master-nao').style.background='var(--card)';document.getElementById('btn-master-nao').style.color='var(--text-muted)'" style="flex:1;padding:12px;border-radius:12px;border:1px solid var(--card-border);background:var(--card);color:var(--text-muted);font-weight:700;font-size:14px;cursor:pointer;">SIM</button>
+          <button type="button" id="btn-master-nao" onclick="document.getElementById('i-master').value='0';this.style.background='linear-gradient(135deg,var(--purple),var(--cyan))';this.style.color='#fff';document.getElementById('btn-master-sim').style.background='var(--card)';document.getElementById('btn-master-sim').style.color='var(--text-muted)'" style="flex:1;padding:12px;border-radius:12px;border:1px solid var(--card-border);background:linear-gradient(135deg,var(--purple),var(--cyan));color:#fff;font-weight:700;font-size:14px;cursor:pointer;">NAO</button>
         </div>
-      </label>` : ''}
-    </div>
-    <div style="display:flex;gap:10px;margin-top:18px;">
-      <button class="btn-ghost" onclick="fecharModal()">Cancelar</button>
-      <button class="btn-primary" id="btn-salvar-jog" onclick="salvarJogador()">Adicionar ✓</button>
+      </div>` : ''}
+      <button class="btn-primary" id="btn-salvar-jog" onclick="salvarJogador()" style="margin-top:10px;font-size:16px;padding:16px;">SALVAR</button>
     </div>`);
   setTimeout(() => document.getElementById('i-nome')?.focus(), 100);
 });
@@ -1174,10 +1201,10 @@ window.previewFoto = (input) => {
 window.salvarJogador = async () => {
   const nome  = document.getElementById('i-nome')?.value.trim();
   const email = document.getElementById('i-email')?.value.trim().toLowerCase();
-  const isMaster = document.getElementById('i-master')?.checked || false;
-  if (!nome) { toast('Digite o nome','erro'); return; }
+  const isMaster = document.getElementById('i-master')?.value === '1' || document.getElementById('i-master')?.checked || false;
+  if (!nome) { toast('DIGITE O NOME','erro'); return; }
   const btn = document.getElementById('btn-salvar-jog');
-  if (btn) { btn.textContent = 'Salvando...'; btn.disabled = true; }
+  if (btn) { btn.textContent = 'SALVANDO...'; btn.disabled = true; }
   try {
     let fotoUrl = '';
     const fotoInput = document.getElementById('i-foto');
@@ -1187,17 +1214,16 @@ window.salvarJogador = async () => {
       const snap = await uploadBytes(sRef, file);
       fotoUrl = await getDownloadURL(snap.ref);
     }
-    // Se marcou como master, remove master de outros
     if (isMaster) {
       const masterAtual = getMaster();
       if (masterAtual) await updateDoc(doc(db,'jogadores',masterAtual.id), { master: false });
     }
     await addDoc(collection(db, 'jogadores'), { nome, email: email||'', master: isMaster, fotoUrl, criadoEm: serverTimestamp() });
-    fecharModal(); await carregarJogadores(); atualizarDash(); toast(`${nome} adicionado! ${isMaster?'MASTER definido':''}`);
+    fecharFullscreen(); await carregarJogadores(); atualizarDash(); toast(`${nome} ADICIONADO!`);
   } catch(e) {
     console.error(e);
-    toast('Erro ao salvar jogador','erro');
-    if (btn) { btn.textContent = 'Adicionar ✓'; btn.disabled = false; }
+    toast('ERRO AO SALVAR JOGADOR','erro');
+    if (btn) { btn.textContent = 'SALVAR'; btn.disabled = false; }
   }
 };
 
@@ -1310,48 +1336,47 @@ function renderAmistosos() {
 
 document.getElementById('btn-criar-ami').addEventListener('click', () => {
   if (jogadores.length < 2) { toast('Cadastre pelo menos 2 jogadores', 'erro'); return; }
-  modal(`<p class="modal-title">Nova Partida</p>
-    <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">Selecione os jogadores para o sorteio balanceado de times</p>
+  fullscreen('NOVA PARTIDA', `
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">SELECIONE OS JOGADORES PARA O SORTEIO BALANCEADO DE TIMES</p>
+    <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">TIPO</label>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
-      <div class="tipo-btn sel" id="tp-clubes" onclick="selTipoAmi('clubes')">⚽<br><span style="font-size:12px;font-weight:700;">Clubes</span></div>
-      <div class="tipo-btn" id="tp-selecoes" onclick="selTipoAmi('selecoes')">🌍<br><span style="font-size:12px;font-weight:700;">Seleções</span></div>
+      <div class="tipo-btn sel" id="tp-clubes" onclick="selTipoAmi('clubes')"><span style="font-size:12px;font-weight:700;">CLUBES</span></div>
+      <div class="tipo-btn" id="tp-selecoes" onclick="selTipoAmi('selecoes')"><span style="font-size:12px;font-weight:700;">SELECOES</span></div>
     </div>
     <input type="hidden" id="ami-tipo" value="clubes">
-    <p style="color:var(--text-muted);font-size:12px;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Jogadores</p>
+    <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">JOGADORES</label>
     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;" id="ami-jogs">
       ${jogadores.map(j => `<label class="check-row"><input type="checkbox" class="jc" value="${j.id}" data-nome="${j.nome}">${SVG_USER_CHIP}<span style="font-weight:700;">${j.nome}</span></label>`).join('')}
     </div>
     <div id="ami-sorteio" style="display:none;margin-bottom:16px;"></div>
     <div style="display:flex;gap:10px;">
-      <button class="btn-ghost" onclick="fecharModal()">Cancelar</button>
-      <button class="btn-primary" style="background:linear-gradient(135deg,#7C3AED,#06B6D4);" onclick="sortearAmistoso()">🎲 Sortear</button>
-      <button id="btn-ami-salvar" style="display:none;" class="btn-primary" onclick="salvarAmistoso()">Salvar ✓</button>
+      <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
+      <button class="btn-primary" style="background:linear-gradient(135deg,#7C3AED,#06B6D4);" onclick="sortearAmistoso()">SORTEAR</button>
+      <button id="btn-ami-salvar" style="display:none;" class="btn-primary" onclick="salvarAmistoso()">SALVAR</button>
     </div>`);
 });
 
 // ─── INICIAR PARTIDA (botão home) ────────────────────────────────────
 window.iniciarPartida = () => {
   if (jogadores.length < 2) { toast('Cadastre pelo menos 2 jogadores', 'erro'); return; }
-  modal(`<div style="text-align:center;margin-bottom:20px;">
-    <div style="font-size:48px;margin-bottom:8px;filter:drop-shadow(0 0 16px rgba(139,92,246,0.7))">⚡</div>
-    <p class="modal-title" style="margin-bottom:4px;">Iniciar Partida</p>
-    <p style="color:var(--text-muted);font-size:13px;">Selecione os jogadores e sortearemos os times!</p>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
-    <div class="tipo-btn sel" id="tp-clubes" onclick="selTipoAmi('clubes')">⚽<br><span style="font-size:12px;font-weight:700;">Clubes</span></div>
-    <div class="tipo-btn" id="tp-selecoes" onclick="selTipoAmi('selecoes')">🌍<br><span style="font-size:12px;font-weight:700;">Seleções</span></div>
-  </div>
-  <input type="hidden" id="ami-tipo" value="clubes">
-  <p style="color:var(--text-muted);font-size:12px;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Selecionar Jogadores</p>
-  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;" id="ami-jogs">
-    ${jogadores.map(j => `<label class="check-row"><input type="checkbox" class="jc" value="${j.id}" data-nome="${j.nome}">${SVG_USER_CHIP}<span style="font-weight:700;font-size:15px;">${j.nome}</span></label>`).join('')}
-  </div>
-  <div id="ami-sorteio" style="display:none;margin-bottom:16px;"></div>
-  <div style="display:flex;gap:10px;">
-    <button class="btn-ghost" onclick="fecharModal()">Cancelar</button>
-    <button class="btn-primary" style="background:linear-gradient(135deg,#7C3AED,#06B6D4);" onclick="sortearAmistoso()">🎲 Sortear Times!</button>
-    <button id="btn-ami-salvar" style="display:none;" class="btn-primary" onclick="salvarAmistoso()">Salvar ✓</button>
-  </div>`);
+  fullscreen('INICIAR PARTIDA', `
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">SELECIONE OS JOGADORES E SORTEAREMOS OS TIMES!</p>
+    <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">TIPO</label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+      <div class="tipo-btn sel" id="tp-clubes" onclick="selTipoAmi('clubes')"><span style="font-size:12px;font-weight:700;">CLUBES</span></div>
+      <div class="tipo-btn" id="tp-selecoes" onclick="selTipoAmi('selecoes')"><span style="font-size:12px;font-weight:700;">SELECOES</span></div>
+    </div>
+    <input type="hidden" id="ami-tipo" value="clubes">
+    <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">SELECIONAR JOGADORES</label>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;" id="ami-jogs">
+      ${jogadores.map(j => `<label class="check-row"><input type="checkbox" class="jc" value="${j.id}" data-nome="${j.nome}">${SVG_USER_CHIP}<span style="font-weight:700;font-size:15px;">${j.nome}</span></label>`).join('')}
+    </div>
+    <div id="ami-sorteio" style="display:none;margin-bottom:16px;"></div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
+      <button class="btn-primary" style="background:linear-gradient(135deg,#7C3AED,#06B6D4);" onclick="sortearAmistoso()">SORTEAR TIMES</button>
+      <button id="btn-ami-salvar" style="display:none;" class="btn-primary" onclick="salvarAmistoso()">SALVAR</button>
+    </div>`);
 };
 
 function vsCardTime(t, jogadoresList, pool) {
@@ -1457,7 +1482,7 @@ window.salvarAmistoso = async () => {
     return;
   }
   await addDoc(collection(db, 'amistosos'), { ..._sorteioAmi, criadoEm: serverTimestamp() });
-  fecharModal(); _sorteioAmi = null;
+  fecharFullscreen(); _sorteioAmi = null;
   await carregarAmistosos(); atualizarDash(); toast('AMISTOSO CRIADO!');
 };
 
@@ -1520,10 +1545,10 @@ function renderCampeonatos() {
 
 function abrirModalCriarCamp() {
   if (jogadores.length < 2) { toast('Cadastre pelo menos 2 jogadores', 'erro'); return; }
-  modal(`<p class="modal-title">Novo Campeonato</p>
+  fullscreen('NOVO CAMPEONATO', `
     <div style="display:flex;flex-direction:column;gap:14px;">
       <div>
-        <p style="color:var(--text-muted);font-size:12px;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Formato</p>
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">FORMATO</label>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
           ${Object.entries(CAMP_META).map(([k,v]) => `<div class="tipo-btn" data-ct="${k}" onclick="selCampTipo('${k}',this)" style="font-size:11px;padding:10px 6px;">
             <div style="height:42px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;">
@@ -1532,30 +1557,33 @@ function abrirModalCriarCamp() {
                 : `<span style="font-size:28px;">${v.emoji}</span>`}
             </div>
             <div style="font-weight:700;line-height:1.2;font-size:10px;">${v.nome}</div>
-            <div style="font-size:9px;color:var(--text-muted);margin-top:2px;">${v.tipo==='selecoes'?'Seleções':'Clubes'}</div>
+            <div style="font-size:9px;color:var(--text-muted);margin-top:2px;">${v.tipo==='selecoes'?'SELECOES':'CLUBES'}</div>
           </div>`).join('')}
         </div>
         <input type="hidden" id="ct" value="champions">
       </div>
-      <input class="input" id="cn" placeholder="Nome do campeonato" autocomplete="off">
       <div>
-        <p style="color:var(--text-muted);font-size:12px;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Participantes</p>
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">NOME DO CAMPEONATO</label>
+        <input class="input" id="cn" placeholder="Nome do campeonato" autocomplete="off">
+      </div>
+      <div>
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">PARTICIPANTES</label>
         <div style="display:flex;flex-direction:column;gap:8px;">
           ${jogadores.map(j => `<label class="check-row"><input type="checkbox" class="cc" value="${j.id}" data-nome="${j.nome}">${SVG_USER_CHIP}<span style="font-weight:600;">${j.nome}</span></label>`).join('')}
         </div>
       </div>
       <div>
-        <p style="color:var(--text-muted);font-size:12px;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Times <span id="ct-info" style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--purple);">(automático - sorteio balanceado)</span></p>
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">TIMES <span id="ct-info" style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--purple);">(AUTOMATICO - SORTEIO BALANCEADO)</span></label>
         <label style="display:flex;align-items:center;gap:10px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);border-radius:12px;padding:10px 12px;cursor:pointer;margin-bottom:8px;">
           <input type="checkbox" id="manual-times" style="width:18px;height:18px;accent-color:var(--purple);" onchange="toggleSelManual()">
-          <span style="font-weight:700;font-size:13px;">Escolher times manualmente</span>
+          <span style="font-weight:700;font-size:13px;">ESCOLHER TIMES MANUALMENTE</span>
         </label>
         <div id="manual-times-box" style="display:none;"></div>
       </div>
     </div>
     <div style="display:flex;gap:10px;margin-top:20px;">
-      <button class="btn-ghost" onclick="fecharModal()">Cancelar</button>
-      <button class="btn-primary" onclick="criarCampeonato()">Criar</button>
+      <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
+      <button class="btn-primary" onclick="criarCampeonato()">CRIAR</button>
     </div>`);
   setTimeout(() => selCampTipo('champions', document.querySelector('[data-ct="champions"]')), 30);
 }
@@ -1620,7 +1648,7 @@ window.criarCampeonato = async () => {
   }
   const grupos = gerarGrupos(distribuidos, tipo);
   await addDoc(collection(db, 'campeonatos'), { nome, tipo, participantes: distribuidos, grupos, fase:'grupos', status:'ativo', criadoEm: serverTimestamp() });
-  fecharModal(); await carregarCampeonatos(); atualizarDash(); toast('TORNEIO CRIADO!');
+  fecharFullscreen(); await carregarCampeonatos(); atualizarDash(); toast('TORNEIO CRIADO!');
 };
 
 function gerarGrupos(partic, tipo) {
