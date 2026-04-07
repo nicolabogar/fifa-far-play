@@ -379,7 +379,7 @@
         <button class="btn-primary" id="btn-criar-ami" style="width:auto;padding:10px 18px;font-size:14px;">+ CRIAR</button>
       </div>
       <div id="lista-ami">
-        <p style="color:var(--text-muted); text-align:center; padding:48px 0; font-size:14px;">Nenhuma partida registrada</p>
+        <p style="color:var(--text-muted); text-align:center; padding:48px 0; font-size:14px;">NENHUM AMISTOSO REGISTRADO</p>
       </div>
     </div>
 
@@ -1359,7 +1359,7 @@ window.excluirJogo = async (id, nome, btnEl) => {
   // Mostra banner de confirmação
   const banner = document.createElement('div');
   banner.style.cssText = 'margin-top:10px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;';
-  banner.innerHTML = `<span style="font-size:12px;font-weight:600;color:#ef4444;">Excluir esta partida?</span>
+  banner.innerHTML = `<span style="font-size:12px;font-weight:600;color:#ef4444;">EXCLUIR ESTE AMISTOSO?</span>
     <div style="display:flex;gap:6px;">
       <button onclick="cancelarExcluirJogo(this)" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:var(--text-muted);padding:4px 10px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;">Cancelar</button>
       <button onclick="excluirJogo('${id}','',this.closest('.match-card').querySelector('[onclick*=excluirJogo]'))" style="background:#ef4444;border:none;color:#fff;padding:4px 10px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">Excluir</button>
@@ -1381,7 +1381,7 @@ const _PAG_SIZE = 10;
 function renderAmistosos() {
   const c = document.getElementById('lista-ami');
   if (!amistosos.length) {
-    c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">NENHUMA PARTIDA REGISTRADA</p>';
+    c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">NENHUM AMISTOSO REGISTRADO</p>';
     return;
   }
 
@@ -1473,7 +1473,7 @@ function _renderFinalizadosAmi() {
 
   lista.innerHTML = slice.length
     ? slice.map(a => cardAmistoso(a)).join('')
-    : '<p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:13px;">NENHUMA PARTIDA COM ESSE FILTRO</p>';
+    : '<p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:13px;">NENHUM AMISTOSO COM ESSE FILTRO</p>';
 
   if (totalPags > 1) {
     pagRow.innerHTML = `
@@ -1503,7 +1503,7 @@ function wrapSwipeAmistoso(a, cardHtml) {
 
 document.getElementById('btn-criar-ami').addEventListener('click', () => {
   if (jogadores.length < 2) { toast('Cadastre pelo menos 2 jogadores', 'erro'); return; }
-  fullscreen('NOVA PARTIDA', `
+  fullscreen('NOVO AMISTOSO', `
     <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">SELECIONE OS JOGADORES PARA O SORTEIO BALANCEADO DE TIMES</p>
     <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">TIPO</label>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
@@ -1526,7 +1526,7 @@ document.getElementById('btn-criar-ami').addEventListener('click', () => {
 // ─── INICIAR PARTIDA (botão home) ────────────────────────────────────
 window.iniciarPartida = () => {
   if (jogadores.length < 2) { toast('Cadastre pelo menos 2 jogadores', 'erro'); return; }
-  fullscreen('INICIAR PARTIDA', `
+  fullscreen('NOVO AMISTOSO', `
     <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">SELECIONE OS JOGADORES E SORTEAREMOS OS TIMES!</p>
     <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">TIPO</label>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
@@ -1645,7 +1645,7 @@ window.salvarAmistoso = async () => {
   if (!_sorteioAmi) return;
   const abertos = amistosos.filter(a => !a.resultado);
   if (abertos.length >= 5) {
-    toast('Máximo de 5 partidas em aberto! Registre um placar antes de criar nova.', 'erro');
+    toast('MAXIMO DE 5 AMISTOSOS EM ABERTO! REGISTRE UM PLACAR ANTES DE CRIAR NOVO.', 'erro');
     return;
   }
   await addDoc(collection(db, 'amistosos'), { ..._sorteioAmi, criadoEm: serverTimestamp() });
@@ -2144,7 +2144,7 @@ window.salvarPartidaDireta = async (cid, gi, j1Id, j2Id, confKey) => {
     return {...gr,membros,partidas:[...(gr.partidas||[]),{j1Id:m1.jogadorId,j1Nome:m1.nome,j2Id:m2.jogadorId,j2Nome:m2.nome,g1,g2}]};
   });
   await updateDoc(doc(db,'campeonatos',cid),{grupos});
-  await carregarCampeonatos(); atualizarDash(); toast('PARTIDA REGISTRADA!'); abrirCampeonato(cid);
+  await carregarCampeonatos(); atualizarDash(); toast('JOGO REGISTRADO!'); abrirCampeonato(cid);
 };
 
 window.excluirCampeonato = (id) => {
@@ -2247,7 +2247,7 @@ window.salvarPartida = async (cid, gi) => {
     return {...g,membros,partidas:[...(g.partidas||[]),{j1Id:m1.jogadorId,j1Nome:m1.nome,j2Id:m2.jogadorId,j2Nome:m2.nome,g1,g2}]};
   });
   await updateDoc(doc(db,'campeonatos',cid),{grupos});
-  fecharModal(); await carregarCampeonatos(); atualizarDash(); toast('PARTIDA REGISTRADA!'); abrirCampeonato(cid);
+  fecharModal(); await carregarCampeonatos(); atualizarDash(); toast('JOGO REGISTRADO!'); abrirCampeonato(cid);
 };
 
 // ─── RANKING ─────────────────────────────────────────────────────────
