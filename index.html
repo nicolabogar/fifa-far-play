@@ -1741,13 +1741,13 @@ function _htmlNovoAmistoso() {
       </div>
     </label>
     <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">JOGADORES</label>
-    <div id="jc-tags" style="display:flex;flex-wrap:wrap;gap:6px;min-height:40px;padding:8px;background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;margin-bottom:8px;">
-      <span style="color:var(--text-muted);font-size:12px;align-self:center;padding:4px 0;">NENHUM JOGADOR SELECIONADO</span>
-    </div>
-    <div style="position:relative;margin-bottom:16px;">
+    <div style="position:relative;margin-bottom:8px;">
       <input id="jc-search" type="text" class="input" placeholder="BUSCAR JOGADOR..." autocomplete="off"
         oninput="filtrarJogsJC()" onfocus="filtrarJogsJC()" style="margin-bottom:0;">
       <div id="jc-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:20;background:var(--bg);border:1px solid var(--card-border);border-radius:12px;max-height:200px;overflow-y:auto;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,0.5);"></div>
+    </div>
+    <div id="jc-tags" style="display:flex;flex-wrap:wrap;gap:6px;min-height:40px;padding:8px;background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;margin-bottom:16px;">
+      <span style="color:var(--text-muted);font-size:12px;align-self:center;padding:4px 0;">NENHUM JOGADOR SELECIONADO</span>
     </div>
     <div id="ami-sorteio" style="display:none;margin-bottom:16px;"></div>
     <div style="display:flex;gap:10px;">
