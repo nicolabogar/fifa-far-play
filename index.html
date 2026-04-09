@@ -380,7 +380,7 @@
     <!-- ── JOGADORES ── -->
     <div id="view-jogadores" class="view">
       <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 0 16px;">
-        <h2 style="font-size:22px; font-weight:900;">JOGADORES</h2>
+        <h2 style="font-size:22px; font-weight:900;" class="grad">JOGADORES</h2>
         <button class="btn-primary" id="btn-add-jog" style="width:auto;padding:10px 18px;font-size:14px;">+ CRIAR</button>
       </div>
       <div id="lista-jog">
@@ -394,7 +394,7 @@
     <!-- ── PARTIDAS ── -->
     <div id="view-amistosos" class="view">
       <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 0 20px;">
-        <h2 style="font-size:22px; font-weight:900;">AMISTOSOS</h2>
+        <h2 style="font-size:22px; font-weight:900;" class="grad">AMISTOSOS</h2>
         <button class="btn-primary" id="btn-criar-ami" style="width:auto;padding:10px 18px;font-size:14px;">+ CRIAR</button>
       </div>
       <div id="lista-ami">
@@ -405,7 +405,7 @@
     <!-- ── CAMPEONATOS ── -->
     <div id="view-campeonatos" class="view">
       <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 0 16px;">
-        <h2 style="font-size:22px; font-weight:900;">TORNEIOS</h2>
+        <h2 style="font-size:22px; font-weight:900;" class="grad">TORNEIOS</h2>
         <button id="btn-criar-camp" class="btn-primary" style="width:auto;padding:10px 18px;font-size:14px;">+ CRIAR</button>
       </div>
       <div id="lista-camp">
@@ -416,7 +416,7 @@
     <!-- ── RANKING ── -->
     <div id="view-ranking" class="view">
       <div style="padding:8px 0 20px;">
-        <h2 style="font-size:22px; font-weight:900;">RANKING</h2>
+        <h2 style="font-size:22px; font-weight:900;" class="grad">RANKING</h2>
       </div>
       <div style="margin-bottom:24px;">
         <p class="sec-title" style="margin-bottom:10px;">RANKING AMISTOSOS</p>
@@ -435,7 +435,7 @@
     <!-- ── TIMES ── -->
     <div id="view-times" class="view">
       <div style="padding:8px 0 16px;">
-        <h2 style="font-size:22px; font-weight:900;">Gerenciar Times</h2>
+        <h2 style="font-size:22px; font-weight:900;" class="grad">TIMES</h2>
         <p style="color:var(--text-muted); font-size:13px; margin-top:4px;">Dados baseados no EA FC 26</p>
       </div>
 
@@ -469,8 +469,8 @@
 <!-- ═══════════════════════════════════════════
      FULLSCREEN (cadastros)
 ═══════════════════════════════════════════ -->
-<div id="fullscreen-overlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:60;overflow-y:auto;">
-  <div style="position:sticky;top:0;z-index:61;background:rgba(8,8,15,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--card-border);padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;">
+<div id="fullscreen-overlay" style="display:none;position:fixed;top:var(--header-h);left:0;right:0;bottom:0;background:var(--bg);z-index:29;overflow-y:auto;">
+  <div style="position:sticky;top:0;z-index:30;background:rgba(8,8,15,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--card-border);padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;">
     <button onclick="fecharFullscreen()" style="background:rgba(255,255,255,0.08);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;">FECHAR</button>
     <span id="fullscreen-title" style="font-weight:900;font-size:16px;" class="grad"></span>
     <div style="width:80px;"></div>
@@ -898,11 +898,11 @@ function fullscreen(title, html) {
   document.getElementById('fullscreen-title').textContent = title;
   document.getElementById('fullscreen-body').innerHTML = html;
   document.getElementById('fullscreen-overlay').style.display = 'block';
-  document.getElementById('app').style.display = 'none';
+  document.getElementById('main').style.display = 'none';
 }
 function fecharFullscreen() {
   document.getElementById('fullscreen-overlay').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
+  document.getElementById('main').style.display = '';
 }
 window.fecharFullscreen = fecharFullscreen;
 
