@@ -1535,7 +1535,14 @@ function cardAmistoso(a, compact=false) {
         ${a.modoDupla ? `<span class="tag tag-cyan" style="font-size:9px;">2v2</span>` : ''}
       </div>
       ${temRes
-        ? `<span class="tag tag-gray">FINALIZADO</span>`
+        ? master
+          ? `<div style="display:flex;align-items:center;gap:6px;">
+              <span class="tag tag-gray">FINALIZADO</span>
+              <button onclick="event.stopPropagation();confirmarExcluirAmistoso('${a.id}')" title="EXCLUIR" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#ef4444;border-radius:8px;padding:3px 7px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+              </button>
+            </div>`
+          : `<span class="tag tag-gray">FINALIZADO</span>`
         : master
           ? `<div style="display:flex;align-items:center;gap:6px;">
               <span class="tag tag-cyan" style="font-size:9px;">EM ANDAMENTO</span>
@@ -1549,9 +1556,9 @@ function cardAmistoso(a, compact=false) {
     ${compact ? `
     <div style="display:flex;align-items:center;gap:8px;">
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-width:0;">
+        <div style="font-weight:800;font-size:13px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;max-width:100%;">${a.time1?.nome || '?'}</div>
         ${b1}
         ${a.time1?.forca ? `<div style="margin-top:2px;">${forcaBadge(a.time1.forca)}</div>` : ''}
-        <div style="font-weight:800;font-size:13px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;max-width:100%;">${a.time1?.nome || '?'}</div>
         ${(a.time1?.jogadores||[]).length ? `<div style="font-size:10px;color:var(--cyan);font-weight:700;">${(a.time1.jogadores).join(' · ')}</div>` : ''}
       </div>
       <div style="flex-shrink:0;text-align:center;">
@@ -1567,17 +1574,17 @@ function cardAmistoso(a, compact=false) {
             : `<div style="color:var(--text-muted);font-size:11px;font-weight:700;">EM<br>ANDAMENTO</div>`}
       </div>
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-width:0;">
+        <div style="font-weight:800;font-size:13px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;max-width:100%;">${a.time2?.nome || '?'}</div>
         ${b2}
         ${a.time2?.forca ? `<div style="margin-top:2px;">${forcaBadge(a.time2.forca)}</div>` : ''}
-        <div style="font-weight:800;font-size:13px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;max-width:100%;">${a.time2?.nome || '?'}</div>
         ${(a.time2?.jogadores||[]).length ? `<div style="font-size:10px;color:var(--cyan);font-weight:700;">${(a.time2.jogadores).join(' · ')}</div>` : ''}
       </div>
     </div>` : `
     <div style="display:flex;align-items:flex-start;gap:8px;">
       <div style="flex:1;text-align:center;">
         <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${a.time1?.nome || '?'}</div>
+        <div style="display:flex;justify-content:center;margin-bottom:4px;">${b1}</div>
         ${a.time1?.forca ? `<div style="margin:4px 0;">${forcaBadge(a.time1.forca)}</div>` : ''}
-        <div style="display:flex;justify-content:center;margin-top:6px;margin-bottom:4px;">${b1}</div>
         ${(a.time1?.jogadores||[]).length
           ? `<div style="margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:2px;">${(a.time1.jogadores).map(n=>`<div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>`
           : ''}
@@ -1587,8 +1594,8 @@ function cardAmistoso(a, compact=false) {
       </div>
       <div style="flex:1;text-align:center;">
         <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${a.time2?.nome || '?'}</div>
+        <div style="display:flex;justify-content:center;margin-bottom:4px;">${b2}</div>
         ${a.time2?.forca ? `<div style="margin:4px 0;">${forcaBadge(a.time2.forca)}</div>` : ''}
-        <div style="display:flex;justify-content:center;margin-top:6px;margin-bottom:4px;">${b2}</div>
         ${(a.time2?.jogadores||[]).length
           ? `<div style="margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:2px;">${(a.time2.jogadores).map(n=>`<div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>`
           : ''}
@@ -1607,9 +1614,11 @@ function cardAmistoso(a, compact=false) {
 
 // RG1/RG2: modal de confirmação centralizado para excluir amistoso
 window.confirmarExcluirAmistoso = (id) => {
-  modal(`<p class="modal-title">EXCLUIR AMISTOSO?</p>
+  const a = amistosos.find(x => x.id === id);
+  const eFinalizado = a && a.resultado != null;
+  modal(`<p class="modal-title">EXCLUIR JOGO?</p>
     <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:12px;padding:12px 14px;margin-bottom:20px;">
-      <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">Esta ação removerá o amistoso e não pode ser desfeita.</p>
+      <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">Esta ação removerá o jogo e não pode ser desfeita.${eFinalizado ? ' <strong style="color:#FCA5A5;">O RANKING SERA ATUALIZADO.</strong>' : ''}</p>
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
@@ -1620,7 +1629,11 @@ window.confirmarExcluirAmistoso = (id) => {
 window.confirmarExcluirAmi = async (id) => {
   fecharModal();
   await deleteDoc(doc(db, 'amistosos', id));
-  await carregarAmistosos(); atualizarDash(); toast('AMISTOSO EXCLUÍDO');
+  await carregarAmistosos();
+  const rankAmi = calcularRankingAmistosos();
+  renderRankingAmistosos(rankAmi);
+  atualizarDash();
+  toast('JOGO EXCLUIDO. RANKING ATUALIZADO');
 };
 
 window.excluirJogo = async (id, nome, btnEl) => {
@@ -2865,8 +2878,8 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
     <div style="display:flex;align-items:flex-start;gap:8px;">
       <div style="flex:1;text-align:center;">
         <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${m1.time?.nome||'?'}</div>
+        <div style="display:flex;justify-content:center;margin-bottom:4px;">${b1}</div>
         ${forca1 ? `<div style="margin:4px 0;">${forcaBadge(forca1)}</div>` : ''}
-        <div style="display:flex;justify-content:center;margin-top:6px;margin-bottom:4px;">${b1}</div>
         <div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;margin:0 auto;display:inline-block;">${m1.nome}</div>
       </div>
       <div style="text-align:center;min-width:70px;padding-top:20px;">
@@ -2874,8 +2887,8 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
       </div>
       <div style="flex:1;text-align:center;">
         <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${m2.time?.nome||'?'}</div>
+        <div style="display:flex;justify-content:center;margin-bottom:4px;">${b2}</div>
         ${forca2 ? `<div style="margin:4px 0;">${forcaBadge(forca2)}</div>` : ''}
-        <div style="display:flex;justify-content:center;margin-top:6px;margin-bottom:4px;">${b2}</div>
         <div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;margin:0 auto;display:inline-block;">${m2.nome}</div>
       </div>
     </div>
