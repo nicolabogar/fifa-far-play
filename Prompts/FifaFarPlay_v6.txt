@@ -1,0 +1,9 @@
+# FIFA FAR PLAY - Prompts de Features v6
+# FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
+# O agente deve marcar o hash do commit ao concluir cada item.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v6.txt e um novo é criado.
+
+## MELHORIAS ##
+
+1-No card de jogos o score do time deve estar abaixo do icone do time, você deve deixar sempre o nome do time e icone em sequencia. [x] (hash: 40da22b)
+2-Ter opção de excluir jogos finalizados com o usuario master, e quando excluir deve ser excluir as contabilizações do ranking. [x] (hash: 40da22b)
