@@ -1196,6 +1196,7 @@ function renderJogadores() {
             ${j.master ? `<span class="tag tag-yellow" style="font-size:10px;">MASTER</span>` : ''}
           </div>
           <div style="color:var(--text-muted);font-size:11px;margin-top:2px;">${j.email||'SEM E-MAIL VINCULADO'}</div>
+          ${j.celular ? `<div style="color:var(--text-muted);font-size:11px;margin-top:1px;">${j.celular}</div>` : ''}
         </div>
       </div>
     </div>`).join('');
@@ -1226,6 +1227,10 @@ window.editarJogador = (id) => {
         <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">EMAIL</label>
         <input class="input" id="i-email-edit" type="email" value="${j.email||''}" autocomplete="off">
       </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">CELULAR</label>
+        <input class="input" id="i-celular-edit" type="tel" placeholder="(11) 99999-9999" value="${j.celular||''}" autocomplete="off">
+      </div>
       ${podeMudarMaster ? `<label class="check-row">
         <input type="checkbox" id="i-master-edit" ${j.master ? 'checked' : ''}>
         <div>
@@ -1252,6 +1257,7 @@ window.previewFotoEdit = (input) => {
 window.salvarEdicaoJogador = async (id) => {
   const nome  = document.getElementById('i-nome-edit')?.value.trim();
   const email = document.getElementById('i-email-edit')?.value.trim().toLowerCase();
+  const celular = document.getElementById('i-celular-edit')?.value.trim() || '';
   const isMaster = document.getElementById('i-master-edit')?.checked || false;
   if (!nome) { toast('DIGITE O NOME','erro'); return; }
   const btn = document.getElementById('btn-salvar-edit');
@@ -1271,7 +1277,7 @@ window.salvarEdicaoJogador = async (id) => {
         await updateDoc(doc(db,'jogadores',masterAtual.id), { master: false });
       }
     }
-    await updateDoc(doc(db,'jogadores',id), { nome, email: email||'', master: isMaster, fotoUrl });
+    await updateDoc(doc(db,'jogadores',id), { nome, email: email||'', celular, master: isMaster, fotoUrl });
     fecharFullscreen(); await carregarJogadores(); atualizarDash(); toast(`${nome} ATUALIZADO!`);
   } catch(e) {
     console.error(e);
@@ -1316,6 +1322,10 @@ document.getElementById('btn-add-jog').addEventListener('click', () => {
       <div>
         <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">EMAIL</label>
         <input class="input" id="i-email" type="email" autocomplete="off">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">CELULAR</label>
+        <input class="input" id="i-celular" type="tel" placeholder="(11) 99999-9999" autocomplete="off">
       </div>
       ${podeDefinirMaster ? `<label class="check-row">
         <input type="checkbox" id="i-master">
@@ -1366,6 +1376,7 @@ window.previewFoto = (input) => {
 window.salvarJogador = async () => {
   const nome  = document.getElementById('i-nome')?.value.trim();
   const email = document.getElementById('i-email')?.value.trim().toLowerCase();
+  const celular = document.getElementById('i-celular')?.value.trim() || '';
   const isMaster = document.getElementById('i-master')?.checked || false;
   if (!nome) { toast('DIGITE O NOME','erro'); return; }
   const btn = document.getElementById('btn-salvar-jog');
@@ -1383,7 +1394,7 @@ window.salvarJogador = async () => {
       const masterAtual = getMaster();
       if (masterAtual) await updateDoc(doc(db,'jogadores',masterAtual.id), { master: false });
     }
-    await addDoc(collection(db, 'jogadores'), { nome, email: email||'', master: isMaster, fotoUrl, criadoEm: serverTimestamp() });
+    await addDoc(collection(db, 'jogadores'), { nome, email: email||'', celular, master: isMaster, fotoUrl, criadoEm: serverTimestamp() });
     fecharFullscreen(); await carregarJogadores(); atualizarDash(); toast(`${nome} ADICIONADO!`);
   } catch(e) {
     console.error(e);
