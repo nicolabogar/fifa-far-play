@@ -2913,7 +2913,7 @@ function atualizarDash() {
   const elAmi = document.getElementById('home-amistosos');
   if (amistososAbertos.length > 0) {
     secAmi.style.display = '';
-    elAmi.innerHTML = amistososAbertos.slice(0,5).map(a => cardAmistoso(a, true)).join('');
+    elAmi.innerHTML = amistososAbertos.slice(0,5).map(a => cardAmistoso(a, false)).join('');
   } else { secAmi.style.display = 'none'; }
 
   // Torneios em andamento na home
