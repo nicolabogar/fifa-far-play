@@ -970,6 +970,13 @@ document.addEventListener('click', (e) => {
     document.getElementById('criar-menu-dropdown').style.display = 'none';
 });
 
+// F2: Limpar/selecionar campo de placar ao focar
+document.addEventListener('focus', (e) => {
+  if (e.target.classList.contains('placar-input')) {
+    e.target.select();
+  }
+}, true);
+
 getRedirectResult(auth).catch(() => {});
 
 onAuthStateChanged(auth, async u => {
@@ -1301,13 +1308,16 @@ function cardAmistoso(a, compact=false) {
         <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" id="pdc2-${a.id}" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
       </div>
       <button onclick="event.stopPropagation();salvarPlacarDireto('${a.id}')" class="btn-primary" style="margin-top:6px;padding:6px 14px;font-size:11px;font-weight:700;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">SALVAR</button>`;
-  return `<div class="match-card" style="margin-bottom:10px;${compact?'padding:12px;':''}${temRes?'cursor:pointer;':''}" ${temRes?`onclick="editarAmistoso('${a.id}')"`:''}>
+  const cardId = `ami-card-${a.id}`;
+  const dblClickAttr = !temRes ? `ondblclick="dblcliqueAmistoso('${a.id}',this)" style="cursor:pointer;"` : `onclick="editarAmistoso('${a.id}')" style="cursor:pointer;"`;
+  return `<div id="${cardId}" style="margin-bottom:10px;">
+  <div class="match-card" style="${compact?'padding:12px;':''}" ${dblClickAttr}>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${compact?'8':'10'}px;">
       <div style="display:flex;align-items:center;gap:6px;">
         <span class="tag tag-purple" style="font-size:9px;">AMISTOSO</span>
         <span class="tag tag-gray" style="font-size:9px;">${a.tipo === 'selecoes' ? 'SELECOES' : 'CLUBES'}</span>
       </div>
-      ${temRes ? `<span class="tag tag-gray">FINALIZADO</span>` : ''}
+      ${temRes ? `<span class="tag tag-gray">FINALIZADO</span>` : `<span class="tag tag-cyan" style="font-size:9px;">EM ANDAMENTO</span>`}
     </div>
     ${compact ? `
     <div style="display:flex;align-items:center;gap:8px;">
@@ -1359,37 +1369,39 @@ function cardAmistoso(a, compact=false) {
           : ''}
       </div>
     </div>`}
+  </div>
   </div>`;
 }
 
-window.excluirJogo = async (id, nome, btnEl) => {
-  // Confirmação inline no card
-  const card = btnEl.closest('.match-card');
-  if (card.dataset.confirmando) {
-    // Segunda chamada = confirmar exclusão
-    await deleteDoc(doc(db, 'amistosos', id));
-    card.style.transition = 'opacity 0.3s';
-    card.style.opacity = '0';
-    setTimeout(async () => { await carregarAmistosos(); atualizarDash(); toast('AMISTOSO EXCLUÍDO'); }, 300);
-    return;
-  }
-  card.dataset.confirmando = '1';
-  // Mostra banner de confirmação
-  const banner = document.createElement('div');
-  banner.style.cssText = 'margin-top:10px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;';
-  banner.innerHTML = `<span style="font-size:12px;font-weight:600;color:#ef4444;">EXCLUIR ESTE AMISTOSO?</span>
+// Duplo clique em amistoso em andamento → popup de confirmação abaixo do card
+window.dblcliqueAmistoso = (id, cardEl) => {
+  const container = cardEl.closest(`#ami-card-${id}`);
+  if (!container) return;
+  // Se já existe popup, cancela
+  const existing = container.querySelector('.ami-del-popup');
+  if (existing) { existing.remove(); return; }
+  const popup = document.createElement('div');
+  popup.className = 'ami-del-popup';
+  popup.style.cssText = 'margin-top:6px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.4);border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;animation:fadeUp 0.2s ease-out;';
+  popup.innerHTML = `<span style="font-size:12px;font-weight:700;color:#ef4444;text-transform:uppercase;">Excluir este amistoso?</span>
     <div style="display:flex;gap:6px;">
-      <button onclick="cancelarExcluirJogo(this)" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:var(--text-muted);padding:4px 10px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;">Cancelar</button>
-      <button onclick="excluirJogo('${id}','',this.closest('.match-card').querySelector('[onclick*=excluirJogo]'))" style="background:#ef4444;border:none;color:#fff;padding:4px 10px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">Excluir</button>
+      <button onclick="this.closest('.ami-del-popup').remove()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:var(--text-muted);padding:5px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">CANCELAR</button>
+      <button onclick="confirmarExcluirAmi('${id}')" style="background:#ef4444;border:none;color:#fff;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">EXCLUIR</button>
     </div>`;
-  card.appendChild(banner);
+  container.appendChild(popup);
 };
 
-window.cancelarExcluirJogo = (btn) => {
-  const card = btn.closest('.match-card');
-  delete card.dataset.confirmando;
-  const banner = btn.closest('div[style*="rgba(239,68,68"]');
-  if (banner) banner.remove();
+window.confirmarExcluirAmi = async (id) => {
+  await deleteDoc(doc(db, 'amistosos', id));
+  await carregarAmistosos(); atualizarDash(); toast('AMISTOSO EXCLUÍDO');
+};
+
+window.excluirJogo = async (id, nome, btnEl) => {
+  // Confirmação inline no card
+  const card = btnEl ? btnEl.closest('.match-card') : null;
+  // Executa exclusão direta (usado pelo confirmarExcluirAmi e compatibilidade)
+  await deleteDoc(doc(db, 'amistosos', id));
+  await carregarAmistosos(); atualizarDash(); toast('AMISTOSO EXCLUÍDO');
 };
 
 // ── Estado dos filtros/paginação de finalizados ──
