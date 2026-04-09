@@ -1427,7 +1427,7 @@ function cardAmistoso(a, compact=false) {
         <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
         <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" id="pdc2-${a.id}" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
       </div>
-      <button onclick="event.stopPropagation();salvarPlacarDireto('${a.id}')" class="btn-primary" style="margin-top:6px;padding:6px 14px;font-size:11px;font-weight:700;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">SALVAR</button>`;
+      <button onclick="event.stopPropagation();salvarPlacarDireto('${a.id}')" class="btn-primary" style="margin-top:6px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">FINALIZAR</button>`;
   const cardId = `ami-card-${a.id}`;
   const dblClickAttr = !temRes
     ? `onclick="editarAmistoso('${a.id}')" ondblclick="event.stopPropagation();dblcliqueAmistoso('${a.id}',this)" style="cursor:pointer;"`
@@ -2131,23 +2131,23 @@ window.salvarAmistoso = async () => {
 window.abrirPlacar = id => {
   const a = amistosos.find(x => x.id === id);
   if (!a) return;
-  modal(`<p class="modal-title">Registrar Placar</p>
+  modal(`<p class="modal-title">REGISTRAR PLACAR</p>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
       <div style="flex:1;text-align:center;">
-        <div style="font-weight:800;font-size:14px;margin-bottom:8px;">${a.time1?.nome}</div>
+        <div style="font-weight:800;font-size:15px;margin-bottom:8px;text-transform:uppercase;">${a.time1?.nome}</div>
         ${a.time1?.forca ? forcaBadge(a.time1.forca) : ''}
-        <input id="pg1" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" class="input" style="text-align:center;font-size:32px;font-weight:900;padding:12px;margin-top:8px;">
+        <input id="pg1" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" class="input placar-input" style="text-align:center;font-size:52px;font-weight:900;padding:14px;margin-top:10px;letter-spacing:-1px;">
       </div>
-      <div style="color:var(--text-muted);font-size:28px;font-weight:900;flex-shrink:0;">×</div>
+      <div style="color:var(--text-muted);font-size:36px;font-weight:900;flex-shrink:0;">×</div>
       <div style="flex:1;text-align:center;">
-        <div style="font-weight:800;font-size:14px;margin-bottom:8px;">${a.time2?.nome}</div>
+        <div style="font-weight:800;font-size:15px;margin-bottom:8px;text-transform:uppercase;">${a.time2?.nome}</div>
         ${a.time2?.forca ? forcaBadge(a.time2.forca) : ''}
-        <input id="pg2" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" class="input" style="text-align:center;font-size:32px;font-weight:900;padding:12px;margin-top:8px;">
+        <input id="pg2" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" class="input placar-input" style="text-align:center;font-size:52px;font-weight:900;padding:14px;margin-top:10px;letter-spacing:-1px;">
       </div>
     </div>
     <div style="display:flex;gap:10px;">
-      <button class="btn-ghost" onclick="fecharModal()">Cancelar</button>
-      <button class="btn-primary" onclick="salvarPlacar('${id}')">Salvar ✓</button>
+      <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
+      <button class="btn-primary" onclick="salvarPlacar('${id}')" style="font-size:17px;padding:18px;font-weight:900;">FINALIZAR</button>
     </div>`);
 };
 window.salvarPlacar = async id => {
