@@ -2613,8 +2613,9 @@ window.criarCampeonato = async () => {
     distribuidos = distribuirTimesBalanceados(partic, pool, hist);
   }
   const grupos = gerarGrupos(distribuidos, tipo);
-  await addDoc(collection(db, 'campeonatos'), { nome, tipo, participantes: distribuidos, grupos, fase:'grupos', status:'ativo', criadoEm: serverTimestamp() });
+  const docRef = await addDoc(collection(db, 'campeonatos'), { nome, tipo, participantes: distribuidos, grupos, fase:'grupos', status:'ativo', criadoEm: serverTimestamp() });
   fecharFullscreen(); await carregarCampeonatos(); atualizarDash(); toast('TORNEIO CRIADO!');
+  abrirCampeonato(docRef.id);
 };
 
 function gerarGrupos(partic, tipo) {
