@@ -1730,12 +1730,10 @@ function _htmlNovoAmistoso() {
   return `
     <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">SELECIONE OS JOGADORES E SORTEAREMOS OS TIMES</p>
     <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">TIPO</label>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
-      <div class="tipo-btn sel" id="tp-clubes" onclick="selTipoAmi('clubes')"><span style="font-size:12px;font-weight:700;">CLUBES</span></div>
-      <div class="tipo-btn" id="tp-selecoes" onclick="selTipoAmi('selecoes')"><span style="font-size:12px;font-weight:700;">SELECOES</span></div>
-      <div class="tipo-btn" id="tp-ambos" onclick="selTipoAmi('ambos')"><span style="font-size:12px;font-weight:700;">AMBOS</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+      <div class="tipo-btn sel" id="tp-clubes" onclick="toggleTipoAmi('clubes')"><span style="font-size:12px;font-weight:700;">CLUBES</span></div>
+      <div class="tipo-btn sel" id="tp-selecoes" onclick="toggleTipoAmi('selecoes')"><span style="font-size:12px;font-weight:700;">SELECOES</span></div>
     </div>
-    <input type="hidden" id="ami-tipo" value="clubes">
     <label class="check-row" style="margin-bottom:16px;" id="label-dupla">
       <input type="checkbox" id="ami-dupla" onchange="toggleModoDupla(this.checked)">
       <div>
@@ -1763,6 +1761,7 @@ function _htmlNovoAmistoso() {
 document.getElementById('btn-criar-ami').addEventListener('click', () => {
   if (jogadores.length < 2) { toast('CADASTRE PELO MENOS 2 JOGADORES', 'erro'); return; }
   _jcSel.clear();
+  _amiTiposSel.clear(); _amiTiposSel.add('clubes'); _amiTiposSel.add('selecoes');
   fullscreen('NOVO AMISTOSO', _htmlNovoAmistoso());
   setTimeout(() => {
     document.getElementById('fullscreen-body')?.addEventListener('click', e => {
@@ -1778,6 +1777,7 @@ document.getElementById('btn-criar-ami').addEventListener('click', () => {
 window.iniciarPartida = () => {
   if (jogadores.length < 2) { toast('CADASTRE PELO MENOS 2 JOGADORES', 'erro'); return; }
   _jcSel.clear();
+  _amiTiposSel.clear(); _amiTiposSel.add('clubes'); _amiTiposSel.add('selecoes');
   fullscreen('NOVO AMISTOSO', _htmlNovoAmistoso());
   setTimeout(() => {
     document.getElementById('fullscreen-body')?.addEventListener('click', e => {
@@ -1827,12 +1827,31 @@ function compartilharWhatsApp(sorteio) {
 }
 window.compartilharWhatsApp = compartilharWhatsApp;
 
+// _amiTiposSel: set com 'clubes' e/ou 'selecoes'
+const _amiTiposSel = new Set(['clubes', 'selecoes']);
+
 window.selTipoAmi = tipo => {
-  document.getElementById('ami-tipo').value = tipo;
-  document.getElementById('tp-clubes').classList.toggle('sel', tipo === 'clubes');
-  document.getElementById('tp-selecoes').classList.toggle('sel', tipo === 'selecoes');
-  const tpAmbos = document.getElementById('tp-ambos');
-  if (tpAmbos) tpAmbos.classList.toggle('sel', tipo === 'ambos');
+  // compatibilidade (chamado de editarAmistoso)
+  _amiTiposSel.clear();
+  if (tipo === 'ambos') { _amiTiposSel.add('clubes'); _amiTiposSel.add('selecoes'); }
+  else _amiTiposSel.add(tipo);
+  document.getElementById('tp-clubes')?.classList.toggle('sel', _amiTiposSel.has('clubes'));
+  document.getElementById('tp-selecoes')?.classList.toggle('sel', _amiTiposSel.has('selecoes'));
+};
+
+window.toggleTipoAmi = tipo => {
+  if (_amiTiposSel.has(tipo)) {
+    if (_amiTiposSel.size > 1) _amiTiposSel.delete(tipo); // ao menos 1 sempre selecionado
+  } else {
+    _amiTiposSel.add(tipo);
+  }
+  document.getElementById('tp-clubes')?.classList.toggle('sel', _amiTiposSel.has('clubes'));
+  document.getElementById('tp-selecoes')?.classList.toggle('sel', _amiTiposSel.has('selecoes'));
+  // resetar sorteio ao mudar tipo
+  const box = document.getElementById('ami-sorteio');
+  if (box) { box.style.display = 'none'; box.innerHTML = ''; }
+  const btnSalvar = document.getElementById('btn-ami-salvar');
+  if (btnSalvar) btnSalvar.style.display = 'none';
 };
 
 window.toggleModoDupla = (ativo) => {
@@ -1856,12 +1875,11 @@ window.sortearAmistoso = () => {
   } else {
     if (_jcSel.size < 2) { toast('SELECIONE 2+ JOGADORES', 'erro'); return; }
   }
-  let tipo = document.getElementById('ami-tipo').value;
-
-  // F6: se tipo=ambos, sortear aleatoriamente entre clubes e seleções
-  // garantindo diferença máxima de 20% da força média entre os dois times
-  if (tipo === 'ambos') {
-    // Tenta até 20 vezes alternar entre clubes e seleções para respeitar regra dos 20%
+  // Determinar tipo a sortear com base nos toggles selecionados
+  const tiposDisponiveis = [..._amiTiposSel];
+  let tipo;
+  if (tiposDisponiveis.length > 1) {
+    // Ambos selecionados: sortear aleatoriamente entre clubes e seleções (lógica "ambos")
     const opcoes = shuffle(['clubes', 'selecoes']);
     let escolhido = null;
     for (let tentativa = 0; tentativa < 20; tentativa++) {
@@ -1871,12 +1889,7 @@ window.sortearAmistoso = () => {
       const [ct1, ct2] = sortearBalanceado(pool, hist);
       const media = (ct1.forca + ct2.forca) / 2;
       const pctDiff = Math.abs(ct1.forca - ct2.forca) / media;
-      if (pctDiff <= 0.20) {
-        tipo = candidato;
-        escolhido = [ct1, ct2];
-        break;
-      }
-      // Se não encontrou em 20 tentativas, usa o melhor disponível
+      if (pctDiff <= 0.20) { tipo = candidato; escolhido = [ct1, ct2]; break; }
       if (tentativa === 19) {
         tipo = opcoes[0];
         const pool2 = tipo === 'selecoes' ? selecoes : clubes;
@@ -1897,6 +1910,7 @@ window.sortearAmistoso = () => {
     _renderSorteioBox(_sorteioAmi, eq, diff);
     return;
   }
+  tipo = tiposDisponiveis[0] || 'clubes';
 
   const pool = tipo === 'selecoes' ? selecoes : clubes;
   const hist = historicoIds(tipo);
