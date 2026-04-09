@@ -1715,15 +1715,22 @@ window.selecionarJogJC = (id, nome) => {
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
   const btnSalvar = document.getElementById('btn-ami-salvar');
   if (btnSalvar) btnSalvar.style.display = 'none';
+  // atualizar seleção manual se estiver no modo manual
+  const sorteioAuto = document.getElementById('ami-sorteio-auto');
+  if (sorteioAuto && !sorteioAuto.checked) _renderSorteioManual();
 };
 
 window.removerJogJC = (id) => {
   _jcSel.delete(id);
+  _amiManualSel.delete(id);
   _renderTagsJC();
   const box = document.getElementById('ami-sorteio');
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
   const btnSalvar = document.getElementById('btn-ami-salvar');
   if (btnSalvar) btnSalvar.style.display = 'none';
+  // atualizar seleção manual se estiver no modo manual
+  const sorteioAuto = document.getElementById('ami-sorteio-auto');
+  if (sorteioAuto && !sorteioAuto.checked) _renderSorteioManual();
 };
 
 function _htmlNovoAmistoso() {
@@ -1733,13 +1740,21 @@ function _htmlNovoAmistoso() {
       <div class="tipo-btn sel" id="tp-clubes" onclick="toggleTipoAmi('clubes')"><span style="font-size:12px;font-weight:700;">CLUBES</span></div>
       <div class="tipo-btn sel" id="tp-selecoes" onclick="toggleTipoAmi('selecoes')"><span style="font-size:12px;font-weight:700;">SELECOES</span></div>
     </div>
-    <label class="check-row" style="margin-bottom:16px;" id="label-dupla">
+    <label class="check-row" style="margin-bottom:8px;" id="label-dupla">
       <input type="checkbox" id="ami-dupla" onchange="toggleModoDupla(this.checked)">
       <div>
         <div style="font-size:13px;font-weight:700;">MODO DUPLA (2v2)</div>
         <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">SELECIONE EXATAMENTE 4 JOGADORES</div>
       </div>
     </label>
+    <label class="check-row" style="margin-bottom:16px;" id="label-sorteio-auto">
+      <input type="checkbox" id="ami-sorteio-auto" checked onchange="toggleSorteioAuto(this.checked)">
+      <div>
+        <div style="font-size:13px;font-weight:700;">SORTEAR TIMES ALEATORIAMENTE</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">DESMARCADO: ESCOLHA O TIME DE CADA JOGADOR</div>
+      </div>
+    </label>
+    <div id="ami-manual-times-box" style="display:none;margin-bottom:16px;"></div>
     <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">JOGADORES</label>
     <div style="position:relative;margin-bottom:8px;">
       <input id="jc-search" type="text" class="input" placeholder="BUSCAR JOGADOR..." autocomplete="off"
@@ -1881,15 +1896,130 @@ window.toggleModoDupla = (ativo) => {
   if (btnSalvar) btnSalvar.style.display = 'none';
 };
 
+window.toggleSorteioAuto = (ativo) => {
+  const manualBox = document.getElementById('ami-manual-times-box');
+  if (!manualBox) return;
+  if (ativo) {
+    manualBox.style.display = 'none';
+    manualBox.innerHTML = '';
+  } else {
+    _renderSorteioManual();
+  }
+  const box = document.getElementById('ami-sorteio');
+  if (box) { box.style.display = 'none'; box.innerHTML = ''; }
+  const btnSalvar = document.getElementById('btn-ami-salvar');
+  if (btnSalvar) btnSalvar.style.display = 'none';
+};
+
+function _renderSorteioManual() {
+  const manualBox = document.getElementById('ami-manual-times-box');
+  if (!manualBox) return;
+  const tiposDisponiveis = [..._amiTiposSel];
+  // Determinar pool de times disponíveis
+  let pool = [];
+  if (tiposDisponiveis.length > 1) {
+    pool = [...clubes.map(t=>({...t,_tipo:'clubes'})), ...selecoes.map(t=>({...t,_tipo:'selecoes'}))];
+  } else if (tiposDisponiveis[0] === 'selecoes') {
+    pool = selecoes.map(t=>({...t,_tipo:'selecoes'}));
+  } else {
+    pool = clubes.map(t=>({...t,_tipo:'clubes'}));
+  }
+  const jogsList = [..._jcSel.entries()].map(([id,nome])=>({id,nome}));
+  if (!jogsList.length) {
+    manualBox.style.display = 'none';
+    manualBox.innerHTML = '';
+    return;
+  }
+  const busca = `<div style="position:relative;margin-bottom:8px;">
+    <input id="ami-manual-search" type="text" class="input" placeholder="BUSCAR TIME..." autocomplete="off"
+      oninput="_filtrarTimesManual()" style="margin-bottom:0;">
+  </div>
+  <div id="ami-manual-lista" style="max-height:200px;overflow-y:auto;background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:6px;margin-bottom:8px;"></div>`;
+  const rows = jogsList.map(j => `
+    <div style="margin-bottom:8px;">
+      <div style="font-size:12px;font-weight:700;color:var(--cyan);margin-bottom:4px;text-transform:uppercase;">${j.nome}</div>
+      <div style="position:relative;">
+        <input type="text" class="input" placeholder="BUSCAR TIME..." id="ami-manual-search-${j.id}" autocomplete="off"
+          oninput="_filtrarTimesManualJog('${j.id}')"
+          onfocus="_abrirDropdownManualJog('${j.id}')"
+          onblur="setTimeout(()=>{const d=document.getElementById('ami-manual-drop-${j.id}');if(d)d.style.display='none';},200)"
+          style="margin-bottom:0;font-size:13px;padding:10px 14px;" readonly>
+        <div id="ami-manual-sel-${j.id}" style="display:none;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);border-radius:8px;padding:6px 10px;margin-top:4px;font-size:12px;font-weight:700;cursor:pointer;" onclick="document.getElementById('ami-manual-search-${j.id}').value='';_abrirDropdownManualJog('${j.id}')"></div>
+        <div id="ami-manual-drop-${j.id}" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:25;background:var(--bg);border:1px solid var(--card-border);border-radius:12px;max-height:180px;overflow-y:auto;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,0.5);"></div>
+      </div>
+    </div>`).join('');
+  manualBox.style.display = 'block';
+  manualBox.innerHTML = `<p style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">ESCOLHA O TIME DE CADA JOGADOR</p>${rows}`;
+}
+
+// _amiManualSel: Map de jogadorId -> {timeId, nome, forca, _tipo}
+const _amiManualSel = new Map();
+
+window._abrirDropdownManualJog = (jogId) => {
+  const q = (document.getElementById('ami-manual-search-'+jogId)?.value||'').toLowerCase();
+  const tiposDisponiveis = [..._amiTiposSel];
+  let pool = [];
+  if (tiposDisponiveis.length > 1) pool = [...clubes.map(t=>({...t,_tipo:'clubes'})), ...selecoes.map(t=>({...t,_tipo:'selecoes'}))];
+  else if (tiposDisponiveis[0]==='selecoes') pool = selecoes.map(t=>({...t,_tipo:'selecoes'}));
+  else pool = clubes.map(t=>({...t,_tipo:'clubes'}));
+  const filtrado = pool.filter(t => !q || t.nome.toLowerCase().includes(q));
+  const drop = document.getElementById('ami-manual-drop-'+jogId);
+  if (!drop) return;
+  if (!filtrado.length) { drop.style.display='none'; return; }
+  drop.innerHTML = filtrado.slice(0,30).map(t=>`
+    <div onclick="selecionarTimeManualJog('${jogId}','${t.id}','${t.nome.replace(/'/g,"\\'")}',${t.forca},'${t._tipo}')"
+      style="padding:9px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);font-weight:600;font-size:12px;display:flex;align-items:center;gap:8px;">
+      <span>${t._tipo==='selecoes'?(selecoes.find(s=>s.id===t.id)?.bandeira||'🌍'):(t.logo||'⚽')}</span>
+      <span>${t.nome}</span>
+      <span style="color:var(--text-muted);font-size:10px;margin-left:auto;">Força ${t.forca}</span>
+    </div>`).join('');
+  drop.style.display='block';
+};
+
+window._filtrarTimesManualJog = (jogId) => { _abrirDropdownManualJog(jogId); };
+
+window.selecionarTimeManualJog = (jogId, timeId, timeNome, forca, tipo) => {
+  _amiManualSel.set(jogId, {timeId, nome: timeNome, forca, _tipo: tipo});
+  const inp = document.getElementById('ami-manual-search-'+jogId);
+  if (inp) inp.value = timeNome;
+  const drop = document.getElementById('ami-manual-drop-'+jogId);
+  if (drop) drop.style.display='none';
+};
+
 let _sorteioAmi = null;
 // F8: expor _sorteioAmi no window para que onclick inline possa acessar
 Object.defineProperty(window, '_sorteioAmi', { get: () => _sorteioAmi });
 window.sortearAmistoso = () => {
   const modoDupla = document.getElementById('ami-dupla')?.checked || false;
+  const sorteioAuto = document.getElementById('ami-sorteio-auto')?.checked !== false;
   if (modoDupla) {
     if (_jcSel.size !== 4) { toast('MODO DUPLA: SELECIONE EXATAMENTE 4 JOGADORES', 'erro'); return; }
   } else {
     if (_jcSel.size < 2) { toast('SELECIONE 2+ JOGADORES', 'erro'); return; }
+  }
+
+  // Modo manual: usar times escolhidos manualmente
+  if (!sorteioAuto) {
+    const jogsList = [..._jcSel.entries()].map(([id, nome]) => ({ id, nome }));
+    for (const j of jogsList) {
+      if (!_amiManualSel.has(j.id)) { toast(`ESCOLHA O TIME DE: ${j.nome}`, 'erro'); return; }
+    }
+    const jogs = shuffle(jogsList);
+    const meio = Math.ceil(jogs.length / 2);
+    const j1 = jogs.slice(0, meio), j2 = jogs.slice(meio);
+    // Determinar time e tipo para cada lado (usa o time do primeiro jogador de cada lado, ou o mesmo)
+    const t1data = _amiManualSel.get(j1[0].id);
+    const t2data = _amiManualSel.get(j2[0].id);
+    const tipo = t1data._tipo === 'selecoes' ? 'selecoes' : 'clubes';
+    const diff = Math.abs(t1data.forca - t2data.forca);
+    const eq = diff <= 2 ? 'EQUILIBRADO' : diff <= 5 ? 'LEVEMENTE DESIGUAL' : 'DESIGUAL';
+    _sorteioAmi = {
+      tipo,
+      time1: { nome: t1data.nome, timeId: t1data.timeId, forca: t1data.forca, jogadores: j1.map(j=>j.nome), jogadoresIds: j1.map(j=>j.id) },
+      time2: { nome: t2data.nome, timeId: t2data.timeId, forca: t2data.forca, jogadores: j2.map(j=>j.nome), jogadoresIds: j2.map(j=>j.id) },
+    };
+    _renderSorteioBox(_sorteioAmi, eq, diff);
+    return;
   }
   // Determinar tipo a sortear com base nos toggles selecionados
   const tiposDisponiveis = [..._amiTiposSel];
