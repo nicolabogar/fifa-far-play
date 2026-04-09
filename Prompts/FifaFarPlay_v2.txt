@@ -1,0 +1,12 @@
+# FIFA FAR PLAY - Prompts de Features v2
+# FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
+# O agente deve marcar o hash do commit ao concluir cada item.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v2.txt e um novo é criado.
+
+[x] 1 - Quando clicar no titulo FIFA FAR PLAY do menu, deve automaticamente ser direcionado para a home. (hash: 35d8030)
+[x] 2 - Na pagina de amistosos, o o pais do time e descrição do time deve vir antes do icone. (hash: 23245bb)
+[x] 3 - No card em andamento do jogo amistoso não esta com opção de exclusão, colocar uma melhor forma de conseguir excluir diretamente no card, ou também excluir caso clicar no card e ir para edição do amistoso. (hash: 130be42)
+[x] 4 - Nos cards de amistoso em andamento tem que ter o botão de enviar para o whatsapp. (hash: f04786d)
+[x] 5 - Deixar o card em andamento da home igual os cards em andamento da pagina de amistosos. (hash: 93076d4)
+[x] 6 - Tirar barra de força quando é clicado na edição do amistoso. (hash: acb36a4)
+[x] 7 - quando clico no card do amistoso em andamento, o menu superior some, temos que deixar todas paginas em sincronia, sempre deixar fixo o menu superior, e manter a nomenclatura do processo igual iguais, quero com o mesmo texto (estilo) que é usado no texto FIFA FAR PLAY (hash: fbf4072)
