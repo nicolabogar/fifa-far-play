@@ -1,0 +1,11 @@
+# FIFA FAR PLAY - Prompts de Features v5
+# FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
+# O agente deve marcar o hash do commit ao concluir cada item.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v5.txt e um novo é criado.
+
+## MELHORIAS ##
+
+1-[x] O pais holando e paises baixos são a mesma coisa, nesse caso preciso que você delete o paises baixos. (hash: 22e7b55)
+2-[x] No Fifa tem o score 82, 84, 85 e que é ataque, meia e defesa (se você tiver essa informação pegue ela some tudo e faça um percentual para ter o score correto. (hash: 6f481a3)
+3-[x] Quando excluir um jogador, todo os historico dele de ranking deve ser excluido, campeonatos, jogos em andamento, tudo que for refenciado com ele. (hash: 3263f06)
+4-No card de jogos o score do time deve estar abaixo do icone do time, você deve deixar sempre o nome do time e icone em sequencia.
