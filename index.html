@@ -1080,12 +1080,33 @@ onAuthStateChanged(auth, async u => {
     await carregarDados();
     // RG4: auto-cadastro de jogador no primeiro login
     await _autoCadastrarJogador(u);
+    // RG5: aplicar controle de acesso na UI
+    _aplicarControleAcesso();
   } else {
     usuario = null;
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
   }
 });
+
+// RG5: controle de acesso — oculta funcionalidades de master para usuários normais
+function _aplicarControleAcesso() {
+  const master = temPermissao();
+  // Botão + CRIAR na home: apenas para master
+  const btnCriarHome = document.getElementById('btn-criar-home');
+  if (btnCriarHome) btnCriarHome.style.display = master ? '' : 'none';
+  // Botões de criação nas telas
+  const btnAddJog = document.getElementById('btn-add-jog');
+  if (btnAddJog) btnAddJog.style.display = master ? '' : 'none';
+  const btnCriarAmi = document.getElementById('btn-criar-ami');
+  if (btnCriarAmi) btnCriarAmi.style.display = master ? '' : 'none';
+  const btnCriarCamp = document.getElementById('btn-criar-camp');
+  if (btnCriarCamp) btnCriarCamp.style.display = master ? '' : 'none';
+  const btnAddTime = document.getElementById('btn-add-time');
+  if (btnAddTime) btnAddTime.style.display = master ? '' : 'none';
+  // Itens do menu hamburger para não-master: apenas home e ranking visíveis
+  // (mantém acesso de leitura; criação bloqueada via botões)
+}
 
 // RG4: verifica se usuário tem cadastro como jogador, cria se não existir
 async function _autoCadastrarJogador(u) {
@@ -1141,6 +1162,7 @@ async function carregarTimes() {
 async function carregarDados() {
   await Promise.all([carregarJogadores(), carregarAmistosos(), carregarCampeonatos()]);
   atualizarDash();
+  _aplicarControleAcesso();
 }
 
 // ─── JOGADORES ───────────────────────────────────────────────────────
