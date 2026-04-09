@@ -272,6 +272,13 @@
       justify-content: center; flex-shrink: 0; transition: transform 0.15s;
     }
     .ham-menu-btn:active .ham-menu-ico { transform: scale(0.9); }
+
+    /* Breadcrumb */
+    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; }
+    .breadcrumb-item { color: var(--text-muted); cursor: pointer; transition: color 0.15s; }
+    .breadcrumb-item:hover { color: var(--text); }
+    .breadcrumb-item.active { color: var(--text); cursor: default; }
+    .breadcrumb-sep { color: var(--text-muted); font-size: 11px; opacity: 0.5; }
   </style>
 </head>
 <body>
@@ -540,7 +547,6 @@
 ═══════════════════════════════════════════ -->
 <div id="modal-overlay">
   <div id="modal-box">
-    <button class="modal-close" onclick="fecharModal()" aria-label="Fechar">✕</button>
     <div class="modal-handle"></div>
     <div id="modal-body"></div>
   </div>
@@ -550,10 +556,12 @@
      FULLSCREEN (cadastros)
 ═══════════════════════════════════════════ -->
 <div id="fullscreen-overlay" style="display:none;position:fixed;top:var(--header-h);left:0;right:0;bottom:0;background:var(--bg);z-index:29;overflow-y:auto;">
-  <div style="position:sticky;top:0;z-index:30;background:rgba(8,8,15,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--card-border);padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;">
-    <button onclick="fecharFullscreen()" style="background:rgba(255,255,255,0.08);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;">CANCELAR</button>
-    <span id="fullscreen-title" style="font-weight:900;font-size:16px;" class="grad"></span>
-    <div style="width:80px;"></div>
+  <div style="position:sticky;top:0;z-index:30;background:rgba(8,8,15,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--card-border);padding:0 16px;height:56px;display:flex;align-items:center;justify-content:flex-start;">
+    <nav id="fullscreen-breadcrumb" class="breadcrumb">
+      <span class="breadcrumb-item" onclick="irParaHome()">HOME</span>
+      <span class="breadcrumb-sep">›</span>
+      <span id="fullscreen-title" class="breadcrumb-item active" style="font-weight:900;font-size:14px;" ></span>
+    </nav>
   </div>
   <div id="fullscreen-body" style="padding:16px 16px 40px;"></div>
 </div>
@@ -1353,7 +1361,6 @@ window.excluirJogador = (id, nome) => {
       <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">Excluir <strong style="color:var(--text)">${nome}</strong> apagará todo o histórico deste jogador: ranking, amistosos e torneios. Esta ação não pode ser desfeita.</p>
     </div>
     <div style="display:flex;gap:10px;">
-      <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
       <button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);" onclick="confirmarExcluirJog('${id}')">CONFIRMAR</button>
     </div>`);
 };
@@ -1621,7 +1628,6 @@ window.confirmarExcluirAmistoso = (id) => {
       <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">Esta ação removerá o jogo e não pode ser desfeita.${eFinalizado ? ' <strong style="color:#FCA5A5;">O RANKING SERA ATUALIZADO.</strong>' : ''}</p>
     </div>
     <div style="display:flex;gap:10px;">
-      <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
       <button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);" onclick="confirmarExcluirAmi('${id}')">CONFIRMAR</button>
     </div>`);
 };
@@ -1854,7 +1860,6 @@ function _htmlNovoAmistoso() {
     </div>
     <div id="ami-sorteio" style="display:none;margin-bottom:16px;"></div>
     <div style="display:flex;gap:10px;">
-      <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
       <button id="btn-ami-proximo" class="btn-primary" style="background:linear-gradient(135deg,#7C3AED,#06B6D4);" onclick="sortearAmistoso()">PRÓXIMO</button>
       <button id="btn-ami-salvar" style="display:none;" class="btn-primary" onclick="salvarAmistoso()">SALVAR</button>
     </div>`;
@@ -2288,7 +2293,6 @@ window.verAmistoso = (id) => {
         <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:10px;text-align:center;">PLACAR</label>
         ${placar}
       </div>` : placar}
-      <button class="btn-ghost" onclick="fecharFullscreen()">FECHAR</button>
     </div>`);
 };
 
@@ -2333,7 +2337,6 @@ window.editarAmistoso = (id) => {
           </div>
         </div>
         <div style="display:flex;gap:10px;">
-          <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
           <button class="btn-primary" onclick="salvarEdicaoAmistoso('${id}')">SALVAR</button>
         </div>
       </div>`);
@@ -2664,7 +2667,6 @@ function abrirModalCriarCamp() {
       </div>
     </div>
     <div style="display:flex;gap:10px;margin-top:20px;">
-      <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
       <button class="btn-primary" onclick="criarCampeonato()" style="font-size:16px;padding:16px;">SALVAR</button>
     </div>`);
   setTimeout(() => {
@@ -3052,7 +3054,6 @@ window.reiniciarTorneio = (id) => {
       <p style="color:var(--text-muted);font-size:12px;line-height:1.5;">Reiniciar <strong style="color:var(--text)">${c.nome}</strong> vai apagar todos os resultados registrados. Os times e participantes serão mantidos. Esta ação não pode ser desfeita.</p>
     </div>
     <div style="display:flex;gap:10px;">
-      <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
       <button class="btn-primary" style="background:linear-gradient(135deg,#F59E0B,#D97706);" onclick="confirmarReiniciarTorneio('${id}')">REINICIAR</button>
     </div>`);
 };
@@ -3079,7 +3080,6 @@ window.excluirCampeonato = (id) => {
       <p style="color:var(--text-muted);font-size:12px;line-height:1.5;">Excluir <strong style="color:var(--text)">${c.nome}</strong> removerá todos os grupos, jogos e classificação. Esta ação não pode ser desfeita.</p>
     </div>
     <div style="display:flex;gap:10px;">
-      <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
       <button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);" onclick="confirmarExcluirCamp('${id}')">CONFIRMAR</button>
     </div>`);
 };
@@ -3100,7 +3100,6 @@ window.ressortearCampeonato = (id) => {
       ${jogadores.map(j => `<label class="check-row"><input type="checkbox" class="rsc" value="${j.id}" data-nome="${j.nome}" ${selecionados.has(j.id)?'checked':''}>${SVG_USER_CHIP}<span style="font-weight:700;">${j.nome}</span></label>`).join('')}
     </div>
     <div style="display:flex;gap:10px;">
-      <button class="btn-ghost" onclick="abrirCampeonato('${id}')">CANCELAR</button>
       <button class="btn-primary" onclick="confirmarRessortear('${id}')">SORTEAR</button>
     </div>`);
 };
@@ -3638,7 +3637,6 @@ function abrirModalAddTime(tipoInicial) {
       </div>
 
       <div style="display:flex;gap:10px;margin-top:6px;">
-        <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
         <button id="btn-salvar-time" class="btn-primary" onclick="salvarNovoTime()" disabled style="opacity:0.4;font-size:16px;padding:16px;">CRIAR</button>
       </div>
     </div>`);
@@ -3759,7 +3757,6 @@ window.editarTime = (id) => {
         </div>
       </div>
       <div style="display:flex;gap:10px;margin-top:8px;">
-        <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
         <button class="btn-primary" onclick="salvarEdicaoTime('${id}')">SALVAR</button>
       </div>
     </div>`);
@@ -3779,7 +3776,6 @@ window.excluirTime = async id => {
       <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">Excluir <strong style="color:var(--text)">${t?.nome}</strong>? Esta ação não pode ser desfeita.</p>
     </div>
     <div style="display:flex;gap:10px;">
-      <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
       <button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);" onclick="confirmarExcluirTime('${id}')">CONFIRMAR</button>
     </div>`);
 };
