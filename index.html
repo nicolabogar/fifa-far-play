@@ -867,10 +867,10 @@ let _disponiveis  = []; // partidas disponíveis para registo em grupo
 
 // ─── ALGORITMO DE BALANCEAMENTO ──────────────────────────────────────
 function forcaBadge(f) {
-  if (f >= 86) return `<span class="forca-badge forca-elite">${f}</span>`;
-  if (f >= 82) return `<span class="forca-badge forca-top">${f}</span>`;
-  if (f >= 78) return `<span class="forca-badge forca-mid">${f}</span>`;
-  return `<span class="forca-badge forca-base">${f}</span>`;
+  // RG7: acima de 85 = verde, abaixo de 75 = vermelho, entre 75 e 85 = amarelo
+  if (f > 85) return `<span class="forca-badge" style="background:rgba(16,185,129,0.2);color:#6EE7B7;">${f}</span>`;
+  if (f < 75) return `<span class="forca-badge" style="background:rgba(239,68,68,0.2);color:#FCA5A5;">${f}</span>`;
+  return `<span class="forca-badge" style="background:rgba(245,158,11,0.2);color:#FCD34D;">${f}</span>`;
 }
 
 function forcaRating(f) {
