@@ -1,7 +1,7 @@
-# FIFA FAR PLAY - Prompts de Features v5
+# FIFA FAR PLAY - Prompts de Features v4
 # FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
 # O agente deve marcar o hash do commit ao concluir cada item.
-# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v5.txt e um novo é criado.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v4.txt e um novo é criado.
 
 ## REGRAS GERAIS ##
 [x] RG1 - Botão excluir padronizado em todos os cards + modal confirmação (hash: eda14d3)
@@ -10,10 +10,10 @@
 [x] RG4 - Auto-cadastro de jogador no primeiro login com Google (hash: bdbc4a5)
 [x] RG5 - Controle de acesso: apenas master cria/edita, outros só veem home (hash: fc00200)
 [x] RG6 - Filtrar amistosos/torneios por participação para não-master (hash: 13d9601)
-[x] RG7b - Master vê detalhes mas tela de alteração bloqueada (hash: 6eca5e0)
+[ ] RG7b - Master vê detalhes mas tela de alteração bloqueada (complemento do RG5)
 [x] RG8 - Cores do score: >85 verde, 75-85 amarelo, <75 vermelho (hash: 604b57a)
 [x] RG9 - Copa do Mundo = formato/tabela da copa, permite times ou seleções (hash: 2b00b4a)
-[x] RG10 - Ao deletar jogador, deletar todo histórico de ranking associado (hash: d25884b)
+[ ] RG10 - Ao deletar jogador, deletar todo histórico de ranking associado
 
 ## AMISTOSOS ##
 [x] A1 - Score/força abaixo do ícone do time (hash: bc3de59)
@@ -25,10 +25,10 @@
 [x] A7 - Renomear SALVAR ALTERAÇÕES para SALVAR (hash: c3d3de6)
 
 ## TIMES ##
-[x] T1 - Adicionar ícone/flag da Holanda (🇳🇱) para Países Baixos (hash: 3a25289)
+[ ] T1 - Adicionar ícone/flag da Holanda (🇳🇱) para Países Baixos
 [x] T2 - Padronizar tela de cadastro de times (hash: 785788b)
 
 ## TORNEIOS ##
 [x] TO1 - Checkbox times manuais antes da seleção de jogadores (hash: 4f0b8e2)
 [x] TO2 - Card de times selecionados maior e mais visual (hash: 9659685)
-[x] TO3 - Jogos do campeonato usando estilo de card de amistosos (hash: 212c0d3)
+[ ] TO3 - Jogos do campeonato usando estilo de card de amistosos
