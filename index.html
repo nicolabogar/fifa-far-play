@@ -1350,7 +1350,7 @@ window.excluirJogador = (id, nome) => {
   modal(`<p class="modal-title">EXCLUIR JOGADOR?</p>
     <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
       <p style="font-weight:700;font-size:13px;color:#FCA5A5;margin-bottom:6px;">ATENÇÃO</p>
-      <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">Excluir <strong style="color:var(--text)">${nome}</strong> também apagará todos os dados de ranking vinculados a este jogador. Esta ação não pode ser desfeita.</p>
+      <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">Excluir <strong style="color:var(--text)">${nome}</strong> apagará todo o histórico deste jogador: ranking, amistosos e torneios. Esta ação não pode ser desfeita.</p>
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
@@ -1374,8 +1374,25 @@ window.confirmarExcluirJog = async id => {
       'time2.jogadores': t2nomes,
     });
   }
+  // RG10b: remover jogador de campeonatos (participantes, grupos.membros, grupos.partidas)
+  const campComJog = campeonatos.filter(c =>
+    (c.participantes||[]).some(p => p.jogadorId === id) ||
+    (c.grupos||[]).some(g =>
+      (g.membros||[]).some(m => m.jogadorId === id) ||
+      (g.partidas||[]).some(p => p.j1Id === id || p.j2Id === id)
+    )
+  );
+  for (const c of campComJog) {
+    const participantes = (c.participantes||[]).filter(p => p.jogadorId !== id);
+    const grupos = (c.grupos||[]).map(g => ({
+      ...g,
+      membros: (g.membros||[]).filter(m => m.jogadorId !== id),
+      partidas: (g.partidas||[]).filter(p => p.j1Id !== id && p.j2Id !== id),
+    }));
+    await updateDoc(doc(db, 'campeonatos', c.id), { participantes, grupos });
+  }
   await deleteDoc(doc(db, 'jogadores', id));
-  fecharModal(); await carregarJogadores(); await carregarAmistosos(); atualizarDash(); toast('JOGADOR REMOVIDO');
+  fecharModal(); await carregarJogadores(); await carregarAmistosos(); await carregarCampeonatos(); atualizarDash(); toast('JOGADOR REMOVIDO');
 };
 
 document.getElementById('btn-add-jog').addEventListener('click', () => {
