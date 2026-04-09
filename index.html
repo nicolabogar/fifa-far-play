@@ -907,6 +907,8 @@ function atributosBadge(t) {
  * - Aceita diferença de até 8 pts se não encontrar melhor.
  */
 function sortearBalanceado(pool, historicoIds = []) {
+  // Filtra times inativos
+  pool = pool.filter(t => !t.inativo);
   // Filtra recentemente usados (última metade do pool)
   const janela  = Math.max(2, Math.floor(pool.length / 2));
   const recentes = historicoIds.slice(-janela);
@@ -946,6 +948,8 @@ function sortearBalanceado(pool, historicoIds = []) {
  * Usa draft serpentina: ordena times por força, distribui alternando.
  */
 function distribuirTimesBalanceados(participantes, pool, usados = []) {
+  // Filtra times inativos
+  pool = pool.filter(t => !t.inativo);
   const n = participantes.length;
   const janela = Math.max(n, Math.floor(pool.length / 2));
   let disp = pool.filter(t => !usados.slice(-janela).includes(t.id));
@@ -1157,11 +1161,17 @@ async function carregarTimes() {
   const custom = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   const deletados = custom.filter(t => t._deleted).map(t => t.id);
   const adicionados = custom.filter(t => !t._deleted);
+  // Mapa de inatividade por id
+  const inativoMap = {};
+  custom.forEach(t => { if (t.inativo) inativoMap[t.id] = true; });
 
   const aplicar = (defaults, tipo) => {
-    const base = defaults.filter(t => !deletados.includes(t.id));
+    const base = defaults.filter(t => !deletados.includes(t.id)).map(t => ({
+      ...t,
+      inativo: inativoMap[t.id] || false
+    }));
     adicionados.filter(t => t.tipo === tipo).forEach(t => {
-      if (!base.find(b => b.id === t.id)) base.push(t);
+      if (!base.find(b => b.id === t.id)) base.push({ ...t, inativo: t.inativo || false });
     });
     return base;
   };
@@ -3557,40 +3567,57 @@ function renderTimesEdit() {
   const el = document.getElementById('lista-times-edit');
   if (!pool.length) { el.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:32px 0;font-size:14px;">NENHUM TIME</p>'; return; }
   el.innerHTML = pool.map(t => {
+    const inativo = t.inativo || false;
+    const ativoStyle = inativo ? 'opacity:0.45;filter:grayscale(0.6);' : '';
+    const btnInativoLabel = inativo ? 'ATIVAR' : 'INATIVO';
+    const btnInativoStyle = inativo
+      ? 'background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);color:#6EE7B7;'
+      : 'background:rgba(100,116,139,0.15);border:1px solid rgba(100,116,139,0.4);color:#94A3B8;';
+    const tagInativo = inativo ? `<span class="tag tag-gray" style="font-size:9px;margin-left:4px;">INATIVO</span>` : '';
     if (isSel) {
       const d = SELECAO_PAIS[t.id] || { pais:'', paisNome: t.nome };
       const flagHtml = d.pais
         ? `<img src="https://flagcdn.com/w80/${d.pais}.png" loading="lazy" style="width:72px;height:54px;object-fit:cover;border-radius:8px;box-shadow:0 3px 10px rgba(0,0,0,0.4);" onerror="this.parentElement.innerHTML='<span style=\\'font-size:40px;\\'>🌍</span>'">`
         : `<span style="font-size:40px;">🌍</span>`;
       return `<div style="margin-bottom:10px;">
-        <div class="entity-card" style="align-items:center;gap:14px;cursor:pointer;" onclick="editarTime('${t.id}')">
+        <div class="entity-card" style="align-items:center;gap:14px;cursor:pointer;${ativoStyle}" onclick="editarTime('${t.id}')">
           <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;">${flagHtml}</div>
           <div style="flex:1;min-width:0;">
-            <div style="font-weight:800;font-size:16px;text-transform:uppercase;">${t.nome}</div>
+            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
+              <span style="font-weight:800;font-size:16px;text-transform:uppercase;">${t.nome}</span>${tagInativo}
+            </div>
             <div style="font-size:12px;color:var(--text-muted);margin-top:2px;text-transform:uppercase;">${d.paisNome||''}</div>
             <div style="margin-top:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">${forcaBadge(t.forca)}${atributosBadge(t)}</div>
           </div>
-          <button onclick="event.stopPropagation();excluirTime('${t.id}')" title="EXCLUIR" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#ef4444;border-radius:8px;padding:6px 8px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-          </button>
+          <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+            <button onclick="event.stopPropagation();toggleInativoTime('${t.id}',${!inativo})" title="${btnInativoLabel}" style="${btnInativoStyle}border-radius:8px;padding:5px 8px;cursor:pointer;font-size:10px;font-weight:800;">${btnInativoLabel}</button>
+            <button onclick="event.stopPropagation();excluirTime('${t.id}')" title="EXCLUIR" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#ef4444;border-radius:8px;padding:6px 8px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            </button>
+          </div>
         </div>
       </div>`;
     } else {
       const d = TEAM_DATA[t.id] || { abrev:(t.nome||'?').slice(0,3).toUpperCase(), fundo:'#1E1E35', cor:'#AAAAAA', pais:'', paisNome:'' };
       return `<div style="margin-bottom:10px;">
-        <div class="entity-card" style="align-items:center;gap:14px;cursor:pointer;" onclick="editarTime('${t.id}')">
+        <div class="entity-card" style="align-items:center;gap:14px;cursor:pointer;${ativoStyle}" onclick="editarTime('${t.id}')">
           <div style="flex-shrink:0;">${shieldClube(t.id, t.nome, 60)}</div>
           <div style="flex:1;min-width:0;">
-            <div style="font-weight:900;font-size:17px;text-transform:uppercase;">${t.nome}</div>
+            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
+              <span style="font-weight:900;font-size:17px;text-transform:uppercase;">${t.nome}</span>${tagInativo}
+            </div>
             <div style="margin-top:4px;display:flex;align-items:center;gap:6px;">
               ${flagImg(d.pais, 18)}
               <span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">${d.paisNome}</span>
             </div>
             <div style="margin-top:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">${forcaBadge(t.forca)}${atributosBadge(t)}</div>
           </div>
-          <button onclick="event.stopPropagation();excluirTime('${t.id}')" title="EXCLUIR" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#ef4444;border-radius:8px;padding:6px 8px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-          </button>
+          <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+            <button onclick="event.stopPropagation();toggleInativoTime('${t.id}',${!inativo})" title="${btnInativoLabel}" style="${btnInativoStyle}border-radius:8px;padding:5px 8px;cursor:pointer;font-size:10px;font-weight:800;">${btnInativoLabel}</button>
+            <button onclick="event.stopPropagation();excluirTime('${t.id}')" title="EXCLUIR" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#ef4444;border-radius:8px;padding:6px 8px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            </button>
+          </div>
         </div>
       </div>`;
     }
@@ -3782,6 +3809,18 @@ window.excluirTime = async id => {
 window.confirmarExcluirTime = async id => {
   await setDoc(doc(db,'times',id+'_del'),{id,_deleted:true});
   await carregarTimes(); fecharModal(); renderTimesEdit();
+};
+
+window.toggleInativoTime = async (id, novoInativo) => {
+  // Salva/atualiza o flag inativo no Firestore (merge para não sobrescrever outros dados)
+  try {
+    await setDoc(doc(db, 'times', id), { inativo: novoInativo }, { merge: true });
+  } catch(e) {
+    // Para times default que não existem no Firestore, criar doc mínimo
+    await setDoc(doc(db, 'times', id), { id, inativo: novoInativo }, { merge: true });
+  }
+  await carregarTimes();
+  renderTimesEdit();
 };
 
 // ─── SERVICE WORKER ──────────────────────────────────────────────────
