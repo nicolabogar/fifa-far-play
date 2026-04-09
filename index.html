@@ -900,13 +900,34 @@ function atributosBadge(t) {
   return `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">${tag('ATK',t.ataque)}${tag('MID',t.meio)}${tag('DEF',t.defesa)}</div>`;
 }
 
+// ─── MEMÓRIA ANTI-REPETIÇÃO (F3) ─────────────────────────────────────
+const MEMORIA_MAX = 10; // últimos N sorteios armazenados por tipo
+function _memoriaKey(tipo) { return `sorteio_mem_${tipo}`; }
+function lerMemoria(tipo) {
+  try { return JSON.parse(localStorage.getItem(_memoriaKey(tipo)) || '[]'); } catch { return []; }
+}
+function salvarMemoria(tipo, par) {
+  const mem = lerMemoria(tipo);
+  // par = [id1, id2] (normalizado: menor id primeiro)
+  const key = [par[0], par[1]].sort().join('|');
+  // remove duplicados antigos e adiciona no topo
+  const nova = [key, ...mem.filter(k => k !== key)].slice(0, MEMORIA_MAX);
+  localStorage.setItem(_memoriaKey(tipo), JSON.stringify(nova));
+}
+function parRepetido(tipo, id1, id2) {
+  const mem = lerMemoria(tipo);
+  const key = [id1, id2].sort().join('|');
+  return mem.includes(key);
+}
+
 /**
  * Sorteia dois times balanceados.
- * - Nunca usa times usados nos últimos N amistosos.
- * - Tenta encontrar par com diferença mínima de força (≤3 pts).
- * - Aceita diferença de até 8 pts se não encontrar melhor.
+ * - Nunca usa times usados nos últimos N amistosos (histórico Firestore).
+ * - Memória anti-repetição no localStorage: evita pares recentes.
+ * - Discrepância aumentada para 35-40% para maior variação.
+ * - Tenta 30 vezes: nas primeiras 15 evita pares repetidos, nas seguintes aceita qualquer.
  */
-function sortearBalanceado(pool, historicoIds = []) {
+function sortearBalanceado(pool, historicoIds = [], tipo = '') {
   // Filtra times inativos
   pool = pool.filter(t => !t.inativo);
   // Filtra recentemente usados (última metade do pool)
@@ -915,32 +936,51 @@ function sortearBalanceado(pool, historicoIds = []) {
   let disp = pool.filter(t => !recentes.includes(t.id));
   if (disp.length < 2) disp = [...pool]; // fallback: usa todos
 
-  // Busca par mais equilibrado em até 80 tentativas
+  // Limite de discrepância: 35-40% da média de força
+  const DISC_MAX_PCT = 0.38; // 38%
+
   let melhor = null, menorDiff = Infinity;
-  for (let i = 0; i < 80; i++) {
+  for (let i = 0; i < 30; i++) {
     const shuf = shuffle(disp);
     const t1 = shuf[0], t2 = shuf[1];
     const diff = Math.abs(t1.forca - t2.forca);
-    if (diff < menorDiff) {
-      menorDiff = diff;
-      melhor = [t1, t2];
-      if (diff === 0) break;
+    const media = (t1.forca + t2.forca) / 2;
+    const pct = media > 0 ? diff / media : 0;
+
+    // Nas primeiras 15 tentativas: evita pares repetidos
+    if (i < 15 && tipo && parRepetido(tipo, t1.id, t2.id)) continue;
+
+    // Aceita se dentro do limite de discrepância
+    if (pct <= DISC_MAX_PCT) {
+      if (diff < menorDiff) {
+        menorDiff = diff;
+        melhor = [t1, t2];
+        if (diff === 0) break;
+      }
     }
   }
 
-  // Se a melhor diferença for > 8, tenta expandir o pool
-  if (menorDiff > 8) {
+  // Se não encontrou par válido dentro do limite, busca o melhor entre todos
+  if (!melhor) {
     const pares = [];
-    for (let i = 0; i < pool.length; i++) {
-      for (let j = i + 1; j < pool.length; j++) {
-        pares.push([pool[i], pool[j], Math.abs(pool[i].forca - pool[j].forca)]);
+    for (let i = 0; i < disp.length; i++) {
+      for (let j = i + 1; j < disp.length; j++) {
+        const d = Math.abs(disp[i].forca - disp[j].forca);
+        const m = (disp[i].forca + disp[j].forca) / 2;
+        pares.push([disp[i], disp[j], d, m > 0 ? d / m : 0]);
       }
     }
-    pares.sort((a,b) => a[2] - b[2]);
+    // Ordena por menor discrepância percentual
+    pares.sort((a, b) => a[3] - b[3]);
     if (pares.length > 0) melhor = [pares[0][0], pares[0][1]];
   }
 
-  return melhor || [disp[0], disp[1]];
+  const resultado = melhor || [disp[0], disp[1]];
+  // Registra na memória anti-repetição
+  if (tipo && resultado[0] && resultado[1]) {
+    salvarMemoria(tipo, [resultado[0].id, resultado[1].id]);
+  }
+  return resultado;
 }
 
 /**
@@ -2137,14 +2177,14 @@ window.sortearAmistoso = () => {
       const candidato = opcoes[tentativa % 2];
       const pool = candidato === 'selecoes' ? selecoes : clubes;
       const hist = historicoIds(candidato);
-      const [ct1, ct2] = sortearBalanceado(pool, hist);
+      const [ct1, ct2] = sortearBalanceado(pool, hist, candidato);
       const media = (ct1.forca + ct2.forca) / 2;
       const pctDiff = Math.abs(ct1.forca - ct2.forca) / media;
-      if (pctDiff <= 0.20) { tipo = candidato; escolhido = [ct1, ct2]; break; }
+      if (pctDiff <= 0.38) { tipo = candidato; escolhido = [ct1, ct2]; break; }
       if (tentativa === 19) {
         tipo = opcoes[0];
         const pool2 = tipo === 'selecoes' ? selecoes : clubes;
-        escolhido = sortearBalanceado(pool2, historicoIds(tipo));
+        escolhido = sortearBalanceado(pool2, historicoIds(tipo), tipo);
       }
     }
     const [t1, t2] = escolhido;
@@ -2165,7 +2205,7 @@ window.sortearAmistoso = () => {
 
   const pool = tipo === 'selecoes' ? selecoes : clubes;
   const hist = historicoIds(tipo);
-  const [t1, t2] = sortearBalanceado(pool, hist);
+  const [t1, t2] = sortearBalanceado(pool, hist, tipo);
   const jogs = shuffle([..._jcSel.entries()].map(([id, nome]) => ({ id, nome })));
   let j1, j2;
   if (modoDupla) {
@@ -2197,18 +2237,27 @@ function _renderSorteioBox(sorteio, eq, diff) {
   const j2 = t2.jogadores.map(n => ({ nome: n }));
   const box = document.getElementById('ami-sorteio');
   box.style.display = '';
+  // Badge clicável para inativar time no sorteio
+  const badgeInativo = (timeId, timeNome, tipoT) =>
+    `<div onclick="inativarTimeSorteio('${timeId}','${timeNome.replace(/'/g,"\\'")}','${tipoT}')"
+      title="Clique para inativar ${timeNome}"
+      style="display:flex;justify-content:center;cursor:pointer;position:relative;transition:opacity 0.15s;"
+      onmouseenter="this.style.opacity='0.7'" onmouseleave="this.style.opacity='1'">
+      ${badgeTime(timeId, timeNome, tipoT)}
+      <span style="position:absolute;top:-6px;right:-6px;background:rgba(239,68,68,0.9);color:#fff;font-size:9px;font-weight:900;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 1px 4px rgba(0,0,0,0.4);">✕</span>
+    </div>`;
   box.innerHTML = `<div class="vs-card">
     <div style="text-align:center;margin-bottom:14px;"><span class="tag tag-green">TIMES SORTEADOS · ${eq}</span></div>
     <div style="display:flex;align-items:flex-start;gap:8px;">
       <div style="flex:1;text-align:center;">
-        <div style="display:flex;justify-content:center;margin-bottom:8px;">${badgeTime(t1.timeId, t1.nome, tipo)}</div>
+        <div style="display:flex;justify-content:center;margin-bottom:8px;">${badgeInativo(t1.timeId, t1.nome, tipo)}</div>
         <div class="vs-team">${t1.nome}</div>
         <div style="margin:4px 0;">${forcaBadge(t1.forca)}</div>
         ${j1.map(j => `<div class="vs-label" style="margin-top:3px;">${j.nome}</div>`).join('')}
       </div>
       <div class="vs-divider" style="padding-top:28px;"><span class="vs-text">VS</span></div>
       <div style="flex:1;text-align:center;">
-        <div style="display:flex;justify-content:center;margin-bottom:8px;">${badgeTime(t2.timeId, t2.nome, tipo)}</div>
+        <div style="display:flex;justify-content:center;margin-bottom:8px;">${badgeInativo(t2.timeId, t2.nome, tipo)}</div>
         <div class="vs-team">${t2.nome}</div>
         <div style="margin:4px 0;">${forcaBadge(t2.forca)}</div>
         ${j2.map(j => `<div class="vs-label" style="margin-top:3px;">${j.nome}</div>`).join('')}
@@ -2224,6 +2273,25 @@ function _renderSorteioBox(sorteio, eq, diff) {
   </div>`;
   document.getElementById('btn-ami-salvar').style.display = '';
 }
+
+// F1: Inativar time clicando no logo durante o sorteio
+window.inativarTimeSorteio = (timeId, timeNome, tipo) => {
+  modal(`<p class="modal-title">INATIVAR TIME?</p>
+    <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
+      <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">Marcar <strong style="color:var(--text)">${timeNome}</strong> como inativo? Ele não sairá nos próximos sorteios.</p>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
+      <button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);" onclick="confirmarInativarTimeSorteio('${timeId}','${tipo}')">INATIVAR E RESSORTEAR</button>
+    </div>`);
+};
+
+window.confirmarInativarTimeSorteio = async (timeId, tipo) => {
+  fecharModal();
+  await toggleInativoTime(timeId, true);
+  // Ressortear automaticamente
+  window.sortearAmistoso();
+};
 
 window.salvarAmistoso = async () => {
   if (!_sorteioAmi) return;
