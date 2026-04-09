@@ -1346,7 +1346,7 @@ window.salvarEdicaoJogador = async (id) => {
       }
     }
     await updateDoc(doc(db,'jogadores',id), { nome, email: email||'', celular, master: isMaster, fotoUrl });
-    fecharFullscreen(); await carregarJogadores(); atualizarDash(); toast(`${nome} ATUALIZADO!`);
+    fecharFullscreen(); await carregarJogadores(); atualizarDash();
   } catch(e) {
     console.error(e);
     toast('ERRO AO SALVAR JOGADOR','erro');
@@ -1399,7 +1399,7 @@ window.confirmarExcluirJog = async id => {
     await updateDoc(doc(db, 'campeonatos', c.id), { participantes, grupos });
   }
   await deleteDoc(doc(db, 'jogadores', id));
-  fecharModal(); await carregarJogadores(); await carregarAmistosos(); await carregarCampeonatos(); atualizarDash(); toast('JOGADOR REMOVIDO');
+  fecharModal(); await carregarJogadores(); await carregarAmistosos(); await carregarCampeonatos(); atualizarDash();
 };
 
 document.getElementById('btn-add-jog').addEventListener('click', () => {
@@ -1495,7 +1495,7 @@ window.salvarJogador = async () => {
       if (masterAtual) await updateDoc(doc(db,'jogadores',masterAtual.id), { master: false });
     }
     await addDoc(collection(db, 'jogadores'), { nome, email: email||'', celular, master: isMaster, fotoUrl, criadoEm: serverTimestamp() });
-    fecharFullscreen(); await carregarJogadores(); atualizarDash(); toast(`${nome} ADICIONADO!`);
+    fecharFullscreen(); await carregarJogadores(); atualizarDash();
   } catch(e) {
     console.error(e);
     toast('ERRO AO SALVAR JOGADOR','erro');
@@ -1639,7 +1639,6 @@ window.confirmarExcluirAmi = async (id) => {
   const rankAmi = calcularRankingAmistosos();
   renderRankingAmistosos(rankAmi);
   atualizarDash();
-  toast('JOGO EXCLUIDO. RANKING ATUALIZADO');
 };
 
 window.excluirJogo = async (id, nome, btnEl) => {
@@ -1647,7 +1646,7 @@ window.excluirJogo = async (id, nome, btnEl) => {
   const card = btnEl ? btnEl.closest('.match-card') : null;
   // Executa exclusão direta (usado pelo confirmarExcluirAmi e compatibilidade)
   await deleteDoc(doc(db, 'amistosos', id));
-  await carregarAmistosos(); atualizarDash(); toast('AMISTOSO EXCLUÍDO');
+  await carregarAmistosos(); atualizarDash();
 };
 
 // ── Estado dos filtros/paginação de finalizados ──
@@ -2225,7 +2224,7 @@ window.salvarAmistoso = async () => {
   }
   await addDoc(collection(db, 'amistosos'), { ..._sorteioAmi, criadoEm: serverTimestamp() });
   fecharFullscreen(); _sorteioAmi = null;
-  await carregarAmistosos(); atualizarDash(); toast('AMISTOSO CRIADO!');
+  await carregarAmistosos(); atualizarDash();
 };
 
 window.abrirPlacar = id => {
@@ -2253,7 +2252,7 @@ window.salvarPlacar = async id => {
   const g1 = parseInt(document.getElementById('pg1').value) || 0;
   const g2 = parseInt(document.getElementById('pg2').value) || 0;
   await updateDoc(doc(db, 'amistosos', id), { resultado: { g1, g2 } });
-  fecharModal(); await carregarAmistosos(); atualizarDash(); toast('RESULTADO SALVO!');
+  fecharModal(); await carregarAmistosos(); atualizarDash();
 };
 
 // ─── VER AMISTOSO (somente leitura — RG7b) ───────────────────────────
@@ -2415,14 +2414,14 @@ window.salvarEdicaoAmistoso = async (id) => {
       time2: _sorteioAmi.time2,
     });
     fecharFullscreen(); _sorteioAmi = null;
-    await carregarAmistosos(); atualizarDash(); toast('AMISTOSO ATUALIZADO!');
+    await carregarAmistosos(); atualizarDash();
     return;
   }
   // Amistoso finalizado: apenas salvar placar
   const g1 = parseInt(document.getElementById('ea-g1')?.value) || 0;
   const g2 = parseInt(document.getElementById('ea-g2')?.value) || 0;
   await updateDoc(doc(db, 'amistosos', id), { resultado: { g1, g2 } });
-  fecharFullscreen(); await carregarAmistosos(); atualizarDash(); toast('PLACAR ATUALIZADO!');
+  fecharFullscreen(); await carregarAmistosos(); atualizarDash();
 };
 
 window.salvarPlacarDireto = async (id) => {
@@ -2432,7 +2431,7 @@ window.salvarPlacarDireto = async (id) => {
   const g1 = parseInt(el1.value) || 0;
   const g2 = parseInt(el2.value) || 0;
   await updateDoc(doc(db, 'amistosos', id), { resultado: { g1, g2 } });
-  await carregarAmistosos(); atualizarDash(); toast('RESULTADO SALVO!');
+  await carregarAmistosos(); atualizarDash();
 };
 
 // ─── CAMPEONATOS ─────────────────────────────────────────────────────
@@ -2816,7 +2815,7 @@ window.criarCampeonato = async () => {
   }
   const grupos = gerarGrupos(distribuidos, tipo);
   const docRef = await addDoc(collection(db, 'campeonatos'), { nome, tipo, participantes: distribuidos, grupos, fase:'grupos', status:'ativo', criadoEm: serverTimestamp() });
-  fecharFullscreen(); await carregarCampeonatos(); atualizarDash(); toast('TORNEIO CRIADO!');
+  fecharFullscreen(); await carregarCampeonatos(); atualizarDash();
   abrirCampeonato(docRef.id);
 };
 
@@ -3042,7 +3041,7 @@ window.salvarPartidaDireta = async (cid, gi, j1Id, j2Id, confKey) => {
     return {...gr,membros,partidas:[...(gr.partidas||[]),{j1Id:m1.jogadorId,j1Nome:m1.nome,j2Id:m2.jogadorId,j2Nome:m2.nome,g1,g2}]};
   });
   await updateDoc(doc(db,'campeonatos',cid),{grupos});
-  await carregarCampeonatos(); atualizarDash(); toast('JOGO REGISTRADO!'); abrirCampeonato(cid);
+  await carregarCampeonatos(); atualizarDash(); abrirCampeonato(cid);
 };
 
 window.reiniciarTorneio = (id) => {
@@ -3068,7 +3067,7 @@ window.confirmarReiniciarTorneio = async (id) => {
   }));
   await updateDoc(doc(db, 'campeonatos', id), { grupos: gruposReset, status: 'ativo' });
   fecharModal(); await carregarCampeonatos(); atualizarDash();
-  toast('TORNEIO REINICIADO!'); abrirCampeonato(id);
+  abrirCampeonato(id);
 };
 
 window.excluirCampeonato = (id) => {
@@ -3085,7 +3084,7 @@ window.excluirCampeonato = (id) => {
 };
 window.confirmarExcluirCamp = async (id) => {
   await deleteDoc(doc(db,'campeonatos',id));
-  fecharModal(); fecharFullscreen(); await carregarCampeonatos(); atualizarDash(); toast('TORNEIO EXCLUÍDO');
+  fecharModal(); fecharFullscreen(); await carregarCampeonatos(); atualizarDash();
 };
 
 window.ressortearCampeonato = (id) => {
@@ -3115,7 +3114,7 @@ window.confirmarRessortear = async (id) => {
   const distribuidos = distribuirTimesBalanceados(partic, pool, hist);
   const grupos = gerarGrupos(distribuidos, c.tipo);
   await updateDoc(doc(db,'campeonatos',id), { participantes: distribuidos, grupos, fase:'grupos', status:'ativo' });
-  fecharFullscreen(); await carregarCampeonatos(); atualizarDash(); toast('TIMES RESSORTEADOS!'); abrirCampeonato(id);
+  fecharFullscreen(); await carregarCampeonatos(); atualizarDash(); abrirCampeonato(id);
 };
 
 window.regPartida = (cid, gi, j1Id, j2Id) => {
@@ -3169,7 +3168,7 @@ window.salvarPartida = async (cid, gi) => {
     return {...g,membros,partidas:[...(g.partidas||[]),{j1Id:m1.jogadorId,j1Nome:m1.nome,j2Id:m2.jogadorId,j2Nome:m2.nome,g1,g2}]};
   });
   await updateDoc(doc(db,'campeonatos',cid),{grupos});
-  fecharModal(); await carregarCampeonatos(); atualizarDash(); toast('JOGO REGISTRADO!'); abrirCampeonato(cid);
+  fecharModal(); await carregarCampeonatos(); atualizarDash(); abrirCampeonato(cid);
 };
 
 // ─── RANKING ─────────────────────────────────────────────────────────
@@ -3735,7 +3734,7 @@ window.salvarNovoTime = async () => {
   await setDoc(doc(db, 'times', novoTime.id), novoTime);
   await carregarTimes();
   _selNovoTime = null;
-  fecharFullscreen(); renderTimesEdit(); toast('TIME ADICIONADO!');
+  fecharFullscreen(); renderTimesEdit();
 };
 
 window.editarTime = (id) => {
@@ -3765,7 +3764,7 @@ window.editarTime = (id) => {
 window.salvarEdicaoTime = async (id) => {
   const forca = parseInt(document.getElementById('et-forca')?.value) || 75;
   await updateDoc(doc(db, 'times', id), { forca });
-  fecharFullscreen(); await carregarTimes(); renderTimesEdit(); toast('TIME ATUALIZADO!');
+  fecharFullscreen(); await carregarTimes(); renderTimesEdit();
 };
 
 window.excluirTime = async id => {
@@ -3782,7 +3781,7 @@ window.excluirTime = async id => {
 
 window.confirmarExcluirTime = async id => {
   await setDoc(doc(db,'times',id+'_del'),{id,_deleted:true});
-  await carregarTimes(); fecharModal(); renderTimesEdit(); toast('TIME REMOVIDO');
+  await carregarTimes(); fecharModal(); renderTimesEdit();
 };
 
 // ─── SERVICE WORKER ──────────────────────────────────────────────────
