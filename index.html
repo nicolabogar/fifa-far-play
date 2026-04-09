@@ -1479,17 +1479,21 @@ async function carregarAmistosos() {
 
 function cardAmistoso(a, compact=false) {
   const temRes = a.resultado != null;
+  const master = temPermissao(); // RG7b: controle de acesso no card
   const diff = temRes ? Math.abs(a.resultado.g1 - a.resultado.g2) : null;
   const b1 = compact ? badgeTimeCompact(a.time1?.timeId, a.time1?.nome, a.tipo) : badgeTime(a.time1?.timeId, a.time1?.nome, a.tipo);
   const b2 = compact ? badgeTimeCompact(a.time2?.timeId, a.time2?.nome, a.tipo) : badgeTime(a.time2?.timeId, a.time2?.nome, a.tipo);
+  // RG7b: não-master vê placar somente-leitura; master vê inputs de edição
   const placarDireto = temRes
     ? `<div style="font-size:29px;font-weight:900;letter-spacing:1px;color:var(--yellow);">${a.resultado.g1}<span style="color:var(--text-muted);font-size:13px;"> × </span>${a.resultado.g2}</div>`
-    : `<div style="display:flex;align-items:center;gap:4px;">
-        <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" id="pdc1-${a.id}" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
-        <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
-        <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" id="pdc2-${a.id}" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
-      </div>
-      <button onclick="event.stopPropagation();salvarPlacarDireto('${a.id}')" class="btn-primary" style="margin-top:6px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">FINALIZAR</button>`;
+    : master
+      ? `<div style="display:flex;align-items:center;gap:4px;">
+          <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" id="pdc1-${a.id}" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
+          <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
+          <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" id="pdc2-${a.id}" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
+        </div>
+        <button onclick="event.stopPropagation();salvarPlacarDireto('${a.id}')" class="btn-primary" style="margin-top:6px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">FINALIZAR</button>`
+      : `<div style="color:var(--text-muted);font-size:13px;font-weight:700;">EM ANDAMENTO</div>`;
   const cardId = `ami-card-${a.id}`;
   return `<div id="${cardId}" style="margin-bottom:10px;">
   <div class="match-card" style="${compact?'padding:12px;':''}" onclick="editarAmistoso('${a.id}')" style="cursor:pointer;">
@@ -1501,12 +1505,14 @@ function cardAmistoso(a, compact=false) {
       </div>
       ${temRes
         ? `<span class="tag tag-gray">FINALIZADO</span>`
-        : `<div style="display:flex;align-items:center;gap:6px;">
-            <span class="tag tag-cyan" style="font-size:9px;">EM ANDAMENTO</span>
-            <button onclick="event.stopPropagation();confirmarExcluirAmistoso('${a.id}')" title="EXCLUIR" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#ef4444;border-radius:8px;padding:3px 7px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-            </button>
-          </div>`
+        : master
+          ? `<div style="display:flex;align-items:center;gap:6px;">
+              <span class="tag tag-cyan" style="font-size:9px;">EM ANDAMENTO</span>
+              <button onclick="event.stopPropagation();confirmarExcluirAmistoso('${a.id}')" title="EXCLUIR" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#ef4444;border-radius:8px;padding:3px 7px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+              </button>
+            </div>`
+          : `<span class="tag tag-cyan" style="font-size:9px;">EM ANDAMENTO</span>`
       }
     </div>
     ${compact ? `
@@ -1520,12 +1526,14 @@ function cardAmistoso(a, compact=false) {
       <div style="flex-shrink:0;text-align:center;">
         ${temRes
           ? `<div style="font-size:22px;font-weight:900;letter-spacing:0.5px;color:var(--yellow);">${a.resultado.g1}<span style="color:var(--text-muted);font-size:12px;"> × </span>${a.resultado.g2}</div>`
-          : `<div style="display:flex;align-items:center;gap:3px;">
-              <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" id="pdc1-${a.id}" class="placar-input" onclick="event.stopPropagation()" style="width:32px;text-align:center;font-size:16px;font-weight:900;padding:4px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:6px;color:var(--text);-moz-appearance:textfield;">
-              <span style="color:var(--text-muted);font-size:11px;font-weight:900;">×</span>
-              <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" id="pdc2-${a.id}" class="placar-input" onclick="event.stopPropagation()" style="width:32px;text-align:center;font-size:16px;font-weight:900;padding:4px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:6px;color:var(--text);-moz-appearance:textfield;">
-              <button onclick="event.stopPropagation();salvarPlacarDireto('${a.id}')" style="margin-left:4px;padding:4px 8px;font-size:10px;font-weight:700;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:6px;cursor:pointer;">OK</button>
-            </div>`}
+          : master
+            ? `<div style="display:flex;align-items:center;gap:3px;">
+                <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" id="pdc1-${a.id}" class="placar-input" onclick="event.stopPropagation()" style="width:32px;text-align:center;font-size:16px;font-weight:900;padding:4px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:6px;color:var(--text);-moz-appearance:textfield;">
+                <span style="color:var(--text-muted);font-size:11px;font-weight:900;">×</span>
+                <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" id="pdc2-${a.id}" class="placar-input" onclick="event.stopPropagation()" style="width:32px;text-align:center;font-size:16px;font-weight:900;padding:4px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:6px;color:var(--text);-moz-appearance:textfield;">
+                <button onclick="event.stopPropagation();salvarPlacarDireto('${a.id}')" style="margin-left:4px;padding:4px 8px;font-size:10px;font-weight:700;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:6px;cursor:pointer;">OK</button>
+              </div>`
+            : `<div style="color:var(--text-muted);font-size:11px;font-weight:700;">EM<br>ANDAMENTO</div>`}
       </div>
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-width:0;">
         ${b2}
@@ -2199,8 +2207,52 @@ window.salvarPlacar = async id => {
   fecharModal(); await carregarAmistosos(); atualizarDash(); toast('RESULTADO SALVO!');
 };
 
+// ─── VER AMISTOSO (somente leitura — RG7b) ───────────────────────────
+window.verAmistoso = (id) => {
+  const a = amistosos.find(x => x.id === id);
+  if (!a) return;
+  const b1 = badgeTime(a.time1?.timeId, a.time1?.nome, a.tipo);
+  const b2 = badgeTime(a.time2?.timeId, a.time2?.nome, a.tipo);
+  const temRes = a.resultado != null;
+  const g1 = a.resultado?.g1 ?? 0;
+  const g2 = a.resultado?.g2 ?? 0;
+  const placar = temRes
+    ? `<div style="display:flex;align-items:center;justify-content:center;gap:12px;">
+        <input type="number" value="${g1}" disabled style="width:70px;text-align:center;font-size:36px;font-weight:900;padding:10px 4px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:var(--text-muted);opacity:0.7;">
+        <span style="font-size:22px;font-weight:900;color:var(--text-muted);">×</span>
+        <input type="number" value="${g2}" disabled style="width:70px;text-align:center;font-size:36px;font-weight:900;padding:10px 4px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:var(--text-muted);opacity:0.7;">
+      </div>`
+    : `<div style="color:var(--text-muted);font-size:13px;font-weight:700;text-align:center;padding:12px;">EM ANDAMENTO</div>`;
+  fullscreen('AMISTOSO', `
+    <div style="display:flex;flex-direction:column;gap:20px;max-width:400px;margin:0 auto;">
+      <div style="display:flex;align-items:center;justify-content:space-around;gap:8px;background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:16px;padding:16px;">
+        <div style="text-align:center;flex:1;">
+          <div style="display:flex;justify-content:center;margin-bottom:8px;">${b1}</div>
+          <div style="font-weight:800;font-size:14px;text-transform:uppercase;">${a.time1?.nome||'?'}</div>
+          ${a.time1?.forca ? `<div style="margin-top:4px;">${forcaBadge(a.time1.forca)}</div>` : ''}
+          <div style="font-size:11px;color:var(--cyan);margin-top:4px;">${(a.time1?.jogadores||[]).join(', ')}</div>
+        </div>
+        <div style="font-size:18px;font-weight:900;color:var(--text-muted);flex-shrink:0;">VS</div>
+        <div style="text-align:center;flex:1;">
+          <div style="display:flex;justify-content:center;margin-bottom:8px;">${b2}</div>
+          <div style="font-weight:800;font-size:14px;text-transform:uppercase;">${a.time2?.nome||'?'}</div>
+          ${a.time2?.forca ? `<div style="margin-top:4px;">${forcaBadge(a.time2.forca)}</div>` : ''}
+          <div style="font-size:11px;color:var(--cyan);margin-top:4px;">${(a.time2?.jogadores||[]).join(', ')}</div>
+        </div>
+      </div>
+      ${temRes ? `<div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:10px;text-align:center;">PLACAR</label>
+        ${placar}
+      </div>` : placar}
+      <button class="btn-ghost" onclick="fecharFullscreen()">FECHAR</button>
+    </div>`);
+};
+
 // ─── EDITAR AMISTOSO ──────────────────────────────────────────────
 window.editarAmistoso = (id) => {
+  // RG7b: não-master abre em modo somente leitura
+  if (!temPermissao()) { verAmistoso(id); return; }
+
   const a = amistosos.find(x => x.id === id);
   if (!a) return;
   const temRes = a.resultado != null;
