@@ -1261,9 +1261,9 @@ window.salvarEdicaoJogador = async (id) => {
     let fotoUrl = jogadores.find(x=>x.id===id)?.fotoUrl || '';
     const fotoInput = document.getElementById('i-foto-edit');
     if (fotoInput?.files?.[0]) {
-      const file = fotoInput.files[0];
-      const sRef = storageRef(storage, `avatars/${Date.now()}_${file.name}`);
-      const snap = await uploadBytes(sRef, file);
+      const blob = await compactarImagem(fotoInput.files[0]);
+      const sRef = storageRef(storage, `avatars/${Date.now()}_avatar.jpg`);
+      const snap = await uploadBytes(sRef, blob);
       fotoUrl = await getDownloadURL(snap.ref);
     }
     if (isMaster) {
@@ -1331,6 +1331,29 @@ document.getElementById('btn-add-jog').addEventListener('click', () => {
   setTimeout(() => document.getElementById('i-nome')?.focus(), 100);
 });
 
+// Compacta imagem via Canvas (max 200x200, JPEG 0.7)
+function compactarImagem(file, maxSize=200, quality=0.7) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        if (w > maxSize || h > maxSize) {
+          if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+          else { w = Math.round(w * maxSize / h); h = maxSize; }
+        }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(blob => resolve(blob), 'image/jpeg', quality);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 window.previewFoto = (input) => {
   const file = input.files[0];
   if (!file) return;
@@ -1353,9 +1376,9 @@ window.salvarJogador = async () => {
     let fotoUrl = '';
     const fotoInput = document.getElementById('i-foto');
     if (fotoInput?.files?.[0]) {
-      const file = fotoInput.files[0];
-      const sRef = storageRef(storage, `avatars/${Date.now()}_${file.name}`);
-      const snap = await uploadBytes(sRef, file);
+      const blob = await compactarImagem(fotoInput.files[0]);
+      const sRef = storageRef(storage, `avatars/${Date.now()}_avatar.jpg`);
+      const snap = await uploadBytes(sRef, blob);
       fotoUrl = await getDownloadURL(snap.ref);
     }
     if (isMaster) {
