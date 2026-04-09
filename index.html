@@ -1694,6 +1694,8 @@ window.toggleModoDupla = (ativo) => {
 };
 
 let _sorteioAmi = null;
+// F8: expor _sorteioAmi no window para que onclick inline possa acessar
+Object.defineProperty(window, '_sorteioAmi', { get: () => _sorteioAmi });
 window.sortearAmistoso = () => {
   const modoDupla = document.getElementById('ami-dupla')?.checked || false;
   if (modoDupla) {
