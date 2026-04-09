@@ -1,0 +1,47 @@
+# FIFA FAR PLAY - Prompts de Features v3
+# FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
+# O agente deve marcar o hash do commit ao concluir cada item.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v3.txt e um novo é criado.
+
+## REGRA ##
+[x] R1 - Deixar todos os cards de jogos igual ao do amistoso (campeonatos tb), exceto exclusão em torneios. (hash: dfa2fdd)
+[x] R2 - Botão excluir dos cards com mesmo estilo/comportamento do botão excluir da tela de jogadores. (hash: 65cf69a)
+
+## MENU ##
+[x] M1 - Melhorar visual do menu hamburguer (hash: 21cfb2e)
+[x] M2 - Corrigir redirecionamento do título FIFA FAR PLAY para home (hash: 09c5b76)
+
+## HOME ##
+[x] H1 - Botão excluir nos cards de torneios em andamento da home. (hash: 65cf69a)
+[x] H2 - Tags dos jogadores + cards dos jogos em andamento dentro do card de torneio. (hash: 28ad6b5)
+[x] H3 - Clicar no torneio em andamento vai direto para detalhes do torneio (hash: 8a12363)
+
+## JOGADORES ##
+[x] J1 - Padronizar todas as telas de cadastro (torneio, amistosos) com estilo da tela de jogadores. (hash: 7fadc99)
+[x] J2 - Breadcrumb de navegação em todas as telas com HOME como link (hash: 2e034b3)
+[x] J3 - Compactar foto do jogador com Canvas API antes de salvar (hash: 4a7d1e5)
+[x] J4 - Campo usuário master: trocar SIM/NÃO por checkbox desmarcado (hash: a3cd91b)
+[x] J5 - Incluir campo de celular no cadastro do jogador (hash: d706d02)
+
+## AMISTOSOS ##
+[x] A1 - Autopreencher jogadores do último amistoso ao criar novo (hash: 3233702)
+[x] A2 - Campo busca antes das tags dos jogadores selecionados (hash: a1765be)
+[x] A3 - Remover botão AMBOS, deixar TIMES e SELEÇÕES (ambos selecionados por padrão) (hash: 9cc6a2d)
+[x] A4 - Fechar dropdown de jogadores ao clicar fora sem selecionar (hash: 45711fd)
+[x] A5 - Checkbox "sortear aleatoriamente" + seleção manual de times com busca (hash: 1fa3eba)
+[x] A6 - Modo sorteio sempre ativado por padrão nas novas criações. (hash: 1fa3eba)
+[x] A7 - Remover label explicativa "Selecione os jogadores..." (hash: d89f4cb)
+
+## TORNEIO ##
+[x] T1 - Arrumar botão excluir conforme padrão da tela de jogadores (R2). (hash: 65cf69a)
+[x] T2 - Cards de torneio da home e da lista de cadastro devem ser idênticos. (hash: 28ad6b5)
+[x] T3 - Card do torneio: tags dos jogadores + cards dos jogos em andamento. (hash: 28ad6b5)
+[x] T4 - Botão excluir do card: mostrar confirmação e excluir, não abrir cadastro. (hash: 65cf69a)
+[x] T5 - Não permitir sortear/adicionar jogadores se torneio já iniciou (algum jogo finalizado). (hash: 2d4ff8d)
+[x] T6 - Opção de reiniciar torneio com confirmação. (hash: 468ce75)
+[x] T7 - Antes de iniciar, permitir sorteio de times. (hash: 2a86ec8)
+[x] T8 - No cadastro de torneio: remover ícones dos botões de tipo, deixar só texto. (hash: 9f1a1be)
+[x] T9 - Ao selecionar tipo de torneio: accordion com regras/descrição do tipo (pesquisar regras). (hash: 3256420)
+[x] T10 - Config de jogadores e times no torneio: igual ao comportamento do amistoso. (hash: 0003096)
+[x] T11 - Renomear botão CRIAR para SALVAR no formulário de torneio. (hash: 380c281)
+[x] T12 - Após criar torneio, ficar na tela do torneio criado (não voltar para lista). (hash: 21fa402)
