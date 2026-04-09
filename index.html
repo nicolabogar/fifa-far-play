@@ -2511,6 +2511,7 @@ function abrirModalCriarCamp() {
           </div>`).join('')}
         </div>
         <input type="hidden" id="ct" value="champions">
+        <div id="ct-regras-box" style="display:none;margin-top:8px;"></div>
       </div>
       <div>
         <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">NOME DO TORNEIO</label>
@@ -2589,6 +2590,21 @@ window.selCampTipo = (k, el) => {
   if (manualCheck) { manualCheck.checked = false; }
   const box = document.getElementById('manual-times-box');
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
+  // Accordion com regras do tipo
+  const regrasBox = document.getElementById('ct-regras-box');
+  if (regrasBox && meta.desc) {
+    regrasBox.style.display = '';
+    regrasBox.innerHTML = `
+      <div class="grupo-header" onclick="toggleGrupo(this)" style="margin-top:4px;">
+        <span class="grupo-titulo" style="color:var(--text-muted);font-size:11px;">COMO FUNCIONA</span>
+        <span class="grupo-seta">›</span>
+      </div>
+      <div class="grupo-body fechado">
+        <p style="color:var(--text-muted);font-size:12px;line-height:1.6;background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:10px 12px;margin-top:4px;">${meta.desc}</p>
+      </div>`;
+  } else if (regrasBox) {
+    regrasBox.style.display = 'none';
+  }
 };
 
 window.criarCampeonato = async () => {
