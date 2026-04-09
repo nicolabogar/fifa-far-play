@@ -1961,13 +1961,15 @@ window._abrirDropdownManualJog = (jogId) => {
   const drop = document.getElementById('ami-manual-drop-'+jogId);
   if (!drop) return;
   if (!filtrado.length) { drop.style.display='none'; return; }
-  drop.innerHTML = filtrado.slice(0,30).map(t=>`
-    <div onclick="selecionarTimeManualJog('${jogId}','${t.id}','${t.nome.replace(/'/g,"\\'")}',${t.forca},'${t._tipo}')"
+  drop.innerHTML = filtrado.slice(0,30).map(t=>{
+    const paisCode = t._tipo==='selecoes' ? (SELECAO_PAIS[t.id]?.pais||'') : (TEAM_DATA[t.id]?.pais||'');
+    const flagEl = paisCode ? `<img src="https://flagcdn.com/w40/${paisCode}.png" alt="" loading="lazy" style="width:20px;height:15px;object-fit:cover;border-radius:2px;flex-shrink:0;" onerror="this.style.display='none'">` : '';
+    return `<div onclick="selecionarTimeManualJog('${jogId}','${t.id}','${t.nome.replace(/'/g,"\\'")}',${t.forca},'${t._tipo}')"
       style="padding:9px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);font-weight:600;font-size:12px;display:flex;align-items:center;gap:8px;">
-      <span>${t._tipo==='selecoes'?(selecoes.find(s=>s.id===t.id)?.bandeira||'🌍'):(t.logo||'⚽')}</span>
-      <span>${t.nome}</span>
-      <span style="color:var(--text-muted);font-size:10px;margin-left:auto;">Força ${t.forca}</span>
-    </div>`).join('');
+      ${flagEl}
+      <span style="text-transform:uppercase;">${t.nome}</span>
+      <span style="color:var(--text-muted);font-size:10px;margin-left:auto;">FORÇA ${t.forca}</span>
+    </div>`;}).join('');
   drop.style.display='block';
 };
 
@@ -2596,13 +2598,15 @@ window._abrirDropdownManualCC = (jogId) => {
   if (!drop) return;
   if (!filtrado.length) { drop.style.display='none'; return; }
   const isSel = meta?.tipo === 'selecoes';
-  drop.innerHTML = filtrado.slice(0,30).map(t=>`
-    <div onclick="selecionarTimeManualCC('${jogId}','${t.id}','${t.nome.replace(/'/g,"\\'")}',${t.forca},'${isSel?'selecoes':'clubes'}')"
+  drop.innerHTML = filtrado.slice(0,30).map(t=>{
+    const paisCode = isSel ? (SELECAO_PAIS[t.id]?.pais||'') : (TEAM_DATA[t.id]?.pais||'');
+    const flagEl = paisCode ? `<img src="https://flagcdn.com/w40/${paisCode}.png" alt="" loading="lazy" style="width:20px;height:15px;object-fit:cover;border-radius:2px;flex-shrink:0;" onerror="this.style.display='none'">` : '';
+    return `<div onclick="selecionarTimeManualCC('${jogId}','${t.id}','${t.nome.replace(/'/g,"\\'")}',${t.forca},'${isSel?'selecoes':'clubes'}')"
       style="padding:9px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);font-weight:600;font-size:12px;display:flex;align-items:center;gap:8px;">
-      <span>${isSel?(selecoes.find(s=>s.id===t.id)?.bandeira||'🌍'):(t.logo||'⚽')}</span>
-      <span>${t.nome}</span>
-      <span style="color:var(--text-muted);font-size:10px;margin-left:auto;">Força ${t.forca}</span>
-    </div>`).join('');
+      ${flagEl}
+      <span style="text-transform:uppercase;">${t.nome}</span>
+      <span style="color:var(--text-muted);font-size:10px;margin-left:auto;">FORÇA ${t.forca}</span>
+    </div>`;}).join('');
   drop.style.display='block';
 };
 
