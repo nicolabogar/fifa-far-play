@@ -195,11 +195,12 @@
 
     /* Player/Team card */
     .swipe-wrap { position: relative; overflow: hidden; border-radius: 18px; margin-bottom: 10px; }
-    .swipe-bg { position: absolute; right: 0; top: 0; bottom: 0; width: 80px; background: linear-gradient(90deg, transparent, #EF4444); display: flex; align-items: center; justify-content: flex-end; padding-right: 18px; border-radius: 18px; }
+    .swipe-bg { position: absolute; left: 0; top: 0; bottom: 0; width: 80px; background: linear-gradient(270deg, transparent, #EF4444); display: flex; align-items: center; justify-content: flex-start; padding-left: 18px; border-radius: 18px; flex-direction: column; gap: 2px; justify-content: center; }
     .swipe-bg svg { color: white; }
-    .swipe-bg-label { font-size: 9px; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
-    .entity-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 18px; padding: 14px; display: flex; align-items: center; gap: 12px; transition: transform 0.25s ease, border-color 0.2s; position: relative; z-index: 1; }
+    .swipe-bg-label { font-size: 9px; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 0.05em; }
+    .entity-card { background: var(--card); border: 1px solid var(--card-border); border-left: 3px solid rgba(239,68,68,0.6); border-radius: 18px; padding: 14px; display: flex; align-items: center; gap: 12px; transition: transform 0.25s ease, border-color 0.2s; position: relative; z-index: 1; }
     .entity-card.swiping { transition: none; }
+    .match-card.swipeable { border-left: 3px solid rgba(239,68,68,0.6); }
     .entity-card:active { transform: scale(0.99); }
     .avatar { width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; background: linear-gradient(135deg, rgba(139,92,246,0.3), rgba(6,182,212,0.3)); }
 
@@ -1412,6 +1413,13 @@ function temPermissao() {
 }
 
 // ─── SWIPE-TO-DELETE (iOS style) ──────────────────────────────────────
+function _resetSwipeCard(card) {
+  card.style.transition = 'transform 0.25s ease';
+  card.style.transform = 'translateX(0)';
+  card.classList.remove('swiping');
+}
+window._resetSwipeCard = _resetSwipeCard;
+
 function initSwipe(container, tipo) {
   container.querySelectorAll('.swipe-wrap').forEach(wrap => {
     if (wrap.dataset.swipeInit) return;
@@ -1419,34 +1427,89 @@ function initSwipe(container, tipo) {
     const card = wrap.querySelector('.entity-card') || wrap.querySelector('.match-card') || wrap.children[wrap.children.length - 1];
     if (!card) return;
     let startX = 0, currentX = 0, isDragging = false;
-    const THRESHOLD = -70;
+    const THRESHOLD = 70; // swipe RIGHT threshold (positive = swipe right to reveal left bg)
     card.addEventListener('touchstart', e => {
-      if (e.target.closest('.placar-input') || e.target.closest('button')) return;
+      if (e.target.closest('.placar-input') || e.target.closest('button') || e.target.closest('input')) return;
       startX = e.touches[0].clientX; isDragging = true;
+      card.classList.add('swiping');
     }, {passive: true});
     card.addEventListener('touchmove', e => {
       if (!isDragging) return;
       currentX = e.touches[0].clientX - startX;
-      if (currentX > 0) currentX = 0;
+      if (currentX < 0) currentX = 0; // only right-to-left (revealing left bg means translating right)
+      // Actually for left-side bg revealed by swiping left:
+      // We translate card to the LEFT (negative), revealing the bg on the left
+      // Re-think: bg is on left, so we swipe LEFT (negative translateX) to reveal it
+      currentX = e.touches[0].clientX - startX;
+      if (currentX > 0) currentX = 0; // only left swipe
       if (currentX < -100) currentX = -100;
       card.style.transform = `translateX(${currentX}px)`;
     }, {passive: true});
     card.addEventListener('touchend', () => {
       if (!isDragging) return;
       isDragging = false;
-      if (currentX < THRESHOLD) {
+      card.classList.remove('swiping');
+      if (currentX < -THRESHOLD) {
+        card.style.transition = 'transform 0.2s ease';
         card.style.transform = 'translateX(-100px)';
         const id = wrap.dataset.swipeId;
         const nome = wrap.dataset.swipeNome;
-        if (tipo === 'jogador') excluirJogador(id, nome);
-        else if (tipo === 'time') excluirTime(id);
-        else if (tipo === 'campeonato') excluirCampeonato(id);
+        const afterModalCancel = () => _resetSwipeCard(card);
+        if (tipo === 'jogador') _swipeExcluirJogador(id, nome, afterModalCancel);
+        else if (tipo === 'time') _swipeExcluirTime(id, afterModalCancel);
+        else if (tipo === 'amistoso') _swipeExcluirAmistoso(id, afterModalCancel);
+        else if (tipo === 'campeonato') _swipeExcluirCampeonato(id, afterModalCancel);
       } else {
-        card.style.transform = 'translateX(0)';
+        _resetSwipeCard(card);
       }
       currentX = 0;
     });
   });
+}
+
+// Wrappers de exclusão com callback de cancelamento
+function _swipeExcluirJogador(id, nome, onCancel) {
+  excluirJogador(id, nome, onCancel);
+}
+function _swipeExcluirTime(id, onCancel) {
+  excluirTime(id);
+  window._swipeCancelCb = onCancel;
+  // excluirTime opens modal; patch cancel button
+  setTimeout(() => {
+    const modal = document.getElementById('modal-body');
+    if (!modal) return;
+    const cancelBtn = modal.querySelector('.btn-ghost');
+    if (cancelBtn) {
+      const orig = cancelBtn.getAttribute('onclick') || '';
+      cancelBtn.setAttribute('onclick', orig + ';(window._swipeCancelCb&&window._swipeCancelCb())');
+    }
+  }, 50);
+}
+function _swipeExcluirAmistoso(id, onCancel) {
+  confirmarExcluirAmistoso(id);
+  window._swipeCancelCb = onCancel;
+  setTimeout(() => {
+    const mBody = document.getElementById('modal-body');
+    if (!mBody) return;
+    const cancelBtn = mBody.querySelector('.btn-ghost');
+    if (cancelBtn) {
+      const orig = cancelBtn.getAttribute('onclick') || '';
+      cancelBtn.setAttribute('onclick', orig + ';(window._swipeCancelCb&&window._swipeCancelCb())');
+    }
+  }, 50);
+}
+function _swipeExcluirCampeonato(id, onCancel) {
+  excluirCampeonato(id);
+  window._swipeCancelCb = onCancel;
+  setTimeout(() => {
+    const mBody = document.getElementById('modal-body');
+    if (!mBody) return;
+    const cancelBtn = mBody.querySelector('.btn-ghost');
+    if (cancelBtn) {
+      const orig = cancelBtn.getAttribute('onclick') || '';
+      cancelBtn.setAttribute('onclick', orig + ';(window._swipeCancelCb&&window._swipeCancelCb())');
+    }
+  }, 50);
 }
 
 function renderJogadores() {
@@ -1454,7 +1517,24 @@ function renderJogadores() {
   if (!jogadores.length) { c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">Nenhum jogador cadastrado</p>'; return; }
   const master = getMaster();
   const podeMudar = temPermissao();
-  c.innerHTML = jogadores.map(j => `
+  c.innerHTML = jogadores.map(j => podeMudar ? `
+    <div class="swipe-wrap" data-swipe-id="${j.id}" data-swipe-nome="${j.nome.replace(/"/g,'&quot;')}">
+      <div class="swipe-bg">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        <span class="swipe-bg-label">EXCLUIR</span>
+      </div>
+      <div class="entity-card" onclick="editarJogador('${j.id}')" style="cursor:pointer;">
+        ${avatarJogador(j, 46)}
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-weight:700;font-size:15px;text-transform:uppercase;">${j.nome}</span>
+            ${j.master ? `<span class="tag tag-yellow" style="font-size:10px;">MASTER</span>` : ''}
+          </div>
+          <div style="color:var(--text-muted);font-size:11px;margin-top:2px;">${j.email||'SEM E-MAIL VINCULADO'}</div>
+          ${j.celular ? `<div style="color:var(--text-muted);font-size:11px;margin-top:1px;">${j.celular}</div>` : ''}
+        </div>
+      </div>
+    </div>` : `
     <div style="margin-bottom:10px;">
       <div class="entity-card" onclick="editarJogador('${j.id}')" style="cursor:pointer;">
         ${avatarJogador(j, 46)}
@@ -1466,9 +1546,9 @@ function renderJogadores() {
           <div style="color:var(--text-muted);font-size:11px;margin-top:2px;">${j.email||'SEM E-MAIL VINCULADO'}</div>
           ${j.celular ? `<div style="color:var(--text-muted);font-size:11px;margin-top:1px;">${j.celular}</div>` : ''}
         </div>
-        ${podeMudar ? `<button onclick="event.stopPropagation();excluirJogador('${j.id}','${j.nome.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')" class="btn-excluir">✕ EXCLUIR</button>` : ''}
       </div>
     </div>`).join('');
+  if (podeMudar) initSwipe(c, 'jogador');
 }
 
 window.editarJogador = (id) => {
@@ -1555,15 +1635,17 @@ window.salvarEdicaoJogador = async (id) => {
   }
 };
 
-window.excluirJogador = (id, nome) => {
+window.excluirJogador = (id, nome, onCancel) => {
   modal(`<p class="modal-title">EXCLUIR JOGADOR?</p>
     <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
       <p style="font-weight:700;font-size:13px;color:#FCA5A5;margin-bottom:6px;">ATENÇÃO</p>
       <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">Excluir <strong style="color:var(--text)">${nome}</strong> apagará todo o histórico deste jogador: ranking, amistosos e torneios. Esta ação não pode ser desfeita.</p>
     </div>
     <div style="display:flex;gap:10px;">
+      <button class="btn-ghost" onclick="fecharModal();(window._swipeCancelCb&&window._swipeCancelCb())">CANCELAR</button>
       <button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);" onclick="confirmarExcluirJog('${id}')">CONFIRMAR</button>
     </div>`);
+  if (onCancel) window._swipeCancelCb = onCancel;
 };
 window.confirmarExcluirJog = async id => {
   // RG10: remover referências do jogador nos amistosos (jogadoresIds)
@@ -1747,33 +1829,25 @@ function cardAmistoso(a, compact=false) {
         <button onclick="event.stopPropagation();salvarPlacarDireto('${a.id}',this)" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">FIM</button>`
       : `<div style="color:var(--text-muted);font-size:13px;font-weight:700;">EM ANDAMENTO</div>`;
   const cardId = `ami-card-${a.id}`;
-  return `<div id="${cardId}" style="margin-bottom:10px;">
-  <div class="match-card" style="${compact?'padding:12px;':''}" onclick="editarAmistoso('${a.id}')" style="cursor:pointer;">
+  const swipeOuter = master
+    ? `<div class="swipe-wrap" data-swipe-id="${a.id}" data-swipe-nome="Amistoso">`
+    : `<div id="${cardId}" style="margin-bottom:10px;">`;
+  const swipeClose = master ? `</div>` : `</div>`;
+  const swipeBg = master ? `<div class="swipe-bg"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg><span class="swipe-bg-label">EXCLUIR</span></div>` : '';
+  return `${swipeOuter}${swipeBg}
+  <div id="${cardId}" class="match-card${master?' swipeable':''}" style="${compact?'padding:12px;':''}" onclick="editarAmistoso('${a.id}')" style="cursor:pointer;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${compact?'8':'10'}px;">
       <div style="display:flex;align-items:center;gap:6px;">
         <span class="tag tag-purple" style="font-size:9px;">AMISTOSO</span>
         <span class="tag tag-gray" style="font-size:9px;">${a.tipo === 'selecoes' ? 'SELECOES' : 'CLUBES'}</span>
         ${a.modoDupla ? `<span class="tag tag-cyan" style="font-size:9px;">2v2</span>` : ''}
       </div>
-      ${temRes
-        ? master
-          ? `<div style="display:flex;align-items:center;gap:6px;">
-              <span class="tag tag-gray">FINALIZADO</span>
-              <button onclick="event.stopPropagation();confirmarExcluirAmistoso('${a.id}')" class="btn-excluir">✕ EXCLUIR</button>
-            </div>`
-          : `<span class="tag tag-gray">FINALIZADO</span>`
-        : master
-          ? `<div style="display:flex;align-items:center;gap:6px;">
-              <span class="tag tag-cyan" style="font-size:9px;">EM ANDAMENTO</span>
-              <button onclick="event.stopPropagation();confirmarExcluirAmistoso('${a.id}')" class="btn-excluir">✕ EXCLUIR</button>
-            </div>`
-          : `<span class="tag tag-cyan" style="font-size:9px;">EM ANDAMENTO</span>`
-      }
+      ${temRes ? `<span class="tag tag-gray">FINALIZADO</span>` : `<span class="tag tag-cyan" style="font-size:9px;">EM ANDAMENTO</span>`}
     </div>
     ${compact ? `
     <div style="display:flex;align-items:center;gap:8px;">
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-width:0;">
-        <div style="display:flex;align-items:center;justify-content:center;gap:3px;font-weight:800;font-size:13px;line-height:1.2;text-transform:uppercase;max-width:100%;">${timeFlagInline(a.time1?.timeId,a.tipo)}<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.time1?.nome || '?'}</span></div>
+        <div style="font-weight:800;font-size:13px;line-height:1.2;text-transform:uppercase;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.time1?.nome || '?'}</div>
         ${b1}
         ${(a.time1?.jogadores||[]).length ? `<div style="font-size:10px;color:var(--cyan);font-weight:700;">${(a.time1.jogadores).join(' · ')}</div>` : ''}
       </div>
@@ -1790,14 +1864,14 @@ function cardAmistoso(a, compact=false) {
             : `<div style="color:var(--text-muted);font-size:11px;font-weight:700;">EM<br>ANDAMENTO</div>`}
       </div>
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-width:0;">
-        <div style="display:flex;align-items:center;justify-content:center;gap:3px;font-weight:800;font-size:13px;line-height:1.2;text-transform:uppercase;max-width:100%;">${timeFlagInline(a.time2?.timeId,a.tipo)}<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.time2?.nome || '?'}</span></div>
+        <div style="font-weight:800;font-size:13px;line-height:1.2;text-transform:uppercase;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.time2?.nome || '?'}</div>
         ${b2}
         ${(a.time2?.jogadores||[]).length ? `<div style="font-size:10px;color:var(--cyan);font-weight:700;">${(a.time2.jogadores).join(' · ')}</div>` : ''}
       </div>
     </div>` : `
     <div style="display:flex;align-items:flex-start;gap:8px;">
       <div style="flex:1;text-align:center;">
-        <div style="display:flex;align-items:center;justify-content:center;gap:4px;font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${timeFlagInline(a.time1?.timeId,a.tipo)}${a.time1?.nome || '?'}</div>
+        <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${a.time1?.nome || '?'}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${b1}</div>
         ${(a.time1?.jogadores||[]).length
           ? `<div style="margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:2px;">${(a.time1.jogadores).map(n=>`<div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>`
@@ -1807,7 +1881,7 @@ function cardAmistoso(a, compact=false) {
         ${placarDireto}
       </div>
       <div style="flex:1;text-align:center;">
-        <div style="display:flex;align-items:center;justify-content:center;gap:4px;font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${timeFlagInline(a.time2?.timeId,a.tipo)}${a.time2?.nome || '?'}</div>
+        <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${a.time2?.nome || '?'}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${b2}</div>
         ${(a.time2?.jogadores||[]).length
           ? `<div style="margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:2px;">${(a.time2.jogadores).map(n=>`<div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>`
@@ -1822,11 +1896,11 @@ function cardAmistoso(a, compact=false) {
     </button>
   </div>` : ''}
   </div>
-  </div>`;
+  ${swipeClose}`;
 }
 
 // RG1/RG2: modal de confirmação centralizado para excluir amistoso
-window.confirmarExcluirAmistoso = (id) => {
+window.confirmarExcluirAmistoso = (id, onCancel) => {
   const a = amistosos.find(x => x.id === id);
   const eFinalizado = a && a.resultado != null;
   modal(`<p class="modal-title">EXCLUIR JOGO?</p>
@@ -1834,8 +1908,10 @@ window.confirmarExcluirAmistoso = (id) => {
       <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">Esta ação removerá o jogo e não pode ser desfeita.${eFinalizado ? ' <strong style="color:#FCA5A5;">O RANKING SERA ATUALIZADO.</strong>' : ''}</p>
     </div>
     <div style="display:flex;gap:10px;">
+      <button class="btn-ghost" onclick="fecharModal();(window._swipeCancelCb&&window._swipeCancelCb())">CANCELAR</button>
       <button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);" onclick="confirmarExcluirAmi('${id}')">CONFIRMAR</button>
     </div>`);
+  if (onCancel) window._swipeCancelCb = onCancel;
 };
 
 window.confirmarExcluirAmi = async (id) => {
@@ -1905,7 +1981,11 @@ function renderAmistosos() {
 
   c.innerHTML = html;
 
-  // swipe removido nos amistosos
+  // Iniciar swipe em abertos
+  if (temPermissao()) {
+    const grpAbertos = document.getElementById('grupo-ami-abertos');
+    if (grpAbertos) initSwipe(grpAbertos, 'amistoso');
+  }
 
   // Renderiza finalizados
   _renderFinalizadosAmi();
@@ -1953,6 +2033,8 @@ function _renderFinalizadosAmi() {
   lista.innerHTML = slice.length
     ? slice.map(a => cardAmistoso(a)).join('')
     : '<p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:13px;">NENHUM AMISTOSO COM ESSE FILTRO</p>';
+
+  if (temPermissao()) initSwipe(lista, 'amistoso');
 
   if (totalPags > 1) {
     pagRow.innerHTML = `
@@ -3893,62 +3975,42 @@ function renderTimesEdit() {
   }
 
   if (!items.length) { el.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:32px 0;font-size:14px;">NENHUM TIME</p>'; return; }
+  const podeMudar = temPermissao();
   el.innerHTML = items.map(t => {
     const inativo = t.inativo || false;
     const ativoStyle = inativo ? 'opacity:0.45;filter:grayscale(0.6);' : '';
-    const btnInativoLabel = inativo ? 'ATIVAR' : 'INATIVO';
-    const btnInativoStyle = inativo
-      ? 'background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);color:#6EE7B7;'
-      : 'background:rgba(100,116,139,0.15);border:1px solid rgba(100,116,139,0.4);color:#94A3B8;';
-    const tagInativo = inativo ? `<span class="tag tag-gray" style="font-size:9px;margin-left:4px;">INATIVO</span>` : '';
-    const eficTag = t.eficiencia ? `<span class="efic-tag selecionado" data-efic="${t.eficiencia}" style="cursor:default;pointer-events:none;">${t.eficiencia}</span>` : '';
+    const tagInativo = inativo ? `<span class="tag tag-gray" style="font-size:9px;">INATIVO</span>` : '';
+    const eficTag = t.eficiencia ? `<span class="efic-tag selecionado" data-efic="${t.eficiencia}" style="cursor:default;pointer-events:none;font-size:10px;">${t.eficiencia}</span>` : '';
+    let icone, countryInfo;
     if (isSel) {
       const d = SELECAO_PAIS[t.id] || { pais:'', paisNome: t.nome };
-      const flagHtml = d.pais
-        ? `<img src="https://flagcdn.com/w80/${d.pais}.png" loading="lazy" style="width:56px;height:42px;object-fit:cover;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.4);" onerror="this.style.display='none'">`
-        : `<span style="font-size:28px;">🌍</span>`;
-      return `<div style="margin-bottom:10px;">
-        <div class="entity-card" style="flex-direction:column;align-items:flex-start;gap:10px;cursor:pointer;${ativoStyle}" onclick="editarTime('${t.id}')">
-          <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-            <div style="display:flex;align-items:center;gap:10px;user-select:none;-webkit-user-select:none;"
-              onmousedown="event.stopPropagation();lpStart('${t.id}','${t.nome.replace(/'/g,"\\'")}',${inativo})"
-              onmouseup="lpEnd()" onmouseleave="lpEnd()"
-              ontouchstart="event.stopPropagation();lpStart('${t.id}','${t.nome.replace(/'/g,"\\'")}',${inativo})"
-              ontouchend="lpEnd()" ontouchcancel="lpEnd()"
-              title="Segure para inativar/ativar">
-              ${flagHtml}
-              <span style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">${d.paisNome||''}</span>
-            </div>
-            <button onclick="event.stopPropagation();excluirTime('${t.id}')" class="btn-excluir">✕ EXCLUIR</button>
-          </div>
-          <div style="font-weight:800;font-size:16px;text-transform:uppercase;display:flex;align-items:center;gap:6px;">${t.nome}${tagInativo}</div>
-          <div style="display:flex;justify-content:center;width:100%;">${flagHtml}</div>
-          ${eficTag ? `<div>${eficTag}</div>` : ''}
-        </div>
-      </div>`;
+      icone = `<div style="width:40px;height:30px;border-radius:6px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.pais?`<img src="https://flagcdn.com/w80/${d.pais}.png" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=\\'font-size:18px;\\'>🌍</span>'">`: '<span style="font-size:18px;">🌍</span>'}</div>`;
+      countryInfo = `<span style="font-size:10px;color:var(--text-muted);font-weight:600;">${d.paisNome||''}</span>`;
     } else {
       const d = TEAM_DATA[t.id] || { abrev:(t.nome||'?').slice(0,3).toUpperCase(), fundo:'#1E1E35', cor:'#AAAAAA', pais:'', paisNome:'' };
-      return `<div style="margin-bottom:10px;">
-        <div class="entity-card" style="flex-direction:column;align-items:flex-start;gap:10px;cursor:pointer;${ativoStyle}" onclick="editarTime('${t.id}')">
-          <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-            <div style="display:flex;align-items:center;gap:8px;user-select:none;-webkit-user-select:none;"
-              onmousedown="event.stopPropagation();lpStart('${t.id}','${t.nome.replace(/'/g,"\\'")}',${inativo})"
-              onmouseup="lpEnd()" onmouseleave="lpEnd()"
-              ontouchstart="event.stopPropagation();lpStart('${t.id}','${t.nome.replace(/'/g,"\\'")}',${inativo})"
-              ontouchend="lpEnd()" ontouchcancel="lpEnd()"
-              title="Segure para inativar/ativar">
-              ${flagImg(d.pais, 22)}
-              <span style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">${d.paisNome}</span>
-            </div>
-            <button onclick="event.stopPropagation();excluirTime('${t.id}')" class="btn-excluir">✕ EXCLUIR</button>
-          </div>
-          <div style="font-weight:900;font-size:17px;text-transform:uppercase;display:flex;align-items:center;gap:6px;">${t.nome}${tagInativo}</div>
-          <div style="display:flex;justify-content:center;width:100%;">${shieldClube(t.id, t.nome, 64)}</div>
-          ${eficTag ? `<div>${eficTag}</div>` : ''}
+      icone = badgeTimeCompact(t.id, t.nome, 'clubes');
+      countryInfo = `<span style="font-size:10px;color:var(--text-muted);font-weight:600;">${flagImg(d.pais,14)} ${d.paisNome||''}</span>`;
+    }
+    const inner = `<div class="entity-card" style="cursor:pointer;${ativoStyle}" onclick="editarTime('${t.id}')">
+        ${icone}
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:800;font-size:14px;text-transform:uppercase;display:flex;align-items:center;gap:5px;flex-wrap:wrap;">${t.nome}${tagInativo}</div>
+          <div style="margin-top:2px;">${countryInfo}</div>
+          ${eficTag ? `<div style="margin-top:4px;">${eficTag}</div>` : ''}
         </div>
       </div>`;
+    if (podeMudar) {
+      return `<div class="swipe-wrap" data-swipe-id="${t.id}" data-swipe-nome="${t.nome.replace(/"/g,'&quot;')}">
+        <div class="swipe-bg">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          <span class="swipe-bg-label">EXCLUIR</span>
+        </div>
+        ${inner}
+      </div>`;
     }
+    return `<div style="margin-bottom:10px;">${inner}</div>`;
   }).join('');
+  if (podeMudar) initSwipe(el, 'time');
 }
 
 document.getElementById('btn-add-time').addEventListener('click', () => {
