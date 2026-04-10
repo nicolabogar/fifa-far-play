@@ -274,11 +274,18 @@
     .ham-menu-btn:active .ham-menu-ico { transform: scale(0.9); }
 
     /* Breadcrumb */
-    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; }
-    .breadcrumb-item { color: var(--text-muted); cursor: pointer; transition: color 0.15s; }
-    .breadcrumb-item:hover { color: var(--text); }
-    .breadcrumb-item.active { color: var(--text); cursor: default; }
-    .breadcrumb-sep { color: var(--text-muted); font-size: 11px; opacity: 0.5; }
+    .breadcrumb { display: flex; align-items: center; gap: 6px; padding: 8px 0 14px; flex-wrap: wrap; }
+    .breadcrumb-item {
+      background: var(--card); border: 1px solid var(--card-border); border-radius: 10px;
+      padding: 5px 12px; color: var(--text-muted); cursor: pointer; font-size: 12px;
+      font-weight: 700; transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .breadcrumb-item:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+    .breadcrumb-item.active {
+      background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(6,182,212,0.15));
+      border-color: rgba(139,92,246,0.4); color: #A78BFA; cursor: default;
+    }
+    .breadcrumb-sep { color: var(--text-muted); opacity: 0.4; font-size: 14px; }
 
     /* Dropdown + Criar animado */
     @keyframes criarSlideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
@@ -484,10 +491,10 @@
 
     <!-- ── JOGADORES ── -->
     <div id="view-jogadores" class="view">
-      <div style="font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:0.05em;padding:4px 0 8px;display:flex;align-items:center;gap:4px;">
-        <span onclick="irParaHome()" style="color:var(--purple);cursor:pointer;text-decoration:none;">HOME</span>
-        <span style="color:var(--card-border);">›</span>
-        <span>JOGADORES</span>
+      <div class="breadcrumb">
+        <span class="breadcrumb-item" onclick="irParaHome()">HOME</span>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-item active">JOGADORES</span>
       </div>
       <div style="display:flex; align-items:center; justify-content:space-between; padding:0 0 16px;">
         <h2 style="font-size:22px; font-weight:900;" class="grad">JOGADORES</h2>
@@ -503,10 +510,10 @@
 
     <!-- ── PARTIDAS ── -->
     <div id="view-amistosos" class="view">
-      <div style="font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:0.05em;padding:4px 0 8px;display:flex;align-items:center;gap:4px;">
-        <span onclick="irParaHome()" style="color:var(--purple);cursor:pointer;">HOME</span>
-        <span style="color:var(--card-border);">›</span>
-        <span>AMISTOSOS</span>
+      <div class="breadcrumb">
+        <span class="breadcrumb-item" onclick="irParaHome()">HOME</span>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-item active">AMISTOSOS</span>
       </div>
       <div style="display:flex; align-items:center; justify-content:space-between; padding:0 0 20px;">
         <h2 style="font-size:22px; font-weight:900;" class="grad">AMISTOSOS</h2>
@@ -519,10 +526,10 @@
 
     <!-- ── CAMPEONATOS ── -->
     <div id="view-campeonatos" class="view">
-      <div style="font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:0.05em;padding:4px 0 8px;display:flex;align-items:center;gap:4px;">
-        <span onclick="irParaHome()" style="color:var(--purple);cursor:pointer;">HOME</span>
-        <span style="color:var(--card-border);">›</span>
-        <span>TORNEIOS</span>
+      <div class="breadcrumb">
+        <span class="breadcrumb-item" onclick="irParaHome()">HOME</span>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-item active">TORNEIOS</span>
       </div>
       <div style="display:flex; align-items:center; justify-content:space-between; padding:0 0 16px;">
         <h2 style="font-size:22px; font-weight:900;" class="grad">TORNEIOS</h2>
@@ -535,10 +542,10 @@
 
     <!-- ── RANKING ── -->
     <div id="view-ranking" class="view">
-      <div style="font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:0.05em;padding:4px 0 8px;display:flex;align-items:center;gap:4px;">
-        <span onclick="irParaHome()" style="color:var(--purple);cursor:pointer;">HOME</span>
-        <span style="color:var(--card-border);">›</span>
-        <span>RANKING</span>
+      <div class="breadcrumb">
+        <span class="breadcrumb-item" onclick="irParaHome()">HOME</span>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-item active">RANKING</span>
       </div>
       <div style="padding:0 0 20px;">
         <h2 style="font-size:22px; font-weight:900;" class="grad">RANKING</h2>
@@ -559,10 +566,10 @@
 
     <!-- ── TIMES ── -->
     <div id="view-times" class="view">
-      <div style="font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:0.05em;padding:4px 0 8px;display:flex;align-items:center;gap:4px;">
-        <span onclick="irParaHome()" style="color:var(--purple);cursor:pointer;">HOME</span>
-        <span style="color:var(--card-border);">›</span>
-        <span>TIMES</span>
+      <div class="breadcrumb">
+        <span class="breadcrumb-item" onclick="irParaHome()">HOME</span>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-item active">TIMES</span>
       </div>
       <div style="padding:0 0 16px;">
         <h2 style="font-size:22px; font-weight:900;" class="grad">TIMES</h2>
