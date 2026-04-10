@@ -995,7 +995,7 @@ function sortearBalanceado(pool, historicoIds = [], tipo = '') {
   if (disp.length < 2) disp = [...pool]; // fallback: usa todos
 
   // Limite de discrepância: 35-40% da média de força
-  const DISC_MAX_PCT = 0.38; // 38%
+  const DISC_MAX_PCT = 0.50; // 50%
 
   let melhor = null, menorDiff = Infinity;
   for (let i = 0; i < 30; i++) {
@@ -2268,7 +2268,7 @@ window.sortearAmistoso = () => {
       const [ct1, ct2] = sortearBalanceado(pool, hist, candidato);
       const media = (ct1.forca + ct2.forca) / 2;
       const pctDiff = Math.abs(ct1.forca - ct2.forca) / media;
-      if (pctDiff <= 0.38) { tipo = candidato; escolhido = [ct1, ct2]; break; }
+      if (pctDiff <= 0.50) { tipo = candidato; escolhido = [ct1, ct2]; break; }
       if (tentativa === 19) {
         tipo = opcoes[0];
         const pool2 = tipo === 'selecoes' ? selecoes : clubes;
