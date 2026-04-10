@@ -3794,54 +3794,50 @@ function renderTimesEdit() {
       ? 'background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);color:#6EE7B7;'
       : 'background:rgba(100,116,139,0.15);border:1px solid rgba(100,116,139,0.4);color:#94A3B8;';
     const tagInativo = inativo ? `<span class="tag tag-gray" style="font-size:9px;margin-left:4px;">INATIVO</span>` : '';
+    const eficTag = t.eficiencia ? `<span class="efic-tag selecionado" data-efic="${t.eficiencia}" style="cursor:default;pointer-events:none;">${t.eficiencia}</span>` : '';
     if (isSel) {
       const d = SELECAO_PAIS[t.id] || { pais:'', paisNome: t.nome };
       const flagHtml = d.pais
-        ? `<img src="https://flagcdn.com/w80/${d.pais}.png" loading="lazy" style="width:72px;height:54px;object-fit:cover;border-radius:8px;box-shadow:0 3px 10px rgba(0,0,0,0.4);" onerror="this.parentElement.innerHTML='<span style=\\'font-size:40px;\\'>🌍</span>'">`
-        : `<span style="font-size:40px;">🌍</span>`;
+        ? `<img src="https://flagcdn.com/w80/${d.pais}.png" loading="lazy" style="width:56px;height:42px;object-fit:cover;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.4);" onerror="this.style.display='none'">`
+        : `<span style="font-size:28px;">🌍</span>`;
       return `<div style="margin-bottom:10px;">
-        <div class="entity-card" style="align-items:center;gap:14px;cursor:pointer;${ativoStyle}" onclick="editarTime('${t.id}')">
-          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;user-select:none;-webkit-user-select:none;"
-            onmousedown="event.stopPropagation();lpStart('${t.id}','${t.nome.replace(/'/g,"\\'")}',${inativo})"
-            onmouseup="lpEnd()" onmouseleave="lpEnd()"
-            ontouchstart="event.stopPropagation();lpStart('${t.id}','${t.nome.replace(/'/g,"\\'")}',${inativo})"
-            ontouchend="lpEnd()" ontouchcancel="lpEnd()"
-            title="Segure para inativar/ativar">${flagHtml}</div>
-          <div style="flex:1;min-width:0;">
-            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
-              <span style="font-weight:800;font-size:16px;text-transform:uppercase;">${t.nome}</span>${tagInativo}
+        <div class="entity-card" style="flex-direction:column;align-items:flex-start;gap:10px;cursor:pointer;${ativoStyle}" onclick="editarTime('${t.id}')">
+          <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+            <div style="display:flex;align-items:center;gap:10px;user-select:none;-webkit-user-select:none;"
+              onmousedown="event.stopPropagation();lpStart('${t.id}','${t.nome.replace(/'/g,"\\'")}',${inativo})"
+              onmouseup="lpEnd()" onmouseleave="lpEnd()"
+              ontouchstart="event.stopPropagation();lpStart('${t.id}','${t.nome.replace(/'/g,"\\'")}',${inativo})"
+              ontouchend="lpEnd()" ontouchcancel="lpEnd()"
+              title="Segure para inativar/ativar">
+              ${flagHtml}
+              <span style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">${d.paisNome||''}</span>
             </div>
-            <div style="font-size:12px;color:var(--text-muted);margin-top:2px;text-transform:uppercase;">${d.paisNome||''}</div>
-            <div style="margin-top:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">${forcaBadge(t.forca)}${atributosBadge(t)}</div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
             <button onclick="event.stopPropagation();excluirTime('${t.id}')" class="btn-excluir">✕ EXCLUIR</button>
           </div>
+          <div style="font-weight:800;font-size:16px;text-transform:uppercase;display:flex;align-items:center;gap:6px;">${t.nome}${tagInativo}</div>
+          <div style="display:flex;justify-content:center;width:100%;">${flagHtml}</div>
+          ${eficTag ? `<div>${eficTag}</div>` : ''}
         </div>
       </div>`;
     } else {
       const d = TEAM_DATA[t.id] || { abrev:(t.nome||'?').slice(0,3).toUpperCase(), fundo:'#1E1E35', cor:'#AAAAAA', pais:'', paisNome:'' };
       return `<div style="margin-bottom:10px;">
-        <div class="entity-card" style="align-items:center;gap:14px;cursor:pointer;${ativoStyle}" onclick="editarTime('${t.id}')">
-          <div style="flex-shrink:0;user-select:none;-webkit-user-select:none;"
-            onmousedown="event.stopPropagation();lpStart('${t.id}','${t.nome.replace(/'/g,"\\'")}',${inativo})"
-            onmouseup="lpEnd()" onmouseleave="lpEnd()"
-            ontouchstart="event.stopPropagation();lpStart('${t.id}','${t.nome.replace(/'/g,"\\'")}',${inativo})"
-            ontouchend="lpEnd()" ontouchcancel="lpEnd()"
-            title="Segure para inativar/ativar">${shieldClube(t.id, t.nome, 60)}</div>
-          <div style="flex:1;min-width:0;">
-            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
-              <span style="font-weight:900;font-size:17px;text-transform:uppercase;">${t.nome}</span>${tagInativo}
+        <div class="entity-card" style="flex-direction:column;align-items:flex-start;gap:10px;cursor:pointer;${ativoStyle}" onclick="editarTime('${t.id}')">
+          <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+            <div style="display:flex;align-items:center;gap:8px;user-select:none;-webkit-user-select:none;"
+              onmousedown="event.stopPropagation();lpStart('${t.id}','${t.nome.replace(/'/g,"\\'")}',${inativo})"
+              onmouseup="lpEnd()" onmouseleave="lpEnd()"
+              ontouchstart="event.stopPropagation();lpStart('${t.id}','${t.nome.replace(/'/g,"\\'")}',${inativo})"
+              ontouchend="lpEnd()" ontouchcancel="lpEnd()"
+              title="Segure para inativar/ativar">
+              ${flagImg(d.pais, 22)}
+              <span style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">${d.paisNome}</span>
             </div>
-            <div style="margin-top:4px;display:flex;align-items:center;gap:6px;">
-              ${flagImg(d.pais, 18)}
-              <span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">${d.paisNome}</span>
-            </div>
-            <div style="margin-top:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">${forcaBadge(t.forca)}${atributosBadge(t)}</div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
             <button onclick="event.stopPropagation();excluirTime('${t.id}')" class="btn-excluir">✕ EXCLUIR</button>
           </div>
+          <div style="font-weight:900;font-size:17px;text-transform:uppercase;display:flex;align-items:center;gap:6px;">${t.nome}${tagInativo}</div>
+          <div style="display:flex;justify-content:center;width:100%;">${shieldClube(t.id, t.nome, 64)}</div>
+          ${eficTag ? `<div>${eficTag}</div>` : ''}
         </div>
       </div>`;
     }
