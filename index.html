@@ -1027,6 +1027,7 @@ function irPara(view) {
     b.classList.toggle('ativo', b.dataset.view === view);
   });
   if (view === 'times') renderTimesEdit();
+  if (view === 'ranking') { renderRankingAmistosos(calcularRankingAmistosos()); renderRankingTorneios(calcularRankingTorneios()); }
 }
 window.irPara = irPara;
 
@@ -2937,11 +2938,11 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
     : podeMudar
       ? `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
           <div style="display:flex;align-items:center;gap:4px;">
-            <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" id="tg1-${confKey}" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
+            <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="1" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
             <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
-            <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" id="tg2-${confKey}" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
+            <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="2" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
           </div>
-          <button onclick="event.stopPropagation();salvarPartidaDireta('${cid}',${gi},'${m1.jogadorId}','${m2.jogadorId}','${confKey}')" class="btn-primary" style="margin-top:14px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">FIM</button>
+          <button onclick="event.stopPropagation();salvarPartidaDireta('${cid}',${gi},'${m1.jogadorId}','${m2.jogadorId}',this)" class="btn-primary" style="margin-top:14px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">FIM</button>
         </div>`
       : `<div style="font-size:18px;font-weight:900;color:var(--text-muted);">VS</div>`;
 
@@ -3099,17 +3100,20 @@ window.abrirCampeonato = (id) => {
 };
 
 // Salva partida diretamente dos inputs no card (sem modal)
-window.salvarPartidaDireta = async (cid, gi, j1Id, j2Id, confKey) => {
+window.salvarPartidaDireta = async (cid, gi, j1Id, j2Id, btnEl) => {
   const c = campeonatos.find(x=>x.id===cid);
   if (!c) return;
   const g = c.grupos[gi];
   const m1 = g.membros.find(m=>m.jogadorId===j1Id);
   const m2 = g.membros.find(m=>m.jogadorId===j2Id);
   if (!m1||!m2) return;
-  const el1 = document.getElementById('tg1-'+confKey);
-  const el2 = document.getElementById('tg2-'+confKey);
-  const g1 = parseInt(el1?.value)||0;
-  const g2 = parseInt(el2?.value)||0;
+  // Busca inputs relativos ao botão para evitar conflito de IDs duplicados
+  const container = btnEl ? btnEl.closest('.match-card') || btnEl.parentElement : null;
+  const el1 = container ? container.querySelector('[data-tpdc="1"]') : null;
+  const el2 = container ? container.querySelector('[data-tpdc="2"]') : null;
+  const g1v = parseInt(el1?.value); const g2v = parseInt(el2?.value);
+  const g1 = isNaN(g1v) ? 0 : g1v;
+  const g2 = isNaN(g2v) ? 0 : g2v;
   const grupos = c.grupos.map((gr,idx) => {
     if (idx!==gi) return gr;
     const membros = gr.membros.map(m => {
