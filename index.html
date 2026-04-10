@@ -1606,6 +1606,18 @@ window.salvarJogador = async () => {
   const celular = document.getElementById('i-celular')?.value.trim() || '';
   const isMaster = document.getElementById('i-master')?.checked || false;
   if (!nome) { toast('DIGITE O NOME','erro'); return; }
+  // RG: verificar duplicados por nome, celular ou email
+  const nomeNorm = nome.toLowerCase();
+  const dupNome = jogadores.find(j => j.nome?.toLowerCase() === nomeNorm);
+  if (dupNome) { toast('JÁ EXISTE UM JOGADOR COM ESSE NOME','erro'); return; }
+  if (celular) {
+    const dupCel = jogadores.find(j => j.celular && j.celular === celular);
+    if (dupCel) { toast('JÁ EXISTE UM JOGADOR COM ESSE CELULAR','erro'); return; }
+  }
+  if (email) {
+    const dupEmail = jogadores.find(j => j.email && j.email.toLowerCase() === email);
+    if (dupEmail) { toast('JÁ EXISTE UM JOGADOR COM ESSE EMAIL','erro'); return; }
+  }
   const btn = document.getElementById('btn-salvar-jog');
   if (btn) { btn.textContent = 'SALVANDO...'; btn.disabled = true; }
   try {
