@@ -1152,6 +1152,10 @@ function historicoIds(tipo) {
 
 // ─── HELPERS UI ──────────────────────────────────────────────────────
 function irPara(view) {
+  // Fechar fullscreen/modal abertos ao navegar
+  const fs = document.getElementById('fullscreen-overlay');
+  if (fs && fs.style.display !== 'none') fecharFullscreen();
+  fecharModal();
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const el = document.getElementById('view-' + view);
   if (el) { el.classList.add('active'); el.classList.add('anim-up'); setTimeout(() => el.classList.remove('anim-up'), 300); }
