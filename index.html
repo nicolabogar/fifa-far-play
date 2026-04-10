@@ -1815,7 +1815,7 @@ async function carregarAmistosos() {
   renderAmistosos();
 }
 
-function cardAmistoso(a, compact=false) {
+function cardAmistoso(a, compact=false, readonly=false) {
   const temRes = a.resultado != null;
   const master = temPermissao(); // RG7b: controle de acesso no card
   const diff = temRes ? Math.abs(a.resultado.g1 - a.resultado.g2) : null;
@@ -1839,7 +1839,7 @@ function cardAmistoso(a, compact=false) {
   const swipeClose = master ? `</div>` : `</div>`;
   const swipeBg = master ? `<div class="swipe-bg"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg><span class="swipe-bg-label">EXCLUIR</span></div>` : '';
   return `${swipeOuter}${swipeBg}
-  <div id="${cardId}" class="match-card${master?' swipeable':''}" style="${compact?'padding:12px;':''}" onclick="editarAmistoso('${a.id}')" style="cursor:pointer;">
+  <div id="${cardId}" class="match-card${master?' swipeable':''}" style="${compact?'padding:12px;':''}" ${readonly || a.resultado ? '' : `onclick="editarAmistoso('${a.id}')" style="cursor:pointer;"`}>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${compact?'8':'10'}px;">
       <div style="display:flex;align-items:center;gap:6px;">
         <span class="tag tag-purple" style="font-size:9px;">AMISTOSO</span>
@@ -2035,7 +2035,7 @@ function _renderFinalizadosAmi() {
   const slice = dados.slice(pag * _PAG_SIZE, (pag + 1) * _PAG_SIZE);
 
   lista.innerHTML = slice.length
-    ? slice.map(a => cardAmistoso(a)).join('')
+    ? slice.map(a => cardAmistoso(a, false, true)).join('')
     : '<p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:13px;">NENHUM AMISTOSO COM ESSE FILTRO</p>';
 
   if (temPermissao()) initSwipe(lista, 'amistoso');
@@ -3809,10 +3809,10 @@ function _renderHistorico() {
   }
 
   lista.innerHTML = slice.map(j => {
-    // Para amistosos, usa o cardAmistoso real
+    // Para amistosos, usa o cardAmistoso real (readonly — sem ação de clique)
     if (j.tipo === 'AMISTOSO' && j.amiId) {
       const ami = amistosos.find(a => a.id === j.amiId);
-      if (ami) return cardAmistoso(ami, true);
+      if (ami) return cardAmistoso(ami, true, true);
     }
     // Para torneios, usa card resumido
     const cor = j.res==='V'?'tag-green':j.res==='D'?'tag-red':'tag-gray';
