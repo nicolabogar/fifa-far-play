@@ -999,6 +999,13 @@ function htmlEficFiltro(containerId) {
 }
 
 // ─── ALGORITMO DE BALANCEAMENTO ──────────────────────────────────────
+/** Badge de eficiência — substitui forcaBadge na UI */
+function eficBadge(efic) {
+  const e = efic || 'Bom';
+  return `<span class="efic-tag selecionado" data-efic="${e}" style="cursor:default;pointer-events:none;font-size:11px;">${e}</span>`;
+}
+window.eficBadge = eficBadge;
+
 function forcaBadge(f) {
   // RG7: acima de 85 = verde, abaixo de 75 = vermelho, entre 75 e 85 = amarelo
   if (f > 85) return `<span class="forca-badge" style="background:rgba(16,185,129,0.2);color:#6EE7B7;">${f}</span>`;
@@ -2314,8 +2321,8 @@ window.sortearAmistoso = () => {
     const eq = diff <= 2 ? 'EQUILIBRADO' : diff <= 5 ? 'LEVEMENTE DESIGUAL' : 'DESIGUAL';
     _sorteioAmi = {
       tipo,
-      time1: { nome: t1data.nome, timeId: t1data.timeId, forca: t1data.forca, jogadores: j1.map(j=>j.nome), jogadoresIds: j1.map(j=>j.id) },
-      time2: { nome: t2data.nome, timeId: t2data.timeId, forca: t2data.forca, jogadores: j2.map(j=>j.nome), jogadoresIds: j2.map(j=>j.id) },
+      time1: { nome: t1data.nome, timeId: t1data.timeId, forca: t1data.forca, eficiencia: t1data.eficiencia||'Bom', jogadores: j1.map(j=>j.nome), jogadoresIds: j1.map(j=>j.id) },
+      time2: { nome: t2data.nome, timeId: t2data.timeId, forca: t2data.forca, eficiencia: t2data.eficiencia||'Bom', jogadores: j2.map(j=>j.nome), jogadoresIds: j2.map(j=>j.id) },
     };
     _renderSorteioBox(_sorteioAmi, eq, diff);
     return;
@@ -2349,8 +2356,8 @@ window.sortearAmistoso = () => {
     const eq = diff <= 2 ? 'EQUILIBRADO' : diff <= 5 ? 'LEVEMENTE DESIGUAL' : 'DESIGUAL';
     _sorteioAmi = {
       tipo,
-      time1: { nome: t1.nome, timeId: t1.id, forca: t1.forca, jogadores: j1.map(j => j.nome), jogadoresIds: j1.map(j => j.id) },
-      time2: { nome: t2.nome, timeId: t2.id, forca: t2.forca, jogadores: j2.map(j => j.nome), jogadoresIds: j2.map(j => j.id) },
+      time1: { nome: t1.nome, timeId: t1.id, forca: t1.forca, eficiencia: t1.eficiencia||'Bom', jogadores: j1.map(j => j.nome), jogadoresIds: j1.map(j => j.id) },
+      time2: { nome: t2.nome, timeId: t2.id, forca: t2.forca, eficiencia: t2.eficiencia||'Bom', jogadores: j2.map(j => j.nome), jogadoresIds: j2.map(j => j.id) },
     };
     _renderSorteioBox(_sorteioAmi, eq, diff);
     return;
@@ -2377,8 +2384,8 @@ window.sortearAmistoso = () => {
   _sorteioAmi = {
     tipo,
     modoDupla: modoDupla || false,
-    time1: { nome: t1.nome, timeId: t1.id, forca: t1.forca, jogadores: j1.map(j => j.nome), jogadoresIds: j1.map(j => j.id) },
-    time2: { nome: t2.nome, timeId: t2.id, forca: t2.forca, jogadores: j2.map(j => j.nome), jogadoresIds: j2.map(j => j.id) },
+    time1: { nome: t1.nome, timeId: t1.id, forca: t1.forca, eficiencia: t1.eficiencia||'Bom', jogadores: j1.map(j => j.nome), jogadoresIds: j1.map(j => j.id) },
+    time2: { nome: t2.nome, timeId: t2.id, forca: t2.forca, eficiencia: t2.eficiencia||'Bom', jogadores: j2.map(j => j.nome), jogadoresIds: j2.map(j => j.id) },
   };
 
   _renderSorteioBox(_sorteioAmi, eq, diff);
@@ -2406,14 +2413,14 @@ function _renderSorteioBox(sorteio, eq, diff) {
       <div style="flex:1;text-align:center;">
         <div style="display:flex;justify-content:center;margin-bottom:8px;">${badgeInativo(t1.timeId, t1.nome, tipo)}</div>
         <div class="vs-team">${t1.nome}</div>
-        <div style="margin:4px 0;">${forcaBadge(t1.forca)}</div>
+        <div style="margin:4px 0;">${eficBadge(t1.eficiencia)}</div>
         ${j1.map(j => `<div class="vs-label" style="margin-top:3px;">${j.nome}</div>`).join('')}
       </div>
       <div class="vs-divider" style="padding-top:28px;"><span class="vs-text">VS</span></div>
       <div style="flex:1;text-align:center;">
         <div style="display:flex;justify-content:center;margin-bottom:8px;">${badgeInativo(t2.timeId, t2.nome, tipo)}</div>
         <div class="vs-team">${t2.nome}</div>
-        <div style="margin:4px 0;">${forcaBadge(t2.forca)}</div>
+        <div style="margin:4px 0;">${eficBadge(t2.eficiencia)}</div>
         ${j2.map(j => `<div class="vs-label" style="margin-top:3px;">${j.nome}</div>`).join('')}
       </div>
     </div>
@@ -2466,13 +2473,13 @@ window.abrirPlacar = id => {
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
       <div style="flex:1;text-align:center;">
         <div style="font-weight:800;font-size:15px;margin-bottom:8px;text-transform:uppercase;">${a.time1?.nome}</div>
-        ${a.time1?.forca ? forcaBadge(a.time1.forca) : ''}
+        ${eficBadge(a.time1?.eficiencia)}
         <input id="pg1" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" class="input placar-input" style="text-align:center;font-size:52px;font-weight:900;padding:14px;margin-top:10px;letter-spacing:-1px;">
       </div>
       <div style="color:var(--text-muted);font-size:36px;font-weight:900;flex-shrink:0;">×</div>
       <div style="flex:1;text-align:center;">
         <div style="font-weight:800;font-size:15px;margin-bottom:8px;text-transform:uppercase;">${a.time2?.nome}</div>
-        ${a.time2?.forca ? forcaBadge(a.time2.forca) : ''}
+        ${eficBadge(a.time2?.eficiencia)}
         <input id="pg2" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" class="input placar-input" style="text-align:center;font-size:52px;font-weight:900;padding:14px;margin-top:10px;letter-spacing:-1px;">
       </div>
     </div>
@@ -2509,14 +2516,14 @@ window.verAmistoso = (id) => {
         <div style="text-align:center;flex:1;">
           <div style="display:flex;justify-content:center;margin-bottom:8px;">${b1}</div>
           <div style="font-weight:800;font-size:14px;text-transform:uppercase;">${a.time1?.nome||'?'}</div>
-          ${a.time1?.forca ? `<div style="margin-top:4px;">${forcaBadge(a.time1.forca)}</div>` : ''}
+          <div style="margin-top:4px;">${eficBadge(a.time1?.eficiencia)}</div>
           <div style="font-size:11px;color:var(--cyan);margin-top:4px;">${(a.time1?.jogadores||[]).join(', ')}</div>
         </div>
         <div style="font-size:18px;font-weight:900;color:var(--text-muted);flex-shrink:0;">VS</div>
         <div style="text-align:center;flex:1;">
           <div style="display:flex;justify-content:center;margin-bottom:8px;">${b2}</div>
           <div style="font-weight:800;font-size:14px;text-transform:uppercase;">${a.time2?.nome||'?'}</div>
-          ${a.time2?.forca ? `<div style="margin-top:4px;">${forcaBadge(a.time2.forca)}</div>` : ''}
+          <div style="margin-top:4px;">${eficBadge(a.time2?.eficiencia)}</div>
           <div style="font-size:11px;color:var(--cyan);margin-top:4px;">${(a.time2?.jogadores||[]).join(', ')}</div>
         </div>
       </div>
@@ -3146,7 +3153,7 @@ window.abrirCampeonato = (id) => {
     return `<div style="flex:1;text-align:center;min-width:0;">
       <div style="display:flex;justify-content:center;margin-bottom:4px;">${bc}</div>
       <div style="font-size:13px;font-weight:800;line-height:1.2;">${m.time?.nome||'?'}</div>
-      ${m.time?.forca ? `<div style="font-size:10px;color:var(--text-muted);margin-top:1px;">FORCA ${m.time.forca}</div>` : ''}
+      <div style="margin-top:3px;">${eficBadge(m.time?.eficiencia)}</div>
       <div style="font-size:11px;color:var(--cyan);margin-top:3px;font-weight:700;">${m.nome}</div>
     </div>`;
   };
@@ -3220,8 +3227,6 @@ window.abrirCampeonato = (id) => {
     <p class="sec-title" style="margin-bottom:10px;">TIMES SORTEADOS</p>
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;">
       ${(c.participantes||[]).map(p=>{
-        const forca = p.time?.forca;
-        const forcaColor = forca > 85 ? 'var(--green)' : forca < 75 ? 'var(--red)' : 'var(--yellow)';
         const timeIcon = isSel
           ? `<div style="width:48px;height:36px;border-radius:8px;overflow:hidden;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.4);">
               <img src="https://flagcdn.com/w80/${(SELECAO_PAIS[p.time?.id]||{pais:''}).pais}.png" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
@@ -3235,7 +3240,7 @@ window.abrirCampeonato = (id) => {
           ${timeIcon}
           <div style="min-width:0;flex:1;">
             <div style="font-weight:900;font-size:13px;line-height:1.2;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.time?.nome||'?'}</div>
-            ${forca ? `<div style="font-size:11px;font-weight:800;color:${forcaColor};margin-top:2px;">FORÇA ${forca}</div>` : ''}
+            <div style="margin-top:3px;">${eficBadge(p.time?.eficiencia)}</div>
             <div style="font-size:11px;color:var(--purple);font-weight:700;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nome}</div>
           </div>
         </div>`;
