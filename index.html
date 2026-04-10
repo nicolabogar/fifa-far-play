@@ -2560,8 +2560,23 @@ window.salvarTimeRapido = async (timeId, tipoT) => {
     await setDoc(doc(db, 'times', timeId), { id: timeId, eficiencia, inativo }, { merge: true });
   }
   await carregarTimes();
-  // Ressortear automaticamente após editar o time
-  setTimeout(() => window.sortearAmistoso && window.sortearAmistoso(), 100);
+  // Atualizar apenas o time editado no sorteio atual sem ressortear
+  if (_sorteioAmi) {
+    if (_sorteioAmi.time1?.timeId === timeId) {
+      _sorteioAmi.time1.eficiencia = eficiencia;
+    }
+    if (_sorteioAmi.time2?.timeId === timeId) {
+      _sorteioAmi.time2.eficiencia = eficiencia;
+    }
+    // Se o time foi inativado, ressortear; caso contrário, apenas re-renderizar
+    if (inativo) {
+      setTimeout(() => window.sortearAmistoso && window.sortearAmistoso(), 100);
+    } else {
+      const diff = Math.abs((_sorteioAmi.time1?.forca||75) - (_sorteioAmi.time2?.forca||75));
+      const eq = diff <= 2 ? 'EQUILIBRADO' : diff <= 5 ? 'LEVEMENTE DESIGUAL' : 'DESIGUAL';
+      _renderSorteioBox(_sorteioAmi, eq, diff);
+    }
+  }
 };
 
 window.inativarTimeSorteio = (timeId, timeNome, tipo) => {
