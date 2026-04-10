@@ -2507,9 +2507,7 @@ function _renderSorteioBox(sorteio, eq, diff) {
         ${j2.map(j => `<div class="vs-label" style="margin-top:3px;">${j.nome}</div>`).join('')}
       </div>
     </div>
-    <div style="margin-top:14px;">
-      <div style="display:flex;justify-content:center;font-size:11px;color:var(--text-muted);margin-bottom:4px;"><span>DIF: ${diff} PTS</span></div>
-    </div>
+    <div style="margin-top:14px;"></div>
     <button onclick="compartilharWhatsApp(_sorteioAmi)" style="width:100%;margin-top:14px;background:#25D366;border:none;color:#fff;padding:12px;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
       Compartilhar no WhatsApp
@@ -3263,7 +3261,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
     </div>
     <div style="display:flex;align-items:flex-start;gap:8px;">
       <div style="flex:1;text-align:center;">
-        <div style="display:flex;align-items:center;justify-content:center;gap:4px;font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${timeFlagInline(m1.time?.id,isSel?'selecoes':'clubes')}${m1.time?.nome||'?'}</div>
+        <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${m1.time?.nome||'?'}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${b1}</div>
         <div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;margin:0 auto;display:inline-block;">${m1.nome}</div>
       </div>
@@ -3271,7 +3269,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
         ${placarArea}
       </div>
       <div style="flex:1;text-align:center;">
-        <div style="display:flex;align-items:center;justify-content:center;gap:4px;font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${timeFlagInline(m2.time?.id,isSel?'selecoes':'clubes')}${m2.time?.nome||'?'}</div>
+        <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${m2.time?.nome||'?'}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${b2}</div>
         <div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;margin:0 auto;display:inline-block;">${m2.nome}</div>
       </div>
@@ -4258,25 +4256,21 @@ window.editarTime = (id) => {
   const t = pool.find(x => x.id === id);
   if (!t) return;
   const isSel = abaTimesAtual === 'selecoes';
-  const badgeHtml = isSel ? badgeTimeCompact(t.id, t.nome, 'selecoes') : badgeTimeCompact(t.id, t.nome, 'clubes');
+  const badgeHtml = isSel ? badgeSel(t.id, t.nome) : badgeClube(t.id, t.nome);
+  const inativoAtual = t.inativo || false;
   fullscreen(t.nome.toUpperCase(), `
     <div style="display:flex;flex-direction:column;gap:16px;max-width:400px;margin:0 auto;">
       <div style="display:flex;justify-content:center;padding:16px 0;">${badgeHtml}</div>
       <div>
-        <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">FORÇA DO TIME</label>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <input type="range" id="et-forca" min="50" max="100" value="${t.forca||75}"
-            oninput="document.getElementById('et-forca-val').textContent=this.value"
-            style="flex:1;accent-color:var(--purple);">
-          <span id="et-forca-val" style="font-size:18px;font-weight:900;color:var(--cyan);min-width:32px;text-align:center;">${t.forca||75}</span>
-        </div>
-      </div>
-      <div>
         <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">EFICIÊNCIA DO TIME</label>
-        <div class="efic-tags" id="et-efic-tags">
+        <div class="efic-tags" id="et-efic-tags" data-selected="${t.eficiencia||''}">
           ${['Ruim','Moderado','Bom'].map(e=>`<span class="efic-tag${t.eficiencia===e?' selecionado':''}" data-efic="${e}" onclick="selecionarEficienciaET('${e}')">${e}</span>`).join('')}
         </div>
       </div>
+      <label class="check-row">
+        <input type="checkbox" id="et-inativo" ${inativoAtual?'checked':''} style="width:18px;height:18px;accent-color:var(--purple);">
+        <div><div style="font-size:13px;font-weight:700;">INATIVO</div><div style="font-size:11px;color:var(--text-muted);">Não aparece nos sorteios</div></div>
+      </label>
       <div style="display:flex;gap:10px;margin-top:8px;">
         <button class="btn-primary" onclick="salvarEdicaoTime('${id}')">SALVAR</button>
         <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
@@ -4285,10 +4279,14 @@ window.editarTime = (id) => {
 };
 
 window.salvarEdicaoTime = async (id) => {
-  const forca = parseInt(document.getElementById('et-forca')?.value) || 75;
   const container = document.getElementById('et-efic-tags');
   const eficiencia = container?.dataset.selected || '';
-  await updateDoc(doc(db, 'times', id), { forca, eficiencia });
+  const inativo = document.getElementById('et-inativo')?.checked || false;
+  try {
+    await updateDoc(doc(db, 'times', id), { eficiencia, inativo });
+  } catch {
+    await setDoc(doc(db, 'times', id), { id, eficiencia, inativo }, { merge: true });
+  }
   fecharFullscreen(); await carregarTimes(); renderTimesEdit();
 };
 
