@@ -1,0 +1,21 @@
+# FIFA FAR PLAY - Prompts de Features v11
+# FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
+# O agente deve marcar o hash do commit ao concluir cada item.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v11.txt e um novo é criado.
+
+## MELHORIAS ##
+
+1 - Na pagina de ranking, o card dos jogos deve ser o mesmo card dos jogos finalizados que hoje esta na pagina de amistosos na grid finalizados. [x] (hash: 9e9f157)
+2 - Na pagina home, o botão criar não esta com espaçamento entre os componentes abaixo dele. [x] (hash: aedc7bd)
+3 - Quero que todas as tags da aplicação tenha o mesmo tamanho de fonte da tag de ação excluir/deletar. [x] (hash: 10979ed)
+4 - Em todos os cards de jogos, quero que você coloque o icone da bandeira do pais antes do nome do time, atualmente esta vindo o nome embaixo o pais e depois o icone do brasão do time. [x] (hash: d756a4a)
+5 - Quero que deixe apenas 3 tag para vincular no cadastro de time, RUIM, MODERADO, BOM. ( dar um espaçamento entre tag e os botões de Sortear da pagina de cadastro de amistoso). [x] (hash: 881b5d6)
+6 - Remova de todos os lugares onde tem a força/score dos times e coloque para exibir as tags de eficiencia. (RUIM, MODREADO, BOM). Por enquanto pode colocar todos os times e seleções como BOM. [x] (hash: 2453d87)
+7 - Quero que remova o icone de X para inativar o time, quero que quando clicar no brasão do time vá diretamente para o cadastro do time, assim posso mudar dando a tag de eficiencia quanto inativa-lo, e quando clicar em salvar ou cancelar deve ser retornado para a pagina anterior no mesmo estado e automaticamente fazer um novo sorteio. [x] (hash: d6c0def)
+8 - Os botões de salvar esta com um delay, porém quando clico novamente sem poerceber que a ação foi processada os amistosos estão duplicando, quero que assim que tiver a ação do clique, deixe por 1 segundo bloqueado. [x] (hash: 5598751)
+9 - Na pagina de torneio, quando vou criar um novo você esta colocando um aviso que aquele formato é de CLUBES ou SELEÇÃO, não quero isso, qualquer torneio pode ter time ou seleção, é apenas as regras de sorteios e classificação que serão tomados ação para criar o torneio. [x] (hash: 91f5611)
+10 - Na pagina de cadastro de clubes, colocar o botão de + CRIAR lá em cima, manter o mesmo padrão para todas telas de cadastro. [x] (hash: a32c5e6)
+11 - Na pagina de times ter opção de filtrar o pais quando selecionado clubes. [x] (hash: 978b3da)
+12 - Na pagina de cadastrar novo time, quando selecionar CLUBE, não precisa ter a opção de pesquisar, e sim poder cadastrar do zero um clube, escolhendo um pais, colocar um nome, a tag de eficiencia se é RUIM, MODERADO, BOM, e poder anexar um icone do brasão do time. [x] (hash: 6fd24ea)
+13 - Na pagina da home, deixar o botão + CRIAR menor, seguindo o mesmo padrão dos botões + Criar das outros paginas, porém esse em especifico tem que preencher a linha inteira. [x] (hash: cabc8a0)
+14 - Manter o padrão de tamanhos de botões todos iguais no projeto inteiro. [x] (hash: 8c6b895)
