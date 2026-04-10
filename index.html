@@ -600,6 +600,7 @@
         <button id="tab-selecoes" onclick="filtrarTimes('selecoes')" style="flex:1; padding:9px; border-radius:10px; border:none; background:none; color:var(--text-muted); font-weight:700; font-size:13px; cursor:pointer;">SELECOES</button>
       </div>
 
+      <div id="filtro-pais-times" style="display:none; margin-bottom:14px;"></div>
       <div id="lista-times-edit"></div>
     </div>
 
@@ -953,6 +954,7 @@ let campeonatos= [];
 let clubes     = [...CLUBES_DEFAULT];
 let selecoes   = [...SELECOES_DEFAULT];
 let abaTimesAtual = 'clubes';
+let _paisFiltroTimes = '';
 let _disponiveis  = []; // partidas disponíveis para registo em grupo
 
 // ─── FILTRO DE EFICIÊNCIA ─────────────────────────────────────────────
@@ -3846,6 +3848,7 @@ function cardCampHome(c, modoLista=false) {
 // ─── GERENCIAR TIMES ─────────────────────────────────────────────────
 window.filtrarTimes = tipo => {
   abaTimesAtual = tipo;
+  _paisFiltroTimes = '';
   document.getElementById('tab-clubes').style.background = tipo==='clubes'?'var(--purple)':'none';
   document.getElementById('tab-clubes').style.color = tipo==='clubes'?'#fff':'var(--text-muted)';
   document.getElementById('tab-selecoes').style.background = tipo==='selecoes'?'var(--purple)':'none';
@@ -3853,12 +3856,42 @@ window.filtrarTimes = tipo => {
   renderTimesEdit();
 };
 
+window._setFiltroTimes = val => {
+  _paisFiltroTimes = val;
+  renderTimesEdit();
+};
+
 function renderTimesEdit() {
   const pool = abaTimesAtual === 'clubes' ? clubes : selecoes;
   const isSel = abaTimesAtual === 'selecoes';
   const el = document.getElementById('lista-times-edit');
-  if (!pool.length) { el.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:32px 0;font-size:14px;">NENHUM TIME</p>'; return; }
-  el.innerHTML = pool.map(t => {
+  const filtroEl = document.getElementById('filtro-pais-times');
+
+  // Country filter — only for clubes
+  if (!isSel) {
+    const paises = [...new Set(pool.map(t => {
+      const d = TEAM_DATA[t.id] || {};
+      return d.paisNome || '';
+    }).filter(Boolean))].sort();
+    filtroEl.style.display = paises.length ? 'block' : 'none';
+    filtroEl.innerHTML = `<select onchange="_setFiltroTimes(this.value)" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--card-border);background:var(--card);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;">
+      <option value="">TODOS OS PAÍSES</option>
+      ${paises.map(p => `<option value="${p}" ${_paisFiltroTimes===p?'selected':''}>${p}</option>`).join('')}
+    </select>`;
+  } else {
+    filtroEl.style.display = 'none';
+  }
+
+  let items = pool;
+  if (!isSel && _paisFiltroTimes) {
+    items = pool.filter(t => {
+      const d = TEAM_DATA[t.id] || {};
+      return (d.paisNome || '') === _paisFiltroTimes;
+    });
+  }
+
+  if (!items.length) { el.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:32px 0;font-size:14px;">NENHUM TIME</p>'; return; }
+  el.innerHTML = items.map(t => {
     const inativo = t.inativo || false;
     const ativoStyle = inativo ? 'opacity:0.45;filter:grayscale(0.6);' : '';
     const btnInativoLabel = inativo ? 'ATIVAR' : 'INATIVO';
