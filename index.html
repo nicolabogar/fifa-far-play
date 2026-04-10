@@ -1506,8 +1506,8 @@ window.editarJogador = (id) => {
           <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">PERMISSAO PARA GERENCIAR O APP</div>
         </div>
       </label>` : ''}
-      <button class="btn-primary" id="btn-salvar-edit" onclick="salvarEdicaoJogador('${id}')" style="margin-top:10px;font-size:16px;padding:16px;">SALVAR</button>
-      <button class="btn-ghost" onclick="fecharFullscreen()" style="font-size:15px;padding:14px;margin-top:8px;">CANCELAR</button>
+      <button class="btn-primary" id="btn-salvar-edit" onclick="salvarEdicaoJogador('${id}')" style="margin-top:10px;">SALVAR</button>
+      <button class="btn-ghost" onclick="fecharFullscreen()" style="margin-top:8px;">CANCELAR</button>
     </div>`);
   setTimeout(() => document.getElementById('i-nome-edit')?.focus(), 100);
 };
@@ -1635,8 +1635,8 @@ document.getElementById('btn-add-jog').addEventListener('click', () => {
           <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">PERMISSAO PARA GERENCIAR O APP</div>
         </div>
       </label>` : ''}
-      <button class="btn-primary" id="btn-salvar-jog" onclick="salvarJogador()" style="margin-top:10px;font-size:16px;padding:16px;">SALVAR</button>
-      <button class="btn-ghost" onclick="fecharFullscreen();irParaHome()" style="font-size:15px;padding:14px;margin-top:8px;">CANCELAR</button>
+      <button class="btn-primary" id="btn-salvar-jog" onclick="salvarJogador()" style="margin-top:10px;">SALVAR</button>
+      <button class="btn-ghost" onclick="fecharFullscreen();irParaHome()" style="margin-top:8px;">CANCELAR</button>
     </div>`);
   setTimeout(() => document.getElementById('i-nome')?.focus(), 100);
 });
@@ -2070,7 +2070,7 @@ function _htmlNovoAmistoso() {
         <button id="btn-ami-proximo" class="btn-primary" style="background:linear-gradient(135deg,#7C3AED,#06B6D4);" onclick="sortearAmistoso()">SORTEAR</button>
         <button id="btn-ami-salvar" style="display:none;" class="btn-primary" onclick="salvarAmistoso()">SALVAR</button>
       </div>
-      <button class="btn-ghost" onclick="fecharFullscreen()" style="font-size:15px;padding:14px;">CANCELAR</button>
+      <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
     </div>`;
 }
 
@@ -2542,7 +2542,7 @@ window.abrirPlacar = id => {
       </div>
     </div>
     <div style="display:flex;gap:10px;align-items:center;justify-content:center;">
-      <button class="btn-primary" onclick="salvarPlacar('${id}')" style="font-size:17px;padding:18px;font-weight:900;max-width:200px;">FIM</button>
+      <button class="btn-primary" onclick="salvarPlacar('${id}')" style="max-width:200px;">FIM</button>
     </div>`);
 };
 window.salvarPlacar = async id => {
@@ -2967,8 +2967,8 @@ function abrirModalCriarCamp() {
     </div>
     <div id="cc-efic-filtro-box">${htmlEficFiltro('cc-efic-filtro')}</div>
     <div style="display:flex;flex-direction:column;gap:8px;margin-top:20px;">
-      <button class="btn-primary" onclick="criarCampeonato()" style="font-size:16px;padding:16px;">SALVAR</button>
-      <button class="btn-ghost" onclick="fecharFullscreen()" style="font-size:15px;padding:14px;">CANCELAR</button>
+      <button class="btn-primary" onclick="criarCampeonato()">SALVAR</button>
+      <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
     </div>`);
   setTimeout(() => {
     selCampTipo('champions', document.querySelector('[data-ct="champions"]'));
@@ -4009,8 +4009,8 @@ function abrirModalAddTime(tipoInicial) {
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
-          <button id="btn-salvar-time" class="btn-primary" onclick="salvarNovoTime()" disabled style="opacity:0.4;font-size:16px;padding:16px;">CRIAR</button>
-          <button class="btn-ghost" onclick="fecharFullscreen()" style="font-size:15px;padding:14px;">CANCELAR</button>
+          <button id="btn-salvar-time" class="btn-primary" onclick="salvarNovoTime()" disabled style="opacity:0.4;">CRIAR</button>
+          <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
         </div>
       </div>
 
@@ -4036,8 +4036,8 @@ function abrirModalAddTime(tipoInicial) {
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
-          <button id="btn-salvar-time-sel" class="btn-primary" onclick="salvarNovoTimeSel()" disabled style="opacity:0.4;font-size:16px;padding:16px;">CRIAR</button>
-          <button class="btn-ghost" onclick="fecharFullscreen()" style="font-size:15px;padding:14px;">CANCELAR</button>
+          <button id="btn-salvar-time-sel" class="btn-primary" onclick="salvarNovoTimeSel()" disabled style="opacity:0.4;">CRIAR</button>
+          <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
         </div>
       </div>
     </div>`);
