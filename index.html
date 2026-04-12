@@ -3984,6 +3984,7 @@ function cardCampHome(c, modoLista=false) {
     ? `<span class="tag tag-gray" style="font-size:9px;">FINALIZADO</span>`
     : `<span class="tag tag-yellow" style="font-size:9px;">EM ANDAMENTO</span>`;
 
+  const podeMudar = temPermissao();
   const cardHtml = `<div ${idAttr}class="match-card${!finalizado && podeMudar ? ' swipeable' : ''}" style="margin-bottom:${modoLista?'0':'10px'};padding:12px;cursor:pointer;" onclick="abrirCampeonato('${c.id}')">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
       <div style="display:flex;align-items:center;gap:6px;">
