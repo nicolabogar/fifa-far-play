@@ -1052,12 +1052,23 @@ function parRepetido(tipo, id1, id2) {
   return mem.includes(key);
 }
 
+function _parEficValido(e1, e2) {
+  const a = e1 || 'Bom', b = e2 || 'Bom';
+  const PARES_OK = [
+    ['Ruim','Ruim'], ['Ruim','Moderado'], ['Moderado','Ruim'],
+    ['Moderado','Moderado'], ['Moderado','Bom'], ['Bom','Moderado'],
+    ['Bom','Bom']
+  ];
+  return PARES_OK.some(([x,y]) => x === a && y === b);
+}
+
 /**
  * Sorteia dois times balanceados.
  * - Nunca usa times usados nos últimos N amistosos (histórico Firestore).
  * - Memória anti-repetição no localStorage: evita pares recentes.
- * - Discrepância aumentada para 35-40% para maior variação.
+ * - Discrepância aumentada para 35-40% da média de força.
  * - Tenta 30 vezes: nas primeiras 15 evita pares repetidos, nas seguintes aceita qualquer.
+ * - Respeita regras de paridade de eficiência (ruim×ruim, ruim×mod, mod×mod, mod×bom, bom×bom).
  */
 function sortearBalanceado(pool, historicoIds = [], tipo = '') {
   // Filtra times inativos
@@ -1082,6 +1093,9 @@ function sortearBalanceado(pool, historicoIds = [], tipo = '') {
     // Nas primeiras 15 tentativas: evita pares repetidos
     if (i < 15 && tipo && parRepetido(tipo, t1.id, t2.id)) continue;
 
+    // Valida regra de paridade de eficiência (nas primeiras 20 tentativas)
+    if (i < 20 && !_parEficValido(t1.eficiencia, t2.eficiencia)) continue;
+
     // Aceita se dentro do limite de discrepância
     if (pct <= DISC_MAX_PCT) {
       if (diff < menorDiff) {
@@ -1092,11 +1106,12 @@ function sortearBalanceado(pool, historicoIds = [], tipo = '') {
     }
   }
 
-  // Se não encontrou par válido dentro do limite, busca o melhor entre todos
+  // Se não encontrou par válido dentro do limite, busca o melhor entre todos (respeitando eficiência)
   if (!melhor) {
     const pares = [];
     for (let i = 0; i < disp.length; i++) {
       for (let j = i + 1; j < disp.length; j++) {
+        if (!_parEficValido(disp[i].eficiencia, disp[j].eficiencia)) continue;
         const d = Math.abs(disp[i].forca - disp[j].forca);
         const m = (disp[i].forca + disp[j].forca) / 2;
         pares.push([disp[i], disp[j], d, m > 0 ? d / m : 0]);
@@ -1105,6 +1120,8 @@ function sortearBalanceado(pool, historicoIds = [], tipo = '') {
     // Ordena por menor discrepância percentual
     pares.sort((a, b) => a[3] - b[3]);
     if (pares.length > 0) melhor = [pares[0][0], pares[0][1]];
+    // Fallback total (sem restrição de eficiência): garante resultado sempre
+    if (!melhor && disp.length >= 2) melhor = [disp[0], disp[1]];
   }
 
   const resultado = melhor || [disp[0], disp[1]];
