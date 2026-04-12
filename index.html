@@ -4414,6 +4414,7 @@ window.excluirTime = async id => {
       <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">Excluir <strong style="color:var(--text)">${t?.nome}</strong>? Esta aÃ§Ã£o nÃ£o pode ser desfeita.</p>
     </div>
     <div style="display:flex;gap:10px;">
+      <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
       <button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);" onclick="confirmarExcluirTime('${id}')">CONFIRMAR</button>
     </div>`);
 };
