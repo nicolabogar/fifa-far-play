@@ -306,19 +306,6 @@
     .criar-opt:active { background:rgba(139,92,246,0.1); }
     .criar-opt-ico { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 
-    /* Botão excluir padronizado */
-    .btn-excluir {
-      background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.4);
-      color: #ef4444; border-radius: 8px; padding: 5px 10px; cursor: pointer;
-      display: inline-flex; align-items: center; gap: 4px;
-      font-size: 11px; font-weight: 800; letter-spacing: 0.03em; flex-shrink: 0;
-      transition: background 0.15s, transform 0.1s;
-    }
-    .btn-excluir:active { transform: scale(0.96); }
-    .btn-excluir-full {
-      width: 100%; justify-content: center; border-radius: 12px;
-      padding: 10px 14px; font-size: 13px;
-    }
     /* Tags de eficiência */
     .efic-tags { display:flex; gap:8px; flex-wrap:wrap; }
     .efic-tag {
@@ -1513,18 +1500,13 @@ function initSwipe(container, tipo) {
       if (e.target.closest('.placar-input') || e.target.closest('button') || e.target.closest('input')) return;
       startX = e.touches[0].clientX; isDragging = true;
       card.classList.add('swiping');
-      const bg = wrap.querySelector('.swipe-bg'); if (bg) bg.classList.add('show');
     }, {passive: true});
     card.addEventListener('touchmove', e => {
       if (!isDragging) return;
       currentX = e.touches[0].clientX - startX;
-      if (currentX < 0) currentX = 0; // only right-to-left (revealing left bg means translating right)
-      // Actually for left-side bg revealed by swiping left:
-      // We translate card to the LEFT (negative), revealing the bg on the left
-      // Re-think: bg is on left, so we swipe LEFT (negative translateX) to reveal it
-      currentX = e.touches[0].clientX - startX;
-      if (currentX > 0) currentX = 0; // only left swipe
+      if (currentX > 0) currentX = 0;
       if (currentX < -100) currentX = -100;
+      if (currentX < -5) { const bg = wrap.querySelector('.swipe-bg'); if (bg) bg.classList.add('show'); }
       card.style.transform = `translateX(${currentX}px)`;
     }, {passive: true});
     card.addEventListener('touchend', () => {
@@ -3516,7 +3498,7 @@ window.abrirCampeonato = (id) => {
       : `<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:10px 12px;margin-bottom:16px;display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">⚠️</span><span style="font-size:12px;color:#FCD34D;font-weight:700;">TORNEIO EM ANDAMENTO — NÃO É POSSÍVEL SORTEAR OU ADICIONAR JOGADORES</span></div>`)
     : ''}
     ${podeMudar ? `<button onclick="reiniciarTorneio('${c.id}')" style="width:100%;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);color:#FCD34D;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px;">REINICIAR TORNEIO</button>` : ''}
-    ${naoIniciado && podeMudar ? `<button onclick="excluirCampeonato('${c.id}')" class="btn-excluir btn-excluir-full" style="margin-bottom:16px;">EXCLUIR TORNEIO</button>` : ''}
+    ${naoIniciado && podeMudar ? `<button onclick="excluirCampeonato('${c.id}')" style="width:100%;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.35);color:#EF4444;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:16px;">EXCLUIR TORNEIO</button>` : ''}
 
     <p class="sec-title" style="margin-bottom:10px;">GRUPOS</p>
     ${gruposHTML}

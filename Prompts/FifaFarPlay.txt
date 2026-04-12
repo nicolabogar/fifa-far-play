@@ -7,7 +7,7 @@
 
 1 - [x] Quando realizo o Swipe para excluir o card, tenho a opção de confirmar ou cancelar, e quando cancelo o card volta corretamente para seu estado atual, mas quando clico fora no modal para a tela de home por exemplo, o modal de confirmação se fecha e o card não volta para o estado normal igual é feito no cancelar, quando for feito essa ação a ação do cancelar tem que ser chamado também. (hash: a59956e)
 2 - [x] Quero que você altere o icone que tem hoje por um icone de bola de futebol com tema dark black. (hash: 339a09e)
-3 - Para os botões de ação como salvar amistoso, salvar torneio, esta demorando a requisição e quando clico novamente o regstro esta se duplicando, tem que ter uma tratativa no botão para ficar bloqueado e com um loader aguardando a conclusão.
+3 - [x] Para os botões de ação como salvar amistoso, salvar torneio, esta demorando a requisição e quando clico novamente o regstro esta se duplicando, tem que ter uma tratativa no botão para ficar bloqueado e com um loader aguardando a conclusão. (hash: 215db73)
 4 - Quando clico e seguro os cards de jogos o estilo de remover que pedi para você excluir anteriormente esta voltando, quero que remova de vez esse efeito e o botão excluir.
 5 - Quero que todas as tags da aploção tenham o mesmo estilo, fonte, tamanho etc..
 6 - Quando pe listado os times e faço o swipe para remover o cadastro de um time o botão cancelar não esta sendo apresentado.
