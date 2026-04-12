@@ -5,7 +5,7 @@
 
 ## MELHORIAS ##
 
-- A borda de exclusão dos cards ficou muito grande, quero que deixe a borda bem fina e do lado direto dos componentes, e também deve ser removido o icone de botão de remover, eu pedir para você criar a função de excluir como um slider, que eu arrasto o card para a esquerda e com essa ação será apresentado se quero confirmar a exclusão ou cancelar, e quando cancelar, o estado do card tem que voltar igual antes devido a animação de slider.
+- [x] A borda de exclusão dos cards ficou muito grande, quero que deixe a borda bem fina e do lado direto dos componentes, e também deve ser removido o icone de botão de remover, eu pedir para você criar a função de excluir como um slider, que eu arrasto o card para a esquerda e com essa ação será apresentado se quero confirmar a exclusão ou cancelar, e quando cancelar, o estado do card tem que voltar igual antes devido a animação de slider. (hash: c4f7eaf)
 - Na pagina de times, ao listar os times quero que aumente um pouco mais o icone do time, e que também exiba a tag de eficiencia cadastrado nele.
 - Quero que inclua para todos os times a tag de eficiencia bom, e conforme sorteio eu irei classificando.
 - Para as regras de sorteios aleatorios fazer a seguinte logica com as tags de eficiencia: (ruim x moderado, ruim x ruim, moderado x moderado, moderado x bom e bom x bom)
