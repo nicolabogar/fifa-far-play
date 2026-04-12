@@ -1,19 +1,7 @@
-# FIFA FAR PLAY - Prompts de Features v13
+# FIFA FAR PLAY - Prompts de Features v14
 # FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
 # O agente deve marcar o hash do commit ao concluir cada item.
-# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v13.txt e um novo é criado.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v14.txt e um novo é criado.
 
 ## MELHORIAS ##
 
-- [x] A borda de exclusão dos cards ficou muito grande, quero que deixe a borda bem fina e do lado direto dos componentes, e também deve ser removido o icone de botão de remover, eu pedir para você criar a função de excluir como um slider, que eu arrasto o card para a esquerda e com essa ação será apresentado se quero confirmar a exclusão ou cancelar, e quando cancelar, o estado do card tem que voltar igual antes devido a animação de slider. (hash: c4f7eaf)
-- Na pagina de times, ao listar os times quero que aumente um pouco mais o icone do time, e que também exiba a tag de eficiencia cadastrado nele.
-- Quero que inclua para todos os times a tag de eficiencia bom, e conforme sorteio eu irei classificando.
-- Para as regras de sorteios aleatorios fazer a seguinte logica com as tags de eficiencia: (ruim x moderado, ruim x ruim, moderado x moderado, moderado x bom e bom x bom)
-- Para os cards de jogos finalizados, tanto no ranking quanto na tela de amistosos e campeonado quero que coloque tags sinalizando vitória (verde), empate (amarelo), derrota (vermelho).
-- Ao cadasrtrar um time a dropdown de paises esta mostrando apenas o nome do pais, quero que coloque no canto esquerdo do texto o icone da bandeira do pais.
-- o botçao excluir do campeonado deve ter o mesmo comportamento do excluir do card de amistoso, e fazer isso para todos os lugarers que tenha opção de excluir, quero que esteja tudo sincronizado.
-- Em todos os cards que está sendo apresentado os times esta totalmente desalinhado a tag de eficiencia, quero que você deixe ele igual os comportamentos de tags feito em outros componentes do aplicativo.
-- Quando a descrição do nome do time ou seleção for muito grande, quero que você abrevie e deixe só o primeiro caracter da palavra que vai quebrar, por exemplo: BAYER MUNICH, Coloque BAYER M.
-- Tem lugares que esta sendo exibido as tags de eficiencia e outros nao, por exemplo: Cards dos jogos dos torneios estão sem a tag, e nos times sorteados para os jogadores esta sendo exibido, nos cards em andamento também não estão sendo exibidos. (caso tenha feito isso nos passos anteriores desconsidere). 
-- a tag de eficiencia esta sendo mostrado nos cards de jogos porém no cadastro dos times quando entro para editar não esta nenhuma tag selecionada, esses cards devem refletir o valor da eficiencia que esta no cadastro dos times.
-- Quero que deixe default no cadasto de times, todos os times com eficiencia BOM, e lembrando que quando salvar e voltar para editar o time essa eficiencia deve estar gravada e seleiconada. (não permnitir que coloque mais que 1 tag de eficiencia.
