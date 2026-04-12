@@ -2907,7 +2907,6 @@ function _cardCampeonato(camp) {
 }
 
 function _wrapSwipeCamp(camp) {
-  // RG1: sem swipe, card simples com botão excluir visível (para não-finalizados)
   return `<div style="margin-bottom:10px;">${_cardCampeonato(camp)}</div>`;
 }
 
@@ -3934,6 +3933,7 @@ function atualizarDash() {
   if (amistososAbertos.length > 0) {
     secAmi.style.display = '';
     elAmi.innerHTML = amistososAbertos.slice(0,5).map(a => cardAmistoso(a, false)).join('');
+    if (isMaster) initSwipe(elAmi, 'amistoso');
   } else { secAmi.style.display = 'none'; }
 
   // Torneios em andamento na home
@@ -3948,6 +3948,7 @@ function atualizarDash() {
   if (campsAndamento.length > 0) {
     secCamp.style.display = '';
     elCamp.innerHTML = campsAndamento.slice(0,5).map(c => cardCampHome(c)).join('');
+    if (isMaster) initSwipe(elCamp, 'campeonato');
   } else { secCamp.style.display = 'none'; }
 }
 

@@ -5,3 +5,9 @@
 
 ## MELHORIAS ##
 
+1 - Em todos os cards que tem a opção de exclusão quero que desfaça tudo que tem hoje e que crie a ação de excluir da seguinte forma: estilo do componente deve se comportar como o Swipeable Row, e quando deslizar para a esquerda deve apresentar o botão de excluir e pintar em vermelho, e quando clicar perguntar se deseja prosseguir ou cancelar, e quando cancelar o componente deve voltar no seu estado normal.
+2 - No cadastro de jogadores no campo nome completo sempre deixar em upper case.
+3 - Nas barras de navegação das paginas deve sempre manter essa logica: Home > Pagina > Cadastro ou Edição. Exemplo: Quando estou na home, e clico para cadastrar novo jogador, é exibido a pagina de jogadores onde são listados todos os cadastros, e quando clico em novo a naveção deve ficar da seguinte forme: HOME > JOGADORES > NOVO, caso seja edição, deve ficar da segunte forma: HOME > JOGADORES > EDIÇÃO. (Quando clicar na navegação em HOME, deve ir para a home com o mesmo comportamento de hoje, quando clicar em JOGADORES, ir para a pagina de jogadores e listar todos jogadores cadastrado como já é feito hoje, e por fim na navegação NOVO ou EDIÇÃO não deve ter nenhuma ação). (Essa lógica de navegação deve ser aplicada para todas as paginas.)
+4 - No card de jogos em andamento quando o time é seleção, esta ficando o nome da seleção em cima, abaixo bem o icone e logo após vem novamente o nome da seleção (remover esse segundo nome quando for seleção.)
+5 - A tag de eficiência do time esta muito grande, quero que todas as tags da aplicação tenha tamanho unido, levar em consideração as tags já existente como as "EM ANDAMENTO", "AMISTOSOS" e etc...
+
