@@ -1863,7 +1863,12 @@ function cardAmistoso(a, compact=false, readonly=false) {
         <span class="tag tag-gray" style="font-size:9px;">${a.tipo === 'selecoes' ? 'SELECOES' : 'CLUBES'}</span>
         ${a.modoDupla ? `<span class="tag tag-cyan" style="font-size:9px;">2v2</span>` : ''}
       </div>
-      ${temRes ? `<span class="tag tag-gray">FINALIZADO</span>` : `<span class="tag tag-cyan" style="font-size:9px;">EM ANDAMENTO</span>`}
+      ${temRes ? (() => {
+        const g1 = a.resultado.g1, g2 = a.resultado.g2;
+        if (g1 > g2) return `<span class="tag tag-green" style="font-size:9px;">VITÓRIA T1</span>`;
+        if (g2 > g1) return `<span class="tag tag-green" style="font-size:9px;">VITÓRIA T2</span>`;
+        return `<span class="tag tag-yellow" style="font-size:9px;">EMPATE</span>`;
+      })() : `<span class="tag tag-cyan" style="font-size:9px;">EM ANDAMENTO</span>`}
     </div>
     ${compact ? `
     <div style="display:flex;align-items:center;gap:8px;">
@@ -3291,7 +3296,12 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
         <span class="tag tag-gray" style="font-size:9px;">${isSel ? 'SELECOES' : 'CLUBES'}</span>
       </div>
       ${temRes
-        ? `<span class="tag tag-gray">FINALIZADO</span>`
+        ? (() => {
+            const g1 = m1.resultado, g2 = m2.resultado;
+            if (g1 > g2) return `<span class="tag tag-green" style="font-size:9px;">VITÓRIA T1</span>`;
+            if (g2 > g1) return `<span class="tag tag-green" style="font-size:9px;">VITÓRIA T2</span>`;
+            return `<span class="tag tag-yellow" style="font-size:9px;">EMPATE</span>`;
+          })()
         : `<span class="tag tag-cyan" style="font-size:9px;">EM ANDAMENTO</span>`}
     </div>
     <div style="display:flex;align-items:flex-start;gap:8px;">
