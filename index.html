@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -16,17 +16,17 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <script>
-    // Safety: apenas se erro ANTES do app ficar pronto (inicialização falhou)
+    // Safety: apenas se erro ANTES do app ficar pronto (inicializaÃ§Ã£o falhou)
     window.addEventListener('error', (ev) => {
-      if (window.__AUTH_READY) return; // app já rodando — ignora erros pontuais
-      // Ignora erros de carregamento de imagens (comuns e não-fatais)
+      if (window.__AUTH_READY) return; // app jÃ¡ rodando â€” ignora erros pontuais
+      // Ignora erros de carregamento de imagens (comuns e nÃ£o-fatais)
       if (ev.target && (ev.target.tagName === 'IMG' || ev.target.tagName === 'LINK')) return;
       const loginScreen = document.getElementById('login-screen');
       const app = document.getElementById('app');
       if (loginScreen) loginScreen.style.display = 'flex';
       if (app) app.style.display = 'none';
     }, true);
-    // Timeout fallback: se script não terminar em 5s, mostra login
+    // Timeout fallback: se script nÃ£o terminar em 5s, mostra login
     setTimeout(() => {
       if (!window.__AUTH_READY) {
         const loginScreen = document.getElementById('login-screen');
@@ -135,7 +135,7 @@
     .tag-yellow { background: rgba(245,158,11,0.2); color: #FCD34D; }
     .tag-gray { background: rgba(100,116,139,0.2); color: #94A3B8; }
     .tag-red { background: rgba(239,68,68,0.2); color: #FCA5A5; }
-    /* ── Agrupadores ── */
+    /* â”€â”€ Agrupadores â”€â”€ */
     .grupo-header { display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:14px;cursor:pointer;margin-bottom:8px;user-select:none; }
     .grupo-header:hover { background:rgba(255,255,255,0.07); }
     .grupo-header .grupo-titulo { font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.07em; }
@@ -143,11 +143,11 @@
     .grupo-header.aberto .grupo-seta { transform:rotate(90deg); }
     .grupo-body { overflow:hidden;transition:max-height 0.3s ease; }
     .grupo-body.fechado { display:none; }
-    /* ── Filtros ── */
+    /* â”€â”€ Filtros â”€â”€ */
     .filtro-row { display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px; }
     .filtro-btn { padding:5px 12px;border-radius:20px;border:1px solid var(--card-border);background:rgba(255,255,255,0.04);color:var(--text-muted);font-size:11px;font-weight:700;cursor:pointer;text-transform:uppercase; }
     .filtro-btn.ativo { border-color:var(--purple);background:rgba(139,92,246,0.15);color:#A78BFA; }
-    /* ── Paginação ── */
+    /* â”€â”€ PaginaÃ§Ã£o â”€â”€ */
     .pag-row { display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px; }
     .pag-btn { padding:6px 14px;border-radius:10px;border:1px solid var(--card-border);background:rgba(255,255,255,0.05);color:var(--text-muted);font-size:12px;font-weight:700;cursor:pointer; }
     .pag-btn:disabled { opacity:0.3;cursor:default; }
@@ -211,7 +211,7 @@
     /* Section title */
     .sec-title { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
 
-    /* Uppercase dinâmico: nomes de jogadores, times e países */
+    /* Uppercase dinÃ¢mico: nomes de jogadores, times e paÃ­ses */
     .vs-team { text-transform: uppercase; }
     .vs-label { text-transform: uppercase; }
 
@@ -306,7 +306,7 @@
     .criar-opt:active { background:rgba(139,92,246,0.1); }
     .criar-opt-ico { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 
-    /* Tags de eficiência */
+    /* Tags de eficiÃªncia */
     .efic-tags { display:flex; gap:8px; flex-wrap:wrap; }
     .efic-tag {
       padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 800;
@@ -323,9 +323,9 @@
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      TELA DE LOGIN
-═══════════════════════════════════════════ -->
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="login-screen">
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
@@ -343,7 +343,7 @@
       </svg>
     </div>
     <h1 style="font-size: 38px; font-weight: 900; letter-spacing: -1px;" class="grad">FIFA FAR PLAY</h1>
-    <p style="color: var(--text-muted); margin-top: 8px; font-size: 15px;">Seus campeonatos. Seu ranking. Sua glória.</p>
+    <p style="color: var(--text-muted); margin-top: 8px; font-size: 15px;">Seus campeonatos. Seu ranking. Sua glÃ³ria.</p>
   </div>
 
   <div style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:320px;">
@@ -360,12 +360,12 @@
   </div>
 
   <p id="login-erro" style="color:#FCA5A5; font-size:13px; margin-top:16px; display:none; text-align:center;"></p>
-  <p style="color: var(--text-muted); font-size: 12px; margin-top: 32px; text-align:center;">Acesso exclusivo · Dados protegidos</p>
+  <p style="color: var(--text-muted); font-size: 12px; margin-top: 32px; text-align:center;">Acesso exclusivo Â· Dados protegidos</p>
 </div>
 
-<!-- ═══════════════════════════════════════════
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      APP PRINCIPAL
-═══════════════════════════════════════════ -->
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="app" style="display:none; flex-direction:column; height:100dvh; position:relative;">
 
   <!-- HEADER -->
@@ -440,10 +440,10 @@
     </div>
   </header>
 
-  <!-- CONTEÚDO -->
+  <!-- CONTEÃšDO -->
   <main style="flex:1; overflow-y:auto;" id="main">
 
-    <!-- ── HOME ── -->
+    <!-- â”€â”€ HOME â”€â”€ -->
     <div id="view-home" class="view active">
       <!-- Botao + CRIAR com dropdown -->
       <div style="padding:16px 0 0;margin-bottom:16px;">
@@ -499,11 +499,11 @@
       </div>
     </div>
 
-    <!-- ── JOGADORES ── -->
+    <!-- â”€â”€ JOGADORES â”€â”€ -->
     <div id="view-jogadores" class="view">
       <div class="breadcrumb">
         <span class="breadcrumb-item" onclick="irParaHome()">HOME</span>
-        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-sep">â€º</span>
         <span class="breadcrumb-item active">JOGADORES</span>
       </div>
       <div style="display:flex; align-items:center; justify-content:space-between; padding:0 0 16px;">
@@ -513,16 +513,16 @@
       <div id="lista-jog">
         <div style="background:rgba(139,92,246,0.08);border:1px dashed rgba(139,92,246,0.3);border-radius:18px;padding:32px 20px;text-align:center;">
           <p style="font-weight:700;margin-bottom:6px;text-transform:uppercase;">NENHUM JOGADOR CADASTRADO</p>
-          <p style="color:var(--text-muted);font-size:13px;">ADICIONE OS AMIGOS QUE VÃO JOGAR</p>
+          <p style="color:var(--text-muted);font-size:13px;">ADICIONE OS AMIGOS QUE VÃƒO JOGAR</p>
         </div>
       </div>
     </div>
 
-    <!-- ── PARTIDAS ── -->
+    <!-- â”€â”€ PARTIDAS â”€â”€ -->
     <div id="view-amistosos" class="view">
       <div class="breadcrumb">
         <span class="breadcrumb-item" onclick="irParaHome()">HOME</span>
-        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-sep">â€º</span>
         <span class="breadcrumb-item active">AMISTOSOS</span>
       </div>
       <div style="display:flex; align-items:center; justify-content:space-between; padding:0 0 20px;">
@@ -534,11 +534,11 @@
       </div>
     </div>
 
-    <!-- ── CAMPEONATOS ── -->
+    <!-- â”€â”€ CAMPEONATOS â”€â”€ -->
     <div id="view-campeonatos" class="view">
       <div class="breadcrumb">
         <span class="breadcrumb-item" onclick="irParaHome()">HOME</span>
-        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-sep">â€º</span>
         <span class="breadcrumb-item active">TORNEIOS</span>
       </div>
       <div style="display:flex; align-items:center; justify-content:space-between; padding:0 0 16px;">
@@ -550,11 +550,11 @@
       </div>
     </div>
 
-    <!-- ── RANKING ── -->
+    <!-- â”€â”€ RANKING â”€â”€ -->
     <div id="view-ranking" class="view">
       <div class="breadcrumb">
         <span class="breadcrumb-item" onclick="irParaHome()">HOME</span>
-        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-sep">â€º</span>
         <span class="breadcrumb-item active">RANKING</span>
       </div>
       <div style="padding:0 0 20px;">
@@ -574,11 +574,11 @@
       </div>
     </div>
 
-    <!-- ── TIMES ── -->
+    <!-- â”€â”€ TIMES â”€â”€ -->
     <div id="view-times" class="view">
       <div class="breadcrumb">
         <span class="breadcrumb-item" onclick="irParaHome()">HOME</span>
-        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-sep">â€º</span>
         <span class="breadcrumb-item active">TIMES</span>
       </div>
       <div style="display:flex; align-items:center; justify-content:space-between; padding:0 0 16px;">
@@ -601,9 +601,9 @@
   <!-- NAV removido - navegacao via hamburger menu -->
 </div>
 
-<!-- ═══════════════════════════════════════════
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      MODAL (confirmacoes)
-═══════════════════════════════════════════ -->
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="modal-overlay">
   <div id="modal-box">
     <div class="modal-handle"></div>
@@ -611,16 +611,16 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      FULLSCREEN (cadastros)
-═══════════════════════════════════════════ -->
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="fullscreen-overlay" style="display:none;position:fixed;top:var(--header-h);left:0;right:0;bottom:0;background:var(--bg);z-index:29;overflow-y:auto;">
   <div style="position:sticky;top:0;z-index:30;background:rgba(8,8,15,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--card-border);padding:0 16px;height:56px;display:flex;align-items:center;justify-content:flex-start;">
     <nav id="fullscreen-breadcrumb" class="breadcrumb">
       <span class="breadcrumb-item" onclick="irParaHome()">HOME</span>
-      <span class="breadcrumb-sep">›</span>
+      <span class="breadcrumb-sep">â€º</span>
       <span id="fullscreen-mid" class="breadcrumb-item" style="display:none;cursor:pointer;"></span>
-      <span id="fullscreen-mid-sep" class="breadcrumb-sep" style="display:none;">›</span>
+      <span id="fullscreen-mid-sep" class="breadcrumb-sep" style="display:none;">â€º</span>
       <span id="fullscreen-title" class="breadcrumb-item active" style="font-weight:900;font-size:14px;" ></span>
     </nav>
   </div>
@@ -630,9 +630,9 @@
 <!-- TOAST -->
 <div id="toast"></div>
 
-<!-- ═══════════════════════════════════════════
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      SCRIPT PRINCIPAL
-═══════════════════════════════════════════ -->
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <script type="module">
 import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, serverTimestamp, setDoc, getDoc }
@@ -642,7 +642,7 @@ import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, Google
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 
-// ─── CONFIG ─────────────────────────────────────────────────────────
+// â”€â”€â”€ CONFIG â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const FB = initializeApp({
   apiKey: "AIzaSyB2FF0TT2ZIEn91DkjhPYqcDABK52Tx2-I",
   authDomain: "fut-manager-6bd85.firebaseapp.com",
@@ -660,105 +660,105 @@ const ap = new OAuthProvider('apple.com');
 ap.addScope('email');
 ap.addScope('name');
 
-// ─── DATABASE DE TIMES EA FC 25 ──────────────────────────────────────
+// â”€â”€â”€ DATABASE DE TIMES EA FC 25 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // ataque/meio/defesa = atributos EA FC 25; forca = Math.round((ataque+meio+defesa)/3)
 const CLUBES_DEFAULT = [
-  // La Liga 🇪🇸
-  { id:'real-madrid',   nome:'Real Madrid',        ataque:89, meio:85, defesa:84, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇪🇸', liga:'La Liga',        logo:'👑' },
-  { id:'barcelona',     nome:'Barcelona',           ataque:84, meio:83, defesa:83, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇪🇸', liga:'La Liga',        logo:'🔵🔴' },
-  { id:'atletico-mad',  nome:'Atlético Madrid',     ataque:82, meio:81, defesa:84, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇪🇸', liga:'La Liga',        logo:'🔴⚪' },
-  { id:'real-sociedad', nome:'Real Sociedad',       ataque:79, meio:80, defesa:79, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇪🇸', liga:'La Liga',        logo:'🔵⚪' },
-  { id:'villarreal',    nome:'Villarreal',          ataque:79, meio:78, defesa:78, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇪🇸', liga:'La Liga',        logo:'🟡' },
-  { id:'sevilla',       nome:'Sevilla',             ataque:77, meio:77, defesa:78, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇪🇸', liga:'La Liga',        logo:'🔴⚪' },
-  // Premier League 🏴󠁧󠁢󠁥󠁮󠁧󠁿
-  { id:'man-city',      nome:'Manchester City',     ataque:86, meio:87, defesa:85, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🩵' },
-  { id:'liverpool',     nome:'Liverpool',           ataque:86, meio:84, defesa:85, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🔴' },
-  { id:'arsenal',       nome:'Arsenal',             ataque:83, meio:85, defesa:81, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🔫' },
-  { id:'chelsea',       nome:'Chelsea',             ataque:82, meio:82, defesa:81, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🦁' },
-  { id:'man-utd',       nome:'Manchester United',   ataque:80, meio:79, defesa:79, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'👹' },
-  { id:'tottenham',     nome:'Tottenham',           ataque:81, meio:80, defesa:79, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🐓' },
-  { id:'newcastle',     nome:'Newcastle',           ataque:80, meio:80, defesa:81, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'⚫⚪' },
-  { id:'aston-villa',   nome:'Aston Villa',         ataque:82, meio:81, defesa:80, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'🦁' },
-  { id:'west-ham',      nome:'West Ham',            ataque:78, meio:78, defesa:77, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', liga:'Premier League', logo:'⚒️' },
-  // Bundesliga 🇩🇪
-  { id:'bayern',        nome:'Bayern Munich',       ataque:90, meio:85, defesa:83, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇩🇪', liga:'Bundesliga',     logo:'🔴⚪' },
-  { id:'leverkusen',    nome:'Bayer Leverkusen',    ataque:81, meio:84, defesa:81, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇩🇪', liga:'Bundesliga',     logo:'⚫🔴' },
-  { id:'dortmund',      nome:'Borussia Dortmund',   ataque:82, meio:81, defesa:79, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇩🇪', liga:'Bundesliga',     logo:'🟡⚫' },
-  { id:'leipzig',       nome:'RB Leipzig',          ataque:80, meio:80, defesa:79, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇩🇪', liga:'Bundesliga',     logo:'🔵🔴' },
-  // Serie A 🇮🇹
-  { id:'inter',         nome:'Inter Milan',         ataque:83, meio:82, defesa:83, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇮🇹', liga:'Serie A',        logo:'🔵⚫' },
-  { id:'milan',         nome:'AC Milan',            ataque:82, meio:81, defesa:80, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇮🇹', liga:'Serie A',        logo:'🔴⚫' },
-  { id:'napoli',        nome:'Napoli',              ataque:81, meio:80, defesa:80, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇮🇹', liga:'Serie A',        logo:'🔵' },
-  { id:'juventus',      nome:'Juventus',            ataque:80, meio:80, defesa:81, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇮🇹', liga:'Serie A',        logo:'⚫⚪' },
-  { id:'roma',          nome:'AS Roma',             ataque:79, meio:78, defesa:78, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇮🇹', liga:'Serie A',        logo:'🟡🔴' },
-  { id:'lazio',         nome:'Lazio',               ataque:78, meio:77, defesa:77, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇮🇹', liga:'Serie A',        logo:'🦅' },
-  // Ligue 1 🇫🇷
-  { id:'psg',           nome:'PSG',                 ataque:84, meio:82, defesa:80, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇫🇷', liga:'Ligue 1',        logo:'🗼' },
-  { id:'monaco',        nome:'Monaco',              ataque:80, meio:79, defesa:78, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇫🇷', liga:'Ligue 1',        logo:'🎲' },
-  // Portugal 🇵🇹
-  { id:'benfica',       nome:'Benfica',             ataque:80, meio:80, defesa:80, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇵🇹', liga:'Primeira Liga',  logo:'🦅' },
-  { id:'porto',         nome:'Porto',               ataque:79, meio:79, defesa:79, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇵🇹', liga:'Primeira Liga',  logo:'🐉' },
-  { id:'sporting',      nome:'Sporting CP',         ataque:78, meio:78, defesa:78, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇵🇹', liga:'Primeira Liga',  logo:'🦁' },
-  // Holanda 🇳🇱
-  { id:'ajax',          nome:'Ajax',                ataque:79, meio:77, defesa:76, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇳🇱', liga:'Eredivisie',     logo:'🔴⚪' },
-  { id:'feyenoord',     nome:'Feyenoord',           ataque:78, meio:76, defesa:76, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇳🇱', liga:'Eredivisie',     logo:'🔴⚫' },
-  // Escócia 🏴󠁧󠁢󠁳󠁣󠁴󠁿
-  { id:'celtic',        nome:'Celtic',              ataque:78, meio:76, defesa:76, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', liga:'Scottish Prem',  logo:'🍀' },
-  { id:'rangers',       nome:'Rangers',             ataque:76, meio:76, defesa:75, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', liga:'Scottish Prem',  logo:'🦁' },
-  // Turquia 🇹🇷
-  { id:'galatasaray',   nome:'Galatasaray',         ataque:79, meio:77, defesa:77, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇹🇷', liga:'Süper Lig',      logo:'🔴🟡' },
+  // La Liga ðŸ‡ªðŸ‡¸
+  { id:'real-madrid',   nome:'Real Madrid',        ataque:89, meio:85, defesa:84, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡ªðŸ‡¸', liga:'La Liga',        logo:'ðŸ‘‘' },
+  { id:'barcelona',     nome:'Barcelona',           ataque:84, meio:83, defesa:83, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡ªðŸ‡¸', liga:'La Liga',        logo:'ðŸ”µðŸ”´' },
+  { id:'atletico-mad',  nome:'AtlÃ©tico Madrid',     ataque:82, meio:81, defesa:84, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡ªðŸ‡¸', liga:'La Liga',        logo:'ðŸ”´âšª' },
+  { id:'real-sociedad', nome:'Real Sociedad',       ataque:79, meio:80, defesa:79, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡ªðŸ‡¸', liga:'La Liga',        logo:'ðŸ”µâšª' },
+  { id:'villarreal',    nome:'Villarreal',          ataque:79, meio:78, defesa:78, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡ªðŸ‡¸', liga:'La Liga',        logo:'ðŸŸ¡' },
+  { id:'sevilla',       nome:'Sevilla',             ataque:77, meio:77, defesa:78, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡ªðŸ‡¸', liga:'La Liga',        logo:'ðŸ”´âšª' },
+  // Premier League ðŸ´ó §ó ¢ó ¥ó ®ó §ó ¿
+  { id:'man-city',      nome:'Manchester City',     ataque:86, meio:87, defesa:85, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ´ó §ó ¢ó ¥ó ®ó §ó ¿', liga:'Premier League', logo:'ðŸ©µ' },
+  { id:'liverpool',     nome:'Liverpool',           ataque:86, meio:84, defesa:85, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ´ó §ó ¢ó ¥ó ®ó §ó ¿', liga:'Premier League', logo:'ðŸ”´' },
+  { id:'arsenal',       nome:'Arsenal',             ataque:83, meio:85, defesa:81, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ´ó §ó ¢ó ¥ó ®ó §ó ¿', liga:'Premier League', logo:'ðŸ”«' },
+  { id:'chelsea',       nome:'Chelsea',             ataque:82, meio:82, defesa:81, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ´ó §ó ¢ó ¥ó ®ó §ó ¿', liga:'Premier League', logo:'ðŸ¦' },
+  { id:'man-utd',       nome:'Manchester United',   ataque:80, meio:79, defesa:79, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ´ó §ó ¢ó ¥ó ®ó §ó ¿', liga:'Premier League', logo:'ðŸ‘¹' },
+  { id:'tottenham',     nome:'Tottenham',           ataque:81, meio:80, defesa:79, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ´ó §ó ¢ó ¥ó ®ó §ó ¿', liga:'Premier League', logo:'ðŸ“' },
+  { id:'newcastle',     nome:'Newcastle',           ataque:80, meio:80, defesa:81, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ´ó §ó ¢ó ¥ó ®ó §ó ¿', liga:'Premier League', logo:'âš«âšª' },
+  { id:'aston-villa',   nome:'Aston Villa',         ataque:82, meio:81, defesa:80, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ´ó §ó ¢ó ¥ó ®ó §ó ¿', liga:'Premier League', logo:'ðŸ¦' },
+  { id:'west-ham',      nome:'West Ham',            ataque:78, meio:78, defesa:77, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ´ó §ó ¢ó ¥ó ®ó §ó ¿', liga:'Premier League', logo:'âš’ï¸' },
+  // Bundesliga ðŸ‡©ðŸ‡ª
+  { id:'bayern',        nome:'Bayern Munich',       ataque:90, meio:85, defesa:83, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡©ðŸ‡ª', liga:'Bundesliga',     logo:'ðŸ”´âšª' },
+  { id:'leverkusen',    nome:'Bayer Leverkusen',    ataque:81, meio:84, defesa:81, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡©ðŸ‡ª', liga:'Bundesliga',     logo:'âš«ðŸ”´' },
+  { id:'dortmund',      nome:'Borussia Dortmund',   ataque:82, meio:81, defesa:79, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡©ðŸ‡ª', liga:'Bundesliga',     logo:'ðŸŸ¡âš«' },
+  { id:'leipzig',       nome:'RB Leipzig',          ataque:80, meio:80, defesa:79, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡©ðŸ‡ª', liga:'Bundesliga',     logo:'ðŸ”µðŸ”´' },
+  // Serie A ðŸ‡®ðŸ‡¹
+  { id:'inter',         nome:'Inter Milan',         ataque:83, meio:82, defesa:83, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡®ðŸ‡¹', liga:'Serie A',        logo:'ðŸ”µâš«' },
+  { id:'milan',         nome:'AC Milan',            ataque:82, meio:81, defesa:80, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡®ðŸ‡¹', liga:'Serie A',        logo:'ðŸ”´âš«' },
+  { id:'napoli',        nome:'Napoli',              ataque:81, meio:80, defesa:80, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡®ðŸ‡¹', liga:'Serie A',        logo:'ðŸ”µ' },
+  { id:'juventus',      nome:'Juventus',            ataque:80, meio:80, defesa:81, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡®ðŸ‡¹', liga:'Serie A',        logo:'âš«âšª' },
+  { id:'roma',          nome:'AS Roma',             ataque:79, meio:78, defesa:78, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡®ðŸ‡¹', liga:'Serie A',        logo:'ðŸŸ¡ðŸ”´' },
+  { id:'lazio',         nome:'Lazio',               ataque:78, meio:77, defesa:77, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡®ðŸ‡¹', liga:'Serie A',        logo:'ðŸ¦…' },
+  // Ligue 1 ðŸ‡«ðŸ‡·
+  { id:'psg',           nome:'PSG',                 ataque:84, meio:82, defesa:80, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡«ðŸ‡·', liga:'Ligue 1',        logo:'ðŸ—¼' },
+  { id:'monaco',        nome:'Monaco',              ataque:80, meio:79, defesa:78, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡«ðŸ‡·', liga:'Ligue 1',        logo:'ðŸŽ²' },
+  // Portugal ðŸ‡µðŸ‡¹
+  { id:'benfica',       nome:'Benfica',             ataque:80, meio:80, defesa:80, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡µðŸ‡¹', liga:'Primeira Liga',  logo:'ðŸ¦…' },
+  { id:'porto',         nome:'Porto',               ataque:79, meio:79, defesa:79, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡µðŸ‡¹', liga:'Primeira Liga',  logo:'ðŸ‰' },
+  { id:'sporting',      nome:'Sporting CP',         ataque:78, meio:78, defesa:78, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡µðŸ‡¹', liga:'Primeira Liga',  logo:'ðŸ¦' },
+  // Holanda ðŸ‡³ðŸ‡±
+  { id:'ajax',          nome:'Ajax',                ataque:79, meio:77, defesa:76, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡³ðŸ‡±', liga:'Eredivisie',     logo:'ðŸ”´âšª' },
+  { id:'feyenoord',     nome:'Feyenoord',           ataque:78, meio:76, defesa:76, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡³ðŸ‡±', liga:'Eredivisie',     logo:'ðŸ”´âš«' },
+  // EscÃ³cia ðŸ´ó §ó ¢ó ³ó £ó ´ó ¿
+  { id:'celtic',        nome:'Celtic',              ataque:78, meio:76, defesa:76, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ´ó §ó ¢ó ³ó £ó ´ó ¿', liga:'Scottish Prem',  logo:'ðŸ€' },
+  { id:'rangers',       nome:'Rangers',             ataque:76, meio:76, defesa:75, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ´ó §ó ¢ó ³ó £ó ´ó ¿', liga:'Scottish Prem',  logo:'ðŸ¦' },
+  // Turquia ðŸ‡¹ðŸ‡·
+  { id:'galatasaray',   nome:'Galatasaray',         ataque:79, meio:77, defesa:77, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡¹ðŸ‡·', liga:'SÃ¼per Lig',      logo:'ðŸ”´ðŸŸ¡' },
 ];
 
 const SELECOES_DEFAULT = [
-  { id:'franca',     nome:'França',         ataque:87, meio:85, defesa:84, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇫🇷' },
-  { id:'argentina',  nome:'Argentina',      ataque:86, meio:83, defesa:83, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇦🇷' },
-  { id:'inglaterra', nome:'Inglaterra',     ataque:84, meio:83, defesa:83, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
-  { id:'espanha',    nome:'Espanha',        ataque:84, meio:85, defesa:83, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇪🇸' },
-  { id:'portugal',   nome:'Portugal',       ataque:84, meio:82, defesa:81, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇵🇹' },
-  { id:'alemanha',   nome:'Alemanha',       ataque:83, meio:82, defesa:82, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇩🇪' },
-  { id:'belgica',    nome:'Bélgica',        ataque:82, meio:81, defesa:80, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇧🇪' },
-  { id:'holanda',    nome:'Holanda',        ataque:82, meio:81, defesa:80, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇳🇱' },
-  { id:'italia',     nome:'Itália',         ataque:80, meio:80, defesa:82, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇮🇹' },
-  { id:'croacia',    nome:'Croácia',        ataque:80, meio:80, defesa:79, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇭🇷' },
-  { id:'uruguai',    nome:'Uruguai',        ataque:80, meio:79, defesa:79, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇺🇾' },
-  { id:'colombia',   nome:'Colômbia',       ataque:79, meio:78, defesa:77, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇨🇴' },
-  { id:'marrocos',   nome:'Marrocos',       ataque:78, meio:78, defesa:79, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇲🇦' },
-  { id:'turquia',    nome:'Turquia',        ataque:78, meio:77, defesa:77, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇹🇷' },
-  { id:'eua',        nome:'EUA',            ataque:77, meio:77, defesa:77, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇺🇸' },
-  { id:'mexico',     nome:'México',         ataque:78, meio:77, defesa:76, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇲🇽' },
-  { id:'austria',    nome:'Áustria',        ataque:77, meio:76, defesa:76, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇦🇹' },
-  { id:'japao',      nome:'Japão',          ataque:76, meio:77, defesa:76, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇯🇵' },
-  { id:'senegal',    nome:'Senegal',        ataque:77, meio:76, defesa:76, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇸🇳' },
-  { id:'dinamarca',  nome:'Dinamarca',      ataque:76, meio:77, defesa:77, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇩🇰' },
-  { id:'suica',      nome:'Suíça',          ataque:76, meio:76, defesa:76, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇨🇭' },
-  { id:'chile',      nome:'Chile',          ataque:75, meio:74, defesa:74, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇨🇱' },
-  { id:'polonia',    nome:'Polônia',        ataque:75, meio:74, defesa:74, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇵🇱' },
-  { id:'australia',  nome:'Austrália',      ataque:73, meio:73, defesa:73, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇦🇺' },
-  { id:'nigeria',    nome:'Nigéria',        ataque:75, meio:73, defesa:72, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇳🇬' },
-  { id:'coreia',     nome:'Coreia do Sul',  ataque:74, meio:74, defesa:72, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇰🇷' },
-  { id:'equador',    nome:'Equador',        ataque:73, meio:72, defesa:72, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇪🇨' },
-  { id:'ghana',      nome:'Gana',           ataque:72, meio:71, defesa:70, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇬🇭' },
-  { id:'peru',       nome:'Peru',           ataque:72, meio:71, defesa:70, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'🇵🇪' },
+  { id:'franca',     nome:'FranÃ§a',         ataque:87, meio:85, defesa:84, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡«ðŸ‡·' },
+  { id:'argentina',  nome:'Argentina',      ataque:86, meio:83, defesa:83, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡¦ðŸ‡·' },
+  { id:'inglaterra', nome:'Inglaterra',     ataque:84, meio:83, defesa:83, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ´ó §ó ¢ó ¥ó ®ó §ó ¿' },
+  { id:'espanha',    nome:'Espanha',        ataque:84, meio:85, defesa:83, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡ªðŸ‡¸' },
+  { id:'portugal',   nome:'Portugal',       ataque:84, meio:82, defesa:81, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡µðŸ‡¹' },
+  { id:'alemanha',   nome:'Alemanha',       ataque:83, meio:82, defesa:82, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡©ðŸ‡ª' },
+  { id:'belgica',    nome:'BÃ©lgica',        ataque:82, meio:81, defesa:80, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡§ðŸ‡ª' },
+  { id:'holanda',    nome:'Holanda',        ataque:82, meio:81, defesa:80, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡³ðŸ‡±' },
+  { id:'italia',     nome:'ItÃ¡lia',         ataque:80, meio:80, defesa:82, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡®ðŸ‡¹' },
+  { id:'croacia',    nome:'CroÃ¡cia',        ataque:80, meio:80, defesa:79, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡­ðŸ‡·' },
+  { id:'uruguai',    nome:'Uruguai',        ataque:80, meio:79, defesa:79, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡ºðŸ‡¾' },
+  { id:'colombia',   nome:'ColÃ´mbia',       ataque:79, meio:78, defesa:77, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡¨ðŸ‡´' },
+  { id:'marrocos',   nome:'Marrocos',       ataque:78, meio:78, defesa:79, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡²ðŸ‡¦' },
+  { id:'turquia',    nome:'Turquia',        ataque:78, meio:77, defesa:77, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡¹ðŸ‡·' },
+  { id:'eua',        nome:'EUA',            ataque:77, meio:77, defesa:77, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡ºðŸ‡¸' },
+  { id:'mexico',     nome:'MÃ©xico',         ataque:78, meio:77, defesa:76, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡²ðŸ‡½' },
+  { id:'austria',    nome:'Ãustria',        ataque:77, meio:76, defesa:76, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡¦ðŸ‡¹' },
+  { id:'japao',      nome:'JapÃ£o',          ataque:76, meio:77, defesa:76, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡¯ðŸ‡µ' },
+  { id:'senegal',    nome:'Senegal',        ataque:77, meio:76, defesa:76, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡¸ðŸ‡³' },
+  { id:'dinamarca',  nome:'Dinamarca',      ataque:76, meio:77, defesa:77, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡©ðŸ‡°' },
+  { id:'suica',      nome:'SuÃ­Ã§a',          ataque:76, meio:76, defesa:76, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡¨ðŸ‡­' },
+  { id:'chile',      nome:'Chile',          ataque:75, meio:74, defesa:74, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡¨ðŸ‡±' },
+  { id:'polonia',    nome:'PolÃ´nia',        ataque:75, meio:74, defesa:74, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡µðŸ‡±' },
+  { id:'australia',  nome:'AustrÃ¡lia',      ataque:73, meio:73, defesa:73, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡¦ðŸ‡º' },
+  { id:'nigeria',    nome:'NigÃ©ria',        ataque:75, meio:73, defesa:72, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡³ðŸ‡¬' },
+  { id:'coreia',     nome:'Coreia do Sul',  ataque:74, meio:74, defesa:72, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡°ðŸ‡·' },
+  { id:'equador',    nome:'Equador',        ataque:73, meio:72, defesa:72, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡ªðŸ‡¨' },
+  { id:'ghana',      nome:'Gana',           ataque:72, meio:71, defesa:70, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡¬ðŸ‡­' },
+  { id:'peru',       nome:'Peru',           ataque:72, meio:71, defesa:70, get forca(){return Math.round((this.ataque+this.meio+this.defesa)/3)}, bandeira:'ðŸ‡µðŸ‡ª' },
 ];
 
 const CAMP_META = {
-  'champions':     { nome:'Champions League', emoji:'⭐', tipo:'clubes',   logo:'https://upload.wikimedia.org/wikipedia/en/thumb/b/bf/UEFA_Champions_League.svg/512px-UEFA_Champions_League.svg.png',
-    desc:'Fase de grupos: todos jogam entre si no grupo. Os 2 primeiros de cada grupo avançam. A partir das oitavas de final, jogos eliminatórios (ida e volta nos torneios oficiais, aqui em jogo único). Campeão é quem vencer a final.' },
-  'libertadores':  { nome:'Libertadores',     emoji:'🌎', tipo:'clubes',   logo:'https://upload.wikimedia.org/wikipedia/en/thumb/1/1e/Copa_Libertadores_logo.svg/512px-Copa_Libertadores_logo.svg.png',
-    desc:'Fase de grupos: todos jogam entre si no grupo. Os 2 primeiros avançam para as oitavas. Fase eliminatória a partir das oitavas. Considerada a Champions da América do Sul.' },
-  'brasileirao':   { nome:'Brasileirão',      emoji:'🟢', tipo:'clubes',   logo:'https://upload.wikimedia.org/wikipedia/pt/thumb/8/89/Brasileir%C3%A3o_-_Log%C3%B3tipo.png/320px-Brasileir%C3%A3o_-_Log%C3%B3tipo.png',
-    desc:'Todos jogam contra todos (turno e returno). Pontuação: vitória 3 pts, empate 1 pt, derrota 0. Campeão é quem acumular mais pontos ao final. Desempate: vitórias, saldo de gols, gols marcados.' },
-  'paulistao':     { nome:'Paulistão',        emoji:'🐍', tipo:'clubes',   logo:'https://upload.wikimedia.org/wikipedia/pt/thumb/6/66/Logo_Paulist%C3%A3o_2021.png/320px-Logo_Paulist%C3%A3o_2021.png',
-    desc:'Fase de grupos com 4 grupos. Os 2 primeiros de cada grupo + 2 melhores terceiros avançam. Quartas, semi e final eliminatórias. Formato regional do estado de São Paulo.' },
-  'copa-brasil':   { nome:'Copa do Brasil',   emoji:'🏆', tipo:'clubes',   logo:'https://upload.wikimedia.org/wikipedia/pt/thumb/4/44/Copa_do_Brasil_logo.png/240px-Copa_do_Brasil_logo.png',
-    desc:'Formato eliminatório desde o início. Cada fase tem jogo único (aqui) ou ida e volta. Quem perde está eliminado. Campeão é o time que vencer todas as fases.' },
-  'copa-do-mundo': { nome:'Copa do Mundo',    emoji:'🌍', tipo:'clubes', logo:'https://upload.wikimedia.org/wikipedia/en/thumb/6/67/2022_FIFA_World_Cup.svg/512px-2022_FIFA_World_Cup.svg.png',
-    desc:'Formato Copa do Mundo: fase de grupos + eliminatórias. Os 2 primeiros de cada grupo avançam. Oitavas, quartas, semis e final eliminatórias. Pode ser jogado com times OU seleções.' },
+  'champions':     { nome:'Champions League', emoji:'â­', tipo:'clubes',   logo:'https://upload.wikimedia.org/wikipedia/en/thumb/b/bf/UEFA_Champions_League.svg/512px-UEFA_Champions_League.svg.png',
+    desc:'Fase de grupos: todos jogam entre si no grupo. Os 2 primeiros de cada grupo avanÃ§am. A partir das oitavas de final, jogos eliminatÃ³rios (ida e volta nos torneios oficiais, aqui em jogo Ãºnico). CampeÃ£o Ã© quem vencer a final.' },
+  'libertadores':  { nome:'Libertadores',     emoji:'ðŸŒŽ', tipo:'clubes',   logo:'https://upload.wikimedia.org/wikipedia/en/thumb/1/1e/Copa_Libertadores_logo.svg/512px-Copa_Libertadores_logo.svg.png',
+    desc:'Fase de grupos: todos jogam entre si no grupo. Os 2 primeiros avanÃ§am para as oitavas. Fase eliminatÃ³ria a partir das oitavas. Considerada a Champions da AmÃ©rica do Sul.' },
+  'brasileirao':   { nome:'BrasileirÃ£o',      emoji:'ðŸŸ¢', tipo:'clubes',   logo:'https://upload.wikimedia.org/wikipedia/pt/thumb/8/89/Brasileir%C3%A3o_-_Log%C3%B3tipo.png/320px-Brasileir%C3%A3o_-_Log%C3%B3tipo.png',
+    desc:'Todos jogam contra todos (turno e returno). PontuaÃ§Ã£o: vitÃ³ria 3 pts, empate 1 pt, derrota 0. CampeÃ£o Ã© quem acumular mais pontos ao final. Desempate: vitÃ³rias, saldo de gols, gols marcados.' },
+  'paulistao':     { nome:'PaulistÃ£o',        emoji:'ðŸ', tipo:'clubes',   logo:'https://upload.wikimedia.org/wikipedia/pt/thumb/6/66/Logo_Paulist%C3%A3o_2021.png/320px-Logo_Paulist%C3%A3o_2021.png',
+    desc:'Fase de grupos com 4 grupos. Os 2 primeiros de cada grupo + 2 melhores terceiros avanÃ§am. Quartas, semi e final eliminatÃ³rias. Formato regional do estado de SÃ£o Paulo.' },
+  'copa-brasil':   { nome:'Copa do Brasil',   emoji:'ðŸ†', tipo:'clubes',   logo:'https://upload.wikimedia.org/wikipedia/pt/thumb/4/44/Copa_do_Brasil_logo.png/240px-Copa_do_Brasil_logo.png',
+    desc:'Formato eliminatÃ³rio desde o inÃ­cio. Cada fase tem jogo Ãºnico (aqui) ou ida e volta. Quem perde estÃ¡ eliminado. CampeÃ£o Ã© o time que vencer todas as fases.' },
+  'copa-do-mundo': { nome:'Copa do Mundo',    emoji:'ðŸŒ', tipo:'clubes', logo:'https://upload.wikimedia.org/wikipedia/en/thumb/6/67/2022_FIFA_World_Cup.svg/512px-2022_FIFA_World_Cup.svg.png',
+    desc:'Formato Copa do Mundo: fase de grupos + eliminatÃ³rias. Os 2 primeiros de cada grupo avanÃ§am. Oitavas, quartas, semis e final eliminatÃ³rias. Pode ser jogado com times OU seleÃ§Ãµes.' },
 };
 
-// ─── DADOS VISUAIS DOS TIMES ──────────────────────────────────────────
-// pais = código ISO para flagcdn.com (https://flagcdn.com/w40/{code}.png)
-// crest = URL do brasão real (football-data.org CDN, público, sem API key)
+// â”€â”€â”€ DADOS VISUAIS DOS TIMES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// pais = cÃ³digo ISO para flagcdn.com (https://flagcdn.com/w40/{code}.png)
+// crest = URL do brasÃ£o real (football-data.org CDN, pÃºblico, sem API key)
 const FD = 'https://crests.football-data.org/';
 const TEAM_DATA = {
   'real-madrid':   { abrev:'RM',  fundo:'#FEFEFE', cor:'#00529F', pais:'es', paisNome:'Espanha',    crest:`${FD}86.png`  },
@@ -780,90 +780,90 @@ const TEAM_DATA = {
   'leverkusen':    { abrev:'B04', fundo:'#E32221', cor:'#000000', pais:'de', paisNome:'Alemanha',   crest:`${FD}3.png`   },
   'dortmund':      { abrev:'BVB', fundo:'#FDE100', cor:'#000000', pais:'de', paisNome:'Alemanha',   crest:`${FD}4.png`   },
   'leipzig':       { abrev:'RBL', fundo:'#DD0741', cor:'#FFFFFF', pais:'de', paisNome:'Alemanha',   crest:`${FD}721.png` },
-  'inter':         { abrev:'INT', fundo:'#003DA5', cor:'#000000', pais:'it', paisNome:'Itália',     crest:`${FD}108.png` },
-  'milan':         { abrev:'ACM', fundo:'#FB090B', cor:'#000000', pais:'it', paisNome:'Itália',     crest:`${FD}98.png`  },
-  'napoli':        { abrev:'NAP', fundo:'#12A0C3', cor:'#FFFFFF', pais:'it', paisNome:'Itália',     crest:`${FD}113.png` },
-  'juventus':      { abrev:'JUV', fundo:'#000000', cor:'#FFFFFF', pais:'it', paisNome:'Itália',     crest:`${FD}109.png` },
-  'roma':          { abrev:'ASR', fundo:'#8E1F2F', cor:'#FFD700', pais:'it', paisNome:'Itália',     crest:`${FD}100.png` },
-  'lazio':         { abrev:'LAZ', fundo:'#87CEEB', cor:'#003366', pais:'it', paisNome:'Itália',     crest:`${FD}110.png` },
-  'psg':           { abrev:'PSG', fundo:'#004170', cor:'#FFFFFF', pais:'fr', paisNome:'França',     crest:`${FD}524.png` },
-  'monaco':        { abrev:'ASM', fundo:'#EE2523', cor:'#FFFFFF', pais:'fr', paisNome:'França',     crest:`${FD}548.png` },
+  'inter':         { abrev:'INT', fundo:'#003DA5', cor:'#000000', pais:'it', paisNome:'ItÃ¡lia',     crest:`${FD}108.png` },
+  'milan':         { abrev:'ACM', fundo:'#FB090B', cor:'#000000', pais:'it', paisNome:'ItÃ¡lia',     crest:`${FD}98.png`  },
+  'napoli':        { abrev:'NAP', fundo:'#12A0C3', cor:'#FFFFFF', pais:'it', paisNome:'ItÃ¡lia',     crest:`${FD}113.png` },
+  'juventus':      { abrev:'JUV', fundo:'#000000', cor:'#FFFFFF', pais:'it', paisNome:'ItÃ¡lia',     crest:`${FD}109.png` },
+  'roma':          { abrev:'ASR', fundo:'#8E1F2F', cor:'#FFD700', pais:'it', paisNome:'ItÃ¡lia',     crest:`${FD}100.png` },
+  'lazio':         { abrev:'LAZ', fundo:'#87CEEB', cor:'#003366', pais:'it', paisNome:'ItÃ¡lia',     crest:`${FD}110.png` },
+  'psg':           { abrev:'PSG', fundo:'#004170', cor:'#FFFFFF', pais:'fr', paisNome:'FranÃ§a',     crest:`${FD}524.png` },
+  'monaco':        { abrev:'ASM', fundo:'#EE2523', cor:'#FFFFFF', pais:'fr', paisNome:'FranÃ§a',     crest:`${FD}548.png` },
   'benfica':       { abrev:'SLB', fundo:'#C8102E', cor:'#FFFFFF', pais:'pt', paisNome:'Portugal',  crest:`${FD}1903.png`},
   'porto':         { abrev:'FCP', fundo:'#003087', cor:'#FFD700', pais:'pt', paisNome:'Portugal',  crest:`${FD}503.png` },
   'sporting':      { abrev:'SCP', fundo:'#008136', cor:'#FFD700', pais:'pt', paisNome:'Portugal',  crest:`${FD}498.png` },
   'ajax':          { abrev:'AFC', fundo:'#C8102E', cor:'#FFFFFF', pais:'nl', paisNome:'Holanda', crest:`${FD}610.png` },
   'feyenoord':     { abrev:'FEY', fundo:'#C8102E', cor:'#000000', pais:'nl', paisNome:'Holanda', crest:`${FD}675.png` },
-  'celtic':        { abrev:'CEL', fundo:'#00843D', cor:'#FFFFFF', pais:'gb-sct', paisNome:'Escócia', crest:`${FD}732.png` },
-  'rangers':       { abrev:'RFC', fundo:'#003087', cor:'#FFFFFF', pais:'gb-sct', paisNome:'Escócia', crest:`${FD}733.png` },
+  'celtic':        { abrev:'CEL', fundo:'#00843D', cor:'#FFFFFF', pais:'gb-sct', paisNome:'EscÃ³cia', crest:`${FD}732.png` },
+  'rangers':       { abrev:'RFC', fundo:'#003087', cor:'#FFFFFF', pais:'gb-sct', paisNome:'EscÃ³cia', crest:`${FD}733.png` },
   'galatasaray':   { abrev:'GS',  fundo:'#DD0000', cor:'#FFD700', pais:'tr', paisNome:'Turquia',   crest:`${FD}2320.png`},
 };
 
 const SELECAO_PAIS = {
-  'franca':     { pais:'fr',    paisNome:'França'       },
+  'franca':     { pais:'fr',    paisNome:'FranÃ§a'       },
   'argentina':  { pais:'ar',    paisNome:'Argentina'    },
   'inglaterra': { pais:'gb-eng', paisNome:'Inglaterra'  },
   'espanha':    { pais:'es',    paisNome:'Espanha'      },
   'portugal':   { pais:'pt',    paisNome:'Portugal'     },
   'alemanha':   { pais:'de',    paisNome:'Alemanha'     },
-  'belgica':    { pais:'be',    paisNome:'Bélgica'      },
+  'belgica':    { pais:'be',    paisNome:'BÃ©lgica'      },
   'holanda':    { pais:'nl',    paisNome:'Holanda'       },
-  'italia':     { pais:'it',    paisNome:'Itália'       },
-  'croacia':    { pais:'hr',    paisNome:'Croácia'      },
+  'italia':     { pais:'it',    paisNome:'ItÃ¡lia'       },
+  'croacia':    { pais:'hr',    paisNome:'CroÃ¡cia'      },
   'uruguai':    { pais:'uy',    paisNome:'Uruguai'      },
-  'colombia':   { pais:'co',    paisNome:'Colômbia'     },
+  'colombia':   { pais:'co',    paisNome:'ColÃ´mbia'     },
   'marrocos':   { pais:'ma',    paisNome:'Marrocos'     },
   'turquia':    { pais:'tr',    paisNome:'Turquia'      },
   'eua':        { pais:'us',    paisNome:'EUA'          },
-  'mexico':     { pais:'mx',    paisNome:'México'       },
-  'austria':    { pais:'at',    paisNome:'Áustria'      },
-  'japao':      { pais:'jp',    paisNome:'Japão'        },
+  'mexico':     { pais:'mx',    paisNome:'MÃ©xico'       },
+  'austria':    { pais:'at',    paisNome:'Ãustria'      },
+  'japao':      { pais:'jp',    paisNome:'JapÃ£o'        },
   'senegal':    { pais:'sn',    paisNome:'Senegal'      },
   'dinamarca':  { pais:'dk',    paisNome:'Dinamarca'    },
-  'suica':      { pais:'ch',    paisNome:'Suíça'        },
+  'suica':      { pais:'ch',    paisNome:'SuÃ­Ã§a'        },
   'chile':      { pais:'cl',    paisNome:'Chile'        },
-  'polonia':    { pais:'pl',    paisNome:'Polônia'      },
-  'australia':  { pais:'au',    paisNome:'Austrália'    },
-  'nigeria':    { pais:'ng',    paisNome:'Nigéria'      },
+  'polonia':    { pais:'pl',    paisNome:'PolÃ´nia'      },
+  'australia':  { pais:'au',    paisNome:'AustrÃ¡lia'    },
+  'nigeria':    { pais:'ng',    paisNome:'NigÃ©ria'      },
   'coreia':     { pais:'kr',    paisNome:'Coreia do Sul'},
   'equador':    { pais:'ec',    paisNome:'Equador'      },
   'ghana':      { pais:'gh',    paisNome:'Gana'         },
   'peru':       { pais:'pe',    paisNome:'Peru'         },
 };
 
-// ─── LISTA DE PAÍSES FIFA (para seleções) ────────────────────────────
+// â”€â”€â”€ LISTA DE PAÃSES FIFA (para seleÃ§Ãµes) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const PAISES_FIFA = [
-  {code:'ar',nome:'Argentina'},{code:'br',nome:'Brasil'},{code:'fr',nome:'França'},{code:'de',nome:'Alemanha'},
-  {code:'es',nome:'Espanha'},{code:'gb-eng',nome:'Inglaterra'},{code:'pt',nome:'Portugal'},{code:'it',nome:'Itália'},
-  {code:'nl',nome:'Holanda'},{code:'be',nome:'Bélgica'},{code:'hr',nome:'Croácia'},{code:'uy',nome:'Uruguai'},
-  {code:'co',nome:'Colômbia'},{code:'ma',nome:'Marrocos'},{code:'tr',nome:'Turquia'},{code:'us',nome:'EUA'},
-  {code:'mx',nome:'México'},{code:'at',nome:'Áustria'},{code:'jp',nome:'Japão'},{code:'sn',nome:'Senegal'},
-  {code:'dk',nome:'Dinamarca'},{code:'ch',nome:'Suíça'},{code:'cl',nome:'Chile'},{code:'pl',nome:'Polônia'},
-  {code:'au',nome:'Austrália'},{code:'ng',nome:'Nigéria'},{code:'kr',nome:'Coreia do Sul'},{code:'ec',nome:'Equador'},
+  {code:'ar',nome:'Argentina'},{code:'br',nome:'Brasil'},{code:'fr',nome:'FranÃ§a'},{code:'de',nome:'Alemanha'},
+  {code:'es',nome:'Espanha'},{code:'gb-eng',nome:'Inglaterra'},{code:'pt',nome:'Portugal'},{code:'it',nome:'ItÃ¡lia'},
+  {code:'nl',nome:'Holanda'},{code:'be',nome:'BÃ©lgica'},{code:'hr',nome:'CroÃ¡cia'},{code:'uy',nome:'Uruguai'},
+  {code:'co',nome:'ColÃ´mbia'},{code:'ma',nome:'Marrocos'},{code:'tr',nome:'Turquia'},{code:'us',nome:'EUA'},
+  {code:'mx',nome:'MÃ©xico'},{code:'at',nome:'Ãustria'},{code:'jp',nome:'JapÃ£o'},{code:'sn',nome:'Senegal'},
+  {code:'dk',nome:'Dinamarca'},{code:'ch',nome:'SuÃ­Ã§a'},{code:'cl',nome:'Chile'},{code:'pl',nome:'PolÃ´nia'},
+  {code:'au',nome:'AustrÃ¡lia'},{code:'ng',nome:'NigÃ©ria'},{code:'kr',nome:'Coreia do Sul'},{code:'ec',nome:'Equador'},
   {code:'gh',nome:'Gana'},{code:'pe',nome:'Peru'},{code:'py',nome:'Paraguai'},{code:'ve',nome:'Venezuela'},
-  {code:'bo',nome:'Bolívia'},{code:'ca',nome:'Canadá'},{code:'cr',nome:'Costa Rica'},{code:'jm',nome:'Jamaica'},
-  {code:'pa',nome:'Panamá'},{code:'hn',nome:'Honduras'},{code:'sa',nome:'Arábia Saudita'},{code:'qa',nome:'Catar'},
-  {code:'ir',nome:'Irã'},{code:'iq',nome:'Iraque'},{code:'ae',nome:'Emirados Árabes'},{code:'jo',nome:'Jordânia'},
-  {code:'cn',nome:'China'},{code:'th',nome:'Tailândia'},{code:'vn',nome:'Vietnã'},{code:'id',nome:'Indonésia'},
-  {code:'ph',nome:'Filipinas'},{code:'nz',nome:'Nova Zelândia'},{code:'eg',nome:'Egito'},{code:'dz',nome:'Argélia'},
-  {code:'tn',nome:'Tunísia'},{code:'ci',nome:'Costa do Marfim'},{code:'cm',nome:'Camarões'},{code:'za',nome:'África do Sul'},
-  {code:'ke',nome:'Quênia'},{code:'ml',nome:'Mali'},{code:'bf',nome:'Burkina Faso'},{code:'gr',nome:'Grécia'},
-  {code:'rs',nome:'Sérvia'},{code:'ro',nome:'Romênia'},{code:'hu',nome:'Hungria'},{code:'cz',nome:'República Tcheca'},
-  {code:'sk',nome:'Eslováquia'},{code:'si',nome:'Eslovênia'},{code:'ua',nome:'Ucrânia'},{code:'ru',nome:'Rússia'},
-  {code:'se',nome:'Suécia'},{code:'no',nome:'Noruega'},{code:'fi',nome:'Finlândia'},{code:'is',nome:'Islândia'},
-  {code:'ie',nome:'Irlanda'},{code:'gb-sct',nome:'Escócia'},{code:'gb-wls',nome:'País de Gales'},{code:'gb-nir',nome:'Irlanda do Norte'},
-  {code:'ba',nome:'Bósnia'},{code:'al',nome:'Albânia'},{code:'me',nome:'Montenegro'},{code:'mk',nome:'Macedônia'},
-  {code:'bg',nome:'Bulgária'},{code:'cy',nome:'Chipre'},{code:'il',nome:'Israel'},{code:'ge',nome:'Geórgia'},
-  {code:'am',nome:'Armênia'},{code:'az',nome:'Azerbaijão'},{code:'uz',nome:'Uzbequistão'},{code:'kz',nome:'Cazaquistão'}
+  {code:'bo',nome:'BolÃ­via'},{code:'ca',nome:'CanadÃ¡'},{code:'cr',nome:'Costa Rica'},{code:'jm',nome:'Jamaica'},
+  {code:'pa',nome:'PanamÃ¡'},{code:'hn',nome:'Honduras'},{code:'sa',nome:'ArÃ¡bia Saudita'},{code:'qa',nome:'Catar'},
+  {code:'ir',nome:'IrÃ£'},{code:'iq',nome:'Iraque'},{code:'ae',nome:'Emirados Ãrabes'},{code:'jo',nome:'JordÃ¢nia'},
+  {code:'cn',nome:'China'},{code:'th',nome:'TailÃ¢ndia'},{code:'vn',nome:'VietnÃ£'},{code:'id',nome:'IndonÃ©sia'},
+  {code:'ph',nome:'Filipinas'},{code:'nz',nome:'Nova ZelÃ¢ndia'},{code:'eg',nome:'Egito'},{code:'dz',nome:'ArgÃ©lia'},
+  {code:'tn',nome:'TunÃ­sia'},{code:'ci',nome:'Costa do Marfim'},{code:'cm',nome:'CamarÃµes'},{code:'za',nome:'Ãfrica do Sul'},
+  {code:'ke',nome:'QuÃªnia'},{code:'ml',nome:'Mali'},{code:'bf',nome:'Burkina Faso'},{code:'gr',nome:'GrÃ©cia'},
+  {code:'rs',nome:'SÃ©rvia'},{code:'ro',nome:'RomÃªnia'},{code:'hu',nome:'Hungria'},{code:'cz',nome:'RepÃºblica Tcheca'},
+  {code:'sk',nome:'EslovÃ¡quia'},{code:'si',nome:'EslovÃªnia'},{code:'ua',nome:'UcrÃ¢nia'},{code:'ru',nome:'RÃºssia'},
+  {code:'se',nome:'SuÃ©cia'},{code:'no',nome:'Noruega'},{code:'fi',nome:'FinlÃ¢ndia'},{code:'is',nome:'IslÃ¢ndia'},
+  {code:'ie',nome:'Irlanda'},{code:'gb-sct',nome:'EscÃ³cia'},{code:'gb-wls',nome:'PaÃ­s de Gales'},{code:'gb-nir',nome:'Irlanda do Norte'},
+  {code:'ba',nome:'BÃ³snia'},{code:'al',nome:'AlbÃ¢nia'},{code:'me',nome:'Montenegro'},{code:'mk',nome:'MacedÃ´nia'},
+  {code:'bg',nome:'BulgÃ¡ria'},{code:'cy',nome:'Chipre'},{code:'il',nome:'Israel'},{code:'ge',nome:'GeÃ³rgia'},
+  {code:'am',nome:'ArmÃªnia'},{code:'az',nome:'AzerbaijÃ£o'},{code:'uz',nome:'UzbequistÃ£o'},{code:'kz',nome:'CazaquistÃ£o'}
 ];
 
-// ─── ICONES SVG (inline, herdam currentColor) ────────────────────────
+// â”€â”€â”€ ICONES SVG (inline, herdam currentColor) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const SVG_USER = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1"/></svg>`;
 const SVG_USER_CHIP = `<span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,rgba(139,92,246,0.25),rgba(6,182,212,0.25));color:#C7B8FF;flex-shrink:0;">${SVG_USER}</span>`;
 
-// ─── BADGE HELPERS ────────────────────────────────────────────────────
+// â”€â”€â”€ BADGE HELPERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function flagEmoji(code) {
   if (!code) return '';
-  // Trata códigos compostos como "gb-eng" → usa "gb"
+  // Trata cÃ³digos compostos como "gb-eng" â†’ usa "gb"
   const c = (code.split('-')[0] || '').toUpperCase().slice(0, 2);
   if (c.length !== 2) return '';
   return String.fromCodePoint(...[...c].map(ch => 0x1F1E0 + ch.charCodeAt(0) - 65));
@@ -877,7 +877,7 @@ function flagImg(paisCode, w=20) {
   return `<img src="https://flagcdn.com/w${ww}/${paisCode}.png" alt="" loading="lazy" decoding="async" style="border-radius:3px;vertical-align:middle;width:${w}px;height:auto;" onerror="this.style.display='none'">`;
 }
 
-/** Brasão do clube — usa logo real do CDN com fallback para escudo SVG */
+/** BrasÃ£o do clube â€” usa logo real do CDN com fallback para escudo SVG */
 function shieldClube(timeId, nomeTime, size=56) {
   const d = TEAM_DATA[timeId] || { abrev:(nomeTime||'?').slice(0,3).toUpperCase(), fundo:'#1E1E35', cor:'#AAAAAA' };
   const h = Math.round(size * 1.15);
@@ -894,12 +894,12 @@ function shieldClube(timeId, nomeTime, size=56) {
   return `<div style="flex-shrink:0;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.4));">${svgFallback}</div>`;
 }
 
-/** Badge compacto para partidas — usa logo real ou escudo */
+/** Badge compacto para partidas â€” usa logo real ou escudo */
 function badgeTimeCompact(timeId, nomeTime, tipo) {
   if (tipo === 'selecoes') {
     const d = SELECAO_PAIS[timeId] || { pais:'', paisNome: nomeTime||'' };
     return `<div style="width:46px;height:34px;border-radius:7px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.3);">
-      ${d.pais ? `<img src="https://flagcdn.com/w80/${d.pais}.png" alt="" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=\\'font-size:18px;\\'>🌍</span>'">` : '<span style="font-size:18px;">🌍</span>'}
+      ${d.pais ? `<img src="https://flagcdn.com/w80/${d.pais}.png" alt="" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=\\'font-size:18px;\\'>ðŸŒ</span>'">` : '<span style="font-size:18px;">ðŸŒ</span>'}
     </div>`;
   }
   const d = TEAM_DATA[timeId] || { abrev:(nomeTime||'?').slice(0,3).toUpperCase(), fundo:'#1E1E35', cor:'#AAAAAA' };
@@ -907,7 +907,7 @@ function badgeTimeCompact(timeId, nomeTime, tipo) {
   return `<div style="width:44px;height:44px;border-radius:10px;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.abrev}</div>`;
 }
 
-/** Badge de clube: quadrado colorido com abreviação + bandeira + nome do país */
+/** Badge de clube: quadrado colorido com abreviaÃ§Ã£o + bandeira + nome do paÃ­s */
 function badgeClube(timeId, nomeTime) {
   const d = TEAM_DATA[timeId] || { abrev:(nomeTime||'?').slice(0,3).toUpperCase(), fundo:'#1E1E35', cor:'#AAAAAA', pais:'eu', paisNome:'' };
   return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
@@ -919,12 +919,12 @@ function badgeClube(timeId, nomeTime) {
   </div>`;
 }
 
-/** Badge de seleção: bandeira grande + nome do país */
+/** Badge de seleÃ§Ã£o: bandeira grande + nome do paÃ­s */
 function badgeSel(timeId, nomeTime) {
   const d = SELECAO_PAIS[timeId] || { pais:'', paisNome: nomeTime||'' };
   return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
     <div style="width:48px;height:36px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
-      ${d.pais ? `<img src="https://flagcdn.com/w80/${d.pais}.png" alt="${nomeTime}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:24px;&quot;>🌍</span>'">` : '<span style="font-size:28px;">🌍</span>'}
+      ${d.pais ? `<img src="https://flagcdn.com/w80/${d.pais}.png" alt="${nomeTime}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:24px;&quot;>ðŸŒ</span>'">` : '<span style="font-size:28px;">ðŸŒ</span>'}
     </div>
   </div>`;
 }
@@ -935,7 +935,7 @@ function badgeTime(timeId, nomeTime, tipo) {
 }
 window.badgeTime = badgeTime;
 
-/** Retorna só a bandeira inline para exibir antes do nome do time nos cards */
+/** Retorna sÃ³ a bandeira inline para exibir antes do nome do time nos cards */
 function timeFlagInline(timeId, tipo) {
   if (tipo === 'selecoes') {
     const d = SELECAO_PAIS[timeId] || {};
@@ -947,7 +947,7 @@ function timeFlagInline(timeId, tipo) {
   return `<img src="https://flagcdn.com/w40/${d.pais}.png" loading="lazy" style="width:18px;height:13px;object-fit:cover;border-radius:2px;flex-shrink:0;vertical-align:middle;margin-right:4px;" onerror="this.style.display='none'">`;
 }
 
-// ─── ESTADO ─────────────────────────────────────────────────────────
+// â”€â”€â”€ ESTADO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let usuario    = null;
 let jogadores  = [];
 let amistosos  = [];
@@ -956,9 +956,9 @@ let clubes     = [...CLUBES_DEFAULT];
 let selecoes   = [...SELECOES_DEFAULT];
 let abaTimesAtual = 'clubes';
 let _paisFiltroTimes = '';
-let _disponiveis  = []; // partidas disponíveis para registo em grupo
+let _disponiveis  = []; // partidas disponÃ­veis para registo em grupo
 
-// ─── FILTRO DE EFICIÊNCIA ─────────────────────────────────────────────
+// â”€â”€â”€ FILTRO DE EFICIÃŠNCIA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const EFIC_TODAS = ['Ruim','Moderado','Bom'];
 function _eficKey() { return `efic_filtro_${usuario?.uid || 'default'}`; }
 function carregarEficFiltro() {
@@ -973,7 +973,7 @@ function salvarEficFiltro(set) {
 }
 function filtrarPoolEfic(pool) {
   const sel = carregarEficFiltro();
-  // Se todas selecionadas (inclui vazio), não filtra
+  // Se todas selecionadas (inclui vazio), nÃ£o filtra
   if (EFIC_TODAS.every(e => sel.has(e)) && sel.has('')) return pool;
   return pool.filter(t => sel.has(t.eficiencia || ''));
 }
@@ -981,7 +981,7 @@ window.toggleEficFiltro = (val) => {
   const sel = carregarEficFiltro();
   if (sel.has(val)) { sel.delete(val); } else { sel.add(val); }
   salvarEficFiltro(sel);
-  // Atualiza visual em ambos os containers possíveis
+  // Atualiza visual em ambos os containers possÃ­veis
   ['ami-efic-filtro','cc-efic-filtro'].forEach(cid => {
     const c = document.getElementById(cid);
     if (c) c.querySelectorAll('.efic-tag').forEach(el => {
@@ -992,20 +992,20 @@ window.toggleEficFiltro = (val) => {
 function htmlEficFiltro(containerId) {
   const sel = carregarEficFiltro();
   return `<div>
-    <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">FILTRAR POR EFICIÊNCIA</label>
+    <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">FILTRAR POR EFICIÃŠNCIA</label>
     <div class="efic-tags" id="${containerId}">
       ${EFIC_TODAS.map(e=>`<span class="efic-tag${sel.has(e)?' selecionado':''}" data-efic="${e}" onclick="toggleEficFiltro('${e}')">${e}</span>`).join('')}
     </div>
   </div>`;
 }
 
-// ─── ALGORITMO DE BALANCEAMENTO ──────────────────────────────────────
-/** Badge de eficiência — substitui forcaBadge na UI */
+// â”€â”€â”€ ALGORITMO DE BALANCEAMENTO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+/** Badge de eficiÃªncia â€” substitui forcaBadge na UI */
 function eficBadge(efic) {
   const e = efic || 'Bom';
   const cor = e==='Ruim'?'#ef4444':e==='Moderado'?'#eab308':'#22c55e';
   const bg = e==='Ruim'?'rgba(239,68,68,0.15)':e==='Moderado'?'rgba(234,179,8,0.15)':'rgba(34,197,94,0.15)';
-  return `<span class="tag" style="background:${bg};color:${cor};border:1px solid ${cor}33;font-size:9px;">${e.toUpperCase()}</span>`;
+  return `<span class="tag" style="background:${bg};color:${cor};border:1px solid ${cor}33;">${e.toUpperCase()}</span>`;
 }
 window.eficBadge = eficBadge;
 
@@ -1034,8 +1034,8 @@ function atributosBadge(t) {
   return `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">${tag('ATK',t.ataque)}${tag('MID',t.meio)}${tag('DEF',t.defesa)}</div>`;
 }
 
-// ─── MEMÓRIA ANTI-REPETIÇÃO (F3) ─────────────────────────────────────
-const MEMORIA_MAX = 10; // últimos N sorteios armazenados por tipo
+// â”€â”€â”€ MEMÃ“RIA ANTI-REPETIÃ‡ÃƒO (F3) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const MEMORIA_MAX = 10; // Ãºltimos N sorteios armazenados por tipo
 function _memoriaKey(tipo) { return `sorteio_mem_${tipo}`; }
 function lerMemoria(tipo) {
   try { return JSON.parse(localStorage.getItem(_memoriaKey(tipo)) || '[]'); } catch { return []; }
@@ -1066,22 +1066,22 @@ function _parEficValido(e1, e2) {
 
 /**
  * Sorteia dois times balanceados.
- * - Nunca usa times usados nos últimos N amistosos (histórico Firestore).
- * - Memória anti-repetição no localStorage: evita pares recentes.
- * - Discrepância aumentada para 35-40% da média de força.
+ * - Nunca usa times usados nos Ãºltimos N amistosos (histÃ³rico Firestore).
+ * - MemÃ³ria anti-repetiÃ§Ã£o no localStorage: evita pares recentes.
+ * - DiscrepÃ¢ncia aumentada para 35-40% da mÃ©dia de forÃ§a.
  * - Tenta 30 vezes: nas primeiras 15 evita pares repetidos, nas seguintes aceita qualquer.
- * - Respeita regras de paridade de eficiência (ruim×ruim, ruim×mod, mod×mod, mod×bom, bom×bom).
+ * - Respeita regras de paridade de eficiÃªncia (ruimÃ—ruim, ruimÃ—mod, modÃ—mod, modÃ—bom, bomÃ—bom).
  */
 function sortearBalanceado(pool, historicoIds = [], tipo = '') {
   // Filtra times inativos
   pool = pool.filter(t => !t.inativo);
-  // Filtra recentemente usados (última metade do pool)
+  // Filtra recentemente usados (Ãºltima metade do pool)
   const janela  = Math.max(2, Math.floor(pool.length / 2));
   const recentes = historicoIds.slice(-janela);
   let disp = pool.filter(t => !recentes.includes(t.id));
   if (disp.length < 2) disp = [...pool]; // fallback: usa todos
 
-  // Limite de discrepância: 35-40% da média de força
+  // Limite de discrepÃ¢ncia: 35-40% da mÃ©dia de forÃ§a
   const DISC_MAX_PCT = 0.50; // 50%
 
   let melhor = null, menorDiff = Infinity;
@@ -1095,10 +1095,10 @@ function sortearBalanceado(pool, historicoIds = [], tipo = '') {
     // Nas primeiras 15 tentativas: evita pares repetidos
     if (i < 15 && tipo && parRepetido(tipo, t1.id, t2.id)) continue;
 
-    // Valida regra de paridade de eficiência (nas primeiras 20 tentativas)
+    // Valida regra de paridade de eficiÃªncia (nas primeiras 20 tentativas)
     if (i < 20 && !_parEficValido(t1.eficiencia, t2.eficiencia)) continue;
 
-    // Aceita se dentro do limite de discrepância
+    // Aceita se dentro do limite de discrepÃ¢ncia
     if (pct <= DISC_MAX_PCT) {
       if (diff < menorDiff) {
         menorDiff = diff;
@@ -1108,7 +1108,7 @@ function sortearBalanceado(pool, historicoIds = [], tipo = '') {
     }
   }
 
-  // Se não encontrou par válido dentro do limite, busca o melhor entre todos (respeitando eficiência)
+  // Se nÃ£o encontrou par vÃ¡lido dentro do limite, busca o melhor entre todos (respeitando eficiÃªncia)
   if (!melhor) {
     const pares = [];
     for (let i = 0; i < disp.length; i++) {
@@ -1119,15 +1119,15 @@ function sortearBalanceado(pool, historicoIds = [], tipo = '') {
         pares.push([disp[i], disp[j], d, m > 0 ? d / m : 0]);
       }
     }
-    // Ordena por menor discrepância percentual
+    // Ordena por menor discrepÃ¢ncia percentual
     pares.sort((a, b) => a[3] - b[3]);
     if (pares.length > 0) melhor = [pares[0][0], pares[0][1]];
-    // Fallback total (sem restrição de eficiência): garante resultado sempre
+    // Fallback total (sem restriÃ§Ã£o de eficiÃªncia): garante resultado sempre
     if (!melhor && disp.length >= 2) melhor = [disp[0], disp[1]];
   }
 
   const resultado = melhor || [disp[0], disp[1]];
-  // Registra na memória anti-repetição
+  // Registra na memÃ³ria anti-repetiÃ§Ã£o
   if (tipo && resultado[0] && resultado[1]) {
     salvarMemoria(tipo, [resultado[0].id, resultado[1].id]);
   }
@@ -1136,7 +1136,7 @@ function sortearBalanceado(pool, historicoIds = [], tipo = '') {
 
 /**
  * Para campeonatos: distribui times entre participantes de forma balanceada.
- * Usa draft serpentina: ordena times por força, distribui alternando.
+ * Usa draft serpentina: ordena times por forÃ§a, distribui alternando.
  */
 function distribuirTimesBalanceados(participantes, pool, usados = []) {
   // Filtra times inativos
@@ -1146,7 +1146,7 @@ function distribuirTimesBalanceados(participantes, pool, usados = []) {
   let disp = pool.filter(t => !usados.slice(-janela).includes(t.id));
   if (disp.length < n) disp = [...pool];
 
-  // Pega n times aleatórios, depois ordena por força
+  // Pega n times aleatÃ³rios, depois ordena por forÃ§a
   const candidatos = shuffle(disp).slice(0, Math.max(n * 2, n + 4));
   candidatos.sort((a, b) => b.forca - a.forca);
   const selecionados = candidatos.slice(0, n);
@@ -1162,15 +1162,15 @@ function distribuirTimesBalanceados(participantes, pool, usados = []) {
 function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
 
 /**
- * Abrevia nome de time longo para caber em espaços compactos.
- * Ex: "BAYER MUNICH" → "BAYER M.", "MANCHESTER UNITED" → "MANCHESTER U."
- * Se o nome couber em maxWords palavras, retorna sem mudança.
+ * Abrevia nome de time longo para caber em espaÃ§os compactos.
+ * Ex: "BAYER MUNICH" â†’ "BAYER M.", "MANCHESTER UNITED" â†’ "MANCHESTER U."
+ * Se o nome couber em maxWords palavras, retorna sem mudanÃ§a.
  */
 function abreviarNome(nome, maxChars = 14) {
   if (!nome || nome.length <= maxChars) return nome;
   const partes = nome.trim().split(/\s+/);
   if (partes.length <= 1) return nome.slice(0, maxChars - 1) + '.';
-  // Mantém a primeira parte inteira, abrevia as demais
+  // MantÃ©m a primeira parte inteira, abrevia as demais
   let resultado = partes[0];
   for (let i = 1; i < partes.length; i++) {
     const candidato = resultado + ' ' + partes[i];
@@ -1185,7 +1185,7 @@ function abreviarNome(nome, maxChars = 14) {
 }
 window.abreviarNome = abreviarNome;
 
-// Coleta histórico de IDs de times usados nos amistosos
+// Coleta histÃ³rico de IDs de times usados nos amistosos
 function historicoIds(tipo) {
   return amistosos
     .filter(a => a.tipo === tipo)
@@ -1193,7 +1193,7 @@ function historicoIds(tipo) {
     .filter(Boolean);
 }
 
-// ─── HELPERS UI ──────────────────────────────────────────────────────
+// â”€â”€â”€ HELPERS UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function irPara(view) {
   // Fechar fullscreen/modal abertos ao navegar
   const fs = document.getElementById('fullscreen-overlay');
@@ -1272,7 +1272,7 @@ function toast(msg, tipo = 'ok') {
 
 function fmt(ts) { try { return (ts?.toDate ? ts.toDate() : new Date(ts)).toLocaleDateString('pt-BR'); } catch { return ''; } }
 
-// ─── AUTH ────────────────────────────────────────────────────────────
+// â”€â”€â”€ AUTH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function fazerLogin(provider, btnId) {
   const btn = document.getElementById(btnId);
   btn.style.opacity = '0.7';
@@ -1306,7 +1306,7 @@ document.getElementById('btn-login').addEventListener('click', () => fazerLogin(
 document.getElementById('btn-login-apple').addEventListener('click', () => fazerLogin(ap, 'btn-login-apple'));
 document.getElementById('btn-sair').addEventListener('click', () => signOut(auth));
 
-// ─── HAMBURGER MENU ──────────────────────────────────────────────────
+// â”€â”€â”€ HAMBURGER MENU â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 window.fecharHamburger = () => { document.getElementById('menu-hamburger-dropdown').style.display = 'none'; };
 window.toggleCriarMenu = () => {
   const menu = document.getElementById('criar-menu-dropdown');
@@ -1314,9 +1314,9 @@ window.toggleCriarMenu = () => {
   if (menu.style.display === 'none' || !menu.style.display) {
     menu.style.display = 'block';
     menu.classList.remove('aberto');
-    void menu.offsetWidth; // force reflow para reiniciar animação
+    void menu.offsetWidth; // force reflow para reiniciar animaÃ§Ã£o
     menu.classList.add('aberto');
-    btn.textContent = '✕ FECHAR';
+    btn.textContent = 'âœ• FECHAR';
   } else {
     menu.style.display = 'none';
     menu.classList.remove('aberto');
@@ -1373,13 +1373,13 @@ onAuthStateChanged(auth, async u => {
   }
 });
 
-// RG5: controle de acesso — oculta funcionalidades de master para usuários normais
+// RG5: controle de acesso â€” oculta funcionalidades de master para usuÃ¡rios normais
 function _aplicarControleAcesso() {
   const master = temPermissao();
-  // Botão + CRIAR na home: apenas para master
+  // BotÃ£o + CRIAR na home: apenas para master
   const btnCriarHome = document.getElementById('btn-criar-home');
   if (btnCriarHome) btnCriarHome.style.display = master ? '' : 'none';
-  // Botões de criação nas telas
+  // BotÃµes de criaÃ§Ã£o nas telas
   const btnAddJog = document.getElementById('btn-add-jog');
   if (btnAddJog) btnAddJog.style.display = master ? '' : 'none';
   const btnCriarAmi = document.getElementById('btn-criar-ami');
@@ -1388,18 +1388,18 @@ function _aplicarControleAcesso() {
   if (btnCriarCamp) btnCriarCamp.style.display = master ? '' : 'none';
   const btnAddTime = document.getElementById('btn-add-time');
   if (btnAddTime) btnAddTime.style.display = master ? '' : 'none';
-  // Itens do menu hamburger para não-master: apenas home e ranking visíveis
-  // (mantém acesso de leitura; criação bloqueada via botões)
+  // Itens do menu hamburger para nÃ£o-master: apenas home e ranking visÃ­veis
+  // (mantÃ©m acesso de leitura; criaÃ§Ã£o bloqueada via botÃµes)
 }
 
-// RG4: verifica se usuário tem cadastro como jogador, cria se não existir
+// RG4: verifica se usuÃ¡rio tem cadastro como jogador, cria se nÃ£o existir
 async function _autoCadastrarJogador(u) {
   try {
     if (!u || !u.email) return;
     const emailNorm = u.email.toLowerCase();
     const jaExiste = jogadores.some(j => j.email && j.email.toLowerCase() === emailNorm);
     if (jaExiste) return;
-    // Verificar no Firestore (caso jogadores ainda não carregados)
+    // Verificar no Firestore (caso jogadores ainda nÃ£o carregados)
     const snap = await getDocs(collection(db, 'jogadores'));
     const todos = snap.docs.map(d => d.data());
     if (todos.some(j => j.email && j.email.toLowerCase() === emailNorm)) return;
@@ -1413,7 +1413,7 @@ async function _autoCadastrarJogador(u) {
   } catch(e) { console.warn('auto-cadastro jogador:', e); }
 }
 
-// ─── TIMES (FIRESTORE) ───────────────────────────────────────────────
+// â”€â”€â”€ TIMES (FIRESTORE) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function carregarTimes() {
   const snap = await getDocs(collection(db, 'times'));
   const custom = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -1437,7 +1437,7 @@ async function carregarTimes() {
   clubes   = aplicar(CLUBES_DEFAULT, 'clube');
   selecoes = aplicar(SELECOES_DEFAULT, 'selecao');
 
-  // Hidrata TEAM_DATA e SELECAO_PAIS para times customizados adicionados pelo usuário
+  // Hidrata TEAM_DATA e SELECAO_PAIS para times customizados adicionados pelo usuÃ¡rio
   adicionados.forEach(t => {
     if (t.tipo === 'selecao' && t.bandeira && !SELECAO_PAIS[t.id]) {
       SELECAO_PAIS[t.id] = { pais: t.bandeira, paisNome: t.paisNome || t.nome };
@@ -1450,14 +1450,14 @@ async function carregarTimes() {
   });
 }
 
-// ─── CARREGAMENTO GERAL ──────────────────────────────────────────────
+// â”€â”€â”€ CARREGAMENTO GERAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function carregarDados() {
   await Promise.all([carregarJogadores(), carregarAmistosos(), carregarCampeonatos()]);
   atualizarDash();
   _aplicarControleAcesso();
 }
 
-// ─── JOGADORES ───────────────────────────────────────────────────────
+// â”€â”€â”€ JOGADORES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function carregarJogadores() {
   const snap = await getDocs(query(collection(db, 'jogadores'), orderBy('nome')));
   jogadores = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -1475,11 +1475,11 @@ function avatarSvg(size=46) {
 function getMaster() { return jogadores.find(j => j.master); }
 function temPermissao() {
   const master = getMaster();
-  if (!master) return true; // sem master definido → todos podem
+  if (!master) return true; // sem master definido â†’ todos podem
   return usuario?.email && master.email && usuario.email.toLowerCase() === master.email.toLowerCase();
 }
 
-// ─── SWIPE-TO-DELETE (iOS style) ──────────────────────────────────────
+// â”€â”€â”€ SWIPE-TO-DELETE (iOS style) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function _resetSwipeCard(card) {
   card.style.transition = 'transform 0.25s ease';
   card.style.transform = 'translateX(0)';
@@ -1531,7 +1531,7 @@ function initSwipe(container, tipo) {
   });
 }
 
-// Wrappers de exclusão com callback de cancelamento
+// Wrappers de exclusÃ£o com callback de cancelamento
 function _swipeExcluirJogador(id, nome, onCancel) {
   excluirJogador(id, nome, onCancel);
 }
@@ -1592,7 +1592,7 @@ function renderJogadores() {
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:6px;">
             <span style="font-weight:700;font-size:15px;text-transform:uppercase;">${j.nome}</span>
-            ${j.master ? `<span class="tag tag-yellow" style="font-size:10px;">MASTER</span>` : ''}
+            ${j.master ? `<span class="tag tag-yellow">MASTER</span>` : ''}
           </div>
           <div style="color:var(--text-muted);font-size:11px;margin-top:2px;">${j.email||'SEM E-MAIL VINCULADO'}</div>
           ${j.celular ? `<div style="color:var(--text-muted);font-size:11px;margin-top:1px;">${j.celular}</div>` : ''}
@@ -1605,7 +1605,7 @@ function renderJogadores() {
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:6px;">
             <span style="font-weight:700;font-size:15px;text-transform:uppercase;">${j.nome}</span>
-            ${j.master ? `<span class="tag tag-yellow" style="font-size:10px;">MASTER</span>` : ''}
+            ${j.master ? `<span class="tag tag-yellow">MASTER</span>` : ''}
           </div>
           <div style="color:var(--text-muted);font-size:11px;margin-top:2px;">${j.email||'SEM E-MAIL VINCULADO'}</div>
           ${j.celular ? `<div style="color:var(--text-muted);font-size:11px;margin-top:1px;">${j.celular}</div>` : ''}
@@ -1620,7 +1620,7 @@ window.editarJogador = (id) => {
   if (!j) return;
   const podeMudarMaster = temPermissao();
   const masterVal = j.master ? '1' : '0';
-  fullscreen('EDIÇÃO', `
+  fullscreen('EDIÃ‡ÃƒO', `
     <div style="display:flex;flex-direction:column;gap:14px;max-width:400px;margin:0 auto;">
       <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:8px;">
         <div id="prev-avatar" style="width:88px;height:88px;border-radius:22px;overflow:hidden;cursor:pointer;background:linear-gradient(135deg,rgba(139,92,246,0.3),rgba(6,182,212,0.3));display:flex;align-items:center;justify-content:center;" onclick="document.getElementById('i-foto-edit').click()">
@@ -1702,8 +1702,8 @@ window.salvarEdicaoJogador = async (id) => {
 window.excluirJogador = (id, nome, onCancel) => {
   modal(`<p class="modal-title">EXCLUIR JOGADOR?</p>
     <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
-      <p style="font-weight:700;font-size:13px;color:#FCA5A5;margin-bottom:6px;">ATENÇÃO</p>
-      <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">Excluir <strong style="color:var(--text)">${nome}</strong> apagará todo o histórico deste jogador: ranking, amistosos e torneios. Esta ação não pode ser desfeita.</p>
+      <p style="font-weight:700;font-size:13px;color:#FCA5A5;margin-bottom:6px;">ATENÃ‡ÃƒO</p>
+      <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">Excluir <strong style="color:var(--text)">${nome}</strong> apagarÃ¡ todo o histÃ³rico deste jogador: ranking, amistosos e torneios. Esta aÃ§Ã£o nÃ£o pode ser desfeita.</p>
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn-ghost" onclick="fecharModal();(window._swipeCancelCb&&window._swipeCancelCb())">CANCELAR</button>
@@ -1712,7 +1712,7 @@ window.excluirJogador = (id, nome, onCancel) => {
   if (onCancel) window._swipeCancelCb = onCancel;
 };
 window.confirmarExcluirJog = async id => {
-  // RG10: remover referências do jogador nos amistosos (jogadoresIds)
+  // RG10: remover referÃªncias do jogador nos amistosos (jogadoresIds)
   const amiComJog = amistosos.filter(a =>
     (a.time1?.jogadoresIds||[]).includes(id) || (a.time2?.jogadoresIds||[]).includes(id)
   );
@@ -1830,14 +1830,14 @@ window.salvarJogador = async () => {
   // RG: verificar duplicados por nome, celular ou email
   const nomeNorm = nome.toLowerCase();
   const dupNome = jogadores.find(j => j.nome?.toLowerCase() === nomeNorm);
-  if (dupNome) { toast('JÁ EXISTE UM JOGADOR COM ESSE NOME','erro'); return; }
+  if (dupNome) { toast('JÃ EXISTE UM JOGADOR COM ESSE NOME','erro'); return; }
   if (celular) {
     const dupCel = jogadores.find(j => j.celular && j.celular === celular);
-    if (dupCel) { toast('JÁ EXISTE UM JOGADOR COM ESSE CELULAR','erro'); return; }
+    if (dupCel) { toast('JÃ EXISTE UM JOGADOR COM ESSE CELULAR','erro'); return; }
   }
   if (email) {
     const dupEmail = jogadores.find(j => j.email && j.email.toLowerCase() === email);
-    if (dupEmail) { toast('JÁ EXISTE UM JOGADOR COM ESSE EMAIL','erro'); return; }
+    if (dupEmail) { toast('JÃ EXISTE UM JOGADOR COM ESSE EMAIL','erro'); return; }
   }
   const btn = document.getElementById('btn-salvar-jog');
   if (btn) { btn.textContent = 'SALVANDO...'; btn.disabled = true; }
@@ -1869,7 +1869,7 @@ window.abrirCriarJogador = () => {
   setTimeout(() => document.getElementById('btn-add-jog').click(), 50);
 };
 
-// ─── AMISTOSOS ───────────────────────────────────────────────────────
+// â”€â”€â”€ AMISTOSOS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function carregarAmistosos() {
   const snap = await getDocs(query(collection(db, 'amistosos'), orderBy('criadoEm', 'desc')));
   amistosos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -1882,13 +1882,13 @@ function cardAmistoso(a, compact=false, readonly=false) {
   const diff = temRes ? Math.abs(a.resultado.g1 - a.resultado.g2) : null;
   const b1 = compact ? badgeTimeCompact(a.time1?.timeId, a.time1?.nome, a.tipo) : badgeTime(a.time1?.timeId, a.time1?.nome, a.tipo);
   const b2 = compact ? badgeTimeCompact(a.time2?.timeId, a.time2?.nome, a.tipo) : badgeTime(a.time2?.timeId, a.time2?.nome, a.tipo);
-  // RG7b: não-master vê placar somente-leitura; master vê inputs de edição
+  // RG7b: nÃ£o-master vÃª placar somente-leitura; master vÃª inputs de ediÃ§Ã£o
   const placarDireto = temRes
-    ? `<div style="font-size:29px;font-weight:900;letter-spacing:1px;color:var(--yellow);">${a.resultado.g1}<span style="color:var(--text-muted);font-size:13px;"> × </span>${a.resultado.g2}</div>`
+    ? `<div style="font-size:29px;font-weight:900;letter-spacing:1px;color:var(--yellow);">${a.resultado.g1}<span style="color:var(--text-muted);font-size:13px;"> Ã— </span>${a.resultado.g2}</div>`
     : master
       ? `<div style="display:flex;align-items:center;gap:4px;">
           <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-pdc="1" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
-          <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
+          <span style="color:var(--text-muted);font-size:13px;font-weight:900;">Ã—</span>
           <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-pdc="2" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
         </div>
         <button onclick="event.stopPropagation();salvarPlacarDireto('${a.id}',this)" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">FIM</button>`
@@ -1903,31 +1903,31 @@ function cardAmistoso(a, compact=false, readonly=false) {
   <div id="${cardId}" class="match-card" style="${compact?'padding:12px;':''}" ${readonly || a.resultado ? '' : `onclick="editarAmistoso('${a.id}')" style="cursor:pointer;"`}>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${compact?'8':'10'}px;">
       <div style="display:flex;align-items:center;gap:6px;">
-        <span class="tag tag-purple" style="font-size:9px;">AMISTOSO</span>
-        <span class="tag tag-gray" style="font-size:9px;">${a.tipo === 'selecoes' ? 'SELECOES' : 'CLUBES'}</span>
-        ${a.modoDupla ? `<span class="tag tag-cyan" style="font-size:9px;">2v2</span>` : ''}
+        <span class="tag tag-purple">AMISTOSO</span>
+        <span class="tag tag-gray">${a.tipo === 'selecoes' ? 'SELECOES' : 'CLUBES'}</span>
+        ${a.modoDupla ? `<span class="tag tag-cyan">2v2</span>` : ''}
       </div>
       ${temRes ? (() => {
         const g1 = a.resultado.g1, g2 = a.resultado.g2;
-        if (g1 > g2) return `<span class="tag tag-green" style="font-size:9px;">VITÓRIA T1</span>`;
-        if (g2 > g1) return `<span class="tag tag-green" style="font-size:9px;">VITÓRIA T2</span>`;
-        return `<span class="tag tag-yellow" style="font-size:9px;">EMPATE</span>`;
-      })() : `<span class="tag tag-cyan" style="font-size:9px;">EM ANDAMENTO</span>`}
+        if (g1 > g2) return `<span class="tag tag-green">VITÃ“RIA T1</span>`;
+        if (g2 > g1) return `<span class="tag tag-green">VITÃ“RIA T2</span>`;
+        return `<span class="tag tag-yellow">EMPATE</span>`;
+      })() : `<span class="tag tag-cyan">EM ANDAMENTO</span>`}
     </div>
     ${compact ? `
     <div style="display:flex;align-items:center;gap:8px;">
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-width:0;">
         <div style="font-weight:800;font-size:13px;line-height:1.2;text-transform:uppercase;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${abreviarNome(a.time1?.nome || '?')}</div>
         ${b1}
-        ${(a.time1?.jogadores||[]).length ? `<div style="font-size:10px;color:var(--cyan);font-weight:700;">${(a.time1.jogadores).join(' · ')}</div>` : ''}
+        ${(a.time1?.jogadores||[]).length ? `<div style="font-size:10px;color:var(--cyan);font-weight:700;">${(a.time1.jogadores).join(' Â· ')}</div>` : ''}
       </div>
       <div style="flex-shrink:0;text-align:center;">
         ${temRes
-          ? `<div style="font-size:22px;font-weight:900;letter-spacing:0.5px;color:var(--yellow);">${a.resultado.g1}<span style="color:var(--text-muted);font-size:12px;"> × </span>${a.resultado.g2}</div>`
+          ? `<div style="font-size:22px;font-weight:900;letter-spacing:0.5px;color:var(--yellow);">${a.resultado.g1}<span style="color:var(--text-muted);font-size:12px;"> Ã— </span>${a.resultado.g2}</div>`
           : master
             ? `<div style="display:flex;align-items:center;gap:3px;">
                 <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-pdc="1" class="placar-input" onclick="event.stopPropagation()" style="width:32px;text-align:center;font-size:16px;font-weight:900;padding:4px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:6px;color:var(--text);-moz-appearance:textfield;">
-                <span style="color:var(--text-muted);font-size:11px;font-weight:900;">×</span>
+                <span style="color:var(--text-muted);font-size:11px;font-weight:900;">Ã—</span>
                 <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-pdc="2" class="placar-input" onclick="event.stopPropagation()" style="width:32px;text-align:center;font-size:16px;font-weight:900;padding:4px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:6px;color:var(--text);-moz-appearance:textfield;">
                 <button onclick="event.stopPropagation();salvarPlacarDireto('${a.id}',this)" style="margin-left:4px;padding:4px 8px;font-size:10px;font-weight:700;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:6px;cursor:pointer;">OK</button>
               </div>`
@@ -1936,7 +1936,7 @@ function cardAmistoso(a, compact=false, readonly=false) {
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-width:0;">
         <div style="font-weight:800;font-size:13px;line-height:1.2;text-transform:uppercase;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${abreviarNome(a.time2?.nome || '?')}</div>
         ${b2}
-        ${(a.time2?.jogadores||[]).length ? `<div style="font-size:10px;color:var(--cyan);font-weight:700;">${(a.time2.jogadores).join(' · ')}</div>` : ''}
+        ${(a.time2?.jogadores||[]).length ? `<div style="font-size:10px;color:var(--cyan);font-weight:700;">${(a.time2.jogadores).join(' Â· ')}</div>` : ''}
       </div>
     </div>` : `
     <div style="display:flex;align-items:flex-start;gap:8px;">
@@ -1971,13 +1971,13 @@ function cardAmistoso(a, compact=false, readonly=false) {
   ${swipeClose}`;
 }
 
-// RG1/RG2: modal de confirmação centralizado para excluir amistoso
+// RG1/RG2: modal de confirmaÃ§Ã£o centralizado para excluir amistoso
 window.confirmarExcluirAmistoso = (id, onCancel) => {
   const a = amistosos.find(x => x.id === id);
   const eFinalizado = a && a.resultado != null;
   modal(`<p class="modal-title">EXCLUIR JOGO?</p>
     <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:12px;padding:12px 14px;margin-bottom:20px;">
-      <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">Esta ação removerá o jogo e não pode ser desfeita.${eFinalizado ? ' <strong style="color:#FCA5A5;">O RANKING SERA ATUALIZADO.</strong>' : ''}</p>
+      <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">Esta aÃ§Ã£o removerÃ¡ o jogo e nÃ£o pode ser desfeita.${eFinalizado ? ' <strong style="color:#FCA5A5;">O RANKING SERA ATUALIZADO.</strong>' : ''}</p>
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn-ghost" onclick="fecharModal();(window._swipeCancelCb&&window._swipeCancelCb())">CANCELAR</button>
@@ -1996,14 +1996,14 @@ window.confirmarExcluirAmi = async (id) => {
 };
 
 window.excluirJogo = async (id, nome, btnEl) => {
-  // Confirmação inline no card
+  // ConfirmaÃ§Ã£o inline no card
   const card = btnEl ? btnEl.closest('.match-card') : null;
-  // Executa exclusão direta (usado pelo confirmarExcluirAmi e compatibilidade)
+  // Executa exclusÃ£o direta (usado pelo confirmarExcluirAmi e compatibilidade)
   await deleteDoc(doc(db, 'amistosos', id));
   await carregarAmistosos(); atualizarDash();
 };
 
-// ── Estado dos filtros/paginação de finalizados ──
+// â”€â”€ Estado dos filtros/paginaÃ§Ã£o de finalizados â”€â”€
 const _amiState = { filtroTipo: 'todos', filtroJog: '', pag: 0 };
 const _PAG_SIZE = 10;
 
@@ -2019,22 +2019,22 @@ function renderAmistosos() {
 
   let html = '';
 
-  // ── EM ANDAMENTO ──
+  // â”€â”€ EM ANDAMENTO â”€â”€
   if (abertos.length) {
     html += `<div class="grupo-header aberto" onclick="toggleGrupo(this)">
       <span class="grupo-titulo" style="color:var(--cyan);">EM ANDAMENTO <span style="color:var(--text-muted);font-weight:600;">(${abertos.length})</span></span>
-      <span class="grupo-seta">›</span>
+      <span class="grupo-seta">â€º</span>
     </div>
     <div class="grupo-body" id="grupo-ami-abertos">
       ${abertos.map(a => cardAmistoso(a)).join('')}
     </div>`;
   }
 
-  // ── FINALIZADOS ──
+  // â”€â”€ FINALIZADOS â”€â”€
   if (finalizados.length) {
     html += `<div class="grupo-header" onclick="toggleGrupo(this)" style="margin-top:${abertos.length?'12':'0'}px;">
       <span class="grupo-titulo" style="color:var(--text-muted);">FINALIZADOS <span style="color:var(--text-muted);font-weight:600;">(${finalizados.length})</span></span>
-      <span class="grupo-seta">›</span>
+      <span class="grupo-seta">â€º</span>
     </div>
     <div class="grupo-body fechado" id="grupo-ami-finalizados">
       <div class="filtro-row" id="ami-filtros">
@@ -2125,7 +2125,7 @@ window._pagAmi = (dir) => {
 
 // wrapSwipeAmistoso removido - swipe nos amistosos descontinuado
 
-// ── Estado dropdown jogadores no amistoso ──
+// â”€â”€ Estado dropdown jogadores no amistoso â”€â”€
 const _jcSel = new Map();
 
 function _renderTagsJC() {
@@ -2138,7 +2138,7 @@ function _renderTagsJC() {
   container.innerHTML = [..._jcSel.entries()].map(([id, nome]) =>
     `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.35);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;">
       ${nome}
-      <span onclick="removerJogJC('${id}')" style="cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;margin-left:2px;">×</span>
+      <span onclick="removerJogJC('${id}')" style="cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;margin-left:2px;">Ã—</span>
     </span>`
   ).join('');
 }
@@ -2166,7 +2166,7 @@ window.selecionarJogJC = (id, nome) => {
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
   const btnSalvar = document.getElementById('btn-ami-salvar');
   if (btnSalvar) btnSalvar.style.display = 'none';
-  // atualizar seleção manual se estiver no modo manual
+  // atualizar seleÃ§Ã£o manual se estiver no modo manual
   const sorteioAuto = document.getElementById('ami-sorteio-auto');
   if (sorteioAuto && !sorteioAuto.checked) _renderSorteioManual();
 };
@@ -2179,7 +2179,7 @@ window.removerJogJC = (id) => {
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
   const btnSalvar = document.getElementById('btn-ami-salvar');
   if (btnSalvar) btnSalvar.style.display = 'none';
-  // atualizar seleção manual se estiver no modo manual
+  // atualizar seleÃ§Ã£o manual se estiver no modo manual
   const sorteioAuto = document.getElementById('ami-sorteio-auto');
   if (sorteioAuto && !sorteioAuto.checked) _renderSorteioManual();
 };
@@ -2229,9 +2229,9 @@ function _htmlNovoAmistoso() {
 }
 
 function _preencherUltimoJogo() {
-  // Preenche jogadores do último amistoso criado (mais recente)
+  // Preenche jogadores do Ãºltimo amistoso criado (mais recente)
   if (!amistosos.length) return;
-  const ultimo = amistosos[0]; // já ordenado por criadoEm desc
+  const ultimo = amistosos[0]; // jÃ¡ ordenado por criadoEm desc
   const ids1 = ultimo.time1?.jogadoresIds || [];
   const ids2 = ultimo.time2?.jogadoresIds || [];
   [...ids1, ...ids2].forEach(jid => {
@@ -2257,7 +2257,7 @@ document.getElementById('btn-criar-ami').addEventListener('click', () => {
   }, 30);
 });
 
-// ─── INICIAR PARTIDA (botão home) ────────────────────────────────────
+// â”€â”€â”€ INICIAR PARTIDA (botÃ£o home) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 window.iniciarPartida = () => {
   if (jogadores.length < 2) { toast('CADASTRE PELO MENOS 2 JOGADORES', 'erro'); return; }
   _jcSel.clear();
@@ -2278,8 +2278,8 @@ function vsCardTime(t, jogadoresList, pool) {
   const timeData = pool.find(x => x.id === t.timeId) || {};
   const isSel = pool === selecoes;
   const icone = isSel
-    ? `<div style="font-size:36px;line-height:1;margin-bottom:4px;">${timeData.bandeira||t.bandeira||'🌍'}</div>`
-    : `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;margin-bottom:4px;"><span style="font-size:16px;line-height:1;">${timeData.bandeira||t.bandeira||''}</span><span style="font-size:28px;line-height:1;">${timeData.logo||t.logo||'⚽'}</span></div>`;
+    ? `<div style="font-size:36px;line-height:1;margin-bottom:4px;">${timeData.bandeira||t.bandeira||'ðŸŒ'}</div>`
+    : `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;margin-bottom:4px;"><span style="font-size:16px;line-height:1;">${timeData.bandeira||t.bandeira||''}</span><span style="font-size:28px;line-height:1;">${timeData.logo||t.logo||'âš½'}</span></div>`;
   return `<div style="flex:1;text-align:center;">
     ${icone}
     <div class="vs-team">${t.nome}</div>
@@ -2296,19 +2296,19 @@ function compartilharWhatsApp(sorteio) {
   const pool = sorteio.tipo === 'selecoes' ? selecoes : clubes;
   const td1 = pool.find(x => x.id === t1.timeId) || {};
   const td2 = pool.find(x => x.id === t2.timeId) || {};
-  const icone1 = sorteio.tipo === 'selecoes' ? (td1.bandeira||'') : `${td1.logo||'⚽'} ${td1.bandeira||''}`;
-  const icone2 = sorteio.tipo === 'selecoes' ? (td2.bandeira||'') : `${td2.logo||'⚽'} ${td2.bandeira||''}`;
+  const icone1 = sorteio.tipo === 'selecoes' ? (td1.bandeira||'') : `${td1.logo||'âš½'} ${td1.bandeira||''}`;
+  const icone2 = sorteio.tipo === 'selecoes' ? (td2.bandeira||'') : `${td2.logo||'âš½'} ${td2.bandeira||''}`;
   const texto =
-    `⚽ *FIFA FAR PLAY — Nova Partida!*\n\n` +
+    `âš½ *FIFA FAR PLAY â€” Nova Partida!*\n\n` +
     `${icone1} *${t1.nome}*\n` +
-    `👥 ${t1.jogadores.join(', ')}\n` +
-    `💪 Força: ${t1.forca}\n\n` +
-    `⚔️  *VS*  ⚔️\n\n` +
+    `ðŸ‘¥ ${t1.jogadores.join(', ')}\n` +
+    `ðŸ’ª ForÃ§a: ${t1.forca}\n\n` +
+    `âš”ï¸  *VS*  âš”ï¸\n\n` +
     `${icone2} *${t2.nome}*\n` +
-    `👥 ${t2.jogadores.join(', ')}\n` +
-    `💪 Força: ${t2.forca}\n\n` +
-    `${eq} (Diferença: ${diff} pts)\n\n` +
-    `📱 _FIFA FAR PLAY App_`;
+    `ðŸ‘¥ ${t2.jogadores.join(', ')}\n` +
+    `ðŸ’ª ForÃ§a: ${t2.forca}\n\n` +
+    `${eq} (DiferenÃ§a: ${diff} pts)\n\n` +
+    `ðŸ“± _FIFA FAR PLAY App_`;
   window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
 }
 window.compartilharWhatsApp = compartilharWhatsApp;
@@ -2341,7 +2341,7 @@ window.toggleTipoAmi = tipo => {
 };
 
 window.toggleModoDupla = (ativo) => {
-  // Apenas feedback visual, a validação ocorre no sorteio
+  // Apenas feedback visual, a validaÃ§Ã£o ocorre no sorteio
   const label = document.getElementById('label-dupla');
   if (label) label.style.borderColor = ativo ? 'var(--cyan)' : '';
   // Resetar sorteio ao mudar modo
@@ -2364,7 +2364,7 @@ window.toggleSorteioAuto = (ativo) => {
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
   const btnSalvar = document.getElementById('btn-ami-salvar');
   if (btnSalvar) btnSalvar.style.display = 'none';
-  // A6: botão PRÓXIMO/sortear só visível quando sorteio automático marcado
+  // A6: botÃ£o PRÃ“XIMO/sortear sÃ³ visÃ­vel quando sorteio automÃ¡tico marcado
   const btnProximo = document.getElementById('btn-ami-proximo');
   if (btnProximo) btnProximo.style.display = ativo ? '' : 'none';
 };
@@ -2373,7 +2373,7 @@ function _renderSorteioManual() {
   const manualBox = document.getElementById('ami-manual-times-box');
   if (!manualBox) return;
   const tiposDisponiveis = [..._amiTiposSel];
-  // Determinar pool de times disponíveis
+  // Determinar pool de times disponÃ­veis
   let pool = [];
   if (tiposDisponiveis.length > 1) {
     pool = [...clubes.map(t=>({...t,_tipo:'clubes'})), ...selecoes.map(t=>({...t,_tipo:'selecoes'}))];
@@ -2389,7 +2389,7 @@ function _renderSorteioManual() {
     return;
   }
   const rows = jogsList.map(j => {
-    // A3: restaurar seleção existente ao re-render
+    // A3: restaurar seleÃ§Ã£o existente ao re-render
     const selAtual = _amiManualSel.get(j.id);
     const valAtual = selAtual ? selAtual.nome : '';
     return `
@@ -2428,7 +2428,7 @@ window._abrirDropdownManualJog = (jogId) => {
     const paisCode = isSel ? (SELECAO_PAIS[t.id]?.pais||'') : (TEAM_DATA[t.id]?.pais||'');
     const flagEl = paisCode ? `<img src="https://flagcdn.com/w40/${paisCode}.png" alt="" loading="lazy" style="width:22px;height:16px;object-fit:cover;border-radius:2px;flex-shrink:0;" onerror="this.style.display='none'">` : '';
     const shieldEl = !isSel ? `<div style="width:22px;height:22px;border-radius:5px;background:${TEAM_DATA[t.id]?.fundo||'#1E1E35'};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:${TEAM_DATA[t.id]?.cor||'#AAA'};flex-shrink:0;border:1px solid rgba(255,255,255,0.1);">${TEAM_DATA[t.id]?.abrev||t.nome.slice(0,3).toUpperCase()}</div>` : '';
-    const eficEl = t.eficiencia ? `<span class="efic-tag selecionado" data-efic="${t.eficiencia}" style="font-size:9px;padding:2px 8px;cursor:default;pointer-events:none;flex-shrink:0;">${t.eficiencia}</span>` : '';
+    const eficEl = t.eficiencia ? eficBadge(t.eficiencia) : '';
     return `<div onclick="selecionarTimeManualJog('${jogId}','${t.id}','${t.nome.replace(/'/g,"\\'")}',${t.forca},'${t._tipo}')"
       style="padding:9px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);font-weight:600;font-size:12px;display:flex;align-items:center;gap:8px;">
       ${flagEl}${shieldEl}
@@ -2487,7 +2487,7 @@ window.sortearAmistoso = () => {
   const tiposDisponiveis = [..._amiTiposSel];
   let tipo;
   if (tiposDisponiveis.length > 1) {
-    // Ambos selecionados: sortear aleatoriamente entre clubes e seleções (lógica "ambos")
+    // Ambos selecionados: sortear aleatoriamente entre clubes e seleÃ§Ãµes (lÃ³gica "ambos")
     const opcoes = shuffle(['clubes', 'selecoes']);
     let escolhido = null;
     for (let tentativa = 0; tentativa < 20; tentativa++) {
@@ -2554,7 +2554,7 @@ function _renderSorteioBox(sorteio, eq, diff) {
   const j2 = t2.jogadores.map(n => ({ nome: n }));
   const box = document.getElementById('ami-sorteio');
   box.style.display = '';
-  // Badge clicável — abre edição rápida do time (eficiência + inativo) sem fechar o sorteio
+  // Badge clicÃ¡vel â€” abre ediÃ§Ã£o rÃ¡pida do time (eficiÃªncia + inativo) sem fechar o sorteio
   const badgeInativo = (timeId, timeNome, tipoT) =>
     `<div onclick="editarTimeRapido('${timeId}','${timeNome.replace(/'/g,"\\'")}','${tipoT}')"
       title="Clique para editar ${timeNome}"
@@ -2563,7 +2563,7 @@ function _renderSorteioBox(sorteio, eq, diff) {
       ${badgeTime(timeId, timeNome, tipoT)}
     </div>`;
   box.innerHTML = `<div class="vs-card">
-    <div style="text-align:center;margin-bottom:14px;"><span class="tag tag-green">TIMES SORTEADOS · ${eq}</span></div>
+    <div style="text-align:center;margin-bottom:14px;"><span class="tag tag-green">TIMES SORTEADOS Â· ${eq}</span></div>
     <div style="display:flex;align-items:flex-start;gap:8px;">
       <div style="flex:1;text-align:center;">
         <div style="display:flex;justify-content:center;margin-bottom:8px;">${badgeInativo(t1.timeId, t1.nome, tipo)}</div>
@@ -2589,21 +2589,21 @@ function _renderSorteioBox(sorteio, eq, diff) {
 }
 
 // F1: Inativar time clicando no logo durante o sorteio
-/** Edição rápida de time a partir do sorteio — mantém fullscreen aberto e ressorteia após salvar */
+/** EdiÃ§Ã£o rÃ¡pida de time a partir do sorteio â€” mantÃ©m fullscreen aberto e ressorteia apÃ³s salvar */
 window.editarTimeRapido = (timeId, timeNome, tipoT) => {
   const pool = tipoT === 'selecoes' ? selecoes : clubes;
   const t = pool.find(x => x.id === timeId) || { eficiencia:'Bom', inativo:false };
   const inativo = t.inativo || false;
   modal(`<p class="modal-title">${timeNome.toUpperCase()}</p>
     <div style="margin-bottom:14px;">
-      <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">EFICIÊNCIA</label>
+      <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">EFICIÃŠNCIA</label>
       <div class="efic-tags" id="etr-efic-tags" data-selected="${t.eficiencia||'Bom'}">
         ${['Ruim','Moderado','Bom'].map(e=>`<span class="efic-tag${(t.eficiencia||'Bom')===e?' selecionado':''}" data-efic="${e}" onclick="selecionarEficienciaETR('${e}')">${e}</span>`).join('')}
       </div>
     </div>
     <label class="check-row" style="margin-bottom:16px;">
       <input type="checkbox" id="etr-inativo" ${inativo?'checked':''} style="width:18px;height:18px;accent-color:var(--purple);">
-      <div><div style="font-size:13px;font-weight:700;">INATIVO</div><div style="font-size:11px;color:var(--text-muted);">Não aparece nos sorteios</div></div>
+      <div><div style="font-size:13px;font-weight:700;">INATIVO</div><div style="font-size:11px;color:var(--text-muted);">NÃ£o aparece nos sorteios</div></div>
     </label>
     <div style="display:flex;gap:10px;">
       <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
@@ -2634,7 +2634,7 @@ window.salvarTimeRapido = async (timeId, tipoT) => {
     if (_sorteioAmi.time2?.timeId === timeId) {
       _sorteioAmi.time2.eficiencia = eficiencia;
     }
-    // Se o time foi inativado, ressortear; caso contrário, apenas re-renderizar
+    // Se o time foi inativado, ressortear; caso contrÃ¡rio, apenas re-renderizar
     if (inativo) {
       setTimeout(() => window.sortearAmistoso && window.sortearAmistoso(), 100);
     } else {
@@ -2648,7 +2648,7 @@ window.salvarTimeRapido = async (timeId, tipoT) => {
 window.inativarTimeSorteio = (timeId, timeNome, tipo) => {
   modal(`<p class="modal-title">INATIVAR TIME?</p>
     <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
-      <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">Marcar <strong style="color:var(--text)">${timeNome}</strong> como inativo? Ele não sairá nos próximos sorteios.</p>
+      <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">Marcar <strong style="color:var(--text)">${timeNome}</strong> como inativo? Ele nÃ£o sairÃ¡ nos prÃ³ximos sorteios.</p>
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
@@ -2663,7 +2663,7 @@ window.confirmarInativarTimeSorteio = async (timeId, tipo) => {
   window.sortearAmistoso();
 };
 
-// Guard global anti-duplo-clique: bloqueia o elemento por 1s após o primeiro clique
+// Guard global anti-duplo-clique: bloqueia o elemento por 1s apÃ³s o primeiro clique
 function _lockBtn(el) {
   if (!el) return false;
   if (el.dataset._locked) return true;
@@ -2706,7 +2706,7 @@ window.abrirPlacar = id => {
         ${eficBadge(a.time1?.eficiencia)}
         <input id="pg1" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" class="input placar-input" style="text-align:center;font-size:52px;font-weight:900;padding:14px;margin-top:10px;letter-spacing:-1px;">
       </div>
-      <div style="color:var(--text-muted);font-size:36px;font-weight:900;flex-shrink:0;">×</div>
+      <div style="color:var(--text-muted);font-size:36px;font-weight:900;flex-shrink:0;">Ã—</div>
       <div style="flex:1;text-align:center;">
         <div style="font-weight:800;font-size:15px;margin-bottom:8px;text-transform:uppercase;">${a.time2?.nome}</div>
         ${eficBadge(a.time2?.eficiencia)}
@@ -2728,7 +2728,7 @@ window.salvarPlacar = async id => {
   } catch(e) { toast('ERRO AO SALVAR', 'erro'); } finally { _unlockBtn(btn); }
 };
 
-// ─── VER AMISTOSO (somente leitura — RG7b) ───────────────────────────
+// â”€â”€â”€ VER AMISTOSO (somente leitura â€” RG7b) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 window.verAmistoso = (id) => {
   const a = amistosos.find(x => x.id === id);
   if (!a) return;
@@ -2740,7 +2740,7 @@ window.verAmistoso = (id) => {
   const placar = temRes
     ? `<div style="display:flex;align-items:center;justify-content:center;gap:12px;">
         <input type="number" value="${g1}" disabled style="width:70px;text-align:center;font-size:36px;font-weight:900;padding:10px 4px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:var(--text-muted);opacity:0.7;">
-        <span style="font-size:22px;font-weight:900;color:var(--text-muted);">×</span>
+        <span style="font-size:22px;font-weight:900;color:var(--text-muted);">Ã—</span>
         <input type="number" value="${g2}" disabled style="width:70px;text-align:center;font-size:36px;font-weight:900;padding:10px 4px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:var(--text-muted);opacity:0.7;">
       </div>`
     : `<div style="color:var(--text-muted);font-size:13px;font-weight:700;text-align:center;padding:12px;">EM ANDAMENTO</div>`;
@@ -2768,9 +2768,9 @@ window.verAmistoso = (id) => {
     </div>`);
 };
 
-// ─── EDITAR AMISTOSO ──────────────────────────────────────────────
+// â”€â”€â”€ EDITAR AMISTOSO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 window.editarAmistoso = (id) => {
-  // RG7b: não-master abre em modo somente leitura
+  // RG7b: nÃ£o-master abre em modo somente leitura
   if (!temPermissao()) { verAmistoso(id); return; }
 
   const a = amistosos.find(x => x.id === id);
@@ -2783,7 +2783,7 @@ window.editarAmistoso = (id) => {
     const b2 = badgeTimeCompact(a.time2?.timeId, a.time2?.nome, a.tipo);
     const g1 = a.resultado?.g1 ?? 0;
     const g2 = a.resultado?.g2 ?? 0;
-    fullscreen('EDIÇÃO', `
+    fullscreen('EDIÃ‡ÃƒO', `
       <div style="display:flex;flex-direction:column;gap:20px;max-width:400px;margin:0 auto;">
         <div style="display:flex;align-items:center;justify-content:space-around;gap:8px;background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:16px;padding:16px;">
           <div style="text-align:center;flex:1;">
@@ -2805,7 +2805,7 @@ window.editarAmistoso = (id) => {
           <div style="display:flex;align-items:center;justify-content:center;gap:12px;">
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="${g1}" id="ea-g1" class="placar-input"
               style="width:70px;text-align:center;font-size:36px;font-weight:900;padding:10px 4px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:12px;color:var(--text);">
-            <span style="font-size:22px;font-weight:900;color:var(--text-muted);">×</span>
+            <span style="font-size:22px;font-weight:900;color:var(--text-muted);">Ã—</span>
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="${g2}" id="ea-g2" class="placar-input"
               style="width:70px;text-align:center;font-size:36px;font-weight:900;padding:10px 4px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:12px;color:var(--text);">
           </div>
@@ -2817,9 +2817,9 @@ window.editarAmistoso = (id) => {
     return;
   }
 
-  // Amistoso em andamento: edição completa com jogadores e sorteio
+  // Amistoso em andamento: ediÃ§Ã£o completa com jogadores e sorteio
   _jcSel.clear();
-  // Pré-selecionar os jogadores do amistoso
+  // PrÃ©-selecionar os jogadores do amistoso
   const todosJogs = [...(a.time1?.jogadoresIds||[]), ...(a.time2?.jogadoresIds||[])];
   const todosNomes = [...(a.time1?.jogadores||[]), ...(a.time2?.jogadores||[])];
   todosJogs.forEach((jid, i) => {
@@ -2828,7 +2828,7 @@ window.editarAmistoso = (id) => {
     else if (todosNomes[i]) _jcSel.set(jid || `jog-${i}`, todosNomes[i]);
   });
 
-  // Pré-preencher _sorteioAmi com os dados atuais
+  // PrÃ©-preencher _sorteioAmi com os dados atuais
   _sorteioAmi = {
     tipo: a.tipo,
     modoDupla: a.modoDupla || false,
@@ -2836,9 +2836,9 @@ window.editarAmistoso = (id) => {
     time2: { ...a.time2 },
   };
 
-  fullscreen('EDIÇÃO', _htmlNovoAmistoso(), 'AMISTOSOS', 'amistosos');
+  fullscreen('EDIÃ‡ÃƒO', _htmlNovoAmistoso(), 'AMISTOSOS', 'amistosos');
 
-  // Após renderizar, configurar os campos com os dados existentes
+  // ApÃ³s renderizar, configurar os campos com os dados existentes
   setTimeout(() => {
     // Selecionar o tipo correto
     selTipoAmi(a.tipo);
@@ -2858,7 +2858,7 @@ window.editarAmistoso = (id) => {
     const eq = diff <= 2 ? 'EQUILIBRADO' : diff <= 5 ? 'LEVEMENTE DESIGUAL' : 'DESIGUAL';
     _renderSorteioBox(_sorteioAmi, eq, diff);
 
-    // Trocar o botão SALVAR para chamar a função de atualização
+    // Trocar o botÃ£o SALVAR para chamar a funÃ§Ã£o de atualizaÃ§Ã£o
     const btnSalvar = document.getElementById('btn-ami-salvar');
     if (btnSalvar) {
       btnSalvar.style.display = '';
@@ -2877,7 +2877,7 @@ window.editarAmistoso = (id) => {
 };
 
 window.salvarEdicaoAmistoso = async (id) => {
-  // Se temos _sorteioAmi atualizado (vindo da tela de edição de andamento), usar ele
+  // Se temos _sorteioAmi atualizado (vindo da tela de ediÃ§Ã£o de andamento), usar ele
   if (_sorteioAmi && !amistosos.find(x => x.id === id)?.resultado) {
     if (!_sorteioAmi.time1 || !_sorteioAmi.time2) {
       toast('SORTEAR OS TIMES ANTES DE SALVAR', 'erro'); return;
@@ -2913,7 +2913,7 @@ window.salvarPlacarDireto = async (id, btn) => {
   } catch(e) { toast('ERRO AO SALVAR', 'erro'); } finally { _unlockBtn(btn); }
 };
 
-// ─── CAMPEONATOS ─────────────────────────────────────────────────────
+// â”€â”€â”€ CAMPEONATOS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function carregarCampeonatos() {
   const snap = await getDocs(query(collection(db, 'campeonatos'), orderBy('criadoEm', 'desc')));
   campeonatos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -2924,7 +2924,7 @@ const _campState = { filtroTipo: 'todos', filtroTipoTime: 'todos', filtroJog: ''
 
 function _cardCampeonato(camp) {
   // Usa o mesmo visual do cardCampHome (T2)
-  return cardCampHome(camp, true); // true = modo lista (sem botão excluir inline, usa swipe)
+  return cardCampHome(camp, true); // true = modo lista (sem botÃ£o excluir inline, usa swipe)
 }
 
 function _wrapSwipeCamp(camp) {
@@ -2939,22 +2939,22 @@ function renderCampeonatos() {
   const finalizados = campeonatos.filter(camp => camp.status === 'finalizado');
   let html = '';
 
-  // ── EM ANDAMENTO ──
+  // â”€â”€ EM ANDAMENTO â”€â”€
   if (andamento.length) {
     html += `<div class="grupo-header aberto" onclick="toggleGrupo(this)">
       <span class="grupo-titulo" style="color:var(--cyan);">EM ANDAMENTO <span style="color:var(--text-muted);font-weight:600;">(${andamento.length})</span></span>
-      <span class="grupo-seta">›</span>
+      <span class="grupo-seta">â€º</span>
     </div>
     <div class="grupo-body" id="grupo-camp-andamento">
       ${andamento.map(camp => _wrapSwipeCamp(camp)).join('')}
     </div>`;
   }
 
-  // ── FINALIZADOS ──
+  // â”€â”€ FINALIZADOS â”€â”€
   if (finalizados.length) {
     html += `<div class="grupo-header" onclick="toggleGrupo(this)" style="margin-top:${andamento.length?'12':'0'}px;">
       <span class="grupo-titulo" style="color:var(--text-muted);">FINALIZADOS <span style="color:var(--text-muted);font-weight:600;">(${finalizados.length})</span></span>
-      <span class="grupo-seta">›</span>
+      <span class="grupo-seta">â€º</span>
     </div>
     <div class="grupo-body fechado" id="grupo-camp-finalizados">
       <div class="filtro-row" id="camp-filtros">
@@ -3050,8 +3050,8 @@ window._pagCamp = (dir) => {
   _renderFinalizadosCamp();
 };
 
-// ── Estado do dropdown de participantes no torneio ──
-const _ccSel = new Map(); // id → nome
+// â”€â”€ Estado do dropdown de participantes no torneio â”€â”€
+const _ccSel = new Map(); // id â†’ nome
 
 function _renderTagsCC() {
   const container = document.getElementById('cc-tags');
@@ -3063,7 +3063,7 @@ function _renderTagsCC() {
   container.innerHTML = [..._ccSel.entries()].map(([id, nome]) =>
     `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;">
       ${nome}
-      <span onclick="removerJogCC('${id}')" style="cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;margin-left:2px;">×</span>
+      <span onclick="removerJogCC('${id}')" style="cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;margin-left:2px;">Ã—</span>
     </span>`
   ).join('');
 }
@@ -3214,7 +3214,7 @@ window._abrirDropdownManualCC = (jogId) => {
     const paisCode = isSel ? (SELECAO_PAIS[t.id]?.pais||'') : (TEAM_DATA[t.id]?.pais||'');
     const flagEl = paisCode ? `<img src="https://flagcdn.com/w40/${paisCode}.png" alt="" loading="lazy" style="width:22px;height:16px;object-fit:cover;border-radius:2px;flex-shrink:0;" onerror="this.style.display='none'">` : '';
     const shieldEl = !isSel ? `<div style="width:22px;height:22px;border-radius:5px;background:${TEAM_DATA[t.id]?.fundo||'#1E1E35'};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:${TEAM_DATA[t.id]?.cor||'#AAA'};flex-shrink:0;border:1px solid rgba(255,255,255,0.1);">${TEAM_DATA[t.id]?.abrev||t.nome.slice(0,3).toUpperCase()}</div>` : '';
-    const eficEl = t.eficiencia ? `<span class="efic-tag selecionado" data-efic="${t.eficiencia}" style="font-size:9px;padding:2px 8px;cursor:default;pointer-events:none;flex-shrink:0;">${t.eficiencia}</span>` : '';
+    const eficEl = t.eficiencia ? eficBadge(t.eficiencia) : '';
     return `<div onclick="selecionarTimeManualCC('${jogId}','${t.id}','${t.nome.replace(/'/g,"\\'")}',${t.forca},'${isSel?'selecoes':'clubes'}')"
       style="padding:9px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);font-weight:600;font-size:12px;display:flex;align-items:center;gap:8px;">
       ${flagEl}${shieldEl}
@@ -3247,7 +3247,7 @@ window.selCampTipo = (k, el) => {
   if (cn && (!cn.value.trim() || Object.values(CAMP_META).some(m => cn.value.trim() === m.nome))) {
     cn.value = meta.nome;
   }
-  // Limpa seleção manual de times se trocar de tipo
+  // Limpa seleÃ§Ã£o manual de times se trocar de tipo
   const manualCheck = document.getElementById('manual-times');
   if (manualCheck) { manualCheck.checked = false; }
   const box = document.getElementById('manual-times-box');
@@ -3259,7 +3259,7 @@ window.selCampTipo = (k, el) => {
     regrasBox.innerHTML = `
       <div class="grupo-header" onclick="toggleGrupo(this)" style="margin-top:4px;">
         <span class="grupo-titulo" style="color:var(--text-muted);font-size:11px;">COMO FUNCIONA</span>
-        <span class="grupo-seta">›</span>
+        <span class="grupo-seta">â€º</span>
       </div>
       <div class="grupo-body fechado">
         <p style="color:var(--text-muted);font-size:12px;line-height:1.6;background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:10px 12px;margin-top:4px;">${meta.desc}</p>
@@ -3284,7 +3284,7 @@ window.criarCampeonato = async () => {
 
   let distribuidos;
   if (isManual) {
-    // Verifica se todos os participantes têm time selecionado
+    // Verifica se todos os participantes tÃªm time selecionado
     const semTime = partic.filter(p => !_ccManualSel.has(p.jogadorId));
     if (semTime.length > 0) { toast(`SELECIONE O TIME DE: ${semTime.map(p=>p.nome).join(', ')}`, 'erro'); _unlockBtn(btn); return; }
     // Atribui times manualmente
@@ -3324,7 +3324,7 @@ function calcularDisp(g) {
   return disp;
 }
 
-/** Card de jogo de torneio — estilo idêntico ao cardAmistoso (TO3) */
+/** Card de jogo de torneio â€” estilo idÃªntico ao cardAmistoso (TO3) */
 function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true) {
   const tipo = isSel ? 'selecoes' : 'clubes';
   const temRes = !!played;
@@ -3333,17 +3333,17 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
   const forca1 = m1.time?.forca;
   const forca2 = m2.time?.forca;
 
-  // Usar badgeTime (grande, igual ao amistoso não-compact)
+  // Usar badgeTime (grande, igual ao amistoso nÃ£o-compact)
   const b1 = badgeTime(m1.time?.id||'', m1.time?.nome||'', tipo);
   const b2 = badgeTime(m2.time?.id||'', m2.time?.nome||'', tipo);
 
   const placarArea = temRes
-    ? `<div style="font-size:29px;font-weight:900;letter-spacing:1px;color:var(--yellow);">${g1r}<span style="color:var(--text-muted);font-size:13px;"> × </span>${g2r}</div>`
+    ? `<div style="font-size:29px;font-weight:900;letter-spacing:1px;color:var(--yellow);">${g1r}<span style="color:var(--text-muted);font-size:13px;"> Ã— </span>${g2r}</div>`
     : podeMudar
       ? `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
           <div style="display:flex;align-items:center;gap:4px;">
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="1" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
-            <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
+            <span style="color:var(--text-muted);font-size:13px;font-weight:900;">Ã—</span>
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="2" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
           </div>
           <button onclick="event.stopPropagation();salvarPartidaDireta('${cid}',${gi},'${m1.jogadorId}','${m2.jogadorId}',this)" class="btn-primary" style="margin-top:14px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">FIM</button>
@@ -3353,17 +3353,17 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
   return `<div class="match-card" style="margin-bottom:10px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <div style="display:flex;align-items:center;gap:6px;">
-        <span class="tag tag-purple" style="font-size:9px;">TORNEIO</span>
-        <span class="tag tag-gray" style="font-size:9px;">${isSel ? 'SELECOES' : 'CLUBES'}</span>
+        <span class="tag tag-purple">TORNEIO</span>
+        <span class="tag tag-gray">${isSel ? 'SELECOES' : 'CLUBES'}</span>
       </div>
       ${temRes
         ? (() => {
             const g1 = m1.resultado, g2 = m2.resultado;
-            if (g1 > g2) return `<span class="tag tag-green" style="font-size:9px;">VITÓRIA T1</span>`;
-            if (g2 > g1) return `<span class="tag tag-green" style="font-size:9px;">VITÓRIA T2</span>`;
-            return `<span class="tag tag-yellow" style="font-size:9px;">EMPATE</span>`;
+            if (g1 > g2) return `<span class="tag tag-green">VITÃ“RIA T1</span>`;
+            if (g2 > g1) return `<span class="tag tag-green">VITÃ“RIA T2</span>`;
+            return `<span class="tag tag-yellow">EMPATE</span>`;
           })()
-        : `<span class="tag tag-cyan" style="font-size:9px;">EM ANDAMENTO</span>`}
+        : `<span class="tag tag-cyan">EM ANDAMENTO</span>`}
     </div>
     <div style="display:flex;align-items:flex-start;gap:8px;">
       <div style="flex:1;text-align:center;">
@@ -3389,7 +3389,7 @@ window.cardJogoTorneio = cardJogoTorneio;
 window.abrirCampeonato = (id) => {
   const c = campeonatos.find(x=>x.id===id);
   if (!c) return;
-  const meta = CAMP_META[c.tipo] || {emoji:'🏆', nome:c.tipo, desc:''};
+  const meta = CAMP_META[c.tipo] || {emoji:'ðŸ†', nome:c.tipo, desc:''};
   const isSel = CAMP_META[c.tipo]?.tipo === 'selecoes';
   const totalJogosReg = (c.grupos||[]).reduce((acc,g)=>acc+(g.partidas||[]).length,0);
   const naoIniciado = totalJogosReg === 0;
@@ -3420,8 +3420,8 @@ window.abrirCampeonato = (id) => {
     }).join('');
 
     return `<div class="grupo-header aberto" onclick="toggleGrupo(this)" style="margin-bottom:8px;">
-      <span class="grupo-titulo">${g.nome} <span style="color:var(--text-muted);font-weight:600;">${disp.length===0?'· CONCLUIDO':`· ${jogados}/${totalJogos}`}</span></span>
-      <span class="grupo-seta">›</span>
+      <span class="grupo-titulo">${g.nome} <span style="color:var(--text-muted);font-weight:600;">${disp.length===0?'Â· CONCLUIDO':`Â· ${jogados}/${totalJogos}`}</span></span>
+      <span class="grupo-seta">â€º</span>
     </div>
     <div class="grupo-body" style="margin-bottom:14px;">
       <table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:12px;background:rgba(255,255,255,0.02);border-radius:12px;overflow:hidden;">
@@ -3432,7 +3432,7 @@ window.abrirCampeonato = (id) => {
           <td style="text-align:center;padding:6px 4px;">SG</td><td style="text-align:center;padding:6px 8px;font-weight:800;">PTS</td>
         </tr>
         ${ord.map((m,i)=>`<tr style="border-top:1px solid rgba(255,255,255,0.04);color:${i<2?'var(--cyan)':'var(--text)'}">
-          <td style="padding:6px 8px;font-weight:800;color:${i===0?'var(--yellow)':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text-muted)'};">${i+1}°</td>
+          <td style="padding:6px 8px;font-weight:800;color:${i===0?'var(--yellow)':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text-muted)'};">${i+1}Â°</td>
           <td style="padding:6px 4px;">
             <div style="font-weight:700;font-size:11px;">${m.nome}</div>
             <div style="font-size:9px;color:var(--text-muted);">${m.time?.nome||'?'}</div>
@@ -3454,17 +3454,17 @@ window.abrirCampeonato = (id) => {
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
       <div style="flex:1;">
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
-          <span class="tag tag-purple" style="font-size:10px;">${meta.nome.toUpperCase()}</span>
-          <span class="tag ${c.status==='finalizado'?'tag-gray':'tag-green'}" style="font-size:10px;">${c.status==='finalizado'?'FINALIZADO':'EM ANDAMENTO'}</span>
+          <span class="tag tag-purple">${meta.nome.toUpperCase()}</span>
+          <span class="tag ${c.status==='finalizado'?'tag-gray':'tag-green'}">${c.status==='finalizado'?'FINALIZADO':'EM ANDAMENTO'}</span>
         </div>
-        <p style="color:var(--text-muted);font-size:12px;">${c.participantes?.length||0} PARTICIPANTES · ${totalJogosReg} JOGOS REGISTRADOS</p>
+        <p style="color:var(--text-muted);font-size:12px;">${c.participantes?.length||0} PARTICIPANTES Â· ${totalJogosReg} JOGOS REGISTRADOS</p>
       </div>
     </div>
 
     ${meta.desc ? `
     <div class="grupo-header" onclick="toggleGrupo(this)" style="margin-bottom:8px;">
       <span class="grupo-titulo" style="color:var(--text-muted);">COMO FUNCIONA</span>
-      <span class="grupo-seta">›</span>
+      <span class="grupo-seta">â€º</span>
     </div>
     <div class="grupo-body fechado" style="margin-bottom:16px;">
       <p style="color:var(--text-muted);font-size:13px;line-height:1.6;background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:12px;">${meta.desc}</p>
@@ -3495,7 +3495,7 @@ window.abrirCampeonato = (id) => {
 
     ${podeMudar ? (naoIniciado
       ? `<button onclick="ressortearCampeonato('${c.id}')" style="width:100%;background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(6,182,212,0.2));border:1px solid rgba(139,92,246,0.4);color:#C4B5FD;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:16px;">SORTEAR TIMES / ADICIONAR JOGADORES</button>`
-      : `<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:10px 12px;margin-bottom:16px;display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">⚠️</span><span style="font-size:12px;color:#FCD34D;font-weight:700;">TORNEIO EM ANDAMENTO — NÃO É POSSÍVEL SORTEAR OU ADICIONAR JOGADORES</span></div>`)
+      : `<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:10px 12px;margin-bottom:16px;display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">âš ï¸</span><span style="font-size:12px;color:#FCD34D;font-weight:700;">TORNEIO EM ANDAMENTO â€” NÃƒO Ã‰ POSSÃVEL SORTEAR OU ADICIONAR JOGADORES</span></div>`)
     : ''}
     ${podeMudar ? `<button onclick="reiniciarTorneio('${c.id}')" style="width:100%;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);color:#FCD34D;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px;">REINICIAR TORNEIO</button>` : ''}
     ${naoIniciado && podeMudar ? `<button onclick="excluirCampeonato('${c.id}')" style="width:100%;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.35);color:#EF4444;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:16px;">EXCLUIR TORNEIO</button>` : ''}
@@ -3513,7 +3513,7 @@ window.salvarPartidaDireta = async (cid, gi, j1Id, j2Id, btnEl) => {
   const m1 = g.membros.find(m=>m.jogadorId===j1Id);
   const m2 = g.membros.find(m=>m.jogadorId===j2Id);
   if (!m1||!m2) return;
-  // Busca inputs relativos ao botão para evitar conflito de IDs duplicados
+  // Busca inputs relativos ao botÃ£o para evitar conflito de IDs duplicados
   const container = btnEl ? btnEl.closest('.match-card') || btnEl.parentElement : null;
   const el1 = container ? container.querySelector('[data-tpdc="1"]') : null;
   const el2 = container ? container.querySelector('[data-tpdc="2"]') : null;
@@ -3540,7 +3540,7 @@ window.reiniciarTorneio = (id) => {
   modal(`<p class="modal-title">REINICIAR TORNEIO?</p>
     <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
       <p style="font-weight:700;font-size:13px;color:#FCD34D;margin-bottom:6px;">ATENCAO</p>
-      <p style="color:var(--text-muted);font-size:12px;line-height:1.5;">Reiniciar <strong style="color:var(--text)">${c.nome}</strong> vai apagar todos os resultados registrados. Os times e participantes serão mantidos. Esta ação não pode ser desfeita.</p>
+      <p style="color:var(--text-muted);font-size:12px;line-height:1.5;">Reiniciar <strong style="color:var(--text)">${c.nome}</strong> vai apagar todos os resultados registrados. Os times e participantes serÃ£o mantidos. Esta aÃ§Ã£o nÃ£o pode ser desfeita.</p>
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn-primary" style="background:linear-gradient(135deg,#F59E0B,#D97706);" onclick="confirmarReiniciarTorneio('${id}')">REINICIAR</button>
@@ -3565,8 +3565,8 @@ window.excluirCampeonato = (id) => {
   if (!c) return;
   modal(`<p class="modal-title">EXCLUIR TORNEIO?</p>
     <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
-      <p style="font-weight:700;font-size:13px;color:#FCA5A5;margin-bottom:6px;">ATENÇÃO</p>
-      <p style="color:var(--text-muted);font-size:12px;line-height:1.5;">Excluir <strong style="color:var(--text)">${c.nome}</strong> removerá todos os grupos, jogos e classificação. Esta ação não pode ser desfeita.</p>
+      <p style="font-weight:700;font-size:13px;color:#FCA5A5;margin-bottom:6px;">ATENÃ‡ÃƒO</p>
+      <p style="color:var(--text-muted);font-size:12px;line-height:1.5;">Excluir <strong style="color:var(--text)">${c.nome}</strong> removerÃ¡ todos os grupos, jogos e classificaÃ§Ã£o. Esta aÃ§Ã£o nÃ£o pode ser desfeita.</p>
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);" onclick="confirmarExcluirCamp('${id}')">CONFIRMAR</button>
@@ -3580,7 +3580,7 @@ window.confirmarExcluirCamp = async (id) => {
 window.ressortearCampeonato = (id) => {
   const c = campeonatos.find(x=>x.id===id);
   if (!c) return;
-  const meta = CAMP_META[c.tipo] || { emoji:'🏆', nome: c.tipo };
+  const meta = CAMP_META[c.tipo] || { emoji:'ðŸ†', nome: c.tipo };
   const selecionados = new Set((c.participantes||[]).map(p=>p.jogadorId));
   fullscreen('RESSORTEAR', `
     <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">SELECIONE OS PARTICIPANTES E SORTEAREMOS OS TIMES NOVAMENTE PARA <strong>${c.nome.toUpperCase()}</strong></p>
@@ -3619,7 +3619,7 @@ window.regPartida = (cid, gi, j1Id, j2Id) => {
   const b1 = isSel ? badgeSel(m1.time?.id||'',m1.time?.nome||'') : badgeClube(m1.time?.id||'',m1.time?.nome||'');
   const b2 = isSel ? badgeSel(m2.time?.id||'',m2.time?.nome||'') : badgeClube(m2.time?.id||'',m2.time?.nome||'');
   modal(`<p class="modal-title" style="margin-bottom:4px;">REGISTRAR PLACAR</p>
-    <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">${g.nome} · ${c.nome}</p>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">${g.nome} Â· ${c.nome}</p>
     <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:24px;">
       <div style="flex:1;text-align:center;">
         <div style="display:flex;justify-content:center;margin-bottom:8px;">${b1}</div>
@@ -3627,7 +3627,7 @@ window.regPartida = (cid, gi, j1Id, j2Id) => {
         <div style="font-size:11px;color:var(--text-muted);">${m1.time?.nome||'?'}</div>
         <input id="rg1" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" class="input" style="text-align:center;font-size:40px;font-weight:900;padding:14px;margin-top:12px;">
       </div>
-      <div style="color:var(--text-muted);font-size:32px;font-weight:900;padding-top:80px;flex-shrink:0;">×</div>
+      <div style="color:var(--text-muted);font-size:32px;font-weight:900;padding-top:80px;flex-shrink:0;">Ã—</div>
       <div style="flex:1;text-align:center;">
         <div style="display:flex;justify-content:center;margin-bottom:8px;">${b2}</div>
         <div style="font-weight:800;font-size:14px;">${m2.nome}</div>
@@ -3637,7 +3637,7 @@ window.regPartida = (cid, gi, j1Id, j2Id) => {
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn-ghost" onclick="abrirCampeonato('${cid}')">Voltar</button>
-      <button class="btn-primary" onclick="salvarPartida('${cid}',${gi})">Salvar Resultado ✓</button>
+      <button class="btn-primary" onclick="salvarPartida('${cid}',${gi})">Salvar Resultado âœ“</button>
     </div>`);
 };
 
@@ -3661,7 +3661,7 @@ window.salvarPartida = async (cid, gi) => {
   fecharModal(); await carregarCampeonatos(); atualizarDash(); abrirCampeonato(cid);
 };
 
-// ─── RANKING ─────────────────────────────────────────────────────────
+// â”€â”€â”€ RANKING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function calcularRankingAmistosos() {
   const s = {};
   jogadores.forEach(j => { s[j.id]={id:j.id,nome:j.nome,fotoUrl:j.fotoUrl||'',vit:0,emp:0,der:0,gp:0,gc:0,pts:0,j:0}; });
@@ -3684,7 +3684,7 @@ function calcularRankingTorneios() {
 function renderRankRow(p, i) {
   const foto = p.fotoUrl ? `<img src="${p.fotoUrl}" style="width:36px;height:36px;border-radius:10px;object-fit:cover;flex-shrink:0;" onerror="this.outerHTML='${avatarSvg(36)}'">`  : avatarSvg(36);
   return `<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:12px;margin-bottom:8px;cursor:pointer;" onclick="abrirHistoricoJogador('${p.id}','${p.nome.replace(/'/g,"\'")}')">
-    <div class="rank-pos" style="color:${i===0?'var(--yellow)':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text-muted)'};font-weight:900;">${i+1}°</div>
+    <div class="rank-pos" style="color:${i===0?'var(--yellow)':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text-muted)'};font-weight:900;">${i+1}Â°</div>
     ${foto}
     <div style="flex:1;min-width:0;">
       <div style="font-weight:800;font-size:14px;text-transform:uppercase;">${p.nome}</div>
@@ -3717,7 +3717,7 @@ function renderRankingTorneios(rank) {
   if (el2) el2.innerHTML = rank.slice(0,5).length===0?'<p style="color:var(--text-muted);text-align:center;padding:16px 0;font-size:14px;">NENHUM TORNEIO FINALIZADO</p>':rank.slice(0,5).map((p,i)=>renderRankRow(p,i)).join('');
 }
 
-// ── Estado do histórico ──
+// â”€â”€ Estado do histÃ³rico â”€â”€
 const _histState = { jogadorId:'', nome:'', filtroTipo:'todos', filtroAdv:'', dataIni:'', dataFim:'', ordenacao:'data_desc', pag:0 };
 const _HIST_PAG = 100;
 
@@ -3859,7 +3859,7 @@ function _renderHistorico() {
   if (_histState.dataIni) { const d = new Date(_histState.dataIni).getTime(); jogos = jogos.filter(j => j.ts && j.ts >= d); }
   if (_histState.dataFim) { const d = new Date(_histState.dataFim).getTime() + 86399999; jogos = jogos.filter(j => j.ts && j.ts <= d); }
 
-  // Ordenação
+  // OrdenaÃ§Ã£o
   const ord = _histState.ordenacao;
   if (ord === 'data_desc') jogos.sort((a,b) => (b.ts||0)-(a.ts||0));
   else if (ord === 'data_asc') jogos.sort((a,b) => (a.ts||0)-(b.ts||0));
@@ -3880,11 +3880,11 @@ function _renderHistorico() {
         <span class="tag tag-green">${v}V</span>
         <span class="tag tag-red">${d}D</span>
         <span class="tag tag-gray">${e}E</span>
-        <span class="tag tag-cyan">${gf}GF · ${gs}GS</span>
+        <span class="tag tag-cyan">${gf}GF Â· ${gs}GS</span>
       </div>`
     : '';
 
-  // Paginação
+  // PaginaÃ§Ã£o
   const total = jogos.length;
   const totalPags = Math.max(1, Math.ceil(total / _HIST_PAG));
   const pag = Math.min(_histState.pag, totalPags - 1);
@@ -3898,7 +3898,7 @@ function _renderHistorico() {
   }
 
   lista.innerHTML = slice.map(j => {
-    // Para amistosos, usa o cardAmistoso real (readonly — sem ação de clique)
+    // Para amistosos, usa o cardAmistoso real (readonly â€” sem aÃ§Ã£o de clique)
     if (j.tipo === 'AMISTOSO' && j.amiId) {
       const ami = amistosos.find(a => a.id === j.amiId);
       if (ami) return cardAmistoso(ami, true, true);
@@ -3909,12 +3909,12 @@ function _renderHistorico() {
     return `<div style="background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:12px;margin-bottom:8px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
         <div style="display:flex;gap:5px;">
-          <span class="tag tag-yellow" style="font-size:9px;">TORNEIO</span>
-          <span class="tag tag-gray" style="font-size:9px;">${j.tipoTime}</span>
-          ${j.torneio?`<span class="tag tag-purple" style="font-size:9px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${j.torneio.toUpperCase()}</span>`:''}
+          <span class="tag tag-yellow">TORNEIO</span>
+          <span class="tag tag-gray">${j.tipoTime}</span>
+          ${j.torneio?`<span class="tag tag-purple" style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${j.torneio.toUpperCase()}</span>`:''}
         </div>
         <div style="display:flex;gap:5px;align-items:center;">
-          <span class="tag ${cor}" style="font-size:10px;font-weight:900;">${j.res==='V'?'VITORIA':j.res==='D'?'DERROTA':'EMPATE'}</span>
+          <span class="tag ${cor}">${j.res==='V'?'VITORIA':j.res==='D'?'DERROTA':'EMPATE'}</span>
           ${data?`<span style="font-size:10px;color:var(--text-muted);">${data}</span>`:''}
         </div>
       </div>
@@ -3940,7 +3940,7 @@ function atualizarDash() {
   renderRankingAmistosos(rankAmi);
   renderRankingTorneios(rankCamp);
 
-  // RG6: filtrar por participação para usuários não-master
+  // RG6: filtrar por participaÃ§Ã£o para usuÃ¡rios nÃ£o-master
   const isMaster = temPermissao();
   const jogadorAtual = !isMaster ? jogadores.find(j => j.email && usuario?.email && j.email.toLowerCase() === usuario.email.toLowerCase()) : null;
   const jogAtualId = jogadorAtual?.id || null;
@@ -3992,7 +3992,7 @@ function cardCampHome(c, modoLista=false) {
     </span>`
   ).join('');
 
-  // Jogos em andamento (pendentes sem placar) — mostrar até 2
+  // Jogos em andamento (pendentes sem placar) â€” mostrar atÃ© 2
   const jogosPendentes = [];
   (c.grupos||[]).forEach((g,gi) => {
     for (let i=0;i<g.membros.length;i++) for (let j=i+1;j<g.membros.length;j++) {
@@ -4008,20 +4008,20 @@ function cardCampHome(c, modoLista=false) {
 
   const idAttr = modoLista ? '' : `id="camp-home-${c.id}" `;
   const statusTag = finalizado
-    ? `<span class="tag tag-gray" style="font-size:9px;">FINALIZADO</span>`
-    : `<span class="tag tag-yellow" style="font-size:9px;">EM ANDAMENTO</span>`;
+    ? `<span class="tag tag-gray">FINALIZADO</span>`
+    : `<span class="tag tag-yellow">EM ANDAMENTO</span>`;
 
   const podeMudar = temPermissao();
   const cardHtml = `<div ${idAttr}class="match-card" style="margin-bottom:${modoLista?'0':'10px'};padding:12px;cursor:pointer;" onclick="abrirCampeonato('${c.id}')">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
       <div style="display:flex;align-items:center;gap:6px;">
-        <span class="tag tag-purple" style="font-size:9px;">TORNEIO</span>
+        <span class="tag tag-purple">TORNEIO</span>
         ${statusTag}
-        <span class="tag tag-gray" style="font-size:9px;">${isSel?'SELECOES':'CLUBES'}</span>
+        <span class="tag tag-gray">${isSel?'SELECOES':'CLUBES'}</span>
       </div>
     </div>
     <div style="font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.nome}</div>
-    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;text-transform:uppercase;">${meta.nome} · ${c.participantes?.length||0} JOGADORES</div>
+    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;text-transform:uppercase;">${meta.nome} Â· ${c.participantes?.length||0} JOGADORES</div>
     ${!finalizado ? `<div style="margin-top:6px;display:flex;align-items:center;gap:6px;">
       <div style="flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;">
         <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--yellow),var(--green));border-radius:2px;"></div>
@@ -4041,9 +4041,9 @@ function cardCampHome(c, modoLista=false) {
     </div>` : cardHtml;
 }
 
-// RG1/RG2: popup antigo removido - excluir campeonato usa modal de confirmação centralizado
+// RG1/RG2: popup antigo removido - excluir campeonato usa modal de confirmaÃ§Ã£o centralizado
 
-// ─── GERENCIAR TIMES ─────────────────────────────────────────────────
+// â”€â”€â”€ GERENCIAR TIMES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 window.filtrarTimes = tipo => {
   abaTimesAtual = tipo;
   _paisFiltroTimes = '';
@@ -4065,7 +4065,7 @@ function renderTimesEdit() {
   const el = document.getElementById('lista-times-edit');
   const filtroEl = document.getElementById('filtro-pais-times');
 
-  // Country filter — only for clubes
+  // Country filter â€” only for clubes
   if (!isSel) {
     const paises = [...new Set(pool.map(t => {
       const d = TEAM_DATA[t.id] || {};
@@ -4073,7 +4073,7 @@ function renderTimesEdit() {
     }).filter(Boolean).map(x => JSON.stringify(x)))].map(s => JSON.parse(s)).sort((a,b) => a.nome.localeCompare(b.nome));
     filtroEl.style.display = paises.length ? 'block' : 'none';
     filtroEl.innerHTML = `<select onchange="_setFiltroTimes(this.value)" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--card-border);background:var(--card);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;">
-      <option value="">TODOS OS PAÍSES</option>
+      <option value="">TODOS OS PAÃSES</option>
       ${paises.map(p => `<option value="${p.nome}" ${_paisFiltroTimes===p.nome?'selected':''}>${flagEmoji(p.code)} ${p.nome}</option>`).join('')}
     </select>`;
   } else {
@@ -4094,12 +4094,12 @@ function renderTimesEdit() {
     const inativo = t.inativo || false;
     const ativoStyle = inativo ? 'opacity:0.45;filter:grayscale(0.6);' : '';
     const eficiencia = t.eficiencia || 'Bom';
-    const tagInativo = inativo ? `<span class="tag tag-gray" style="font-size:9px;">INATIVO</span>` : '';
-    const eficTag = `<span class="efic-tag selecionado" data-efic="${eficiencia}" style="cursor:default;pointer-events:none;font-size:10px;">${eficiencia}</span>`;
+    const tagInativo = inativo ? `<span class="tag tag-gray">INATIVO</span>` : '';
+    const eficTag = eficBadge(eficiencia);
     let icone, countryInfo;
     if (isSel) {
       const d = SELECAO_PAIS[t.id] || { pais:'', paisNome: t.nome };
-      icone = `<div style="width:40px;height:30px;border-radius:6px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.pais?`<img src="https://flagcdn.com/w80/${d.pais}.png" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=\\'font-size:18px;\\'>🌍</span>'">`: '<span style="font-size:18px;">🌍</span>'}</div>`;
+      icone = `<div style="width:40px;height:30px;border-radius:6px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.pais?`<img src="https://flagcdn.com/w80/${d.pais}.png" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=\\'font-size:18px;\\'>ðŸŒ</span>'">`: '<span style="font-size:18px;">ðŸŒ</span>'}</div>`;
       countryInfo = `<span style="font-size:10px;color:var(--text-muted);font-weight:600;">${d.paisNome||''}</span>`;
     } else {
       const d = TEAM_DATA[t.id] || { abrev:(t.nome||'?').slice(0,3).toUpperCase(), fundo:'#1E1E35', cor:'#AAAAAA', pais:'', paisNome:'' };
@@ -4147,18 +4147,18 @@ function abrirModalAddTime(tipoInicial) {
           </div>
           <div class="tipo-btn ${tipoInicial==='selecao'?'sel':''}" id="nt-s" onclick="selTipoTime('selecao')">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>
-            <span style="font-size:12px;font-weight:700;display:block;margin-top:4px;">SELEÇÃO</span>
+            <span style="font-size:12px;font-weight:700;display:block;margin-top:4px;">SELEÃ‡ÃƒO</span>
           </div>
         </div>
       </div>
       <input type="hidden" id="nt-tipo" value="${tipoInicial}">
 
-      <!-- CLUBE: formulário do zero -->
+      <!-- CLUBE: formulÃ¡rio do zero -->
       <div id="nt-clube-section" style="display:${tipoInicial==='clube'?'flex':'none'};flex-direction:column;gap:14px;">
         <div>
-          <label style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">PAÍS</label>
+          <label style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">PAÃS</label>
           <select id="nt-clube-pais" class="input" style="cursor:pointer;" onchange="_ntClubePreview()">
-            <option value="">Selecione o país...</option>
+            <option value="">Selecione o paÃ­s...</option>
             ${paisOptions}
           </select>
         </div>
@@ -4167,10 +4167,10 @@ function abrirModalAddTime(tipoInicial) {
           <input class="input" id="nt-clube-nome" placeholder="Nome do clube..." autocomplete="off" oninput="_ntClubePreview()">
         </div>
         <div>
-          <label style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">BRASÃO (OPCIONAL)</label>
+          <label style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">BRASÃƒO (OPCIONAL)</label>
           <div style="display:flex;align-items:center;gap:10px;">
             <div id="nt-clube-crest-preview" style="width:52px;height:52px;border-radius:10px;background:rgba(255,255,255,0.05);border:1.5px dashed rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">
-              <span style="font-size:22px;color:var(--text-muted);">🛡️</span>
+              <span style="font-size:22px;color:var(--text-muted);">ðŸ›¡ï¸</span>
             </div>
             <label style="flex:1;cursor:pointer;">
               <div class="btn-ghost" style="text-align:center;pointer-events:none;font-size:13px;padding:10px;">ESCOLHER IMAGEM</div>
@@ -4179,7 +4179,7 @@ function abrirModalAddTime(tipoInicial) {
           </div>
         </div>
         <div>
-          <label style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">EFICIÊNCIA</label>
+          <label style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">EFICIÃŠNCIA</label>
           <div class="efic-tags" id="nt-efic-tags">
             <span class="efic-tag${_eficienciaNT==='Ruim'?' selecionado':''}" data-efic="Ruim"     onclick="selecionarEficienciaNT('Ruim')">Ruim</span>
             <span class="efic-tag${_eficienciaNT==='Moderado'?' selecionado':''}" data-efic="Moderado" onclick="selecionarEficienciaNT('Moderado')">Moderado</span>
@@ -4192,21 +4192,21 @@ function abrirModalAddTime(tipoInicial) {
         </div>
       </div>
 
-      <!-- SELEÇÃO: busca existente -->
+      <!-- SELEÃ‡ÃƒO: busca existente -->
       <div id="nt-selecao-section" style="display:${tipoInicial==='selecao'?'flex':'none'};flex-direction:column;gap:14px;">
         <div>
-          <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">BUSCAR SELEÇÃO</label>
-          <input class="input" id="nt-busca" placeholder="Buscar país..." autocomplete="off" oninput="filtrarListaAddTime()">
+          <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">BUSCAR SELEÃ‡ÃƒO</label>
+          <input class="input" id="nt-busca" placeholder="Buscar paÃ­s..." autocomplete="off" oninput="filtrarListaAddTime()">
         </div>
         <div id="nt-lista" style="max-height:280px;overflow-y:auto;border-radius:12px;border:1px solid var(--card-border);background:rgba(0,0,0,0.2);padding:8px;"></div>
 
         <div id="nt-form" style="display:none;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);border-radius:14px;padding:14px;">
-          <p style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">SELEÇÃO ESCOLHIDA</p>
+          <p style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">SELEÃ‡ÃƒO ESCOLHIDA</p>
           <div id="nt-preview" style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"></div>
         </div>
 
         <div>
-          <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">EFICIÊNCIA</label>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">EFICIÃŠNCIA</label>
           <div class="efic-tags" id="nt-efic-tags-sel">
             <span class="efic-tag${_eficienciaNT==='Ruim'?' selecionado':''}" data-efic="Ruim"     onclick="selecionarEficienciaNTSel('Ruim')">Ruim</span>
             <span class="efic-tag${_eficienciaNT==='Moderado'?' selecionado':''}" data-efic="Moderado" onclick="selecionarEficienciaNTSel('Moderado')">Moderado</span>
@@ -4276,12 +4276,12 @@ window.renderListaAddTime = () => {
   const el = document.getElementById('nt-lista');
   if (!el) return;
   {
-    // Seleções: mostra todos países de PAISES_FIFA que não estão ainda em `selecoes`
+    // SeleÃ§Ãµes: mostra todos paÃ­ses de PAISES_FIFA que nÃ£o estÃ£o ainda em `selecoes`
     const jaTemNomes = new Set(selecoes.map(s => s.nome.toLowerCase()));
     const opcoes = PAISES_FIFA
       .filter(p => !jaTemNomes.has(p.nome.toLowerCase()))
       .filter(p => !filtro || p.nome.toLowerCase().includes(filtro) || p.code.includes(filtro));
-    if (!opcoes.length) { el.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:24px;font-size:12px;">NENHUM PAÍS DISPONÍVEL</p>'; return; }
+    if (!opcoes.length) { el.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:24px;font-size:12px;">NENHUM PAÃS DISPONÃVEL</p>'; return; }
     el.innerHTML = `<div style="display:flex;flex-direction:column;gap:4px;">${opcoes.map(p => `
       <button type="button" onclick="escolherSelecaoAdd('${p.code}','${p.nome.replace(/'/g,"")}')" style="background:${_selNovoTime===p.code?'rgba(139,92,246,0.2)':'rgba(255,255,255,0.03)'};border:1.5px solid ${_selNovoTime===p.code?'var(--purple)':'transparent'};border-radius:10px;padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;">
         <img src="https://flagcdn.com/w40/${p.code}.png" alt="" style="width:30px;height:22px;object-fit:cover;border-radius:4px;flex-shrink:0;" onerror="this.style.display='none'">
@@ -4313,7 +4313,7 @@ window.escolherSelecaoAdd = (code, nome) => {
   const prev = document.getElementById('nt-preview');
   if (prev) prev.innerHTML = `
     <div style="width:44px;height:34px;border-radius:6px;overflow:hidden;flex-shrink:0;"><img src="https://flagcdn.com/w80/${code}.png" alt="" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"></div>
-    <div style="flex:1;"><div style="font-weight:800;font-size:15px;">${nome}</div><div style="font-size:11px;color:var(--text-muted);">Seleção</div></div>`;
+    <div style="flex:1;"><div style="font-weight:800;font-size:15px;">${nome}</div><div style="font-size:11px;color:var(--text-muted);">SeleÃ§Ã£o</div></div>`;
   const btn = document.getElementById('btn-salvar-time-sel');
   if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
   renderListaAddTime();
@@ -4341,7 +4341,7 @@ window.salvarNovoTime = async () => {
   const nomeEl = document.getElementById('nt-clube-nome');
   const pais = paisEl?.value;
   const nome = nomeEl?.value.trim();
-  if (!pais || !nome) { toast('PREENCHA PAÍS E NOME DO CLUBE', 'erro'); return; }
+  if (!pais || !nome) { toast('PREENCHA PAÃS E NOME DO CLUBE', 'erro'); return; }
   const opt = paisEl.options[paisEl.selectedIndex];
   const paisNome = opt?.dataset?.nome || '';
   const eficiencia = _eficienciaNT || '';
@@ -4355,7 +4355,7 @@ window.salvarNovoTime = async () => {
 };
 
 window.salvarNovoTimeSel = async () => {
-  if (!_selNovoTime) { toast('SELECIONE UMA SELEÇÃO', 'erro'); return; }
+  if (!_selNovoTime) { toast('SELECIONE UMA SELEÃ‡ÃƒO', 'erro'); return; }
   const nome = window._selNovoTimeNome || _selNovoTime;
   const eficiencia = _eficienciaNT || '';
   const id = 'sel-' + _selNovoTime.replace(/-/g,'');
@@ -4378,14 +4378,14 @@ window.editarTime = (id) => {
     <div style="display:flex;flex-direction:column;gap:16px;max-width:400px;margin:0 auto;">
       <div style="display:flex;justify-content:center;padding:16px 0;">${badgeHtml}</div>
       <div>
-        <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">EFICIÊNCIA DO TIME</label>
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">EFICIÃŠNCIA DO TIME</label>
         <div class="efic-tags" id="et-efic-tags" data-selected="${t.eficiencia||'Bom'}">
           ${['Ruim','Moderado','Bom'].map(e=>`<span class="efic-tag${(t.eficiencia||'Bom')===e?' selecionado':''}" data-efic="${e}" onclick="selecionarEficienciaET('${e}')">${e}</span>`).join('')}
         </div>
       </div>
       <label class="check-row">
         <input type="checkbox" id="et-inativo" ${inativoAtual?'checked':''} style="width:18px;height:18px;accent-color:var(--purple);">
-        <div><div style="font-size:13px;font-weight:700;">INATIVO</div><div style="font-size:11px;color:var(--text-muted);">Não aparece nos sorteios</div></div>
+        <div><div style="font-size:13px;font-weight:700;">INATIVO</div><div style="font-size:11px;color:var(--text-muted);">NÃ£o aparece nos sorteios</div></div>
       </label>
       <div style="display:flex;gap:10px;margin-top:8px;">
         <button class="btn-primary" onclick="salvarEdicaoTime('${id}')">SALVAR</button>
@@ -4411,7 +4411,7 @@ window.excluirTime = async id => {
   const t = pool.find(x => x.id === id);
   modal(`<p class="modal-title">EXCLUIR TIME?</p>
     <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
-      <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">Excluir <strong style="color:var(--text)">${t?.nome}</strong>? Esta ação não pode ser desfeita.</p>
+      <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">Excluir <strong style="color:var(--text)">${t?.nome}</strong>? Esta aÃ§Ã£o nÃ£o pode ser desfeita.</p>
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);" onclick="confirmarExcluirTime('${id}')">CONFIRMAR</button>
@@ -4424,18 +4424,18 @@ window.confirmarExcluirTime = async id => {
 };
 
 window.toggleInativoTime = async (id, novoInativo) => {
-  // Salva/atualiza o flag inativo no Firestore (merge para não sobrescrever outros dados)
+  // Salva/atualiza o flag inativo no Firestore (merge para nÃ£o sobrescrever outros dados)
   try {
     await setDoc(doc(db, 'times', id), { inativo: novoInativo }, { merge: true });
   } catch(e) {
-    // Para times default que não existem no Firestore, criar doc mínimo
+    // Para times default que nÃ£o existem no Firestore, criar doc mÃ­nimo
     await setDoc(doc(db, 'times', id), { id, inativo: novoInativo }, { merge: true });
   }
   await carregarTimes();
   renderTimesEdit();
 };
 
-// ─── LONG PRESS NO ÍCONE DO TIME ─────────────────────────────────────
+// â”€â”€â”€ LONG PRESS NO ÃCONE DO TIME â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let _lpTimer = null;
 window.lpStart = (id, nome, inativo) => {
   _lpTimer = setTimeout(() => { _lpTimer = null; mostrarModalInativoTime(id, nome, inativo); }, 600);
@@ -4447,8 +4447,8 @@ window.mostrarModalInativoTime = (id, nome, inativo) => {
   const bordCor = inativo ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)';
   const btnCor = inativo ? 'linear-gradient(135deg,#16a34a,#22c55e)' : 'linear-gradient(135deg,#EF4444,#DC2626)';
   const msg = inativo
-    ? `Reativar <strong style="color:var(--text)">${nome}</strong>? Ele voltará a aparecer nos sorteios.`
-    : `Marcar <strong style="color:var(--text)">${nome}</strong> como inativo? Ele não sairá nos próximos sorteios.`;
+    ? `Reativar <strong style="color:var(--text)">${nome}</strong>? Ele voltarÃ¡ a aparecer nos sorteios.`
+    : `Marcar <strong style="color:var(--text)">${nome}</strong> como inativo? Ele nÃ£o sairÃ¡ nos prÃ³ximos sorteios.`;
   modal(`<p class="modal-title">${acao} TIME?</p>
     <div style="background:${msgCor};border:1px solid ${bordCor};border-radius:12px;padding:12px 14px;margin-bottom:16px;">
       <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">${msg}</p>
@@ -4459,12 +4459,12 @@ window.mostrarModalInativoTime = (id, nome, inativo) => {
     </div>`);
 };
 
-// ─── SERVICE WORKER ──────────────────────────────────────────────────
+// â”€â”€â”€ SERVICE WORKER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
       const reg = await navigator.serviceWorker.register('sw.js');
-      // Verifica atualizações periodicamente (a cada 12h)
+      // Verifica atualizaÃ§Ãµes periodicamente (a cada 12h)
       setInterval(() => reg.update(), 12 * 3600 * 1000);
     } catch(e) {}
   });
