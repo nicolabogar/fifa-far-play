@@ -1,0 +1,15 @@
+# FIFA FAR PLAY - Prompts de Features v12
+# FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
+# O agente deve marcar o hash do commit ao concluir cada item.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v12.txt e um novo é criado.
+
+## MELHORIAS ##
+
+- [x] Quero que refatore tudo que se refere a exclusão, remova a tag que temos hoje de exclusão e quero que a ação seja quando deslisar o card para a esquerda, tendo um comportamento de slide toogle, e que quando abrir o modal de confimar ou cancelar ao cancelar o card deve voltar para seu padrão de estilo normal. e os cards que tiverem essa ação de excluir tenham a borda do componente do lado esquerdo com a cor vermelha. (hash: 50eafc3)
+- [x] Suas alterações quebrou algumas coisas no card de jogos, preciso que você lembre que quando falamos de times, temos dois cenários, seleção e clubes, a seleção você esta colocando icone do pais antes do nome da seleção, não é para colocar, o icone da bandeira só vai ter abaixo do nome da seleção. Para os clubes você esta colocando duas vezes a bandeira do pais que o clube pertence, uma do lado esquerdo do nome do clube e outro embaixo, remova a do lado esquerdo do nome do clube, e no outro não mexa. (hash: 50eafc3)
+- [x] Pedi para remover o score/força do time e deixar apenas as tags de eficiencia e você não fez isso, o score ainda exxiste no cadastro, e nos cards de jogos. (hash: 1390e51)
+- [x] No cadastro de time o icone do brasão esta bem pequeno, aumentar ele, sei que da para aumentar porque na listagem de times exibimos ele maior. (hash: 1390e51)
+- [x] Na pagina de cadastro de times ao listar os times o card esta bem grande e o icone bem ao meio, quero que diminua todos os componentes e alinhe-os conforme o time é mostrado no card de jogos. (hash: 50eafc3)
+- [x] Em qualquer pagina que estou em edição, ao não cancelar e tentar entrar em outra pagina o aplicativo não esta indo, não deve ser bloqueado, você deve cancelar as alterações e deixar o fluxo seguir para onde o usuario quer ir. (hash: c2a83a9)
+- [x] Quando é cadasto um amistoso e clico no time para inativar ou colocar a tag de eficiencia a ação esta sendo colocada nos dois times, deve ser segregado essa ação, time da esquerda e time da direita do card. (hash: 6c5c0b2)
+- [x] Quando entro no ranking e entro no jogo, esta indo para uma tela cheia, esses cards de ranking não devem ter ação, a mesma coisa para o card de amistoso e campeonatos finalizados, em excessão para exclusão do mesmo quando é um usuário master fazendo isso. (hash: c99e697)
