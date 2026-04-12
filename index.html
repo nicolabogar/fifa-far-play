@@ -1234,7 +1234,7 @@ function modal(html) {
   document.getElementById('modal-body').innerHTML = html;
   document.getElementById('modal-overlay').classList.add('open');
 }
-function fecharModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+function fecharModal() { document.getElementById('modal-overlay').classList.remove('open'); if (window._swipeCancelCb) { window._swipeCancelCb(); window._swipeCancelCb = null; } }
 window.fecharModal = fecharModal;
 document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target.id === 'modal-overlay') fecharModal(); });
 
