@@ -346,6 +346,35 @@
     .efic-tag.selecionado[data-efic="Ruim"]     { background: rgba(239,68,68,0.3);  border-color: #ef4444; }
     .efic-tag.selecionado[data-efic="Moderado"] { background: rgba(234,179,8,0.3);  border-color: #eab308; }
     .efic-tag.selecionado[data-efic="Bom"]      { background: rgba(34,197,94,0.3);  border-color: #22c55e; }
+
+    /* Multi-select dropdown */
+    .ms-drop { position:relative; margin-bottom:14px; }
+    .ms-trigger {
+      width:100%; display:flex; align-items:center; justify-content:space-between;
+      padding:10px 14px; border-radius:12px; border:1px solid var(--card-border);
+      background:var(--card); color:var(--text); font-size:13px; font-weight:700;
+      cursor:pointer; text-align:left; gap:8px;
+    }
+    .ms-trigger-label { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .ms-trigger-arrow { font-size:10px; color:var(--text-muted); transition:transform 0.2s; flex-shrink:0; }
+    .ms-drop.open .ms-trigger-arrow { transform:rotate(180deg); }
+    .ms-panel {
+      display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:200;
+      background:#0F0F20; border:1px solid rgba(139,92,246,0.3); border-radius:14px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.5); overflow:hidden; max-height:260px; overflow-y:auto;
+    }
+    .ms-drop.open .ms-panel { display:block; }
+    .ms-opt {
+      display:flex; align-items:center; gap:10px; padding:11px 14px; cursor:pointer;
+      font-size:13px; font-weight:700; transition:background 0.12s; user-select:none;
+    }
+    .ms-opt:hover { background:rgba(255,255,255,0.06); }
+    .ms-opt-check {
+      width:18px; height:18px; border-radius:6px; border:2px solid var(--card-border);
+      display:flex; align-items:center; justify-content:center; flex-shrink:0;
+      font-size:11px; transition:all 0.12s;
+    }
+    .ms-opt.checked .ms-opt-check { background:var(--purple); border-color:var(--purple); color:#fff; }
   </style>
 </head>
 <body>
@@ -1057,9 +1086,9 @@ window.badgeTime = badgeTime;
 /** Renderiza apenas a info de país do time (bandeira pequena + nome do país) */
 function badgeTimeCountryInfo(timeId, nomeTime, tipo, align='center') {
   if (tipo === 'selecoes') {
-    const d = SELECAO_PAIS[timeId] || {};
+    const d = SELECAO_PAIS[timeId] || { pais:'', paisNome: nomeTime||'' };
     if (!d.pais) return '';
-    return `<div style="display:flex;align-items:center;justify-content:${align};gap:3px;white-space:nowrap;">${flagImg(d.pais, 20)}</div>`;
+    return `<div style="display:flex;align-items:center;justify-content:${align};gap:3px;white-space:nowrap;">${flagImg(d.pais, 20)}<span style="font-size:9px;color:var(--text-muted);font-weight:600;">${d.paisNome}</span></div>`;
   }
   const d = TEAM_DATA[timeId] || { pais:'eu', paisNome:'' };
   return `<div style="display:flex;align-items:center;justify-content:${align};gap:3px;white-space:nowrap;">${flagImg(d.pais, 20)}<span style="font-size:9px;color:var(--text-muted);font-weight:600;">${d.paisNome}</span></div>`;
@@ -1103,7 +1132,7 @@ let campeonatos= [];
 let clubes     = [...CLUBES_DEFAULT];
 let selecoes   = [...SELECOES_DEFAULT];
 let abaTimesAtual = 'clubes';
-let _paisFiltroTimes = '';
+let _paisFiltroTimesSet = new Set(); // multi-select: vazio = todos
 let _nomeFiltroTimes = '';
 let _eficFiltroTimesSet = null; // inicializado após EFIC_TODAS
 let _disponiveis  = []; // partidas disponíveis para registo em grupo
@@ -1165,24 +1194,105 @@ function htmlEficFiltro(containerId) {
     </div>
   </div>`;
 }
-window.toggleEficFiltroTimes = (val) => {
+window.toggleEficFiltroTimes = (e, val) => {
+  if (e && e.stopPropagation) e.stopPropagation();
   if (_eficFiltroTimesSet.has(val)) {
-    const restantes = EFIC_TODAS.filter(e => e !== val && _eficFiltroTimesSet.has(e));
+    const restantes = EFIC_TODAS.filter(v => v !== val && _eficFiltroTimesSet.has(v));
     if (restantes.length === 0) { toast('SELECIONE PELO MENOS UMA TAG DE EFICIENCIA', 'erro'); return; }
     _eficFiltroTimesSet.delete(val);
   } else { _eficFiltroTimesSet.add(val); }
-  const c = document.getElementById('times-efic-filtro');
-  if (c) c.querySelectorAll('.efic-tag').forEach(el => {
-    el.classList.toggle('selecionado', _eficFiltroTimesSet.has(el.dataset.efic));
-  });
-  renderTimesEdit();
+  _atualizarMsDropdown('ms-efic-times');
+  _renderTimesLista();
 };
+window.togglePaisFiltroTimes = (e, val) => {
+  if (e && e.stopPropagation) e.stopPropagation();
+  if (_paisFiltroTimesSet.has(val)) { _paisFiltroTimesSet.delete(val); }
+  else { _paisFiltroTimesSet.add(val); }
+  _atualizarMsDropdown('ms-pais-times');
+  _renderTimesLista();
+};
+// Fechar todos os dropdowns multi-select ao clicar fora
+document.addEventListener('click', e => {
+  if (!e.target.closest('.ms-drop')) {
+    document.querySelectorAll('.ms-drop.open').forEach(el => el.classList.remove('open'));
+  }
+});
+window._toggleMsDrop = (e, id) => {
+  if (e && e.stopPropagation) e.stopPropagation();
+  const el = document.getElementById(id);
+  if (!el) return;
+  const wasOpen = el.classList.contains('open');
+  document.querySelectorAll('.ms-drop.open').forEach(d => d.classList.remove('open'));
+  if (!wasOpen) el.classList.add('open');
+};
+function _atualizarMsDropdown(dropId) {
+  const drop = document.getElementById(dropId);
+  if (!drop) return;
+  const opts = drop.querySelectorAll('.ms-opt');
+  opts.forEach(opt => {
+    const val = opt.dataset.val;
+    const isEfic = dropId === 'ms-efic-times';
+    const checked = isEfic ? _eficFiltroTimesSet.has(val) : _paisFiltroTimesSet.has(val);
+    opt.classList.toggle('checked', checked);
+    const chk = opt.querySelector('.ms-opt-check');
+    if (chk) chk.textContent = checked ? '✓' : '';
+  });
+  const labelEl = drop.querySelector('.ms-trigger-label');
+  if (labelEl) labelEl.textContent = _msTriggerLabel(dropId);
+}
+function _msTriggerLabel(dropId) {
+  if (dropId === 'ms-efic-times') {
+    if (EFIC_TODAS.every(e => _eficFiltroTimesSet.has(e))) return 'TODAS AS EFICIENCIAS';
+    return [..._eficFiltroTimesSet].filter(e => EFIC_TODAS.includes(e)).map(e => e.toUpperCase()).join(', ') || 'NENHUMA';
+  }
+  if (dropId === 'ms-pais-times') {
+    if (_paisFiltroTimesSet.size === 0) return 'TODOS OS PAISES';
+    return [..._paisFiltroTimesSet].join(', ');
+  }
+  return '';
+}
+function htmlMsDropEficTimes() {
+  const label = _msTriggerLabel('ms-efic-times');
+  return `<div class="ms-drop" id="ms-efic-times">
+    <button class="ms-trigger" onclick="_toggleMsDrop(event,'ms-efic-times')" type="button">
+      <span class="ms-trigger-label">${label}</span>
+      <span class="ms-trigger-arrow">▼</span>
+    </button>
+    <div class="ms-panel">
+      ${EFIC_TODAS.map(e => {
+        const checked = _eficFiltroTimesSet.has(e);
+        const cor = e==='Ruim'?'#ef4444':e==='Moderado'?'#eab308':'#22c55e';
+        return `<div class="ms-opt${checked?' checked':''}" data-val="${e}" onclick="toggleEficFiltroTimes(event,'${e}')">
+          <div class="ms-opt-check">${checked?'✓':''}</div>
+          <span style="color:${cor};text-transform:uppercase;font-size:12px;">${e}</span>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+function htmlMsDropPaisTimes(paises) {
+  const label = _msTriggerLabel('ms-pais-times');
+  return `<div class="ms-drop" id="ms-pais-times">
+    <button class="ms-trigger" onclick="_toggleMsDrop(event,'ms-pais-times')" type="button">
+      <span class="ms-trigger-label">${label}</span>
+      <span class="ms-trigger-arrow">▼</span>
+    </button>
+    <div class="ms-panel">
+      ${paises.map(p => {
+        const checked = _paisFiltroTimesSet.has(p.nome);
+        return `<div class="ms-opt${checked?' checked':''}" data-val="${window._escSQ(p.nome)}" onclick="togglePaisFiltroTimes(event,'${window._escSQ(p.nome)}')">
+          <div class="ms-opt-check">${checked?'✓':''}</div>
+          ${p.code ? `<img src="https://flagcdn.com/w40/${p.code}.png" style="width:22px;height:16px;object-fit:cover;border-radius:3px;" loading="lazy">` : ''}
+          <span style="text-transform:uppercase;font-size:12px;">${p.nome}</span>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
 function htmlEficFiltroTimes() {
   return `<div style="margin-bottom:14px;">
     <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">FILTRAR POR EFICIENCIA</label>
-    <div class="efic-tags" id="times-efic-filtro">
-      ${EFIC_TODAS.map(e=>`<span class="efic-tag${_eficFiltroTimesSet.has(e)?' selecionado':''}" data-efic="${e}" onclick="toggleEficFiltroTimes('${e}')">${e}</span>`).join('')}
-    </div>
+    ${htmlMsDropEficTimes()}
   </div>`;
 }
 
@@ -4789,7 +4899,7 @@ function cardCampHome(c, modoLista=false) {
 // ─── GERENCIAR TIMES ─────────────────────────────────────────────────
 window.filtrarTimes = tipo => {
   abaTimesAtual = tipo;
-  _paisFiltroTimes = '';
+  _paisFiltroTimesSet = new Set();
   _nomeFiltroTimes = '';
   const inputEl = document.getElementById('filtro-nome-times');
   if (inputEl) inputEl.value = '';
@@ -4806,38 +4916,20 @@ window.filtrarTimesPorNome = val => {
 };
 
 window._setFiltroTimes = val => {
-  _paisFiltroTimes = val;
+  _paisFiltroTimesSet = new Set();
+  if (val) _paisFiltroTimesSet.add(val);
   renderTimesEdit();
 };
 
-function renderTimesEdit() {
+function _renderTimesLista() {
   const pool = abaTimesAtual === 'clubes' ? clubes : selecoes;
   const isSel = abaTimesAtual === 'selecoes';
   const el = document.getElementById('lista-times-edit');
-  const filtroEl = document.getElementById('filtro-pais-times');
-  const eficWrap = document.getElementById('filtro-efic-times-wrap');
-  if (eficWrap) eficWrap.innerHTML = htmlEficFiltroTimes();
-
-  // Country filter — only for clubes
-  if (!isSel) {
-    const paises = [...new Set(pool.map(t => {
-      const d = TEAM_DATA[t.id] || {};
-      return d.paisNome ? { nome: d.paisNome, code: d.pais || '' } : null;
-    }).filter(Boolean).map(x => JSON.stringify(x)))].map(s => JSON.parse(s)).sort((a,b) => a.nome.localeCompare(b.nome));
-    filtroEl.style.display = paises.length ? 'block' : 'none';
-    filtroEl.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:6px;">
-      <button onclick="_setFiltroTimes('')" class="filtro-btn${_paisFiltroTimes===''?' ativo':''}">TODOS</button>
-      ${paises.map(p => `<button onclick="_setFiltroTimes('${window._escSQ(p.nome)}')" class="filtro-btn${_paisFiltroTimes===p.nome?' ativo':''}" style="display:inline-flex;align-items:center;gap:6px;">${flagImg(p.code,18)}<span>${p.nome}</span></button>`).join('')}
-    </div>`;
-  } else {
-    filtroEl.style.display = 'none';
-  }
-
   let items = pool;
-  if (!isSel && _paisFiltroTimes) {
+  if (!isSel && _paisFiltroTimesSet.size > 0) {
     items = pool.filter(t => {
       const d = TEAM_DATA[t.id] || {};
-      return (d.paisNome || '') === _paisFiltroTimes;
+      return _paisFiltroTimesSet.has(d.paisNome || '');
     });
   }
   if (_nomeFiltroTimes) {
@@ -4893,6 +4985,28 @@ function renderTimesEdit() {
     return `<div style="margin-bottom:10px;">${inner}</div>`;
   }).join('');
   if (podeMudar) initSwipe(el, 'time');
+}
+
+function renderTimesEdit() {
+  const pool = abaTimesAtual === 'clubes' ? clubes : selecoes;
+  const isSel = abaTimesAtual === 'selecoes';
+  const filtroEl = document.getElementById('filtro-pais-times');
+  const eficWrap = document.getElementById('filtro-efic-times-wrap');
+  if (eficWrap) eficWrap.innerHTML = htmlEficFiltroTimes();
+
+  // Country filter — only for clubes, as multi-select dropdown
+  if (!isSel) {
+    const paises = [...new Set(pool.map(t => {
+      const d = TEAM_DATA[t.id] || {};
+      return d.paisNome ? { nome: d.paisNome, code: d.pais || '' } : null;
+    }).filter(Boolean).map(x => JSON.stringify(x)))].map(s => JSON.parse(s)).sort((a,b) => a.nome.localeCompare(b.nome));
+    filtroEl.style.display = paises.length ? 'block' : 'none';
+    filtroEl.innerHTML = paises.length ? `<div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">FILTRAR POR PAIS</label>${htmlMsDropPaisTimes(paises)}</div>` : '';
+  } else {
+    filtroEl.style.display = 'none';
+  }
+
+  _renderTimesLista();
 }
 
 document.getElementById('btn-add-time').addEventListener('click', () => {
