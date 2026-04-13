@@ -5,4 +5,8 @@
 
 ## MELHORIAS ##
 
+- [ ] Na página de jogadores, ordenar os jogadores por ordem alfabética
+- [ ] Na página de times, ordenar por ordem alfabética e adicionar filtro por nome do clube ou seleção (cards se escondem ao digitar)
+- [ ] Quando alterado a eficiência do time, deve ser refletido nos cards de amistosos e torneios dinamicamente
+- [ ] Quando excluir um amistoso ou campeonato, deve ser excluído também do ranking; revisar jogos finalizados e atualizar ranking corretamente
 

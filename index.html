@@ -593,6 +593,9 @@
       </div>
 
       <div id="filtro-pais-times" style="display:none; margin-bottom:14px;"></div>
+      <div style="margin-bottom:14px;">
+        <input id="filtro-nome-times" type="text" placeholder="🔍 BUSCAR TIME..." oninput="filtrarTimesPorNome(this.value)" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--card-border);background:var(--card);color:var(--text);font-size:13px;font-weight:700;box-sizing:border-box;">
+      </div>
       <div id="lista-times-edit"></div>
     </div>
 
@@ -956,6 +959,7 @@ let clubes     = [...CLUBES_DEFAULT];
 let selecoes   = [...SELECOES_DEFAULT];
 let abaTimesAtual = 'clubes';
 let _paisFiltroTimes = '';
+let _nomeFilterTimes = '';
 let _disponiveis  = []; // partidas disponíveis para registo em grupo
 
 // ─── FILTRO DE EFICIÊNCIA ─────────────────────────────────────────────
@@ -1008,6 +1012,13 @@ function eficBadge(efic) {
   return `<span class="tag" style="background:${bg};color:${cor};border:1px solid ${cor}33;">${e.toUpperCase()}</span>`;
 }
 window.eficBadge = eficBadge;
+
+/** Retorna a eficiência atual de um time buscando nos arrays em memória */
+function eficienciaAtual(timeId) {
+  if (!timeId) return 'Bom';
+  const t = clubes.find(x => x.id === timeId) || selecoes.find(x => x.id === timeId);
+  return t?.eficiencia || 'Bom';
+}
 
 function forcaBadge(f) {
   // RG7: acima de 85 = verde, abaixo de 75 = vermelho, entre 75 e 85 = amarelo
@@ -1586,7 +1597,8 @@ function renderJogadores() {
   if (!jogadores.length) { c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">Nenhum jogador cadastrado</p>'; return; }
   const master = getMaster();
   const podeMudar = temPermissao();
-  c.innerHTML = jogadores.map(j => podeMudar ? `
+  const sorted = [...jogadores].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }));
+  c.innerHTML = sorted.map(j => podeMudar ? `
     <div class="swipe-wrap" data-swipe-id="${j.id}" data-swipe-nome="${j.nome.replace(/"/g,'&quot;')}">
       <div class="swipe-bg">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
@@ -1948,7 +1960,7 @@ function cardAmistoso(a, compact=false, readonly=false) {
       <div style="flex:1;text-align:center;">
         <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${abreviarNome(a.time1?.nome || '?')}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${b1}</div>
-        <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(a.time1?.eficiencia)}</div>
+        <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(a.time1?.timeId))}</div>
         ${(a.time1?.jogadores||[]).length
           ? `<div style="margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:2px;">${(a.time1.jogadores).map(n=>`<div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>`
           : ''}
@@ -1959,7 +1971,7 @@ function cardAmistoso(a, compact=false, readonly=false) {
       <div style="flex:1;text-align:center;">
         <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${abreviarNome(a.time2?.nome || '?')}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${b2}</div>
-        <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(a.time2?.eficiencia)}</div>
+        <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(a.time2?.timeId))}</div>
         ${(a.time2?.jogadores||[]).length
           ? `<div style="margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:2px;">${(a.time2.jogadores).map(n=>`<div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>`
           : ''}
@@ -2631,7 +2643,7 @@ window.salvarTimeRapido = async (timeId, tipoT) => {
     await setDoc(doc(db, 'times', timeId), { id: timeId, eficiencia, inativo }, { merge: true });
   }
   await carregarTimes();
-  // Atualizar apenas o time editado no sorteio atual sem ressortear
+  renderAmistosos();
   if (_sorteioAmi) {
     if (_sorteioAmi.time1?.timeId === timeId) {
       _sorteioAmi.time1.eficiencia = eficiencia;
@@ -2708,13 +2720,13 @@ window.abrirPlacar = id => {
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
       <div style="flex:1;text-align:center;">
         <div style="font-weight:800;font-size:15px;margin-bottom:8px;text-transform:uppercase;">${a.time1?.nome}</div>
-        ${eficBadge(a.time1?.eficiencia)}
+        ${eficBadge(eficienciaAtual(a.time1?.timeId))}
         <input id="pg1" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" class="input placar-input" style="text-align:center;font-size:52px;font-weight:900;padding:14px;margin-top:10px;letter-spacing:-1px;">
       </div>
       <div style="color:var(--text-muted);font-size:36px;font-weight:900;flex-shrink:0;">×</div>
       <div style="flex:1;text-align:center;">
         <div style="font-weight:800;font-size:15px;margin-bottom:8px;text-transform:uppercase;">${a.time2?.nome}</div>
-        ${eficBadge(a.time2?.eficiencia)}
+        ${eficBadge(eficienciaAtual(a.time2?.timeId))}
         <input id="pg2" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" class="input placar-input" style="text-align:center;font-size:52px;font-weight:900;padding:14px;margin-top:10px;letter-spacing:-1px;">
       </div>
     </div>
@@ -2755,14 +2767,14 @@ window.verAmistoso = (id) => {
         <div style="text-align:center;flex:1;">
           <div style="display:flex;justify-content:center;margin-bottom:8px;">${b1}</div>
           <div style="font-weight:800;font-size:14px;text-transform:uppercase;">${a.time1?.nome||'?'}</div>
-          <div style="margin-top:4px;">${eficBadge(a.time1?.eficiencia)}</div>
+          <div style="margin-top:4px;">${eficBadge(eficienciaAtual(a.time1?.timeId))}</div>
           <div style="font-size:11px;color:var(--cyan);margin-top:4px;">${(a.time1?.jogadores||[]).join(', ')}</div>
         </div>
         <div style="font-size:18px;font-weight:900;color:var(--text-muted);flex-shrink:0;">VS</div>
         <div style="text-align:center;flex:1;">
           <div style="display:flex;justify-content:center;margin-bottom:8px;">${b2}</div>
           <div style="font-weight:800;font-size:14px;text-transform:uppercase;">${a.time2?.nome||'?'}</div>
-          <div style="margin-top:4px;">${eficBadge(a.time2?.eficiencia)}</div>
+          <div style="margin-top:4px;">${eficBadge(eficienciaAtual(a.time2?.timeId))}</div>
           <div style="font-size:11px;color:var(--cyan);margin-top:4px;">${(a.time2?.jogadores||[]).join(', ')}</div>
         </div>
       </div>
@@ -2794,14 +2806,14 @@ window.editarAmistoso = (id) => {
           <div style="text-align:center;flex:1;">
             <div style="display:flex;justify-content:center;margin-bottom:8px;">${b1}</div>
             <div style="font-weight:800;font-size:14px;">${a.time1?.nome||'?'}</div>
-            <div style="margin-top:4px;">${eficBadge(a.time1?.eficiencia)}</div>
+            <div style="margin-top:4px;">${eficBadge(eficienciaAtual(a.time1?.timeId))}</div>
             <div style="font-size:11px;color:var(--cyan);margin-top:4px;">${(a.time1?.jogadores||[]).join(', ')}</div>
           </div>
           <div style="font-size:18px;font-weight:900;color:var(--text-muted);flex-shrink:0;">VS</div>
           <div style="text-align:center;flex:1;">
             <div style="display:flex;justify-content:center;margin-bottom:8px;">${b2}</div>
             <div style="font-weight:800;font-size:14px;">${a.time2?.nome||'?'}</div>
-            <div style="margin-top:4px;">${eficBadge(a.time2?.eficiencia)}</div>
+            <div style="margin-top:4px;">${eficBadge(eficienciaAtual(a.time2?.timeId))}</div>
             <div style="font-size:11px;color:var(--cyan);margin-top:4px;">${(a.time2?.jogadores||[]).join(', ')}</div>
           </div>
         </div>
@@ -3374,7 +3386,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
       <div style="flex:1;text-align:center;">
         <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${abreviarNome(m1.time?.nome||'?')}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${b1}</div>
-        <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(m1.time?.eficiencia)}</div>
+        <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(m1.time?.id))}</div>
         <div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;margin:0 auto;display:inline-block;">${m1.nome}</div>
       </div>
       <div style="text-align:center;min-width:70px;padding-top:20px;">
@@ -3383,7 +3395,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
       <div style="flex:1;text-align:center;">
         <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${abreviarNome(m2.time?.nome||'?')}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${b2}</div>
-        <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(m2.time?.eficiencia)}</div>
+        <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(m2.time?.id))}</div>
         <div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;margin:0 auto;display:inline-block;">${m2.nome}</div>
       </div>
     </div>
@@ -3405,7 +3417,7 @@ window.abrirCampeonato = (id) => {
     return `<div style="flex:1;text-align:center;min-width:0;">
       <div style="display:flex;justify-content:center;margin-bottom:4px;">${bc}</div>
       <div style="font-size:13px;font-weight:800;line-height:1.2;">${m.time?.nome||'?'}</div>
-      <div style="margin-top:3px;">${eficBadge(m.time?.eficiencia)}</div>
+      <div style="margin-top:3px;">${eficBadge(eficienciaAtual(m.time?.id))}</div>
       <div style="font-size:11px;color:var(--cyan);margin-top:3px;font-weight:700;">${m.nome}</div>
     </div>`;
   };
@@ -3491,7 +3503,7 @@ window.abrirCampeonato = (id) => {
           ${timeIcon}
           <div style="min-width:0;flex:1;">
             <div style="font-weight:900;font-size:13px;line-height:1.2;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.time?.nome||'?'}</div>
-            <div style="margin-top:3px;">${eficBadge(p.time?.eficiencia)}</div>
+            <div style="margin-top:3px;">${eficBadge(eficienciaAtual(p.time?.id))}</div>
             <div style="font-size:11px;color:var(--purple);font-weight:700;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nome}</div>
           </div>
         </div>`;
@@ -4052,10 +4064,18 @@ function cardCampHome(c, modoLista=false) {
 window.filtrarTimes = tipo => {
   abaTimesAtual = tipo;
   _paisFiltroTimes = '';
+  _nomeFilterTimes = '';
+  const inputEl = document.getElementById('filtro-nome-times');
+  if (inputEl) inputEl.value = '';
   document.getElementById('tab-clubes').style.background = tipo==='clubes'?'var(--purple)':'none';
   document.getElementById('tab-clubes').style.color = tipo==='clubes'?'#fff':'var(--text-muted)';
   document.getElementById('tab-selecoes').style.background = tipo==='selecoes'?'var(--purple)':'none';
   document.getElementById('tab-selecoes').style.color = tipo==='selecoes'?'#fff':'var(--text-muted)';
+  renderTimesEdit();
+};
+
+window.filtrarTimesPorNome = val => {
+  _nomeFilterTimes = val.trim().toLowerCase();
   renderTimesEdit();
 };
 
@@ -4092,6 +4112,10 @@ function renderTimesEdit() {
       return (d.paisNome || '') === _paisFiltroTimes;
     });
   }
+  if (_nomeFilterTimes) {
+    items = items.filter(t => t.nome.toLowerCase().includes(_nomeFilterTimes));
+  }
+  items = [...items].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }));
 
   if (!items.length) { el.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:32px 0;font-size:14px;">NENHUM TIME</p>'; return; }
   const podeMudar = temPermissao();
@@ -4410,7 +4434,7 @@ window.salvarEdicaoTime = async (id) => {
   } catch {
     await setDoc(doc(db, 'times', id), { id, eficiencia, inativo }, { merge: true });
   }
-  fecharFullscreen(); await carregarTimes(); renderTimesEdit();
+  fecharFullscreen(); await carregarTimes(); renderTimesEdit(); renderAmistosos();
 };
 
 window.excluirTime = async id => {
