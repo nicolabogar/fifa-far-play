@@ -980,10 +980,11 @@ function shieldClube(timeId, nomeTime, size=56) {
   const fs = size > 50 ? 15 : 11;
   const svgFallback = `<svg width="${size}" height="${h}" viewBox="0 0 56 64" xmlns="http://www.w3.org/2000/svg"><path d="M28 2 L54 11 L54 40 Q54 56 28 63 Q2 56 2 40 L2 11 Z" fill="${_escHtml(d.fundo)}" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/><text x="28" y="${Math.round(h*0.58)}" text-anchor="middle" dominant-baseline="middle" fill="${_escHtml(d.cor)}" font-weight="900" font-size="${fs}" font-family="system-ui">${_escHtml(d.abrev)}</text></svg>`;
   if (d.crest) {
-    return `<div style="width:${size}px;height:${h}px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-      <img src="${d.crest}" width="${size}" height="${size}" loading="lazy" decoding="async"
-        style="object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.4));"
-        onerror="window._onCrestError(this,'${_escSQ(d.fundo)}','${_escSQ(d.cor)}','${_escSQ(d.abrev)}',${size},${h})"
+    return `<div style="position:relative;width:${size}px;height:${h}px;flex-shrink:0;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.4));">
+      ${svgFallback}
+      <img src="${d.crest}" alt="" width="${size}" height="${h}" decoding="async"
+        style="position:absolute;inset:0;width:${size}px;height:${h}px;object-fit:contain;"
+        onerror="this.style.display='none'"
       >
     </div>`;
   }
@@ -1000,7 +1001,10 @@ function badgeTimeCompact(timeId, nomeTime, tipo) {
   }
   const d = TEAM_DATA[timeId] || { abrev:(nomeTime||'?').slice(0,3).toUpperCase(), fundo:'#1E1E35', cor:'#AAAAAA' };
   if (d.crest) {
-    return `<img src="${d.crest}" width="38" height="38" loading="lazy" style="object-fit:contain;flex-shrink:0;" onerror="window._onCrestErrorCompact(this,'${_escSQ(d.fundo)}','${_escSQ(d.cor)}','${_escSQ(d.abrev)}')">`;
+    return `<div style="position:relative;width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">
+      ${d.abrev}
+      <img src="${d.crest}" alt="" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none'">
+    </div>`;
   }
   return `<div style="width:44px;height:44px;border-radius:10px;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.abrev}</div>`;
 }
@@ -4036,10 +4040,9 @@ window.abrirCampeonato = (id) => {
           ? `<div style="width:48px;height:36px;border-radius:8px;overflow:hidden;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.4);">
               <img src="https://flagcdn.com/w80/${(SELECAO_PAIS[p.time?.id]||{pais:''}).pais}.png" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
             </div>`
-          : `<div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              ${TEAM_DATA[p.time?.id]?.crest
-                ? `<img src="${TEAM_DATA[p.time?.id].crest}" style="width:40px;height:40px;object-fit:contain;" onerror="this.style.display='none'">`
-                : `<div style="width:40px;height:40px;border-radius:10px;background:${TEAM_DATA[p.time?.id]?.fundo||'#1E1E35'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:${TEAM_DATA[p.time?.id]?.cor||'#fff'};">${(TEAM_DATA[p.time?.id]?.abrev||'?').slice(0,3)}</div>`}
+          : `<div style="position:relative;width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;background:${TEAM_DATA[p.time?.id]?.fundo||'#1E1E35'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:${TEAM_DATA[p.time?.id]?.cor||'#fff'};">
+              ${(TEAM_DATA[p.time?.id]?.abrev||'?').slice(0,3)}
+              ${TEAM_DATA[p.time?.id]?.crest ? `<img src="${TEAM_DATA[p.time?.id].crest}" alt="" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none'">` : ''}
             </div>`;
         return `<div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:12px;">
           ${timeIcon}
@@ -4712,7 +4715,11 @@ function renderTimesEdit() {
       countryInfo = `<span style="font-size:10px;color:var(--text-muted);font-weight:600;">${d.paisNome||''}</span>`;
     } else {
       const d = TEAM_DATA[t.id] || { abrev:(t.nome||'?').slice(0,3).toUpperCase(), fundo:'#1E1E35', cor:'#AAAAAA', pais:'', paisNome:'' };
-      const crestHtml = d.crest ? `<img src="${d.crest}" width="49" height="49" loading="lazy" style="object-fit:contain;flex-shrink:0;" onerror="window._onCrestErrorBox(this,'${_escSQ(d.fundo)}','${_escSQ(d.cor)}','${_escSQ(d.abrev)}',57,57,12,15)">`
+      const crestHtml = d.crest
+        ? `<div style="position:relative;width:57px;height:57px;border-radius:12px;overflow:hidden;flex-shrink:0;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">
+            ${d.abrev}
+            <img src="${d.crest}" alt="" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none'">
+          </div>`
         : `<div style="width:57px;height:57px;border-radius:12px;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.abrev}</div>`;
       icone = crestHtml;
       countryInfo = `<span style="font-size:10px;color:var(--text-muted);font-weight:600;">${flagImg(d.pais,14)} ${d.paisNome||''}</span>`;
