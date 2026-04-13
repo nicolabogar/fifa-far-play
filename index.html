@@ -1859,10 +1859,11 @@ function avatarSvg(size=46) {
 window.avatarSvg = avatarSvg;
 
 function getMaster() { return jogadores.find(j => j.master); }
+function getMasters() { return jogadores.filter(j => j.master); }
 function temPermissao() {
-  const master = getMaster();
-  if (!master) return true; // sem master definido → todos podem
-  return usuario?.email && master.email && usuario.email.toLowerCase() === master.email.toLowerCase();
+  const masters = getMasters();
+  if (!masters.length) return true; // sem master definido → todos podem
+  return usuario?.email && masters.some(m => m.email && usuario.email.toLowerCase() === m.email.toLowerCase());
 }
 
 // ─── SWIPE-TO-DELETE (iOS style) ──────────────────────────────────────
@@ -2089,12 +2090,7 @@ window.salvarEdicaoJogador = async (id) => {
       fotoUrl = _croppedBlob;
       _croppedBlob = null;
     }
-    if (isMasterCheck && isMasterUser) {
-      const masterAtual = getMaster();
-      if (masterAtual && masterAtual.id !== id) {
-        await updateDoc(doc(db,'jogadores',masterAtual.id), { master: false });
-      }
-    }
+    // permite múltiplos masters: não remove o master atual ao promover outro
     await updateDoc(doc(db,'jogadores',id), { nome, apelido, email: email||'', celular, master: isMasterCheck, fotoUrl });
     fecharFullscreen(); await carregarJogadores(); atualizarDash();
   } catch(e) {
@@ -2453,10 +2449,7 @@ window.salvarJogador = async () => {
       fotoUrl = _croppedBlob;
       _croppedBlob = null;
     }
-    if (isMaster) {
-      const masterAtual = getMaster();
-      if (masterAtual) await updateDoc(doc(db,'jogadores',masterAtual.id), { master: false });
-    }
+    // permite múltiplos masters: não remove o master atual ao criar novo player com master=true
     await addDoc(collection(db, 'jogadores'), { nome, apelido, email: email||'', celular, master: isMaster, fotoUrl, criadoEm: serverTimestamp() });
     fecharFullscreen(); await carregarJogadores(); atualizarDash();
   } catch(e) {
