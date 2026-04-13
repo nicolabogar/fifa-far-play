@@ -1,0 +1,12 @@
+# FIFA FAR PLAY - Prompts de Features v23
+# FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
+# O agente deve marcar o hash do commit ao concluir cada item.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v23.txt e um novo é criado.
+
+## MELHORIAS ##
+
+- [x] A substituicao em toda aplicacao para apresentar o apelido do jogador ao inves do nome quando existir apelido nao estava funcionando em alguns cards (jogo em andamento, sorteio, detalhes, edicao, historico e compartilhamento WhatsApp) — revisado e corrigido em todos os lugares. Na lista de cadastro de jogadores o nome completo e exibido com o campo apelido aparecendo abaixo quando existir (hash: b511208)
+- [x] Nos cards dos jogos o placar está centralizado no meio entre os time a e time b, quero que ele fique ainda nesse meio mas quero que ele fique na parte de baixo (hash: cef42ea)
+- [x] No card de jogos, criar duas divs para organizar componentes: primeira div com a tag do jogador, nome do time, icone e descricao do pais (time A esquerda, time B direita); segunda div com o icone do time e eficiencia (time A esquerda, time B direita) e placar centralizado (hash: a36871d)
+- [x] o ícone dos times selecionados no torneio está ficando com um fundo branco, quero que remova é só deixe o a imagem do logo do time, o torneio também quero que os nomes de tipos de torneio esteja em upper case (hash: 822d36a)
+- [x] Quando entro na edicao de um torneio nao esta sendo possivel alterar o nome do torneio, e o escrito do nome do torneio deve ser sempre em upper case, a exibicao do nome do torneio nos jogos em andamento e finalizados devem tambem estar em upper case (hash: 0c786aa)

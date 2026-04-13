@@ -1003,7 +1003,7 @@ function badgeTimeCompact(timeId, nomeTime, tipo) {
   if (d.crest) {
     return `<div style="position:relative;width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">
       <span class="crest-fallback">${d.abrev}</span>
-      <img src="${d.crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='';this.previousElementSibling.style.display='none'" onerror="window._crestError(this)">
+      <img src="${d.crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='';this.previousElementSibling.style.display='none';this.parentElement.style.background='transparent';this.parentElement.style.border='none';" onerror="window._crestError(this)">
     </div>`;
   }
   return `<div style="width:44px;height:44px;border-radius:10px;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.abrev}</div>`;
@@ -3703,7 +3703,7 @@ function abrirModalCriarCamp(secao, secaoView) {
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
           ${Object.entries(CAMP_META).map(([k,v]) => {
             return `<div class="tipo-btn" data-ct="${k}" onclick="selCampTipo('${k}',this)" style="font-size:11px;padding:10px 6px;">
-              <div style="font-weight:700;line-height:1.2;font-size:10px;">${v.nome}</div>
+              <div style="font-weight:700;line-height:1.2;font-size:10px;">${v.nome.toUpperCase()}</div>
             </div>`;
           }).join('')}
         </div>
@@ -3712,7 +3712,7 @@ function abrirModalCriarCamp(secao, secaoView) {
       </div>
       <div>
         <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">NOME DO TORNEIO</label>
-        <input class="input" id="cn" placeholder="Nome do torneio" autocomplete="off">
+        <input class="input" id="cn" placeholder="NOME DO TORNEIO" autocomplete="off" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
       </div>
       <div>
         <label class="check-row" style="margin-bottom:8px;">
@@ -3840,8 +3840,8 @@ window.selCampTipo = (k, el) => {
   // Auto-preenche nome com o tipo do campeonato (#16)
   const meta = CAMP_META[k];
   const cn = document.getElementById('cn');
-  if (cn && (!cn.value.trim() || Object.values(CAMP_META).some(m => cn.value.trim() === m.nome))) {
-    cn.value = meta.nome;
+  if (cn && (!cn.value.trim() || Object.values(CAMP_META).some(m => cn.value.trim() === m.nome.toUpperCase()))) {
+    cn.value = meta.nome.toUpperCase();
   }
   // Limpa seleção manual de times se trocar de tipo
   const manualCheck = document.getElementById('manual-times');
@@ -3868,7 +3868,7 @@ window.selCampTipo = (k, el) => {
 window.criarCampeonato = async () => {
   const btn = document.getElementById('btn-camp-salvar');
   if (_lockBtn(btn)) return;
-  const nome = document.getElementById('cn').value.trim();
+  const nome = document.getElementById('cn').value.trim().toUpperCase();
   const tipo = document.getElementById('ct').value;
   if (!nome) { toast('DIGITE O NOME DO TORNEIO', 'erro'); _unlockBtn(btn); return; }
   if (campeonatos.some(c => c.nome.trim().toLowerCase() === nome.toLowerCase())) { toast('JA EXISTE UM TORNEIO COM ESSE NOME', 'erro'); _unlockBtn(btn); return; }
@@ -3936,22 +3936,18 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
   const placarArea = temRes
     ? `<div style="font-size:29px;font-weight:900;letter-spacing:1px;color:var(--yellow);">${g1r}<span style="color:var(--text-muted);font-size:13px;"> × </span>${g2r}</div>`
     : podeMudar
-      ? `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-          <div style="display:flex;align-items:center;gap:4px;">
+      ? `<div style="display:flex;align-items:center;gap:4px;">
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="1" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
             <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="2" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
           </div>
-          <button onclick="event.stopPropagation();salvarPartidaDireta('${cid}',${gi},'${m1.jogadorId}','${m2.jogadorId}',this)" class="btn-primary" style="margin-top:14px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">FIM</button>
-        </div>`
-      : `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-          <div style="display:flex;align-items:center;gap:4px;opacity:0.4;">
+          <button onclick="event.stopPropagation();salvarPartidaDireta('${cid}',${gi},'${m1.jogadorId}','${m2.jogadorId}',this)" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">FIM</button>`
+      : `<div style="display:flex;align-items:center;gap:4px;opacity:0.4;">
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="1" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;cursor:not-allowed;">
             <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="2" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;cursor:not-allowed;">
           </div>
-          <button disabled onclick="event.stopPropagation()" class="btn-primary" style="margin-top:14px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:not-allowed;opacity:0.4;">FIM</button>
-        </div>`;
+          <button disabled onclick="event.stopPropagation()" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:not-allowed;opacity:0.4;">FIM</button>`;
 
   return `<div class="match-card" style="margin-bottom:10px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -4090,7 +4086,7 @@ window.abrirCampeonato = (id) => {
             </div>`
           : `<div style="position:relative;width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;background:${TEAM_DATA[p.time?.id]?.fundo||'#1E1E35'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:${TEAM_DATA[p.time?.id]?.cor||'#fff'};">
               <span class="crest-fallback">${(TEAM_DATA[p.time?.id]?.abrev||'?').slice(0,3)}</span>
-              ${TEAM_DATA[p.time?.id]?.crest ? `<img src="${TEAM_DATA[p.time?.id].crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='';this.previousElementSibling.style.display='none'" onerror="window._crestError(this)">` : ''}
+              ${TEAM_DATA[p.time?.id]?.crest ? `<img src="${TEAM_DATA[p.time?.id].crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='';this.previousElementSibling.style.display='none';this.parentElement.style.background='transparent';this.parentElement.style.border='none';" onerror="window._crestError(this)">` : ''}
             </div>`;
         return `<div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:12px;">
           ${timeIcon}
@@ -4103,6 +4099,7 @@ window.abrirCampeonato = (id) => {
       }).join('')}
     </div>
 
+    ${podeMudar ? `<button onclick="editarNomeTorneio('${c.id}')" style="width:100%;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.35);color:#C4B5FD;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px;">EDITAR NOME DO TORNEIO</button>` : ''}
     ${podeMudar ? (naoIniciado
       ? `<button onclick="ressortearCampeonato('${c.id}')" style="width:100%;background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(6,182,212,0.2));border:1px solid rgba(139,92,246,0.4);color:#C4B5FD;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:16px;">SORTEAR TIMES / ADICIONAR JOGADORES</button>`
       : `<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:10px 12px;margin-bottom:16px;display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">⚠️</span><span style="font-size:12px;color:#FCD34D;font-weight:700;">TORNEIO EM ANDAMENTO — NÃO É POSSÍVEL SORTEAR OU ADICIONAR JOGADORES</span></div>`)
@@ -4187,6 +4184,28 @@ window.confirmarExcluirCamp = async (id) => {
   fecharModal(); fecharFullscreen(); await carregarCampeonatos(); atualizarDash();
 };
 
+window.editarNomeTorneio = (id) => {
+  const c = campeonatos.find(x => x.id === id);
+  if (!c) return;
+  modal(`<p class="modal-title">EDITAR NOME DO TORNEIO</p>
+    <input class="input" id="novo-nome-torneio" value="${c.nome.toUpperCase()}" style="text-transform:uppercase;margin-bottom:16px;" autocomplete="off" oninput="this.value=this.value.toUpperCase()">
+    <div style="display:flex;gap:10px;">
+      <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
+      <button class="btn-primary" onclick="confirmarEditarNomeTorneio('${id}')">SALVAR</button>
+    </div>`);
+  setTimeout(() => { const inp = document.getElementById('novo-nome-torneio'); if (inp) { inp.focus(); inp.select(); } }, 100);
+};
+
+window.confirmarEditarNomeTorneio = async (id) => {
+  const c = campeonatos.find(x => x.id === id);
+  if (!c) return;
+  const novoNome = document.getElementById('novo-nome-torneio')?.value.trim().toUpperCase();
+  if (!novoNome) { toast('DIGITE O NOME DO TORNEIO', 'erro'); return; }
+  if (campeonatos.some(x => x.id !== id && x.nome.trim().toUpperCase() === novoNome)) { toast('JA EXISTE UM TORNEIO COM ESSE NOME', 'erro'); return; }
+  await updateDoc(doc(db, 'campeonatos', id), { nome: novoNome });
+  fecharModal(); await carregarCampeonatos(); atualizarDash(); abrirCampeonato(id);
+};
+
 window.ressortearCampeonato = (id) => {
   const c = campeonatos.find(x=>x.id===id);
   if (!c) return;
@@ -4229,7 +4248,7 @@ window.regPartida = (cid, gi, j1Id, j2Id) => {
   const b1 = isSel ? badgeSel(m1.time?.id||'',m1.time?.nome||'') : badgeClube(m1.time?.id||'',m1.time?.nome||'');
   const b2 = isSel ? badgeSel(m2.time?.id||'',m2.time?.nome||'') : badgeClube(m2.time?.id||'',m2.time?.nome||'');
   modal(`<p class="modal-title" style="margin-bottom:4px;">REGISTRAR PLACAR</p>
-    <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">${g.nome} · ${c.nome}</p>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">${g.nome} · ${c.nome.toUpperCase()}</p>
     <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:24px;">
       <div style="flex:1;text-align:center;">
         <div style="display:flex;justify-content:center;margin-bottom:8px;">${b1}</div>
@@ -4660,7 +4679,7 @@ function cardCampHome(c, modoLista=false) {
   const podeMudar = temPermissao();
   const cardHtml = `<div ${idAttr}class="match-card" style="margin-bottom:${modoLista?'0':'10px'};padding:12px;cursor:pointer;" onclick="abrirCampeonato('${c.id}')">
     <div style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.07);">
-      <div style="font-weight:900;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.02em;">${c.nome}</div>
+      <div style="font-weight:900;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.02em;">${c.nome.toUpperCase()}</div>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;">
@@ -4767,7 +4786,7 @@ function renderTimesEdit() {
       const crestHtml = d.crest
         ? `<div style="position:relative;width:57px;height:57px;border-radius:12px;overflow:hidden;flex-shrink:0;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">
             <span class="crest-fallback">${d.abrev}</span>
-            <img src="${d.crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='';this.previousElementSibling.style.display='none'" onerror="window._crestError(this)">
+            <img src="${d.crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='';this.previousElementSibling.style.display='none';this.parentElement.style.background='transparent';this.parentElement.style.border='none';" onerror="window._crestError(this)">
           </div>`
         : `<div style="width:57px;height:57px;border-radius:12px;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.abrev}</div>`;
       icone = crestHtml;
