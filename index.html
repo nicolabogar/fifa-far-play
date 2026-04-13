@@ -1101,9 +1101,9 @@ function badgeTimeCountryInfo(timeId, nomeTime, tipo, align='center') {
 }
 window.badgeTimeCountryInfo = badgeTimeCountryInfo;
 
-/** Renderiza apenas o ícone do time — para seleções retorna vazio (invisível nos cards de jogos) */
+/** Renderiza apenas o ícone do time — para seleções retorna a bandeira, para clubes o escudo */
 function badgeTimeIcon(timeId, nomeTime, tipo) {
-  return tipo === 'selecoes' ? '' : shieldClube(timeId, nomeTime, 48);
+  return tipo === 'selecoes' ? badgeSel(timeId, nomeTime) : shieldClube(timeId, nomeTime, 48);
 }
 window.badgeTimeIcon = badgeTimeIcon;
 
