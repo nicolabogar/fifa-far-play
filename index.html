@@ -5379,30 +5379,37 @@ function _renderTimesLista() {
     const eficiencia = t.eficiencia || 'Bom';
     const tagInativo = inativo ? `<span class="tag tag-gray">INATIVO</span>` : '';
     const eficTag = eficBadge(eficiencia);
-    let icone, countryInfo;
+    let inner;
     if (isSel) {
       const d = SELECAO_PAIS[t.id] || { pais:'', paisNome: t.nome };
-      icone = `<div style="width:52px;height:39px;border-radius:7px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.pais?`<img src="https://flagcdn.com/w80/${d.pais}.png" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=\\'font-size:22px;\\'>🌍</span>'">`: '<span style="font-size:22px;">🌍</span>'}</div>`;
-      countryInfo = '';
+      const flagIcone = `<div style="width:52px;height:39px;border-radius:7px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.pais?`<img src="https://flagcdn.com/w80/${d.pais}.png" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=\\'font-size:22px;\\'>🌍</span>'">`: '<span style="font-size:22px;">🌍</span>'}</div>`;
+      inner = `<div class="entity-card" style="cursor:pointer;${ativoStyle}" onclick="editarTime('${t.id}')">
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:800;font-size:14px;text-transform:uppercase;display:flex;align-items:center;gap:5px;flex-wrap:wrap;">${t.nome}${tagInativo}</div>
+            ${eficTag ? `<div style="margin-top:4px;">${eficTag}</div>` : ''}
+          </div>
+          ${flagIcone}
+        </div>`;
     } else {
       const d = _teamDataOuFallback(t.id, t.nome);
-      const crestHtml = d.crest
+      const flagIcone = `<div style="width:39px;height:29px;border-radius:5px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.pais ? `<img src="https://flagcdn.com/w40/${d.pais}.png" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=\\'font-size:14px;\\'>🏳</span>'">` : '<span style="font-size:14px;">🏳</span>'}</div>`;
+      const countryDescr = `<span style="font-size:10px;color:var(--text-muted);font-weight:600;">${d.paisNome||''}</span>`;
+      const shieldIcone = d.crest
         ? `<div style="position:relative;width:57px;height:57px;border-radius:12px;overflow:hidden;flex-shrink:0;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">
             <span class="crest-fallback">${d.abrev}</span>
             <img src="${d.crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='';this.previousElementSibling.style.display='none';this.parentElement.style.background='transparent';this.parentElement.style.border='none';" onerror="window._crestError(this)">
           </div>`
         : `<div style="width:57px;height:57px;border-radius:12px;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.abrev}</div>`;
-      icone = crestHtml;
-      countryInfo = `<span style="font-size:10px;color:var(--text-muted);font-weight:600;">${flagImg(d.pais,14)} ${d.paisNome||''}</span>`;
+      inner = `<div class="entity-card" style="cursor:pointer;${ativoStyle}" onclick="editarTime('${t.id}')">
+          ${flagIcone}
+          <div style="flex:1;min-width:0;">
+            <div style="margin-bottom:2px;">${countryDescr}</div>
+            <div style="font-weight:800;font-size:14px;text-transform:uppercase;display:flex;align-items:center;gap:5px;flex-wrap:wrap;">${t.nome}${tagInativo}</div>
+            ${eficTag ? `<div style="margin-top:4px;">${eficTag}</div>` : ''}
+          </div>
+          ${shieldIcone}
+        </div>`;
     }
-    const inner = `<div class="entity-card" style="cursor:pointer;${ativoStyle}" onclick="editarTime('${t.id}')">
-        ${icone}
-        <div style="flex:1;min-width:0;">
-          <div style="margin-bottom:2px;">${countryInfo}</div>
-          <div style="font-weight:800;font-size:14px;text-transform:uppercase;display:flex;align-items:center;gap:5px;flex-wrap:wrap;">${t.nome}${tagInativo}</div>
-          ${eficTag ? `<div style="margin-top:4px;">${eficTag}</div>` : ''}
-        </div>
-      </div>`;
     if (podeMudar) {
       return `<div class="swipe-wrap" data-swipe-id="${t.id}" data-swipe-nome="${t.nome.replace(/"/g,'&quot;')}">
         <div class="swipe-bg">
@@ -5683,7 +5690,28 @@ window.editarTime = (id) => {
   const t = pool.find(x => x.id === id);
   if (!t) return;
   const isSel = abaTimesAtual === 'selecoes';
-  const badgeHtml = isSel ? badgeSel(t.id, t.nome) : badgeClube(t.id, t.nome);
+  let badgeHtml;
+  if (isSel) {
+    const selD = SELECAO_PAIS[t.id] || { pais: '', paisNome: t.nome };
+    badgeHtml = `<div style="display:flex;align-items:center;justify-content:center;gap:10px;">
+      <span style="font-weight:900;font-size:16px;text-transform:uppercase;">${t.nome}</span>
+      <div style="width:48px;height:36px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
+        ${selD.pais ? `<img src="https://flagcdn.com/w80/${selD.pais}.png" alt="${t.nome}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:24px;&quot;>🌍</span>'">` : '<span style="font-size:24px;">🌍</span>'}
+      </div>
+    </div>`;
+  } else {
+    const d = _teamDataOuFallback(t.id, t.nome);
+    badgeHtml = `<div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        ${d.pais ? `<div style="width:32px;height:24px;border-radius:4px;overflow:hidden;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,0.3);"><img src="https://flagcdn.com/w40/${d.pais}.png" alt="" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;"></div>` : ''}
+        <span style="font-size:12px;color:var(--text-muted);font-weight:600;">${d.paisNome||''}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-weight:900;font-size:16px;text-transform:uppercase;">${t.nome}</span>
+        ${shieldClube(t.id, t.nome, 40)}
+      </div>
+    </div>`;
+  }
   const inativoAtual = t.inativo || false;
   fullscreen(t.nome.toUpperCase(), `
     <div style="display:flex;flex-direction:column;gap:16px;max-width:400px;margin:0 auto;">
