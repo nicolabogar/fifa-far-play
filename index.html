@@ -1419,14 +1419,19 @@ async function carregarTimes() {
   const custom = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   const deletados = custom.filter(t => t._deleted).map(t => t.id);
   const adicionados = custom.filter(t => !t._deleted);
-  // Mapa de inatividade por id
+  // Mapa de inatividade e eficiência por id
   const inativoMap = {};
-  custom.forEach(t => { if (t.inativo) inativoMap[t.id] = true; });
+  const eficienciaMap = {};
+  custom.forEach(t => {
+    if (t.inativo) inativoMap[t.id] = true;
+    if (t.eficiencia) eficienciaMap[t.id] = t.eficiencia;
+  });
 
   const aplicar = (defaults, tipo) => {
     const base = defaults.filter(t => !deletados.includes(t.id)).map(t => ({
       ...t,
-      inativo: inativoMap[t.id] || false
+      inativo: inativoMap[t.id] || false,
+      eficiencia: eficienciaMap[t.id] || t.eficiencia || 'Bom'
     }));
     adicionados.filter(t => t.tipo === tipo).forEach(t => {
       if (!base.find(b => b.id === t.id)) base.push({ ...t, inativo: t.inativo || false });
@@ -4390,8 +4395,8 @@ window.editarTime = (id) => {
         <div><div style="font-size:13px;font-weight:700;">INATIVO</div><div style="font-size:11px;color:var(--text-muted);">Não aparece nos sorteios</div></div>
       </label>
       <div style="display:flex;gap:10px;margin-top:8px;">
-        <button class="btn-primary" onclick="salvarEdicaoTime('${id}')">SALVAR</button>
         <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
+        <button class="btn-primary" onclick="salvarEdicaoTime('${id}')">SALVAR</button>
       </div>
     </div>`);
 };
