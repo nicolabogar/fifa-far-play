@@ -2225,10 +2225,10 @@ function cardAmistoso(a, compact=false, readonly=false) {
   const t1nom = (a.time1?.nome||'').replace(/'/g,"\\'");
   const t2nom = (a.time2?.nome||'').replace(/'/g,"\\'");
   const lpBadge1 = (!temRes && master && !compact)
-    ? `<div style="display:flex;justify-content:center;margin-bottom:4px;cursor:pointer;user-select:none;" title="Segure para editar o time" onpointerdown="_lpAmiStart('${a.id}','${a.time1?.timeId}','${t1nom}','${a.tipo}')" onpointerup="_lpAmiEnd()" onpointercancel="_lpAmiEnd()" onclick="if(window._lpAmiTriggered){window._lpAmiTriggered=false;event.stopPropagation();}">${b1}</div>`
+    ? `<div style="display:flex;justify-content:center;margin-bottom:4px;cursor:pointer;user-select:none;-webkit-touch-callout:none;" title="Segure para editar o time" onpointerdown="_lpAmiStart('${a.id}','${a.time1?.timeId}','${t1nom}','${a.tipo}')" onpointerup="_lpAmiEnd()" onpointercancel="_lpAmiEnd()" oncontextmenu="return false;" onclick="if(window._lpAmiTriggered){window._lpAmiTriggered=false;event.stopPropagation();}">${b1}</div>`
     : `<div style="display:flex;justify-content:center;margin-bottom:4px;">${b1}</div>`;
   const lpBadge2 = (!temRes && master && !compact)
-    ? `<div style="display:flex;justify-content:center;margin-bottom:4px;cursor:pointer;user-select:none;" title="Segure para editar o time" onpointerdown="_lpAmiStart('${a.id}','${a.time2?.timeId}','${t2nom}','${a.tipo}')" onpointerup="_lpAmiEnd()" onpointercancel="_lpAmiEnd()" onclick="if(window._lpAmiTriggered){window._lpAmiTriggered=false;event.stopPropagation();}">${b2}</div>`
+    ? `<div style="display:flex;justify-content:center;margin-bottom:4px;cursor:pointer;user-select:none;-webkit-touch-callout:none;" title="Segure para editar o time" onpointerdown="_lpAmiStart('${a.id}','${a.time2?.timeId}','${t2nom}','${a.tipo}')" onpointerup="_lpAmiEnd()" onpointercancel="_lpAmiEnd()" oncontextmenu="return false;" onclick="if(window._lpAmiTriggered){window._lpAmiTriggered=false;event.stopPropagation();}">${b2}</div>`
     : `<div style="display:flex;justify-content:center;margin-bottom:4px;">${b2}</div>`;
   // RG7b: não-master vê placar somente-leitura; master vê inputs de edição
   const placarDireto = temRes
