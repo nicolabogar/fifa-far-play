@@ -8,3 +8,5 @@
 - [x] Para usuários não master, eles podem ver o cadastro de jogadores, mas só podem ter opção para alterar o seu próprio cadastro e só podem alterar o número do celular, o nome e a foto. (hash: 75beac6)
 
 - [x] No ranking, o filtro de adversário deve ser por jogador (não por time), e ao filtrar, as tags de totalizador devem ser atualizadas conforme o filtro. (hash: 7811fab)
+
+- [x] Nos cards de jogos em andamento, bloquear a abertura da imagem do ícone do time de forma expandida ao clicar e segurar (long press). (hash: a9a52ce)
