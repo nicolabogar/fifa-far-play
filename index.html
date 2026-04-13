@@ -4546,6 +4546,49 @@ function _renderTimesManualCC() {
     return;
   }
   const qtd = _ccQtdTimes || 1;
+  const modoDupla = document.getElementById('camp-dupla')?.checked || false;
+
+  if (modoDupla) {
+    // Modo dupla: agrupar por pares, um time por dupla
+    const escolherDuplas = document.getElementById('camp-escolher-duplas')?.checked || false;
+    let pares;
+    if (escolherDuplas && _ccParesManual.length === jogsList.length / 2 && _ccParesManual.every(p => p.j1Id && p.j2Id)) {
+      pares = _ccParesManual;
+    } else {
+      pares = [];
+      for (let i = 0; i < jogsList.length; i += 2) {
+        const j1 = jogsList[i] || {id: '', nome: ''};
+        const j2 = jogsList[i+1] || {id: '', nome: ''};
+        pares.push({j1Id: j1.id, j1Nome: j1.nome, j2Id: j2.id, j2Nome: j2.nome});
+      }
+    }
+    const rows = pares.map((par, pidx) => {
+      const timesAtual = _ccManualTimesArr.get(par.j1Id) || [];
+      const inputsHtml = Array.from({length: qtd}, (_, k) => {
+        const selAtual = timesAtual[k];
+        return `
+        <div style="position:relative;margin-bottom:4px;">
+          <input type="text" class="input" placeholder="TIME ${k+1}..." id="cc-manual-search-dupla-${pidx}-${k}" autocomplete="off"
+            oninput="_filtrarTimesManualCCDupla(${pidx},${k},'${par.j1Id}','${par.j2Id}')"
+            onfocus="_abrirDropdownManualCCDupla(${pidx},${k},'${par.j1Id}','${par.j2Id}')"
+            onblur="setTimeout(()=>{const d=document.getElementById('cc-manual-drop-dupla-${pidx}-${k}');if(d)d.style.display='none';},200)"
+            value="${selAtual ? selAtual.nome.replace(/"/g,'&quot;') : ''}"
+            style="margin-bottom:0;font-size:13px;padding:10px 14px;">
+          <div id="cc-manual-drop-dupla-${pidx}-${k}" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:25;background:var(--bg);border:1px solid var(--card-border);border-radius:12px;max-height:180px;overflow-y:auto;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,0.5);"></div>
+        </div>`;
+      }).join('');
+      return `
+      <div style="margin-bottom:10px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.25);border-radius:12px;padding:10px;">
+        <div style="font-size:11px;font-weight:700;color:var(--cyan);margin-bottom:4px;">DUPLA ${pidx+1}</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">${par.j1Nome} &amp; ${par.j2Nome}</div>
+        ${inputsHtml}
+      </div>`;
+    }).join('');
+    box.style.display = 'block';
+    box.innerHTML = `<p style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">ESCOLHA ${qtd > 1 ? `OS ${qtd} TIMES DE CADA DUPLA` : 'O TIME DE CADA DUPLA'}</p>${rows}`;
+    return;
+  }
+
   // Gerar inputs de time para cada jogador: qtd inputs por jogador
   const rows = jogsList.map(j => {
     const timesAtual = _ccManualTimesArr.get(j.id) || [];
@@ -4600,6 +4643,48 @@ window._abrirDropdownManualCC = (jogId, idx=0) => {
 };
 
 window._filtrarTimesManualCC = (jogId, idx=0) => { _abrirDropdownManualCC(jogId, idx); };
+
+window._abrirDropdownManualCCDupla = (pidx, idx, j1Id, j2Id) => {
+  const tipo = document.getElementById('ct')?.value;
+  const meta = tipo ? CAMP_META[tipo] : null;
+  const pool = meta?.tipo === 'selecoes' ? selecoes : clubes;
+  const inputId = `cc-manual-search-dupla-${pidx}-${idx}`;
+  const dropId = `cc-manual-drop-dupla-${pidx}-${idx}`;
+  const q = (document.getElementById(inputId)?.value||'').toLowerCase();
+  const filtrado = pool.filter(t => !q || t.nome.toLowerCase().includes(q));
+  const drop = document.getElementById(dropId);
+  if (!drop) return;
+  if (!filtrado.length) { drop.style.display='none'; return; }
+  const isSel = meta?.tipo === 'selecoes';
+  drop.innerHTML = filtrado.slice(0,30).map(t=>{
+    const _td = !isSel ? _teamDataOuFallback(t.id, t.nome) : null;
+    const paisCode = isSel ? (SELECAO_PAIS[t.id]?.pais||'') : (_td?.pais||'');
+    const flagEl = paisCode ? `<img src="https://flagcdn.com/w40/${paisCode}.png" alt="" loading="lazy" style="width:22px;height:16px;object-fit:cover;border-radius:2px;flex-shrink:0;" onerror="this.style.display='none'">` : '';
+    const shieldEl = !isSel ? `<div style="width:22px;height:22px;border-radius:5px;background:${_td.fundo};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:${_td.cor};flex-shrink:0;border:1px solid rgba(255,255,255,0.1);">${_td.abrev}</div>` : '';
+    const eficEl = t.eficiencia ? eficBadge(t.eficiencia) : '';
+    return `<div onclick="selecionarTimeManualCCDupla(${pidx},${idx},'${j1Id}','${j2Id}','${t.id}','${t.nome.replace(/'/g,"\\'")}',${t.forca},'${isSel?'selecoes':'clubes'}')"
+      style="padding:9px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);font-weight:600;font-size:12px;display:flex;align-items:center;gap:8px;">
+      ${flagEl}${shieldEl}
+      <span style="text-transform:uppercase;flex:1;">${t.nome}</span>
+      ${eficEl}
+    </div>`;}).join('');
+  drop.style.display='block';
+};
+
+window._filtrarTimesManualCCDupla = (pidx, idx, j1Id, j2Id) => { _abrirDropdownManualCCDupla(pidx, idx, j1Id, j2Id); };
+
+window.selecionarTimeManualCCDupla = (pidx, idx, j1Id, j2Id, timeId, timeNome, forca, tipo) => {
+  for (const jogId of [j1Id, j2Id]) {
+    const arr = _ccManualTimesArr.get(jogId) || [];
+    arr[idx] = {timeId, nome: timeNome, forca, _tipo: tipo};
+    _ccManualTimesArr.set(jogId, arr);
+    if (idx === 0) _ccManualSel.set(jogId, {timeId, nome: timeNome, forca, _tipo: tipo});
+  }
+  const inp = document.getElementById(`cc-manual-search-dupla-${pidx}-${idx}`);
+  if (inp) inp.value = timeNome;
+  const drop = document.getElementById(`cc-manual-drop-dupla-${pidx}-${idx}`);
+  if (drop) drop.style.display='none';
+};
 
 // _ccManualSel: Map de jogadorId -> {timeId, nome, forca, _tipo}
 const _ccManualSel = new Map();
@@ -4692,6 +4777,7 @@ window._onToggleCampDupla = (ativo) => {
     if (cb) cb.checked = false;
   }
   if (lbl) lbl.textContent = ativo ? 'TIMES POR DUPLA' : 'TIMES POR JOGADOR';
+  if (document.getElementById('manual-times')?.checked) _renderTimesManualCC();
 };
 
 window._onToggleEscolherDuplas = (ativo) => {
@@ -4705,6 +4791,7 @@ window._onToggleEscolherDuplas = (ativo) => {
     box.innerHTML = '';
     _ccParesManual = [];
   }
+  if (document.getElementById('manual-times')?.checked) _renderTimesManualCC();
 };
 
 window._renderDuplasManualUI = () => {
@@ -4773,6 +4860,7 @@ window._setPar = (paridx, slot, jogId, jogNome) => {
   _ccParesManual[paridx][`${field}Id`] = jogId;
   _ccParesManual[paridx][`${field}Nome`] = jogNome;
   _renderDuplasManualUI();
+  if (document.getElementById('manual-times')?.checked) _renderTimesManualCC();
 };
 
 window.criarCampeonato = async () => {
