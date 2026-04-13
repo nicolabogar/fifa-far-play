@@ -4456,6 +4456,22 @@ function abrirModalCriarCamp(secao, secaoView) {
         <div id="ct-regras-box" style="display:none;margin-top:8px;"></div>
       </div>
       <div>
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;" id="label-qtd-times-titulo">TIMES POR JOGADOR</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="camp-qtd-times-btns">
+          ${[1,2,3,4,5,6,7,8,9,10].map(n => `<div class="tipo-btn${n===1?' sel':''}" data-qtd="${n}" onclick="_selQtdTimes(${n},this)" style="font-size:12px;padding:8px 12px;min-width:36px;text-align:center;">${n}</div>`).join('')}
+        </div>
+        <input type="hidden" id="camp-qtd-times" value="1">
+      </div>
+      <div>
+        <label class="check-row" style="margin-bottom:8px;">
+          <input type="checkbox" id="manual-times" style="width:18px;height:18px;accent-color:var(--purple);" onchange="toggleSelManual()">
+          <div>
+            <div style="font-size:13px;font-weight:700;">ESCOLHER TIMES MANUALMENTE</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">DESMARCADO: SORTEIO BALANCEADO AUTOMATICO</div>
+          </div>
+        </label>
+      </div>
+      <div>
         <label class="check-row" style="margin-bottom:4px;">
           <input type="checkbox" id="camp-dupla" style="width:18px;height:18px;accent-color:var(--purple);" onchange="_onToggleCampDupla(this.checked)">
           <div>
@@ -4471,22 +4487,6 @@ function abrirModalCriarCamp(secao, secaoView) {
           </div>
         </label>
         <div id="camp-duplas-box" style="display:none;margin-top:8px;"></div>
-      </div>
-      <div>
-        <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;" id="label-qtd-times-titulo">TIMES POR JOGADOR</label>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="camp-qtd-times-btns">
-          ${[1,2,3,4,5].map(n => `<div class="tipo-btn${n===1?' sel':''}" data-qtd="${n}" onclick="_selQtdTimes(${n},this)" style="font-size:12px;padding:8px 12px;min-width:36px;text-align:center;">${n}</div>`).join('')}
-        </div>
-        <input type="hidden" id="camp-qtd-times" value="1">
-      </div>
-      <div>
-        <label class="check-row" style="margin-bottom:8px;">
-          <input type="checkbox" id="manual-times" style="width:18px;height:18px;accent-color:var(--purple);" onchange="toggleSelManual()">
-          <div>
-            <div style="font-size:13px;font-weight:700;">ESCOLHER TIMES MANUALMENTE</div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">DESMARCADO: SORTEIO BALANCEADO AUTOMATICO</div>
-          </div>
-        </label>
       </div>
       <div>
         <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">PARTICIPANTES</label>

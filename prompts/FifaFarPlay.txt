@@ -6,3 +6,4 @@
 ## MELHORIAS ##
 
 - [x] Limite de partidas por dupla na criacao de amistosos + distribuicao manual de jogadores por time (hash: 72b6117)
+- [x] Colocar o componente times por dupla depois do componente escolher times manual, e tambem colocar opcao de ate 10 times (hash: fecfe0c)
