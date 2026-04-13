@@ -156,6 +156,7 @@
     .filtro-row { display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px; }
     .filtro-btn { padding:5px 12px;border-radius:20px;border:1px solid var(--card-border);background:rgba(255,255,255,0.04);color:var(--text-muted);font-size:11px;font-weight:700;cursor:pointer;text-transform:uppercase; }
     .filtro-btn.ativo { border-color:var(--purple);background:rgba(139,92,246,0.15);color:#A78BFA; }
+    .filtro-btn.ativo::after { content:' ×'; font-size:13px; font-weight:900; opacity:0.8; }
     /* ── Paginação ── */
     .pag-row { display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px; }
     .pag-btn { padding:6px 14px;border-radius:10px;border:1px solid var(--card-border);background:rgba(255,255,255,0.05);color:var(--text-muted);font-size:12px;font-weight:700;cursor:pointer; }
@@ -346,6 +347,7 @@
     .efic-tag.selecionado[data-efic="Ruim"]     { background: rgba(239,68,68,0.3);  border-color: #ef4444; }
     .efic-tag.selecionado[data-efic="Moderado"] { background: rgba(234,179,8,0.3);  border-color: #eab308; }
     .efic-tag.selecionado[data-efic="Bom"]      { background: rgba(34,197,94,0.3);  border-color: #22c55e; }
+    .efic-tag.selecionado::after { content:' ×'; font-size:13px; font-weight:900; opacity:0.8; }
 
     /* Multi-select dropdown */
     .ms-drop { position:relative; margin-bottom:14px; }
@@ -1063,15 +1065,15 @@ function badgeTimeCompact(timeId, nomeTime, tipo) {
   return `<div style="width:44px;height:44px;border-radius:10px;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.abrev}</div>`;
 }
 
-/** Badge de clube: quadrado colorido com abreviação + bandeira + nome do país */
+/** Badge de clube: escudo (imagem) acima, informação do país (bandeira + nome) abaixo */
 function badgeClube(timeId, nomeTime) {
   const d = _teamDataOuFallback(timeId, nomeTime);
   return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+    ${shieldClube(timeId, nomeTime, 48)}
     <div style="display:flex;align-items:center;gap:3px;white-space:nowrap;">
       ${flagImg(d.pais, 20)}
       <span style="font-size:9px;color:var(--text-muted);font-weight:600;">${d.paisNome}</span>
     </div>
-    ${shieldClube(timeId, nomeTime, 48)}
   </div>`;
 }
 
@@ -1099,9 +1101,9 @@ function badgeTimeCountryInfo(timeId, nomeTime, tipo, align='center') {
 }
 window.badgeTimeCountryInfo = badgeTimeCountryInfo;
 
-/** Renderiza apenas o ícone do time (escudo do clube ou bandeira da seleção) */
+/** Renderiza apenas o ícone do time — para seleções retorna vazio (invisível nos cards de jogos) */
 function badgeTimeIcon(timeId, nomeTime, tipo) {
-  return tipo === 'selecoes' ? badgeSel(timeId, nomeTime) : shieldClube(timeId, nomeTime, 48);
+  return tipo === 'selecoes' ? '' : shieldClube(timeId, nomeTime, 48);
 }
 window.badgeTimeIcon = badgeTimeIcon;
 
@@ -1193,7 +1195,7 @@ window.toggleEficFiltro = (val) => {
 };
 function htmlEficFiltro(containerId) {
   const sel = carregarEficFiltro();
-  return `<div style="background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:14px 16px;">
+  return `<div>
     <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">FILTRAR POR EFICIÊNCIA</label>
     <div class="efic-tags" id="${containerId}">
       ${EFIC_TODAS.map(e=>`<span class="efic-tag${sel.has(e)?' selecionado':''}" data-efic="${e}" onclick="toggleEficFiltro('${e}')">${e}</span>`).join('')}
@@ -2671,14 +2673,15 @@ function cardAmistoso(a, compact=false, readonly=false) {
     <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;row-gap:8px;">
       <div style="text-align:center;">
         <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${abreviarNome(a.time1?.nome || '?')}</div>
+        ${ci1 ? `<div style="display:flex;justify-content:center;margin-top:2px;">${ci1}</div>` : ''}
       </div>
       <div></div>
       <div style="text-align:center;">
         <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${abreviarNome(a.time2?.nome || '?')}</div>
+        ${ci2 ? `<div style="display:flex;justify-content:center;margin-top:2px;">${ci2}</div>` : ''}
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;">
         ${lpIcon1}
-        <div style="display:flex;justify-content:center;margin-bottom:4px;">${ci1}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(a.time1?.timeId))}</div>
         ${_nomesTime(a.time1).length
           ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;">${_nomesTime(a.time1).map(n=>`<div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>`
@@ -2689,7 +2692,6 @@ function cardAmistoso(a, compact=false, readonly=false) {
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;">
         ${lpIcon2}
-        <div style="display:flex;justify-content:center;margin-bottom:4px;">${ci2}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(a.time2?.timeId))}</div>
         ${_nomesTime(a.time2).length
           ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;">${_nomesTime(a.time2).map(n=>`<div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>`
@@ -2961,7 +2963,7 @@ function _htmlNovoAmistoso() {
     <div id="jc-tags" style="display:flex;flex-wrap:wrap;gap:6px;min-height:40px;padding:8px;background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;margin-bottom:16px;">
       <span style="color:var(--text-muted);font-size:12px;align-self:center;padding:4px 0;">NENHUM JOGADOR SELECIONADO</span>
     </div>
-    <div id="ami-efic-filtro-box" style="margin-bottom:16px;">${htmlEficFiltro('ami-efic-filtro')}</div>
+    <div id="ami-efic-filtro-box" style="margin-bottom:16px;background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:12px 14px;">${htmlEficFiltro('ami-efic-filtro')}</div>
     <div id="ami-sorteio" style="display:none;margin-bottom:16px;"></div>
     <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
       <div style="display:flex;gap:10px;">
@@ -4280,14 +4282,15 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
     <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;row-gap:8px;">
       <div style="text-align:center;">
         <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${abreviarNome(m1.time?.nome||'?')}</div>
+        ${(() => { const ci = badgeTimeCountryInfo(m1.time?.id||'', m1.time?.nome||'', tipo, 'center'); return ci ? `<div style="display:flex;justify-content:center;margin-top:2px;">${ci}</div>` : ''; })()}
       </div>
       <div></div>
       <div style="text-align:center;">
         <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${abreviarNome(m2.time?.nome||'?')}</div>
+        ${(() => { const ci = badgeTimeCountryInfo(m2.time?.id||'', m2.time?.nome||'', tipo, 'center'); return ci ? `<div style="display:flex;justify-content:center;margin-top:2px;">${ci}</div>` : ''; })()}
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;">
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(m1.time?.id||'', m1.time?.nome||'', tipo)}</div>
-        <div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeCountryInfo(m1.time?.id||'', m1.time?.nome||'', tipo, 'center')}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(m1.time?.id))}</div>
         ${nome1 ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;"><div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${nome1}</div></div>` : ''}
       </div>
@@ -4296,7 +4299,6 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;">
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(m2.time?.id||'', m2.time?.nome||'', tipo)}</div>
-        <div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeCountryInfo(m2.time?.id||'', m2.time?.nome||'', tipo, 'center')}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(m2.time?.id))}</div>
         ${nome2 ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;"><div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${nome2}</div></div>` : ''}
       </div>
@@ -4904,16 +4906,15 @@ function _renderHistorico() {
       </div>
       <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;row-gap:8px;">
         <div style="text-align:center;">
-          ${ci1}
           <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${abreviarNome(j.meuTime)}</div>
         </div>
         <div></div>
         <div style="text-align:center;">
-          ${ci2}
           <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${abreviarNome(nomeAdvTime)}</div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:center;">
           <div style="display:flex;justify-content:center;margin-bottom:4px;">${icon1}</div>
+          <div style="display:flex;justify-content:center;margin-bottom:4px;">${ci1}</div>
           <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(j.meuTimeId))}</div>
           ${nome1?`<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;"><div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${nome1}</div></div>`:''}
         </div>
@@ -4922,6 +4923,7 @@ function _renderHistorico() {
         </div>
         <div style="display:flex;flex-direction:column;align-items:center;">
           <div style="display:flex;justify-content:center;margin-bottom:4px;">${icon2}</div>
+          <div style="display:flex;justify-content:center;margin-bottom:4px;">${ci2}</div>
           <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(j.advTimeId))}</div>
           ${nome2?`<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;"><div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${nome2}</div></div>`:''}
         </div>
@@ -5006,11 +5008,12 @@ function cardCampHome(c, modoLista=false) {
   const finalizado = c.status === 'finalizado';
 
   // Tags dos jogadores participantes
-  const tagsJogs = (c.participantes||[]).map(p =>
-    `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);border-radius:20px;padding:3px 8px;font-size:11px;font-weight:700;">
-      ${avatarJogador({fotoUrl:''}, 16)}<span style="text-transform:uppercase;">${_nomeJogPorId(p.jogadorId, p.nome)}</span>
-    </span>`
-  ).join('');
+  const tagsJogs = (c.participantes||[]).map(p => {
+    const jog = jogadores.find(x => x.id === p.jogadorId);
+    return `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);border-radius:20px;padding:3px 8px;font-size:11px;font-weight:700;white-space:nowrap;">
+      ${avatarJogador({fotoUrl: jog?.fotoUrl||''}, 16)}<span style="text-transform:uppercase;">${_nomeJogPorId(p.jogadorId, p.nome)}</span>
+    </span>`;
+  }).join('');
 
   // Jogos em andamento (pendentes sem placar) — mostrar até 2
   const jogosPendentes = [];
@@ -5051,7 +5054,7 @@ function cardCampHome(c, modoLista=false) {
       </div>
       <span style="font-size:10px;color:var(--text-muted);white-space:nowrap;">${totalParts}/${totalPoss} JOGOS</span>
     </div>` : ''}
-    ${tagsJogs ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;">${tagsJogs}</div>` : ''}
+    ${tagsJogs ? `<div style="display:flex;flex-wrap:nowrap;gap:4px;margin-top:8px;overflow-x:auto;">${tagsJogs}</div>` : ''}
     ${!finalizado && jogosHtml ? `<div style="margin-top:8px;" onclick="event.stopPropagation();abrirCampeonato('${c.id}')">${jogosHtml}</div>` : ''}
   </div>`;
 
