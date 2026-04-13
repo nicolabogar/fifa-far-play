@@ -1,0 +1,9 @@
+# FIFA FAR PLAY - Prompts de Features v21
+# FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
+# O agente deve marcar o hash do commit ao concluir cada item.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v21.txt e um novo é criado.
+
+## MELHORIAS ##
+
+- [x] Ao criar amistosos e torneios, o sorteio sempre analisa as tags de eficiência dos times: se uma única tag estiver selecionada, apenas times com essa tag participam do sorteio; sempre deve haver pelo menos uma tag selecionada; a regra de paridade é bom x bom, bom x moderado, moderado x moderado, moderado x ruim, ruim x ruim. (hash: f770d48)
+
