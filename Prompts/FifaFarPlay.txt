@@ -5,4 +5,4 @@
 
 ## MELHORIAS ##
 
-- [ ] [Descreva aqui a próxima melhoria desejada]
+- [x] Nos cards dos jogos o placar está centralizado no meio entre os time a e time b, quero que ele fique ainda nesse meio mas quero que ele fique na parte de baixo (hash: cef42ea)
