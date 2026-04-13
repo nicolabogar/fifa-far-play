@@ -2445,13 +2445,15 @@ function cardAmistoso(a, compact=false, readonly=false) {
     </div>` : `
     <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;row-gap:8px;">
       <div style="text-align:center;">
+        ${a.tipo !== 'selecoes' ? ci1 : ''}
         <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${abreviarNome(a.time1?.nome || '?')}</div>
-        ${ci1}
+        ${a.tipo === 'selecoes' ? ci1 : ''}
       </div>
       <div></div>
       <div style="text-align:center;">
+        ${a.tipo !== 'selecoes' ? ci2 : ''}
         <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${abreviarNome(a.time2?.nome || '?')}</div>
-        ${ci2}
+        ${a.tipo === 'selecoes' ? ci2 : ''}
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;">
         ${lpIcon1}
@@ -3988,13 +3990,15 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
     </div>
     <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;row-gap:8px;">
       <div style="text-align:center;">
+        ${!isSel ? badgeTimeCountryInfo(m1.time?.id||'', m1.time?.nome||'', tipo, 'center') : ''}
         <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${abreviarNome(m1.time?.nome||'?')}</div>
-        ${badgeTimeCountryInfo(m1.time?.id||'', m1.time?.nome||'', tipo, 'center')}
+        ${isSel ? badgeTimeCountryInfo(m1.time?.id||'', m1.time?.nome||'', tipo, 'center') : ''}
       </div>
       <div></div>
       <div style="text-align:center;">
+        ${!isSel ? badgeTimeCountryInfo(m2.time?.id||'', m2.time?.nome||'', tipo, 'center') : ''}
         <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${abreviarNome(m2.time?.nome||'?')}</div>
-        ${badgeTimeCountryInfo(m2.time?.id||'', m2.time?.nome||'', tipo, 'center')}
+        ${isSel ? badgeTimeCountryInfo(m2.time?.id||'', m2.time?.nome||'', tipo, 'center') : ''}
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;">
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(m1.time?.id||'', m1.time?.nome||'', tipo)}</div>
@@ -4590,13 +4594,15 @@ function _renderHistorico() {
       </div>
       <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;row-gap:8px;">
         <div style="text-align:center;">
+          ${!isSel ? ci1 : ''}
           <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${abreviarNome(j.meuTime)}</div>
-          ${ci1}
+          ${isSel ? ci1 : ''}
         </div>
         <div></div>
         <div style="text-align:center;">
+          ${!isSel ? ci2 : ''}
           <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${abreviarNome(nomeAdvTime)}</div>
-          ${ci2}
+          ${isSel ? ci2 : ''}
         </div>
         <div style="display:flex;flex-direction:column;align-items:center;">
           <div style="display:flex;justify-content:center;margin-bottom:4px;">${icon1}</div>
