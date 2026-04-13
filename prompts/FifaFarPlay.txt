@@ -5,4 +5,4 @@
 
 ## MELHORIAS ##
 
-- [ ] [Descreva aqui a próxima melhoria desejada]
+- [x] Limite de partidas por dupla na criacao de amistosos + distribuicao manual de jogadores por time (hash: 72b6117)
