@@ -1051,6 +1051,12 @@ let jogadores  = [];
 // ─── HELPERS DE NOME ────────────────────────────────────────────────
 function _nomeExibicao(j) { return (j && (j.apelido || j.nome)) || ''; }
 function _nomeJogPorId(id, fallback) { const j = jogadores.find(x => x.id === id); return j ? _nomeExibicao(j) : (fallback || ''); }
+function _nomesTime(time) {
+  const ids = time?.jogadoresIds || [];
+  const nomes = time?.jogadores || [];
+  if (ids.length) return ids.map((id, i) => _nomeJogPorId(id, nomes[i] || ''));
+  return nomes;
+}
 let amistosos  = [];
 let campeonatos= [];
 let clubes     = [...CLUBES_DEFAULT];
@@ -1797,15 +1803,16 @@ function renderJogadores() {
         ${avatarJogador(j, 46)}
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:6px;">
-            <span style="font-weight:700;font-size:15px;text-transform:uppercase;">${_escHtml(_nomeExibicao(j))}</span>
+            <span style="font-weight:700;font-size:15px;text-transform:uppercase;">${_escHtml(j.nome||'')}</span>
             ${j.master ? `<span class="tag tag-yellow">MASTER</span>` : ''}
           </div>
+          ${j.apelido ? `<div style="color:var(--cyan);font-size:11px;font-weight:700;margin-top:2px;text-transform:uppercase;">APELIDO: ${_escHtml(j.apelido)}</div>` : ''}
           <div style="color:var(--text-muted);font-size:11px;margin-top:2px;">${j.email||'SEM E-MAIL VINCULADO'}</div>
           ${j.celular ? `<div style="color:var(--text-muted);font-size:11px;margin-top:1px;">${j.celular}</div>` : ''}
         </div>`;
     if (podeMudar) {
       return `
-    <div class="swipe-wrap" data-swipe-id="${j.id}" data-swipe-nome="${_escHtml(_nomeExibicao(j))}">
+    <div class="swipe-wrap" data-swipe-id="${j.id}" data-swipe-nome="${_escHtml(j.nome||'')}">
       <div class="swipe-bg">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
         <span class="swipe-bg-label">EXCLUIR</span>
@@ -2354,8 +2361,8 @@ function cardAmistoso(a, compact=false, readonly=false) {
       </div>
       ${temRes ? (() => {
         const g1 = a.resultado.g1, g2 = a.resultado.g2;
-        if (g1 > g2) return `<span class="tag tag-green">VITÓRIA: ${(a.time1?.jogadores||[]).join(', ') || 'T1'}</span>`;
-        if (g2 > g1) return `<span class="tag tag-green">VITÓRIA: ${(a.time2?.jogadores||[]).join(', ') || 'T2'}</span>`;
+        if (g1 > g2) return `<span class="tag tag-green">VITÓRIA: ${_nomesTime(a.time1).join(', ') || 'T1'}</span>`;
+        if (g2 > g1) return `<span class="tag tag-green">VITÓRIA: ${_nomesTime(a.time2).join(', ') || 'T2'}</span>`;
         return `<span class="tag tag-yellow">EMPATE</span>`;
       })() : `<span class="tag tag-cyan">EM ANDAMENTO</span>`}
     </div>
@@ -2364,7 +2371,7 @@ function cardAmistoso(a, compact=false, readonly=false) {
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-width:0;">
         <div style="font-weight:800;font-size:13px;line-height:1.2;text-transform:uppercase;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${abreviarNome(a.time1?.nome || '?')}</div>
         ${b1}
-        ${(a.time1?.jogadores||[]).length ? `<div style="font-size:10px;color:var(--cyan);font-weight:700;">${(a.time1.jogadores).join(' · ')}</div>` : ''}
+        ${_nomesTime(a.time1).length ? `<div style="font-size:10px;color:var(--cyan);font-weight:700;">${_nomesTime(a.time1).join(' · ')}</div>` : ''}
       </div>
       <div style="flex-shrink:0;text-align:center;">
         ${temRes
@@ -2386,13 +2393,13 @@ function cardAmistoso(a, compact=false, readonly=false) {
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-width:0;">
         <div style="font-weight:800;font-size:13px;line-height:1.2;text-transform:uppercase;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${abreviarNome(a.time2?.nome || '?')}</div>
         ${b2}
-        ${(a.time2?.jogadores||[]).length ? `<div style="font-size:10px;color:var(--cyan);font-weight:700;">${(a.time2.jogadores).join(' · ')}</div>` : ''}
+        ${_nomesTime(a.time2).length ? `<div style="font-size:10px;color:var(--cyan);font-weight:700;">${_nomesTime(a.time2).join(' · ')}</div>` : ''}
       </div>
     </div>` : `
     <div style="display:flex;align-items:stretch;gap:8px;">
       <div style="flex:1;text-align:center;">
-        ${(a.time1?.jogadores||[]).length
-          ? `<div style="margin-bottom:4px;display:flex;flex-direction:column;align-items:center;gap:2px;">${(a.time1.jogadores).map(n=>`<div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>`
+        ${_nomesTime(a.time1).length
+          ? `<div style="margin-bottom:4px;display:flex;flex-direction:column;align-items:center;gap:2px;">${_nomesTime(a.time1).map(n=>`<div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>`
           : ''}
         <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${abreviarNome(a.time1?.nome || '?')}</div>
         ${lpBadge1}
@@ -2402,8 +2409,8 @@ function cardAmistoso(a, compact=false, readonly=false) {
         ${placarDireto}
       </div>
       <div style="flex:1;text-align:center;">
-        ${(a.time2?.jogadores||[]).length
-          ? `<div style="margin-bottom:4px;display:flex;flex-direction:column;align-items:center;gap:2px;">${(a.time2.jogadores).map(n=>`<div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>`
+        ${_nomesTime(a.time2).length
+          ? `<div style="margin-bottom:4px;display:flex;flex-direction:column;align-items:center;gap:2px;">${_nomesTime(a.time2).map(n=>`<div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>`
           : ''}
         <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${abreviarNome(a.time2?.nome || '?')}</div>
         ${lpBadge2}
@@ -2759,11 +2766,11 @@ function compartilharWhatsApp(sorteio) {
   const texto =
     `⚽ *FIFA FAR PLAY — Nova Partida!*\n\n` +
     `${icone1} *${t1.nome}*\n` +
-    `👥 ${t1.jogadores.join(', ')}\n` +
+    `👥 ${_nomesTime(t1).join(', ')}\n` +
     `💪 Força: ${t1.forca}\n\n` +
     `⚔️  *VS*  ⚔️\n\n` +
     `${icone2} *${t2.nome}*\n` +
-    `👥 ${t2.jogadores.join(', ')}\n` +
+    `👥 ${_nomesTime(t2).join(', ')}\n` +
     `💪 Força: ${t2.forca}\n\n` +
     `${eq} (Diferença: ${diff} pts)\n\n` +
     `📱 _FIFA FAR PLAY App_`;
@@ -2935,8 +2942,8 @@ window.sortearAmistoso = () => {
     const eq = diff <= 2 ? 'EQUILIBRADO' : diff <= 5 ? 'LEVEMENTE DESIGUAL' : 'DESIGUAL';
     _sorteioAmi = {
       tipo,
-      time1: { nome: t1data.nome, timeId: t1data.timeId, forca: t1data.forca, eficiencia: t1data.eficiencia||'Bom', jogadores: j1.map(j=>j.nome), jogadoresIds: j1.map(j=>j.id) },
-      time2: { nome: t2data.nome, timeId: t2data.timeId, forca: t2data.forca, eficiencia: t2data.eficiencia||'Bom', jogadores: j2.map(j=>j.nome), jogadoresIds: j2.map(j=>j.id) },
+      time1: { nome: t1data.nome, timeId: t1data.timeId, forca: t1data.forca, eficiencia: t1data.eficiencia||'Bom', jogadores: j1.map(j=>_nomeExibicao(j)), jogadoresIds: j1.map(j=>j.id) },
+      time2: { nome: t2data.nome, timeId: t2data.timeId, forca: t2data.forca, eficiencia: t2data.eficiencia||'Bom', jogadores: j2.map(j=>_nomeExibicao(j)), jogadoresIds: j2.map(j=>j.id) },
     };
     _renderSorteioBox(_sorteioAmi, eq, diff);
     return;
@@ -3008,8 +3015,8 @@ window.sortearAmistoso = () => {
 function _renderSorteioBox(sorteio, eq, diff) {
   const t1 = sorteio.time1, t2 = sorteio.time2;
   const tipo = sorteio.tipo;
-  const j1 = t1.jogadores.map(n => ({ nome: n }));
-  const j2 = t2.jogadores.map(n => ({ nome: n }));
+  const n1 = _nomesTime(t1);
+  const n2 = _nomesTime(t2);
   const box = document.getElementById('ami-sorteio');
   box.style.display = '';
   // Badge clicável — abre edição rápida do time (eficiência + inativo) sem fechar o sorteio
@@ -3281,14 +3288,14 @@ window.verAmistoso = (id) => {
           <div style="display:flex;justify-content:center;margin-bottom:8px;">${b1}</div>
           <div style="font-weight:800;font-size:14px;text-transform:uppercase;">${a.time1?.nome||'?'}</div>
           <div style="margin-top:4px;">${eficBadge(eficienciaAtual(a.time1?.timeId))}</div>
-          <div style="font-size:11px;color:var(--cyan);margin-top:4px;">${(a.time1?.jogadores||[]).join(', ')}</div>
+          <div style="font-size:11px;color:var(--cyan);margin-top:4px;">${_nomesTime(a.time1).join(', ')}</div>
         </div>
         <div style="font-size:18px;font-weight:900;color:var(--text-muted);flex-shrink:0;">VS</div>
         <div style="text-align:center;flex:1;">
           <div style="display:flex;justify-content:center;margin-bottom:8px;">${b2}</div>
           <div style="font-weight:800;font-size:14px;text-transform:uppercase;">${a.time2?.nome||'?'}</div>
           <div style="margin-top:4px;">${eficBadge(eficienciaAtual(a.time2?.timeId))}</div>
-          <div style="font-size:11px;color:var(--cyan);margin-top:4px;">${(a.time2?.jogadores||[]).join(', ')}</div>
+          <div style="font-size:11px;color:var(--cyan);margin-top:4px;">${_nomesTime(a.time2).join(', ')}</div>
         </div>
       </div>
       ${temRes ? `<div>
@@ -3320,14 +3327,14 @@ window.editarAmistoso = (id) => {
             <div style="display:flex;justify-content:center;margin-bottom:8px;">${b1}</div>
             <div style="font-weight:800;font-size:14px;">${a.time1?.nome||'?'}</div>
             <div style="margin-top:4px;">${eficBadge(eficienciaAtual(a.time1?.timeId))}</div>
-            <div style="font-size:11px;color:var(--cyan);margin-top:4px;">${(a.time1?.jogadores||[]).join(', ')}</div>
+            <div style="font-size:11px;color:var(--cyan);margin-top:4px;">${_nomesTime(a.time1).join(', ')}</div>
           </div>
           <div style="font-size:18px;font-weight:900;color:var(--text-muted);flex-shrink:0;">VS</div>
           <div style="text-align:center;flex:1;">
             <div style="display:flex;justify-content:center;margin-bottom:8px;">${b2}</div>
             <div style="font-weight:800;font-size:14px;">${a.time2?.nome||'?'}</div>
             <div style="margin-top:4px;">${eficBadge(eficienciaAtual(a.time2?.timeId))}</div>
-            <div style="font-size:11px;color:var(--cyan);margin-top:4px;">${(a.time2?.jogadores||[]).join(', ')}</div>
+            <div style="font-size:11px;color:var(--cyan);margin-top:4px;">${_nomesTime(a.time2).join(', ')}</div>
           </div>
         </div>
         <div>
@@ -3354,7 +3361,7 @@ window.editarAmistoso = (id) => {
   const todosNomes = [...(a.time1?.jogadores||[]), ...(a.time2?.jogadores||[])];
   todosJogs.forEach((jid, i) => {
     const jog = jogadores.find(j => j.id === jid);
-    if (jog) _jcSel.set(jid, jog.nome);
+    if (jog) _jcSel.set(jid, _nomeExibicao(jog));
     else if (todosNomes[i]) _jcSel.set(jid || `jog-${i}`, todosNomes[i]);
   });
 
@@ -4305,7 +4312,7 @@ function _coletarJogosJogador(jogadorId) {
     const advGol = isT1 ? a.resultado.g2 : a.resultado.g1;
     const res = meuGol > advGol ? 'V' : meuGol < advGol ? 'D' : 'E';
     const ts = a.criadoEm?.seconds ? a.criadoEm.seconds * 1000 : null;
-    const advJogadores = isT1 ? (a.time2?.jogadores||[]) : (a.time1?.jogadores||[]);
+    const advJogadores = isT1 ? _nomesTime(a.time2) : _nomesTime(a.time1);
     jogos.push({
       tipo:'AMISTOSO', tipoTime: a.tipo==='selecoes'?'SELECAO':'CLUBE',
       meuTime: isT1?a.time1?.nome:a.time2?.nome,
