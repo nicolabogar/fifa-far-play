@@ -953,24 +953,19 @@ function flagImg(paisCode, w=20) {
 window._escSQ = function(s) { return String(s).replace(/'/g,"\\'"); };
 /** Escapa caracteres HTML para uso seguro em innerHTML/SVG */
 window._escHtml = function(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
-window._onCrestError = function(img, fundo, cor, abrev, size, h) {
-  var sz = +size, ht = +h, fs = sz > 50 ? 15 : 11;
-  var wrapper = document.createElement('div');
-  wrapper.style.cssText = 'flex-shrink:0;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.4));';
-  wrapper.innerHTML = '<svg width="' + sz + '" height="' + ht + '" viewBox="0 0 56 64" xmlns="http://www.w3.org/2000/svg"><path d="M28 2 L54 11 L54 40 Q54 56 28 63 Q2 56 2 40 L2 11 Z" fill="' + _escHtml(fundo) + '" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/><text x="28" y="' + Math.round(ht * 0.58) + '" text-anchor="middle" dominant-baseline="middle" fill="' + _escHtml(cor) + '" font-weight="900" font-size="' + fs + '" font-family="system-ui">' + _escHtml(abrev) + '</text></svg>';
-  if (img.parentNode) img.parentNode.replaceChild(wrapper, img);
-};
-window._onCrestErrorCompact = function(img, fundo, cor, abrev) {
-  var div = document.createElement('div');
-  div.style.cssText = 'width:44px;height:44px;border-radius:10px;background:' + fundo + ';display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:' + cor + ';letter-spacing:-0.3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);';
-  div.textContent = abrev;
-  if (img.parentNode) img.parentNode.replaceChild(div, img);
-};
-window._onCrestErrorBox = function(img, fundo, cor, abrev, w, h, r, fs) {
-  var div = document.createElement('div');
-  div.style.cssText = 'width:' + w + 'px;height:' + h + 'px;border-radius:' + r + 'px;background:' + fundo + ';display:flex;align-items:center;justify-content:center;font-size:' + fs + 'px;font-weight:900;color:' + cor + ';letter-spacing:-0.3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);';
-  div.textContent = abrev;
-  if (img.parentNode) img.parentNode.replaceChild(div, img);
+/** Retry de crest — tenta recarregar até 2x antes de ocultar a imagem */
+window._crestError = function(img) {
+  if (img._retrying) return;
+  var retries = (img._retries || 0) + 1;
+  img._retries = retries;
+  if (retries <= 2) {
+    img._retrying = true;
+    var src = img.getAttribute('src');
+    img.removeAttribute('src');
+    setTimeout(function() { img._retrying = false; img.setAttribute('src', src); }, retries * 1500);
+  } else {
+    img.style.display = 'none';
+  }
 };
 
 /** Brasão do clube — usa logo real do CDN com fallback para escudo SVG */
@@ -978,17 +973,17 @@ function shieldClube(timeId, nomeTime, size=56) {
   const d = TEAM_DATA[timeId] || { abrev:(nomeTime||'?').slice(0,3).toUpperCase(), fundo:'#1E1E35', cor:'#AAAAAA' };
   const h = Math.round(size * 1.15);
   const fs = size > 50 ? 15 : 11;
-  const svgFallback = `<svg width="${size}" height="${h}" viewBox="0 0 56 64" xmlns="http://www.w3.org/2000/svg"><path d="M28 2 L54 11 L54 40 Q54 56 28 63 Q2 56 2 40 L2 11 Z" fill="${_escHtml(d.fundo)}" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/><text x="28" y="${Math.round(h*0.58)}" text-anchor="middle" dominant-baseline="middle" fill="${_escHtml(d.cor)}" font-weight="900" font-size="${fs}" font-family="system-ui">${_escHtml(d.abrev)}</text></svg>`;
+  const svgFallback = `<svg width="${size}" height="${h}" viewBox="0 0 56 64" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 3px 8px rgba(0,0,0,0.4));display:block;"><path d="M28 2 L54 11 L54 40 Q54 56 28 63 Q2 56 2 40 L2 11 Z" fill="${_escHtml(d.fundo)}" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/><text x="28" y="${Math.round(h*0.58)}" text-anchor="middle" dominant-baseline="middle" fill="${_escHtml(d.cor)}" font-weight="900" font-size="${fs}" font-family="system-ui">${_escHtml(d.abrev)}</text></svg>`;
   if (d.crest) {
-    return `<div style="position:relative;width:${size}px;height:${h}px;flex-shrink:0;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.4));">
+    return `<div style="position:relative;width:${size}px;height:${h}px;flex-shrink:0;">
       ${svgFallback}
-      <img src="${d.crest}" alt="" width="${size}" height="${h}" decoding="async"
-        style="position:absolute;inset:0;width:${size}px;height:${h}px;object-fit:contain;"
-        onerror="this.style.display='none'"
+      <img src="${d.crest}" alt="" width="${size}" height="${h}" loading="eager"
+        style="position:absolute;top:0;left:0;right:0;bottom:0;width:${size}px;height:${h}px;object-fit:contain;"
+        onerror="window._crestError(this)"
       >
     </div>`;
   }
-  return `<div style="flex-shrink:0;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.4));">${svgFallback}</div>`;
+  return `<div style="flex-shrink:0;">${svgFallback}</div>`;
 }
 
 /** Badge compacto para partidas — usa logo real ou escudo */
@@ -1003,7 +998,7 @@ function badgeTimeCompact(timeId, nomeTime, tipo) {
   if (d.crest) {
     return `<div style="position:relative;width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">
       ${d.abrev}
-      <img src="${d.crest}" alt="" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none'">
+      <img src="${d.crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;" onerror="window._crestError(this)">
     </div>`;
   }
   return `<div style="width:44px;height:44px;border-radius:10px;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.abrev}</div>`;
@@ -4042,7 +4037,7 @@ window.abrirCampeonato = (id) => {
             </div>`
           : `<div style="position:relative;width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;background:${TEAM_DATA[p.time?.id]?.fundo||'#1E1E35'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:${TEAM_DATA[p.time?.id]?.cor||'#fff'};">
               ${(TEAM_DATA[p.time?.id]?.abrev||'?').slice(0,3)}
-              ${TEAM_DATA[p.time?.id]?.crest ? `<img src="${TEAM_DATA[p.time?.id].crest}" alt="" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none'">` : ''}
+              ${TEAM_DATA[p.time?.id]?.crest ? `<img src="${TEAM_DATA[p.time?.id].crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;" onerror="window._crestError(this)">` : ''}
             </div>`;
         return `<div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:12px;">
           ${timeIcon}
@@ -4719,7 +4714,7 @@ function renderTimesEdit() {
       const crestHtml = d.crest
         ? `<div style="position:relative;width:57px;height:57px;border-radius:12px;overflow:hidden;flex-shrink:0;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">
             ${d.abrev}
-            <img src="${d.crest}" alt="" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none'">
+            <img src="${d.crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;" onerror="window._crestError(this)">
           </div>`
         : `<div style="width:57px;height:57px;border-radius:12px;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.abrev}</div>`;
       icone = crestHtml;
