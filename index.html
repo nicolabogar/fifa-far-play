@@ -5054,7 +5054,7 @@ function cardCampHome(c, modoLista=false) {
       </div>
       <span style="font-size:10px;color:var(--text-muted);white-space:nowrap;">${totalParts}/${totalPoss} JOGOS</span>
     </div>` : ''}
-    ${tagsJogs ? `<div style="display:flex;flex-wrap:nowrap;gap:4px;margin-top:8px;overflow-x:auto;">${tagsJogs}</div>` : ''}
+    ${tagsJogs ? `<div style="display:flex;flex-direction:column;gap:4px;margin-top:8px;">${tagsJogs}</div>` : ''}
     ${!finalizado && jogosHtml ? `<div style="margin-top:8px;" onclick="event.stopPropagation();abrirCampeonato('${c.id}')">${jogosHtml}</div>` : ''}
   </div>`;
 
