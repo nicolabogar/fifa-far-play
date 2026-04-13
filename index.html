@@ -3712,7 +3712,7 @@ function abrirModalCriarCamp(secao, secaoView) {
       </div>
       <div>
         <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">NOME DO TORNEIO</label>
-        <input class="input" id="cn" placeholder="Nome do torneio" autocomplete="off">
+        <input class="input" id="cn" placeholder="NOME DO TORNEIO" autocomplete="off" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
       </div>
       <div>
         <label class="check-row" style="margin-bottom:8px;">
@@ -3840,8 +3840,8 @@ window.selCampTipo = (k, el) => {
   // Auto-preenche nome com o tipo do campeonato (#16)
   const meta = CAMP_META[k];
   const cn = document.getElementById('cn');
-  if (cn && (!cn.value.trim() || Object.values(CAMP_META).some(m => cn.value.trim() === m.nome))) {
-    cn.value = meta.nome;
+  if (cn && (!cn.value.trim() || Object.values(CAMP_META).some(m => cn.value.trim() === m.nome.toUpperCase()))) {
+    cn.value = meta.nome.toUpperCase();
   }
   // Limpa seleção manual de times se trocar de tipo
   const manualCheck = document.getElementById('manual-times');
@@ -4099,6 +4099,7 @@ window.abrirCampeonato = (id) => {
       }).join('')}
     </div>
 
+    ${podeMudar ? `<button onclick="editarNomeTorneio('${c.id}')" style="width:100%;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.35);color:#C4B5FD;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px;">EDITAR NOME DO TORNEIO</button>` : ''}
     ${podeMudar ? (naoIniciado
       ? `<button onclick="ressortearCampeonato('${c.id}')" style="width:100%;background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(6,182,212,0.2));border:1px solid rgba(139,92,246,0.4);color:#C4B5FD;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:16px;">SORTEAR TIMES / ADICIONAR JOGADORES</button>`
       : `<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:10px 12px;margin-bottom:16px;display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">⚠️</span><span style="font-size:12px;color:#FCD34D;font-weight:700;">TORNEIO EM ANDAMENTO — NÃO É POSSÍVEL SORTEAR OU ADICIONAR JOGADORES</span></div>`)
@@ -4183,6 +4184,28 @@ window.confirmarExcluirCamp = async (id) => {
   fecharModal(); fecharFullscreen(); await carregarCampeonatos(); atualizarDash();
 };
 
+window.editarNomeTorneio = (id) => {
+  const c = campeonatos.find(x => x.id === id);
+  if (!c) return;
+  modal(`<p class="modal-title">EDITAR NOME DO TORNEIO</p>
+    <input class="input" id="novo-nome-torneio" value="${c.nome.toUpperCase()}" style="text-transform:uppercase;margin-bottom:16px;" autocomplete="off" oninput="this.value=this.value.toUpperCase()">
+    <div style="display:flex;gap:10px;">
+      <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
+      <button class="btn-primary" onclick="confirmarEditarNomeTorneio('${id}')">SALVAR</button>
+    </div>`);
+  setTimeout(() => { const inp = document.getElementById('novo-nome-torneio'); if (inp) { inp.focus(); inp.select(); } }, 100);
+};
+
+window.confirmarEditarNomeTorneio = async (id) => {
+  const c = campeonatos.find(x => x.id === id);
+  if (!c) return;
+  const novoNome = document.getElementById('novo-nome-torneio')?.value.trim().toUpperCase();
+  if (!novoNome) { toast('DIGITE O NOME DO TORNEIO', 'erro'); return; }
+  if (campeonatos.some(x => x.id !== id && x.nome.trim().toUpperCase() === novoNome)) { toast('JA EXISTE UM TORNEIO COM ESSE NOME', 'erro'); return; }
+  await updateDoc(doc(db, 'campeonatos', id), { nome: novoNome });
+  fecharModal(); await carregarCampeonatos(); atualizarDash(); abrirCampeonato(id);
+};
+
 window.ressortearCampeonato = (id) => {
   const c = campeonatos.find(x=>x.id===id);
   if (!c) return;
@@ -4225,7 +4248,7 @@ window.regPartida = (cid, gi, j1Id, j2Id) => {
   const b1 = isSel ? badgeSel(m1.time?.id||'',m1.time?.nome||'') : badgeClube(m1.time?.id||'',m1.time?.nome||'');
   const b2 = isSel ? badgeSel(m2.time?.id||'',m2.time?.nome||'') : badgeClube(m2.time?.id||'',m2.time?.nome||'');
   modal(`<p class="modal-title" style="margin-bottom:4px;">REGISTRAR PLACAR</p>
-    <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">${g.nome} · ${c.nome}</p>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">${g.nome} · ${c.nome.toUpperCase()}</p>
     <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:24px;">
       <div style="flex:1;text-align:center;">
         <div style="display:flex;justify-content:center;margin-bottom:8px;">${b1}</div>
