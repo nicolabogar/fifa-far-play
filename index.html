@@ -1137,6 +1137,7 @@ let _disponiveis  = []; // partidas disponíveis para registo em grupo
 let _unsubJogadores   = null;
 let _unsubAmistosos   = null;
 let _unsubCampeonatos = null;
+let _autoCadastroEmAndamento = false;
 
 function _pararListeners() {
   if (_unsubJogadores)   { _unsubJogadores();   _unsubJogadores   = null; }
@@ -1717,8 +1718,10 @@ function _escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'
 
 // RG4: verifica se usuário tem cadastro como jogador, cria se não existir
 async function _autoCadastrarJogador(u) {
+  if (!u || !u.email) return;
+  if (_autoCadastroEmAndamento) return;
+  _autoCadastroEmAndamento = true;
   try {
-    if (!u || !u.email) return;
     const emailNorm = u.email.toLowerCase();
     const jaExiste = jogadores.some(j => j.email && j.email.toLowerCase() === emailNorm);
     if (jaExiste) return;
@@ -1735,6 +1738,7 @@ async function _autoCadastrarJogador(u) {
     });
     await carregarJogadores();
   } catch(e) { console.warn('auto-cadastro jogador:', e); }
+  finally { _autoCadastroEmAndamento = false; }
 }
 
 // RG4-CEL: exibe modal bloqueante solicitando o celular no primeiro cadastro
