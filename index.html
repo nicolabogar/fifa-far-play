@@ -4796,10 +4796,10 @@ function renderTimesEdit() {
       return d.paisNome ? { nome: d.paisNome, code: d.pais || '' } : null;
     }).filter(Boolean).map(x => JSON.stringify(x)))].map(s => JSON.parse(s)).sort((a,b) => a.nome.localeCompare(b.nome));
     filtroEl.style.display = paises.length ? 'block' : 'none';
-    filtroEl.innerHTML = `<select onchange="_setFiltroTimes(this.value)" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--card-border);background:var(--card);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;">
-      <option value="">TODOS OS PAÍSES</option>
-      ${paises.map(p => `<option value="${p.nome}" ${_paisFiltroTimes===p.nome?'selected':''}>${flagEmoji(p.code)} ${p.nome}</option>`).join('')}
-    </select>`;
+    filtroEl.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:6px;">
+      <button onclick="_setFiltroTimes('')" class="filtro-btn${_paisFiltroTimes===''?' ativo':''}">TODOS</button>
+      ${paises.map(p => `<button onclick="_setFiltroTimes('${window._escSQ(p.nome)}')" class="filtro-btn${_paisFiltroTimes===p.nome?' ativo':''}" style="display:inline-flex;align-items:center;gap:6px;">${flagImg(p.code,18)}<span>${p.nome}</span></button>`).join('')}
+    </div>`;
   } else {
     filtroEl.style.display = 'none';
   }
