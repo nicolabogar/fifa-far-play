@@ -4341,6 +4341,18 @@ window.abrirCampeonato = (id) => {
     </div>
 
     ${podeMudar ? `<input id="torneio-nome-inline-${c.id}" class="input" value="${c.nome.toUpperCase().replace(/"/g,'&quot;')}" style="text-transform:uppercase;margin-bottom:8px;width:100%;box-sizing:border-box;" autocomplete="off" oninput="this.value=this.value.toUpperCase()" onblur="_autoSalvarNomeTorneio('${c.id}',this.value)">` : ''}
+    ${podeMudar ? `
+      <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">FORMATO</label>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
+        ${Object.entries(CAMP_META).map(([k,v]) => {
+          const isSelected = k === c.tipo;
+          if (naoIniciado) {
+            return `<div class="tipo-btn${isSelected?' sel':''}" data-ct-view="${k}" onclick="_salvarTipoTorneio('${c.id}','${k}')" style="font-size:11px;padding:10px 6px;"><div style="font-weight:700;line-height:1.2;font-size:10px;">${v.nome.toUpperCase()}</div></div>`;
+          } else {
+            return `<div class="tipo-btn${isSelected?' sel':''}" data-ct-view="${k}" style="font-size:11px;padding:10px 6px;pointer-events:none;cursor:not-allowed;${isSelected?'':'opacity:0.4;'}"><div style="font-weight:700;line-height:1.2;font-size:10px;">${v.nome.toUpperCase()}</div></div>`;
+          }
+        }).join('')}
+      </div>` : ''}
     ${podeMudar ? (naoIniciado
       ? `<button onclick="ressortearCampeonato('${c.id}')" style="width:100%;background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(6,182,212,0.2));border:1px solid rgba(139,92,246,0.4);color:#C4B5FD;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:16px;">SORTEAR TIMES / ADICIONAR JOGADORES</button>`
       : `<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:10px 12px;margin-bottom:16px;display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">⚠️</span><span style="font-size:12px;color:#FCD34D;font-weight:700;">TORNEIO EM ANDAMENTO — NÃO É POSSÍVEL SORTEAR OU ADICIONAR JOGADORES</span></div>`)
@@ -4434,6 +4446,16 @@ window._autoSalvarNomeTorneio = async (id, valor) => {
   if (novoNome === c.nome.trim().toUpperCase()) return;
   if (campeonatos.some(x => x.id !== id && x.nome.trim().toUpperCase() === novoNome)) { toast('JA EXISTE UM TORNEIO COM ESSE NOME', 'erro'); abrirCampeonato(id); return; }
   await updateDoc(doc(db, 'campeonatos', id), { nome: novoNome });
+  await carregarCampeonatos(); atualizarDash(); abrirCampeonato(id);
+};
+
+window._salvarTipoTorneio = async (id, tipo) => {
+  const c = campeonatos.find(x => x.id === id);
+  if (!c) return;
+  if (c.tipo === tipo) return;
+  const totalJogosReg = (c.grupos||[]).reduce((acc,g)=>acc+(g.partidas||[]).length,0);
+  if (totalJogosReg > 0) { toast('NAO E POSSIVEL ALTERAR O FORMATO COM JOGOS REGISTRADOS', 'erro'); return; }
+  await updateDoc(doc(db, 'campeonatos', id), { tipo });
   await carregarCampeonatos(); atualizarDash(); abrirCampeonato(id);
 };
 
