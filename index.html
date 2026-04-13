@@ -1363,21 +1363,29 @@ function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
  * Se o nome couber em maxWords palavras, retorna sem mudança.
  */
 function abreviarNome(nome, maxChars = 14) {
-  if (!nome || nome.length <= maxChars) return nome;
-  const partes = nome.trim().split(/\s+/);
-  if (partes.length <= 1) return nome.slice(0, maxChars - 1) + '.';
-  // Mantém a primeira parte inteira, abrevia as demais
-  let resultado = partes[0];
-  for (let i = 1; i < partes.length; i++) {
-    const candidato = resultado + ' ' + partes[i];
-    if (candidato.length <= maxChars) {
-      resultado = candidato;
-    } else {
-      resultado += ' ' + partes[i][0] + '.';
-      break;
-    }
+  if (!nome) return nome;
+  const trimmed = nome.trim();
+  if (trimmed.length <= maxChars) return nome;
+  const partes = trimmed.split(/\s+/);
+  if (partes.length <= 1) return trimmed.slice(0, maxChars - 1) + '.';
+  const w1 = partes[0];
+  const w2 = partes[1];
+  const resto = partes.slice(2);
+  // Abrevia a palavra mais longa para os 3 primeiros caracteres + "."
+  let abrev;
+  if (w1.length >= w2.length) {
+    abrev = [w1.slice(0, 3) + '.', w2, ...resto].join(' ');
+  } else {
+    abrev = [w1, w2.slice(0, 3) + '.', ...resto].join(' ');
   }
-  return resultado;
+  if (abrev.length <= maxChars) return abrev;
+  // Se ainda ultrapassar, reduz para 1 caractere + "."
+  if (w1.length >= w2.length) {
+    abrev = [w1.slice(0, 1) + '.', w2, ...resto].join(' ');
+  } else {
+    abrev = [w1, w2.slice(0, 1) + '.', ...resto].join(' ');
+  }
+  return abrev.length <= maxChars ? abrev : abrev.slice(0, maxChars - 1) + '.';
 }
 window.abreviarNome = abreviarNome;
 
