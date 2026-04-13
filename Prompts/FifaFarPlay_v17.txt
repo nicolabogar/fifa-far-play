@@ -1,0 +1,10 @@
+# FIFA FAR PLAY - Prompts de Features v17
+# FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
+# O agente deve marcar o hash do commit ao concluir cada item.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v17.txt e um novo é criado.
+
+## MELHORIAS ##
+
+- [x] Quando remover o jogador, deve ser excluído os amistosos, torneios e rankings que ele estiver (hash: dfce579)
+- [x] Criar um botão sincronizar ranking na página de ranking, só o usuário jogador com login master poderá visualizar essa função (hash: c779314)
+
