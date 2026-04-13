@@ -1073,6 +1073,7 @@ let jogadores  = [];
 
 // ─── HELPERS DE NOME ────────────────────────────────────────────────
 function _nomeExibicao(j) { return (j && (j.apelido || j.nome)) || ''; }
+function _nomeTag(nome) { const p = (nome || '').trim().split(/\s+/); return p.length > 2 ? p[0] + ' ' + p[1] : nome; }
 function _nomeJogPorId(id, fallback) { const j = jogadores.find(x => x.id === id); return j ? _nomeExibicao(j) : (fallback || ''); }
 function _nomesTime(time) {
   const ids = time?.jogadoresIds || [];
@@ -2640,7 +2641,7 @@ function _renderTagsJC() {
   }
   container.innerHTML = [..._jcSel.entries()].map(([id, nome]) =>
     `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.35);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;">
-      ${nome}
+      ${_nomeTag(nome)}
       <span onclick="removerJogJC('${id}')" style="cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;margin-left:2px;">×</span>
     </span>`
   ).join('');
@@ -3658,7 +3659,7 @@ function _renderTagsCC() {
   }
   container.innerHTML = [..._ccSel.entries()].map(([id, nome]) =>
     `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;">
-      ${nome}
+      ${_nomeTag(nome)}
       <span onclick="removerJogCC('${id}')" style="cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;margin-left:2px;">×</span>
     </span>`
   ).join('');
