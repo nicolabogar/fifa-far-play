@@ -4080,25 +4080,17 @@ window.abrirCampeonato = (id) => {
     </div>` : ''}
 
     <p class="sec-title" style="margin-bottom:10px;">TIMES SORTEADOS</p>
-    <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:14px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
       ${(c.participantes||[]).map(p=>{
-        const timeIcon = isSel
-          ? `<div style="width:48px;height:36px;border-radius:8px;overflow:hidden;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.4);">
-              <img src="https://flagcdn.com/w80/${(SELECAO_PAIS[p.time?.id]||{pais:''}).pais}.png" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
-            </div>`
-          : `<div style="position:relative;width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;background:${TEAM_DATA[p.time?.id]?.fundo||'#1E1E35'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:${TEAM_DATA[p.time?.id]?.cor||'#fff'};">
-              <span class="crest-fallback">${(TEAM_DATA[p.time?.id]?.abrev||'?').slice(0,3)}</span>
-              ${TEAM_DATA[p.time?.id]?.crest ? `<img src="${TEAM_DATA[p.time?.id].crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='';this.previousElementSibling.style.display='none';this.parentElement.style.background='transparent';this.parentElement.style.border='none';" onerror="window._crestError(this)">` : ''}
-            </div>`;
+        const tipo = isSel ? 'selecoes' : 'clubes';
         const jogNome = _nomeJogPorId(p.jogadorId, p.nome);
-        return `<div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:12px;">
-          <div style="display:flex;align-items:center;flex-shrink:0;">
-            ${timeIcon}
-          </div>
-          <div style="min-width:0;flex:1;">
-            <div style="font-weight:900;font-size:15px;line-height:1.2;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;">${p.time?.nome||'?'}</div>
-            <div style="margin-bottom:4px;">${eficBadge(eficienciaAtual(p.time?.id))}</div>
-            ${jogNome ? `<span class="tag tag-cyan" style="max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;">${jogNome}</span>` : ''}
+        return `<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:12px;text-align:center;">
+          <div style="font-weight:900;font-size:14px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${abreviarNome(p.time?.nome||'?')}</div>
+          ${badgeTimeCountryInfo(p.time?.id, p.time?.nome, tipo)}
+          <div style="display:flex;flex-direction:column;align-items:center;margin-top:8px;">
+            <div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(p.time?.id, p.time?.nome, tipo)}</div>
+            <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(p.time?.id))}</div>
+            ${jogNome ? `<div style="margin-top:2px;display:flex;flex-direction:column;align-items:center;gap:2px;"><div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${jogNome}</div></div>` : ''}
           </div>
         </div>`;
       }).join('')}
