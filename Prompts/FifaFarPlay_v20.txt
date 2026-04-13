@@ -1,0 +1,12 @@
+# FIFA FAR PLAY - Prompts de Features v20
+# FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
+# O agente deve marcar o hash do commit ao concluir cada item.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v20.txt e um novo é criado.
+
+## MELHORIAS ##
+
+- [x] Para usuários não master, eles podem ver o cadastro de jogadores, mas só podem ter opção para alterar o seu próprio cadastro e só podem alterar o número do celular, o nome e a foto. (hash: 75beac6)
+
+- [x] No ranking, o filtro de adversário deve ser por jogador (não por time), e ao filtrar, as tags de totalizador devem ser atualizadas conforme o filtro. (hash: 7811fab)
+
+- [x] Ao fazer o login, o login deve ficar em cachê para quando voltar a página o login fazer automaticamente (hash: 3f3c92a)

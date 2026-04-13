@@ -16,23 +16,31 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <script>
+    // Cache de login: se usuario estava logado, oculta tela de login e mostra loading
+    if (localStorage.getItem('ffp_logged_in')) {
+      document.documentElement.classList.add('user-cached');
+    }
     // Safety: apenas se erro ANTES do app ficar pronto (inicialização falhou)
     window.addEventListener('error', (ev) => {
       if (window.__AUTH_READY) return; // app já rodando — ignora erros pontuais
       // Ignora erros de carregamento de imagens (comuns e não-fatais)
       if (ev.target && (ev.target.tagName === 'IMG' || ev.target.tagName === 'LINK')) return;
+      document.documentElement.classList.remove('user-cached');
       const loginScreen = document.getElementById('login-screen');
+      const loadingScreen = document.getElementById('loading-screen');
       const app = document.getElementById('app');
       if (loginScreen) loginScreen.style.display = 'flex';
+      if (loadingScreen) loadingScreen.style.display = 'none';
       if (app) app.style.display = 'none';
     }, true);
     // Timeout fallback: se script não terminar em 5s, mostra login
     setTimeout(() => {
       if (!window.__AUTH_READY) {
+        document.documentElement.classList.remove('user-cached');
         const loginScreen = document.getElementById('login-screen');
-        if (loginScreen && loginScreen.style.display === '') {
-          loginScreen.style.display = 'flex';
-        }
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) loadingScreen.style.display = 'none';
+        if (loginScreen) loginScreen.style.display = 'flex';
       }
     }, 5000);
   </script>
@@ -270,6 +278,12 @@
 
     /* Login screen */
     #login-screen { min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px; background: radial-gradient(ellipse at 50% -20%, rgba(139,92,246,0.25) 0%, transparent 65%), var(--bg); }
+    .user-cached #login-screen { display: none !important; }
+    /* Loading screen (cache de login) */
+    #loading-screen { display: none; min-height: 100dvh; flex-direction: column; align-items: center; justify-content: center; gap: 20px; background: var(--bg); }
+    .user-cached #loading-screen { display: flex !important; }
+    #loading-screen .load-spinner { width: 40px; height: 40px; border: 3px solid rgba(139,92,246,0.25); border-top-color: var(--purple); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    #loading-screen .load-text { color: var(--text-muted); font-size: 14px; font-weight: 600; letter-spacing: 1px; }
 
     /* Orb decorations */
     .orb { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; }
@@ -368,6 +382,14 @@
 
   <p id="login-erro" style="color:#FCA5A5; font-size:13px; margin-top:16px; display:none; text-align:center;"></p>
   <p style="color: var(--text-muted); font-size: 12px; margin-top: 32px; text-align:center;">Acesso exclusivo · Dados protegidos</p>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     LOADING SCREEN (cache de login)
+═══════════════════════════════════════════ -->
+<div id="loading-screen">
+  <div class="load-spinner"></div>
+  <p class="load-text">ENTRANDO...</p>
 </div>
 
 <!-- ═══════════════════════════════════════════
@@ -1412,7 +1434,11 @@ getRedirectResult(auth).catch(e => { mostraErro(e.message || 'Erro ao realizar l
 
 onAuthStateChanged(auth, async u => {
   window.__AUTH_READY = true;
+  document.documentElement.classList.remove('user-cached');
+  const loadingScreen = document.getElementById('loading-screen');
+  if (loadingScreen) loadingScreen.style.display = 'none';
   if (u) {
+    localStorage.setItem('ffp_logged_in', '1');
     usuario = u;
     document.getElementById('login-screen').style.display = 'none';
     const app = document.getElementById('app');
@@ -1426,6 +1452,7 @@ onAuthStateChanged(auth, async u => {
     // RG5: aplicar controle de acesso na UI
     _aplicarControleAcesso();
   } else {
+    localStorage.removeItem('ffp_logged_in');
     usuario = null;
     _pararListeners();
     document.getElementById('login-screen').style.display = 'flex';
@@ -2244,7 +2271,7 @@ function cardAmistoso(a, compact=false, readonly=false) {
   const lpBadge2 = (!temRes && master && !compact)
     ? `<div style="display:flex;justify-content:center;margin-bottom:4px;cursor:pointer;user-select:none;" title="Segure para editar o time" onpointerdown="_lpAmiStart('${a.id}','${a.time2?.timeId}','${t2nom}','${a.tipo}')" onpointerup="_lpAmiEnd()" onpointercancel="_lpAmiEnd()" onclick="if(window._lpAmiTriggered){window._lpAmiTriggered=false;event.stopPropagation();}">${b2}</div>`
     : `<div style="display:flex;justify-content:center;margin-bottom:4px;">${b2}</div>`;
-  // RG7b: não-master vê placar somente-leitura; master vê inputs de edição
+  // RG7b: não-master vê placar desabilitado; master vê inputs de edição
   const placarDireto = temRes
     ? `<div style="font-size:29px;font-weight:900;letter-spacing:1px;color:var(--yellow);">${a.resultado.g1}<span style="color:var(--text-muted);font-size:13px;"> × </span>${a.resultado.g2}</div>`
     : master
@@ -2254,7 +2281,12 @@ function cardAmistoso(a, compact=false, readonly=false) {
           <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-pdc="2" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
         </div>
         <button onclick="event.stopPropagation();salvarPlacarDireto('${a.id}',this)" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">FIM</button>`
-      : `<div style="color:var(--text-muted);font-size:13px;font-weight:700;">EM ANDAMENTO</div>`;
+      : `<div style="display:flex;align-items:center;gap:4px;opacity:0.4;">
+          <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-pdc="1" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;cursor:not-allowed;">
+          <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
+          <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-pdc="2" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;cursor:not-allowed;">
+        </div>
+        <button disabled onclick="event.stopPropagation()" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:not-allowed;opacity:0.4;">FIM</button>`;
   const cardId = `ami-card-${a.id}`;
   const swipeOuter = master
     ? `<div class="swipe-wrap" data-swipe-id="${a.id}" data-swipe-nome="Amistoso">`
@@ -2293,7 +2325,12 @@ function cardAmistoso(a, compact=false, readonly=false) {
                 <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-pdc="2" class="placar-input" onclick="event.stopPropagation()" style="width:32px;text-align:center;font-size:16px;font-weight:900;padding:4px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:6px;color:var(--text);-moz-appearance:textfield;">
                 <button onclick="event.stopPropagation();salvarPlacarDireto('${a.id}',this)" style="margin-left:4px;padding:4px 8px;font-size:10px;font-weight:700;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:6px;cursor:pointer;">OK</button>
               </div>`
-            : `<div style="color:var(--text-muted);font-size:11px;font-weight:700;">EM<br>ANDAMENTO</div>`}
+            : `<div style="display:flex;align-items:center;gap:3px;opacity:0.4;">
+                <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-pdc="1" class="placar-input" disabled onclick="event.stopPropagation()" style="width:32px;text-align:center;font-size:16px;font-weight:900;padding:4px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:6px;color:var(--text);-moz-appearance:textfield;cursor:not-allowed;">
+                <span style="color:var(--text-muted);font-size:11px;font-weight:900;">×</span>
+                <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-pdc="2" class="placar-input" disabled onclick="event.stopPropagation()" style="width:32px;text-align:center;font-size:16px;font-weight:900;padding:4px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:6px;color:var(--text);-moz-appearance:textfield;cursor:not-allowed;">
+                <button disabled onclick="event.stopPropagation()" style="margin-left:4px;padding:4px 8px;font-size:10px;font-weight:700;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:6px;cursor:not-allowed;opacity:1;">OK</button>
+              </div>`}
       </div>
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-width:0;">
         <div style="font-weight:800;font-size:13px;line-height:1.2;text-transform:uppercase;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${abreviarNome(a.time2?.nome || '?')}</div>
