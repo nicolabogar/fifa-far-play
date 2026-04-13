@@ -2631,7 +2631,7 @@ function cardAmistoso(a, compact=false, readonly=false) {
       <div style="display:flex;align-items:center;gap:6px;">
         <span class="tag tag-purple">AMISTOSO</span>
         <span class="tag tag-gray">${a.tipo === 'selecoes' ? 'SELECOES' : 'CLUBES'}</span>
-        ${a.modoDupla ? `<span class="tag tag-cyan">2v2</span>` : ''}
+        ${a.modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
       </div>
       ${temRes ? (() => {
         const g1 = a.resultado.g1, g2 = a.resultado.g2;
