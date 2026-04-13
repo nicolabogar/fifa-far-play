@@ -5,5 +5,5 @@
 
 ## MELHORIAS ##
 
-- [ ] [Descreva aqui a próxima melhoria desejada]
+- [x] Para usuários não master, eles podem ver o cadastro de jogadores, mas só podem ter opção para alterar o seu próprio cadastro e só podem alterar o número do celular, o nome e a foto. (hash: 75beac6)
 

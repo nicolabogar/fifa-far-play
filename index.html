@@ -1705,38 +1705,46 @@ function renderJogadores() {
   if (!jogadores.length) { c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">Nenhum jogador cadastrado</p>'; return; }
   const master = getMaster();
   const podeMudar = temPermissao();
+  // RG5b: não-master pode editar apenas o próprio cadastro
+  const meuJogadorId = !podeMudar && usuario?.email
+    ? (jogadores.find(j => j.email && j.email.toLowerCase() === usuario.email.toLowerCase())?.id || null)
+    : null;
   const sorted = [...jogadores].sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' }));
-  c.innerHTML = sorted.map(j => podeMudar ? `
+  c.innerHTML = sorted.map(j => {
+    const cardContent = `
+        ${avatarJogador(j, 46)}
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-weight:700;font-size:15px;text-transform:uppercase;">${_escHtml(j.nome)}</span>
+            ${j.master ? `<span class="tag tag-yellow">MASTER</span>` : ''}
+          </div>
+          <div style="color:var(--text-muted);font-size:11px;margin-top:2px;">${j.email||'SEM E-MAIL VINCULADO'}</div>
+          ${j.celular ? `<div style="color:var(--text-muted);font-size:11px;margin-top:1px;">${j.celular}</div>` : ''}
+        </div>`;
+    if (podeMudar) {
+      return `
     <div class="swipe-wrap" data-swipe-id="${j.id}" data-swipe-nome="${_escHtml(j.nome)}">
       <div class="swipe-bg">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
         <span class="swipe-bg-label">EXCLUIR</span>
       </div>
-      <div class="entity-card" onclick="editarJogador('${j.id}')" style="cursor:pointer;">
-        ${avatarJogador(j, 46)}
-        <div style="flex:1;min-width:0;">
-          <div style="display:flex;align-items:center;gap:6px;">
-            <span style="font-weight:700;font-size:15px;text-transform:uppercase;">${_escHtml(j.nome)}</span>
-            ${j.master ? `<span class="tag tag-yellow">MASTER</span>` : ''}
-          </div>
-          <div style="color:var(--text-muted);font-size:11px;margin-top:2px;">${j.email||'SEM E-MAIL VINCULADO'}</div>
-          ${j.celular ? `<div style="color:var(--text-muted);font-size:11px;margin-top:1px;">${j.celular}</div>` : ''}
-        </div>
+      <div class="entity-card" onclick="editarJogador('${j.id}')" style="cursor:pointer;">${cardContent}
       </div>
-    </div>` : `
+    </div>`;
+    } else if (j.id === meuJogadorId) {
+      return `
     <div style="margin-bottom:10px;">
-      <div class="entity-card" onclick="editarJogador('${j.id}')" style="cursor:pointer;">
-        ${avatarJogador(j, 46)}
-        <div style="flex:1;min-width:0;">
-          <div style="display:flex;align-items:center;gap:6px;">
-            <span style="font-weight:700;font-size:15px;text-transform:uppercase;">${_escHtml(j.nome)}</span>
-            ${j.master ? `<span class="tag tag-yellow">MASTER</span>` : ''}
-          </div>
-          <div style="color:var(--text-muted);font-size:11px;margin-top:2px;">${j.email||'SEM E-MAIL VINCULADO'}</div>
-          ${j.celular ? `<div style="color:var(--text-muted);font-size:11px;margin-top:1px;">${j.celular}</div>` : ''}
-        </div>
+      <div class="entity-card" onclick="editarJogador('${j.id}')" style="cursor:pointer;">${cardContent}
       </div>
-    </div>`).join('');
+    </div>`;
+    } else {
+      return `
+    <div style="margin-bottom:10px;">
+      <div class="entity-card">${cardContent}
+      </div>
+    </div>`;
+    }
+  }).join('');
   if (podeMudar) initSwipe(c, 'jogador');
 }
 
@@ -1744,7 +1752,10 @@ window.editarJogador = (id) => {
   _croppedBlob = null;
   const j = jogadores.find(x => x.id === id);
   if (!j) return;
-  const podeMudarMaster = temPermissao();
+  const isMasterUser = temPermissao();
+  // RG5b: não-master só pode editar o próprio cadastro
+  const isProprioJogador = usuario?.email && j.email && j.email.toLowerCase() === usuario.email.toLowerCase();
+  if (!isMasterUser && !isProprioJogador) return;
   const masterVal = j.master ? '1' : '0';
   fullscreen('EDIÇÃO', `
     <div style="display:flex;flex-direction:column;gap:14px;max-width:400px;margin:0 auto;">
@@ -1761,15 +1772,15 @@ window.editarJogador = (id) => {
         <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">NOME COMPLETO</label>
         <input class="input" id="i-nome-edit" value="${j.nome.replace(/"/g,'&quot;')}" autocomplete="off" style="text-transform:uppercase;">
       </div>
-      <div>
+      ${isMasterUser ? `<div>
         <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">EMAIL</label>
         <input class="input" id="i-email-edit" type="email" value="${j.email||''}" autocomplete="off">
-      </div>
+      </div>` : ''}
       <div>
         <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">CELULAR</label>
         <input class="input" id="i-celular-edit" type="tel" placeholder="(11) 99999-9999" value="${j.celular||''}" autocomplete="off">
       </div>
-      ${podeMudarMaster ? `<label class="check-row">
+      ${isMasterUser ? `<label class="check-row">
         <input type="checkbox" id="i-master-edit" ${j.master ? 'checked' : ''}>
         <div>
           <div style="font-size:13px;font-weight:700;">USUARIO MASTER</div>
@@ -1792,10 +1803,15 @@ window.previewFotoEdit = (input) => {
 };
 
 window.salvarEdicaoJogador = async (id) => {
+  const isMasterUser = temPermissao();
+  const j = jogadores.find(x => x.id === id);
+  // RG5b: não-master só pode editar o próprio cadastro
+  const isProprioJogador = usuario?.email && j?.email && j.email.toLowerCase() === usuario.email.toLowerCase();
+  if (!isMasterUser && !isProprioJogador) { toast('SEM PERMISSAO','erro'); return; }
   const nome  = (document.getElementById('i-nome-edit')?.value.trim() || '').toUpperCase();
-  const email = document.getElementById('i-email-edit')?.value.trim().toLowerCase();
+  const email = isMasterUser ? document.getElementById('i-email-edit')?.value.trim().toLowerCase() : (j.email || '');
   const celular = document.getElementById('i-celular-edit')?.value.trim() || '';
-  const isMaster = document.getElementById('i-master-edit')?.checked || false;
+  const isMasterCheck = isMasterUser ? (document.getElementById('i-master-edit')?.checked || false) : j.master;
   if (!nome) { toast('DIGITE O NOME','erro'); return; }
   const btn = document.getElementById('btn-salvar-edit');
   if (btn) { btn.textContent = 'SALVANDO...'; btn.disabled = true; }
@@ -1805,13 +1821,13 @@ window.salvarEdicaoJogador = async (id) => {
       fotoUrl = _croppedBlob;
       _croppedBlob = null;
     }
-    if (isMaster) {
+    if (isMasterCheck && isMasterUser) {
       const masterAtual = getMaster();
       if (masterAtual && masterAtual.id !== id) {
         await updateDoc(doc(db,'jogadores',masterAtual.id), { master: false });
       }
     }
-    await updateDoc(doc(db,'jogadores',id), { nome, email: email||'', celular, master: isMaster, fotoUrl });
+    await updateDoc(doc(db,'jogadores',id), { nome, email: email||'', celular, master: isMasterCheck, fotoUrl });
     fecharFullscreen(); await carregarJogadores(); atualizarDash();
   } catch(e) {
     console.error(e);
