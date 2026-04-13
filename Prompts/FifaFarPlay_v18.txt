@@ -1,0 +1,9 @@
+# FIFA FAR PLAY - Prompts de Features v18
+# FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
+# O agente deve marcar o hash do commit ao concluir cada item.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v18.txt e um novo é criado.
+
+## MELHORIAS ##
+
+- [x] No card de amistoso em andamento (com time sorteado), ao clicar e segurar o logo do time, abrir a edição do time (eficiência + inativo). Se o time for inativado ou a eficiência alterada, fazer novo sorteio substituindo ambos os times no amistoso. (hash: f6b4ed2)
+
