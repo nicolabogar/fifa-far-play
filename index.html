@@ -352,11 +352,6 @@
       Entrar com Google
     </button>
 
-    <button id="btn-login-apple" style="display:flex; align-items:center; justify-content:center; gap:12px; background:#000; color:#fff; font-weight:800; font-size:16px; padding:16px 24px; border-radius:18px; border:1px solid rgba(255,255,255,0.2); cursor:pointer; width:100%; transition: transform 0.1s, box-shadow 0.2s, background 0.2s; box-shadow: 0 8px 32px rgba(0,0,0,0.4);" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform=''" ontouchend="this.style.transform=''" onmouseover="this.style.background='#1a1a1a'" onmouseout="this.style.background='#000'">
-      <svg width="20" height="20" viewBox="0 0 814 1000" fill="white"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 386.3 1 315 1 254c0-122.4 79.6-187 157.3-187 49.9 0 91.4 33.2 121.8 33.2 29.2 0 75.4-35.4 134.3-35.4 21.1 0 108.4 1.9 164.4 83zm-202.6-99.1c24.3-24.3 42-57.4 42-90.5 0-4.5-.5-9.1-1.3-13.6-39.9 1.9-87.3 26.6-115.7 54.9-21.1 21.7-42 55.2-42 88.3 0 4.5.6 9.1 1.4 12.4 2.6.5 5.2.6 7.8.6 36.5 0 81.3-24.3 107.8-52.1z"/></svg>
-      Entrar com Apple
-    </button>
-
   </div>
 
   <p id="login-erro" style="color:#FCA5A5; font-size:13px; margin-top:16px; display:none; text-align:center;"></p>
@@ -640,7 +635,7 @@
 import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, serverTimestamp, setDoc, getDoc }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, OAuthProvider, signOut, onAuthStateChanged }
+import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
@@ -659,9 +654,6 @@ const auth    = getAuth(FB);
 const storage = getStorage(FB);
 
 const gp = new GoogleAuthProvider();
-const ap = new OAuthProvider('apple.com');
-ap.addScope('email');
-ap.addScope('name');
 
 // ─── DATABASE DE TIMES EA FC 25 ──────────────────────────────────────
 // ataque/meio/defesa = atributos EA FC 25; forca = Math.round((ataque+meio+defesa)/3)
@@ -1301,10 +1293,15 @@ async function fazerLogin(provider, btnId) {
       } catch (e2) {
         btn.style.opacity = '1';
         btn.style.pointerEvents = '';
+        mostraErro(e2.message || 'Erro ao realizar login. Tente novamente.');
       }
-    } else if (e.code !== 'auth/cancelled-popup-request') {
+    } else if (e.code === 'auth/cancelled-popup-request') {
       btn.style.opacity = '1';
       btn.style.pointerEvents = '';
+    } else {
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = '';
+      mostraErro(e.message || 'Erro ao realizar login. Tente novamente.');
     }
   }
 }
@@ -1318,7 +1315,6 @@ function mostraErro(msg) {
 }
 
 document.getElementById('btn-login').addEventListener('click', () => fazerLogin(gp, 'btn-login'));
-document.getElementById('btn-login-apple').addEventListener('click', () => fazerLogin(ap, 'btn-login-apple'));
 document.getElementById('btn-sair').addEventListener('click', () => signOut(auth));
 
 // ─── HAMBURGER MENU ──────────────────────────────────────────────────
@@ -1364,7 +1360,7 @@ document.addEventListener('focus', (e) => {
   }
 }, true);
 
-getRedirectResult(auth).catch(() => {});
+getRedirectResult(auth).catch(e => { mostraErro(e.message || 'Erro ao realizar login. Tente novamente.'); });
 
 onAuthStateChanged(auth, async u => {
   window.__AUTH_READY = true;
