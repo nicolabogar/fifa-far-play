@@ -5,4 +5,6 @@
 
 ## MELHORIAS ##
 
+- [x] Quando o jogador realizar login pela primeira vez e não tiver cadastro, solicitar o número de celular (obrigatório) antes de criar o registro (hash: fa5b9b7)
+
 
