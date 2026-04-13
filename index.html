@@ -4057,6 +4057,15 @@ function abrirModalCriarCamp(secao, secaoView) {
       </div>
       <div>
         <label class="check-row" style="margin-bottom:8px;">
+          <input type="checkbox" id="camp-dupla" style="width:18px;height:18px;accent-color:var(--purple);">
+          <div>
+            <div style="font-size:13px;font-weight:700;">MODO DUPLA (2 POR TIME)</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">PARTICIPANTES EM DUPLAS — EXIGE NUMERO PAR DE JOGADORES</div>
+          </div>
+        </label>
+      </div>
+      <div>
+        <label class="check-row" style="margin-bottom:8px;">
           <input type="checkbox" id="manual-times" style="width:18px;height:18px;accent-color:var(--purple);" onchange="toggleSelManual()">
           <div>
             <div style="font-size:13px;font-weight:700;">ESCOLHER TIMES MANUALMENTE</div>
@@ -4213,9 +4222,11 @@ window.criarCampeonato = async () => {
   if (_lockBtn(btn)) return;
   const nome = document.getElementById('cn').value.trim().toUpperCase();
   const tipo = document.getElementById('ct').value;
+  const modoDupla = document.getElementById('camp-dupla')?.checked || false;
   if (!nome) { toast('DIGITE O NOME DO TORNEIO', 'erro'); _unlockBtn(btn); return; }
   if (campeonatos.some(c => c.nome.trim().toLowerCase() === nome.toLowerCase())) { toast('JA EXISTE UM TORNEIO COM ESSE NOME', 'erro'); _unlockBtn(btn); return; }
   if (_ccSel.size < 2) { toast('SELECIONE 2+ PARTICIPANTES', 'erro'); _unlockBtn(btn); return; }
+  if (modoDupla && _ccSel.size % 2 !== 0) { toast('MODO DUPLA: SELECIONE UM NUMERO PAR DE JOGADORES', 'erro'); _unlockBtn(btn); return; }
   const meta = CAMP_META[tipo];
   const isManual = document.getElementById('manual-times')?.checked;
   const hist = historicoIds(meta.tipo);
@@ -4235,9 +4246,12 @@ window.criarCampeonato = async () => {
     const pool = filtrarPoolEfic(meta.tipo === 'selecoes' ? selecoes : clubes);
     distribuidos = distribuirTimesBalanceados(partic, pool, hist);
   }
+  if (modoDupla) {
+    distribuidos = distribuidos.map((p, i) => ({ ...p, duplaIndex: Math.floor(i / 2) }));
+  }
   const grupos = gerarGrupos(distribuidos, tipo);
   try {
-    const docRef = await addDoc(collection(db, 'campeonatos'), { nome, tipo, participantes: distribuidos, grupos, fase:'grupos', status:'ativo', criadoEm: serverTimestamp() });
+    const docRef = await addDoc(collection(db, 'campeonatos'), { nome, tipo, modoDupla, participantes: distribuidos, grupos, fase:'grupos', status:'ativo', criadoEm: serverTimestamp() });
     fecharFullscreen(); await carregarCampeonatos(); atualizarDash();
     abrirCampeonato(docRef.id);
   } catch(e) { toast('ERRO AO SALVAR', 'erro'); } finally { _unlockBtn(btn); }
@@ -4403,6 +4417,7 @@ window.abrirCampeonato = (id) => {
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
           <span class="tag tag-purple">${meta.nome.toUpperCase()}</span>
           <span class="tag ${c.status==='finalizado'?'tag-gray':'tag-green'}">${c.status==='finalizado'?'FINALIZADO':'EM ANDAMENTO'}</span>
+          ${c.modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
         </div>
         <p style="color:var(--text-muted);font-size:12px;">${c.participantes?.length||0} PARTICIPANTES · ${totalJogosReg} JOGOS REGISTRADOS</p>
       </div>
@@ -4437,22 +4452,43 @@ window.abrirCampeonato = (id) => {
     ${podeMudar ? `<button onclick="reiniciarTorneio('${c.id}')" style="width:100%;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);color:#FCD34D;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px;">REINICIAR TORNEIO</button>` : ''}
     ${naoIniciado && podeMudar ? `<button onclick="excluirCampeonato('${c.id}')" style="width:100%;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.35);color:#EF4444;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:16px;">EXCLUIR TORNEIO</button>` : ''}
 
-    <p class="sec-title" style="margin-bottom:10px;">TIMES SORTEADOS</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
-      ${(c.participantes||[]).map(p=>{
-        const tipo = isSel ? 'selecoes' : 'clubes';
+    <p class="sec-title" style="margin-bottom:10px;">JOGADORES</p>
+    ${(() => {
+      const tipo = isSel ? 'selecoes' : 'clubes';
+      const participantes = c.participantes || [];
+      const playerRow = (p) => {
         const jogNome = _nomeJogPorId(p.jogadorId, p.nome);
-        return `<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:12px;text-align:center;">
-          ${badgeTimeCountryInfo(p.time?.id, p.time?.nome, tipo)}
-          <div style="font-weight:900;font-size:14px;line-height:1.2;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${abreviarNome(p.time?.nome||'?')}</div>
-          <div style="display:flex;flex-direction:column;align-items:center;margin-top:8px;">
-            <div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(p.time?.id, p.time?.nome, tipo)}</div>
-            <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(p.time?.id))}</div>
-            ${jogNome ? `<div style="margin-top:2px;display:flex;flex-direction:column;align-items:center;gap:2px;"><span class="tag tag-cyan" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${jogNome.toUpperCase()}</span></div>` : ''}
+        return `<div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:10px 12px;margin-bottom:6px;">
+          <div style="flex-shrink:0;">${badgeTimeIcon(p.time?.id, p.time?.nome, tipo)}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:900;font-size:13px;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${abreviarNome(p.time?.nome||'?')}</div>
+            <div style="margin-top:2px;">${eficBadge(eficienciaAtual(p.time?.id))}</div>
           </div>
+          ${jogNome ? `<span class="tag tag-cyan" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:45%;flex-shrink:0;">${jogNome.toUpperCase()}</span>` : ''}
         </div>`;
-      }).join('')}
-    </div>
+      };
+      if (c.modoDupla) {
+        const grupos_dupla = {};
+        participantes.forEach((p, i) => {
+          const di = p.duplaIndex !== undefined ? p.duplaIndex : Math.floor(i / 2);
+          if (!grupos_dupla[di]) grupos_dupla[di] = [];
+          grupos_dupla[di].push(p);
+        });
+        return Object.entries(grupos_dupla).map(([di, pares]) =>
+          `<div style="margin-bottom:10px;">
+            <div class="grupo-header aberto" onclick="toggleGrupo(this)" style="margin-bottom:6px;">
+              <span class="grupo-titulo">DUPLA ${parseInt(di)+1}</span>
+              <span class="grupo-seta">›</span>
+            </div>
+            <div class="grupo-body" style="padding:0 2px;">
+              ${pares.map(p => playerRow(p)).join('')}
+            </div>
+          </div>`
+        ).join('');
+      } else {
+        return `<div style="margin-bottom:14px;">${participantes.map(p => playerRow(p)).join('')}</div>`;
+      }
+    })()}
 
     <p class="sec-title" style="margin-bottom:10px;">GRUPOS</p>
     ${gruposHTML}
@@ -4560,6 +4596,7 @@ window.ressortearCampeonato = (id) => {
   const selecionados = new Set((c.participantes||[]).map(p=>p.jogadorId));
   fullscreen('RESSORTEAR', `
     <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">SELECIONE OS PARTICIPANTES E SORTEAREMOS OS TIMES NOVAMENTE PARA <strong>${c.nome.toUpperCase()}</strong></p>
+    ${c.modoDupla ? `<p style="color:var(--yellow);font-size:12px;font-weight:700;margin-bottom:12px;">MODO DUPLA ATIVO — SELECIONE UM NUMERO PAR DE JOGADORES</p>` : ''}
     <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">PARTICIPANTES</label>
     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
       ${jogadores.map(j => `<label class="check-row"><input type="checkbox" class="rsc" value="${j.id}" data-nome="${_nomeExibicao(j).replace(/"/g,'&quot;')}" ${selecionados.has(j.id)?'checked':''}>${SVG_USER_CHIP}<span style="font-weight:700;">${_nomeExibicao(j)}</span></label>`).join('')}
@@ -4573,11 +4610,15 @@ window.confirmarRessortear = async (id) => {
   if (!c) return;
   const checks = [...document.querySelectorAll('.rsc:checked')];
   if (checks.length < 2) { toast('SELECIONE 2+ PARTICIPANTES','erro'); return; }
+  if (c.modoDupla && checks.length % 2 !== 0) { toast('MODO DUPLA: SELECIONE UM NUMERO PAR DE JOGADORES', 'erro'); return; }
   const meta = CAMP_META[c.tipo];
   const pool = filtrarPoolEfic(meta.tipo === 'selecoes' ? selecoes : clubes);
   const hist = historicoIds(meta.tipo);
   const partic = checks.map(ch => ({ jogadorId: ch.value, nome: ch.dataset.nome }));
-  const distribuidos = distribuirTimesBalanceados(partic, pool, hist);
+  let distribuidos = distribuirTimesBalanceados(partic, pool, hist);
+  if (c.modoDupla) {
+    distribuidos = distribuidos.map((p, i) => ({ ...p, duplaIndex: Math.floor(i / 2) }));
+  }
   const grupos = gerarGrupos(distribuidos, c.tipo);
   await updateDoc(doc(db,'campeonatos',id), { participantes: distribuidos, grupos, fase:'grupos', status:'ativo' });
   fecharFullscreen(); await carregarCampeonatos(); atualizarDash(); abrirCampeonato(id);
