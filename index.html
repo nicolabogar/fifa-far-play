@@ -953,7 +953,7 @@ function flagImg(paisCode, w=20) {
 window._escSQ = function(s) { return String(s).replace(/'/g,"\\'"); };
 /** Escapa caracteres HTML para uso seguro em innerHTML/SVG */
 window._escHtml = function(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
-/** Retry de crest — tenta recarregar até 2x antes de ocultar a imagem */
+/** Retry de crest — tenta recarregar até 2x; em caso de falha permanente mostra o fallback */
 window._crestError = function(img) {
   if (img._retrying) return;
   var retries = (img._retries || 0) + 1;
@@ -965,6 +965,10 @@ window._crestError = function(img) {
     setTimeout(function() { img._retrying = false; img.setAttribute('src', src); }, retries * 1500);
   } else {
     img.style.display = 'none';
+    var fb = img.previousElementSibling;
+    if (fb && fb.classList && fb.classList.contains('crest-fallback')) {
+      fb.style.display = '';
+    }
   }
 };
 
@@ -976,9 +980,10 @@ function shieldClube(timeId, nomeTime, size=56) {
   const svgFallback = `<svg width="${size}" height="${h}" viewBox="0 0 56 64" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 3px 8px rgba(0,0,0,0.4));display:block;"><path d="M28 2 L54 11 L54 40 Q54 56 28 63 Q2 56 2 40 L2 11 Z" fill="${_escHtml(d.fundo)}" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/><text x="28" y="${Math.round(h*0.58)}" text-anchor="middle" dominant-baseline="middle" fill="${_escHtml(d.cor)}" font-weight="900" font-size="${fs}" font-family="system-ui">${_escHtml(d.abrev)}</text></svg>`;
   if (d.crest) {
     return `<div style="position:relative;width:${size}px;height:${h}px;flex-shrink:0;">
-      ${svgFallback}
+      <div class="crest-fallback">${svgFallback}</div>
       <img src="${d.crest}" alt="" width="${size}" height="${h}" loading="eager"
-        style="position:absolute;top:0;left:0;right:0;bottom:0;width:${size}px;height:${h}px;object-fit:contain;"
+        style="position:absolute;top:0;left:0;right:0;bottom:0;width:${size}px;height:${h}px;object-fit:contain;display:none;"
+        onload="this.style.display='';this.previousElementSibling.style.display='none'"
         onerror="window._crestError(this)"
       >
     </div>`;
@@ -997,8 +1002,8 @@ function badgeTimeCompact(timeId, nomeTime, tipo) {
   const d = TEAM_DATA[timeId] || { abrev:(nomeTime||'?').slice(0,3).toUpperCase(), fundo:'#1E1E35', cor:'#AAAAAA' };
   if (d.crest) {
     return `<div style="position:relative;width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">
-      ${d.abrev}
-      <img src="${d.crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;" onerror="window._crestError(this)">
+      <span class="crest-fallback">${d.abrev}</span>
+      <img src="${d.crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='';this.previousElementSibling.style.display='none'" onerror="window._crestError(this)">
     </div>`;
   }
   return `<div style="width:44px;height:44px;border-radius:10px;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.abrev}</div>`;
@@ -1031,6 +1036,23 @@ function badgeTime(timeId, nomeTime, tipo) {
   return tipo === 'selecoes' ? badgeSel(timeId, nomeTime) : badgeClube(timeId, nomeTime);
 }
 window.badgeTime = badgeTime;
+
+/** Renderiza apenas a info de país do time (bandeira pequena + nome do país) */
+function badgeTimeCountryInfo(timeId, nomeTime, tipo) {
+  if (tipo === 'selecoes') {
+    const d = SELECAO_PAIS[timeId] || { pais:'', paisNome: nomeTime||'' };
+    return `<div style="display:flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap;">${d.pais ? `<img src="https://flagcdn.com/w40/${d.pais}.png" loading="lazy" style="width:18px;height:13px;object-fit:cover;border-radius:2px;flex-shrink:0;" onerror="this.style.display='none'">` : ''}<span style="font-size:9px;color:var(--text-muted);font-weight:600;">${d.paisNome}</span></div>`;
+  }
+  const d = TEAM_DATA[timeId] || { pais:'eu', paisNome:'' };
+  return `<div style="display:flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap;">${flagImg(d.pais, 20)}<span style="font-size:9px;color:var(--text-muted);font-weight:600;">${d.paisNome}</span></div>`;
+}
+window.badgeTimeCountryInfo = badgeTimeCountryInfo;
+
+/** Renderiza apenas o ícone do time (escudo do clube ou bandeira da seleção) */
+function badgeTimeIcon(timeId, nomeTime, tipo) {
+  return tipo === 'selecoes' ? badgeSel(timeId, nomeTime) : shieldClube(timeId, nomeTime, 48);
+}
+window.badgeTimeIcon = badgeTimeIcon;
 
 /** Retorna só a bandeira inline para exibir antes do nome do time nos cards */
 function timeFlagInline(timeId, tipo) {
@@ -2329,6 +2351,14 @@ function cardAmistoso(a, compact=false, readonly=false) {
   const lpBadge2 = (!temRes && master && !compact)
     ? `<div style="display:flex;justify-content:center;margin-bottom:4px;cursor:pointer;user-select:none;-webkit-touch-callout:none;" title="Segure para editar o time" onpointerdown="_lpAmiStart('${a.id}','${a.time2?.timeId}','${t2nom}','${a.tipo}')" onpointerup="_lpAmiEnd()" onpointercancel="_lpAmiEnd()" oncontextmenu="return false;" onclick="if(window._lpAmiTriggered){window._lpAmiTriggered=false;event.stopPropagation();}">${b2}</div>`
     : `<div style="display:flex;justify-content:center;margin-bottom:4px;">${b2}</div>`;
+  const ci1 = badgeTimeCountryInfo(a.time1?.timeId, a.time1?.nome, a.tipo);
+  const ci2 = badgeTimeCountryInfo(a.time2?.timeId, a.time2?.nome, a.tipo);
+  const lpIcon1 = (!temRes && master && !compact)
+    ? `<div style="display:flex;justify-content:center;margin-bottom:4px;cursor:pointer;user-select:none;-webkit-touch-callout:none;" title="Segure para editar o time" onpointerdown="_lpAmiStart('${a.id}','${a.time1?.timeId}','${t1nom}','${a.tipo}')" onpointerup="_lpAmiEnd()" onpointercancel="_lpAmiEnd()" oncontextmenu="return false;" onclick="if(window._lpAmiTriggered){window._lpAmiTriggered=false;event.stopPropagation();}">${badgeTimeIcon(a.time1?.timeId, a.time1?.nome, a.tipo)}</div>`
+    : `<div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(a.time1?.timeId, a.time1?.nome, a.tipo)}</div>`;
+  const lpIcon2 = (!temRes && master && !compact)
+    ? `<div style="display:flex;justify-content:center;margin-bottom:4px;cursor:pointer;user-select:none;-webkit-touch-callout:none;" title="Segure para editar o time" onpointerdown="_lpAmiStart('${a.id}','${a.time2?.timeId}','${t2nom}','${a.tipo}')" onpointerup="_lpAmiEnd()" onpointercancel="_lpAmiEnd()" oncontextmenu="return false;" onclick="if(window._lpAmiTriggered){window._lpAmiTriggered=false;event.stopPropagation();}">${badgeTimeIcon(a.time2?.timeId, a.time2?.nome, a.tipo)}</div>`
+    : `<div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(a.time2?.timeId, a.time2?.nome, a.tipo)}</div>`;
   // RG7b: não-master vê placar desabilitado; master vê inputs de edição
   const placarDireto = temRes
     ? `<div style="font-size:29px;font-weight:900;letter-spacing:1px;color:var(--yellow);">${a.resultado.g1}<span style="color:var(--text-muted);font-size:13px;"> × </span>${a.resultado.g2}</div>`
@@ -2396,24 +2426,32 @@ function cardAmistoso(a, compact=false, readonly=false) {
         ${_nomesTime(a.time2).length ? `<div style="font-size:10px;color:var(--cyan);font-weight:700;">${_nomesTime(a.time2).join(' · ')}</div>` : ''}
       </div>
     </div>` : `
-    <div style="display:flex;align-items:stretch;gap:8px;">
+    <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;">
       <div style="flex:1;text-align:center;">
         ${_nomesTime(a.time1).length
           ? `<div style="margin-bottom:4px;display:flex;flex-direction:column;align-items:center;gap:2px;">${_nomesTime(a.time1).map(n=>`<div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>`
           : ''}
         <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${abreviarNome(a.time1?.nome || '?')}</div>
-        ${lpBadge1}
-        <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(a.time1?.timeId))}</div>
-      </div>
-      <div style="text-align:center;min-width:70px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;">
-        ${placarDireto}
+        ${ci1}
       </div>
       <div style="flex:1;text-align:center;">
         ${_nomesTime(a.time2).length
           ? `<div style="margin-bottom:4px;display:flex;flex-direction:column;align-items:center;gap:2px;">${_nomesTime(a.time2).map(n=>`<div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>`
           : ''}
         <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${abreviarNome(a.time2?.nome || '?')}</div>
-        ${lpBadge2}
+        ${ci2}
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+        ${lpIcon1}
+        <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(a.time1?.timeId))}</div>
+      </div>
+      <div style="text-align:center;min-width:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+        ${placarDireto}
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+        ${lpIcon2}
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(a.time2?.timeId))}</div>
       </div>
     </div>`}
@@ -3930,20 +3968,28 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
           })()
         : `<span class="tag tag-cyan">EM ANDAMENTO</span>`}
     </div>
-    <div style="display:flex;align-items:flex-start;gap:8px;">
+    <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;">
       <div style="flex:1;text-align:center;">
         <div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;margin:0 auto 4px;display:inline-block;">${_nomeJogPorId(m1.jogadorId, m1.nome)}</div>
         <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${abreviarNome(m1.time?.nome||'?')}</div>
-        <div style="display:flex;justify-content:center;margin-bottom:4px;">${b1}</div>
-        <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(m1.time?.id))}</div>
-      </div>
-      <div style="text-align:center;min-width:70px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;">
-        ${placarArea}
+        ${badgeTimeCountryInfo(m1.time?.id||'', m1.time?.nome||'', tipo)}
       </div>
       <div style="flex:1;text-align:center;">
         <div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;margin:0 auto 4px;display:inline-block;">${_nomeJogPorId(m2.jogadorId, m2.nome)}</div>
         <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${abreviarNome(m2.time?.nome||'?')}</div>
-        <div style="display:flex;justify-content:center;margin-bottom:4px;">${b2}</div>
+        ${badgeTimeCountryInfo(m2.time?.id||'', m2.time?.nome||'', tipo)}
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+        <div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(m1.time?.id||'', m1.time?.nome||'', tipo)}</div>
+        <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(m1.time?.id))}</div>
+      </div>
+      <div style="text-align:center;min-width:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+        ${placarArea}
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+        <div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(m2.time?.id||'', m2.time?.nome||'', tipo)}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(m2.time?.id))}</div>
       </div>
     </div>
@@ -4043,8 +4089,8 @@ window.abrirCampeonato = (id) => {
               <img src="https://flagcdn.com/w80/${(SELECAO_PAIS[p.time?.id]||{pais:''}).pais}.png" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
             </div>`
           : `<div style="position:relative;width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;background:${TEAM_DATA[p.time?.id]?.fundo||'#1E1E35'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:${TEAM_DATA[p.time?.id]?.cor||'#fff'};">
-              ${(TEAM_DATA[p.time?.id]?.abrev||'?').slice(0,3)}
-              ${TEAM_DATA[p.time?.id]?.crest ? `<img src="${TEAM_DATA[p.time?.id].crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;" onerror="window._crestError(this)">` : ''}
+              <span class="crest-fallback">${(TEAM_DATA[p.time?.id]?.abrev||'?').slice(0,3)}</span>
+              ${TEAM_DATA[p.time?.id]?.crest ? `<img src="${TEAM_DATA[p.time?.id].crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='';this.previousElementSibling.style.display='none'" onerror="window._crestError(this)">` : ''}
             </div>`;
         return `<div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:12px;">
           ${timeIcon}
@@ -4720,8 +4766,8 @@ function renderTimesEdit() {
       const d = TEAM_DATA[t.id] || { abrev:(t.nome||'?').slice(0,3).toUpperCase(), fundo:'#1E1E35', cor:'#AAAAAA', pais:'', paisNome:'' };
       const crestHtml = d.crest
         ? `<div style="position:relative;width:57px;height:57px;border-radius:12px;overflow:hidden;flex-shrink:0;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">
-            ${d.abrev}
-            <img src="${d.crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;" onerror="window._crestError(this)">
+            <span class="crest-fallback">${d.abrev}</span>
+            <img src="${d.crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='';this.previousElementSibling.style.display='none'" onerror="window._crestError(this)">
           </div>`
         : `<div style="width:57px;height:57px;border-radius:12px;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.abrev}</div>`;
       icone = crestHtml;
