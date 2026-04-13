@@ -146,7 +146,7 @@
     /* ── Agrupadores ── */
     .grupo-header { display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:14px;cursor:pointer;margin-bottom:8px;user-select:none; }
     .grupo-header:hover { background:rgba(255,255,255,0.07); }
-    .grupo-header .grupo-titulo { font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:0.07em;background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+    .grupo-header .grupo-titulo { font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:0.07em;background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
     .grupo-header .grupo-titulo span { -webkit-text-fill-color:var(--text-muted); }
     .grupo-header .grupo-seta { font-size:14px;color:var(--text-muted);transition:transform 0.25s;display:inline-block; }
     .grupo-header.aberto .grupo-seta { transform:rotate(90deg); }
@@ -476,7 +476,7 @@
     <!-- ── HOME ── -->
     <div id="view-home" class="view active">
       <!-- Botao + CRIAR com dropdown -->
-      <div style="padding:16px 0 0;margin-bottom:16px;">
+      <div id="wrap-btn-criar-home" style="padding:16px 0 0;margin-bottom:16px;">
         <button id="btn-criar-home" onclick="toggleCriarMenu()" class="btn-primary" style="width:100%;font-size:14px;padding:10px 18px;text-transform:uppercase;font-weight:700;">+ CRIAR</button>
       </div>
       <div id="criar-menu-dropdown" style="display:none;margin:0 -16px 24px;background:var(--bg2);border-top:1px solid var(--card-border);border-bottom:1px solid var(--card-border);box-shadow:0 8px 32px rgba(0,0,0,0.5);">
@@ -1543,9 +1543,9 @@ onAuthStateChanged(auth, async u => {
 // RG5: controle de acesso — oculta funcionalidades de master para usuários normais
 function _aplicarControleAcesso() {
   const master = temPermissao();
-  // Botão + CRIAR na home: apenas para master
-  const btnCriarHome = document.getElementById('btn-criar-home');
-  if (btnCriarHome) btnCriarHome.style.display = master ? '' : 'none';
+  // Botão + CRIAR na home: apenas para master (oculta o wrapper inteiro para não deixar espaço em branco)
+  const wrapBtnCriarHome = document.getElementById('wrap-btn-criar-home');
+  if (wrapBtnCriarHome) wrapBtnCriarHome.style.display = master ? '' : 'none';
   // Botões de criação nas telas
   const btnAddJog = document.getElementById('btn-add-jog');
   if (btnAddJog) btnAddJog.style.display = master ? '' : 'none';
