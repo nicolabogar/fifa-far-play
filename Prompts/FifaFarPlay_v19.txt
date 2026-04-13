@@ -1,0 +1,10 @@
+# FIFA FAR PLAY - Prompts de Features v19
+# FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
+# O agente deve marcar o hash do commit ao concluir cada item.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v19.txt e um novo é criado.
+
+## MELHORIAS ##
+
+- [x] Criar um campo apelido no cadastro de jogadores, e quando informado esse apelido, apresentar o apelido ao invés do nome em todas as informações do aplicativo, por exemplo o card em andamento dos amistosos (hash: a681b80)
+
+
