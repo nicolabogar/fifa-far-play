@@ -1,10 +1,9 @@
-# FIFA FAR PLAY - Prompts de Features v16
+# FIFA FAR PLAY - Prompts de Features v17
 # FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
 # O agente deve marcar o hash do commit ao concluir cada item.
-# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v16.txt e um novo é criado.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v17.txt e um novo é criado.
 
 ## MELHORIAS ##
 
-- [x] Quando o jogador realizar login pela primeira vez e não tiver cadastro, solicitar o número de celular (obrigatório) antes de criar o registro (hash: fa5b9b7)
-
+- [ ] [Descreva aqui a próxima melhoria desejada]
 
