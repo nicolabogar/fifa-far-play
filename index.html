@@ -3689,8 +3689,8 @@ window.editarAmistoso = (id) => {
     const btnCancelar = document.querySelector('#fullscreen-body .btn-ghost');
     if (btnCancelar) {
       const btnExcluir = document.createElement('button');
-      btnExcluir.className = 'btn-ghost';
-      btnExcluir.style.cssText = 'color:#EF4444;border-color:rgba(239,68,68,0.3);';
+      btnExcluir.className = 'btn-primary';
+      btnExcluir.style.cssText = 'background:linear-gradient(135deg,#EF4444,#DC2626);border-color:transparent;color:#fff;';
       btnExcluir.textContent = 'EXCLUIR AMISTOSO';
       btnExcluir.onclick = () => confirmarExcluirAmistoso(id);
       btnCancelar.parentElement.insertBefore(btnExcluir, btnCancelar);
