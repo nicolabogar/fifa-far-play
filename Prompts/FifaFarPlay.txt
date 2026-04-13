@@ -5,5 +5,5 @@
 
 ## MELHORIAS ##
 
-- [ ] No card de amistoso em andamento (com time sorteado), ao clicar e segurar o logo do time, abrir a edição do time (eficiência + inativo). Se o time for inativado ou a eficiência alterada, fazer novo sorteio substituindo ambos os times no amistoso.
+- [x] No card de amistoso em andamento (com time sorteado), ao clicar e segurar o logo do time, abrir a edição do time (eficiência + inativo). Se o time for inativado ou a eficiência alterada, fazer novo sorteio substituindo ambos os times no amistoso. (hash: fe0376d)
 

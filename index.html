@@ -1939,10 +1939,10 @@ function cardAmistoso(a, compact=false, readonly=false) {
   const t1nom = (a.time1?.nome||'').replace(/'/g,"\\'");
   const t2nom = (a.time2?.nome||'').replace(/'/g,"\\'");
   const lpBadge1 = (!temRes && master && !compact)
-    ? `<div style="display:flex;justify-content:center;margin-bottom:4px;cursor:pointer;user-select:none;" title="Segure para editar o time" onpointerdown="_lpAmiStart('${a.id}','${a.time1?.timeId}','${t1nom}','${a.tipo}','time1')" onpointerup="_lpAmiEnd()" onpointercancel="_lpAmiEnd()" onclick="if(window._lpAmiTriggered){window._lpAmiTriggered=false;event.stopPropagation();}">${b1}</div>`
+    ? `<div style="display:flex;justify-content:center;margin-bottom:4px;cursor:pointer;user-select:none;" title="Segure para editar o time" onpointerdown="_lpAmiStart('${a.id}','${a.time1?.timeId}','${t1nom}','${a.tipo}')" onpointerup="_lpAmiEnd()" onpointercancel="_lpAmiEnd()" onclick="if(window._lpAmiTriggered){window._lpAmiTriggered=false;event.stopPropagation();}">${b1}</div>`
     : `<div style="display:flex;justify-content:center;margin-bottom:4px;">${b1}</div>`;
   const lpBadge2 = (!temRes && master && !compact)
-    ? `<div style="display:flex;justify-content:center;margin-bottom:4px;cursor:pointer;user-select:none;" title="Segure para editar o time" onpointerdown="_lpAmiStart('${a.id}','${a.time2?.timeId}','${t2nom}','${a.tipo}','time2')" onpointerup="_lpAmiEnd()" onpointercancel="_lpAmiEnd()" onclick="if(window._lpAmiTriggered){window._lpAmiTriggered=false;event.stopPropagation();}">${b2}</div>`
+    ? `<div style="display:flex;justify-content:center;margin-bottom:4px;cursor:pointer;user-select:none;" title="Segure para editar o time" onpointerdown="_lpAmiStart('${a.id}','${a.time2?.timeId}','${t2nom}','${a.tipo}')" onpointerup="_lpAmiEnd()" onpointercancel="_lpAmiEnd()" onclick="if(window._lpAmiTriggered){window._lpAmiTriggered=false;event.stopPropagation();}">${b2}</div>`
     : `<div style="display:flex;justify-content:center;margin-bottom:4px;">${b2}</div>`;
   // RG7b: não-master vê placar somente-leitura; master vê inputs de edição
   const placarDireto = temRes
@@ -2728,17 +2728,17 @@ window.confirmarInativarTimeSorteio = async (timeId, tipo) => {
 // ─── LONG PRESS NO LOGO DO TIME NO CARD DE ANDAMENTO ─────────────────
 let _lpAmiTimer = null;
 window._lpAmiTriggered = false;
-window._lpAmiStart = (amiId, timeId, timeNome, tipoT, qual) => {
+window._lpAmiStart = (amiId, timeId, timeNome, tipoT) => {
   _lpAmiTimer = setTimeout(() => {
     _lpAmiTimer = null;
     window._lpAmiTriggered = true;
-    editarTimeAmistoso(amiId, timeId, timeNome, tipoT, qual);
+    editarTimeAmistoso(amiId, timeId, timeNome, tipoT);
   }, 600);
 };
 window._lpAmiEnd = () => {
   if (_lpAmiTimer) { clearTimeout(_lpAmiTimer); _lpAmiTimer = null; }
 };
-window.editarTimeAmistoso = (amiId, timeId, timeNome, tipoT, qual) => {
+window.editarTimeAmistoso = (amiId, timeId, timeNome, tipoT) => {
   const pool = tipoT === 'selecoes' ? selecoes : clubes;
   const t = pool.find(x => x.id === timeId) || { eficiencia:'Bom', inativo:false };
   modal(`<p class="modal-title">${timeNome.toUpperCase()}</p>
@@ -2754,7 +2754,7 @@ window.editarTimeAmistoso = (amiId, timeId, timeNome, tipoT, qual) => {
     </label>
     <div style="display:flex;gap:10px;">
       <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
-      <button class="btn-primary" onclick="salvarTimeAmistoso('${amiId}','${timeId}','${tipoT}','${qual}')">SALVAR</button>
+      <button class="btn-primary" onclick="salvarTimeAmistoso('${amiId}','${timeId}','${tipoT}')">SALVAR</button>
     </div>`);
 };
 window.selecionarEficienciaETAmi = (val) => {
@@ -2763,7 +2763,7 @@ window.selecionarEficienciaETAmi = (val) => {
   c.dataset.selected = val;
   c.querySelectorAll('.efic-tag').forEach(el => el.classList.toggle('selecionado', el.dataset.efic === val));
 };
-window.salvarTimeAmistoso = async (amiId, timeId, tipoT, qual) => {
+window.salvarTimeAmistoso = async (amiId, timeId, tipoT) => {
   const eficiencia = document.getElementById('etami-efic-tags')?.dataset.selected || 'Bom';
   const inativo = document.getElementById('etami-inativo')?.checked || false;
   const pool = tipoT === 'selecoes' ? selecoes : clubes;
