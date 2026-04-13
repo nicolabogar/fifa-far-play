@@ -1001,6 +1001,10 @@ function timeFlagInline(timeId, tipo) {
 // ─── ESTADO ─────────────────────────────────────────────────────────
 let usuario    = null;
 let jogadores  = [];
+
+// ─── HELPERS DE NOME ────────────────────────────────────────────────
+function _nomeExibicao(j) { return (j && (j.apelido || j.nome)) || ''; }
+function _nomeJogPorId(id, fallback) { const j = jogadores.find(x => x.id === id); return j ? _nomeExibicao(j) : (fallback || ''); }
 let amistosos  = [];
 let campeonatos= [];
 let clubes     = [...CLUBES_DEFAULT];
@@ -1742,7 +1746,7 @@ function renderJogadores() {
         ${avatarJogador(j, 46)}
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:6px;">
-            <span style="font-weight:700;font-size:15px;text-transform:uppercase;">${_escHtml(j.nome)}</span>
+            <span style="font-weight:700;font-size:15px;text-transform:uppercase;">${_escHtml(_nomeExibicao(j))}</span>
             ${j.master ? `<span class="tag tag-yellow">MASTER</span>` : ''}
           </div>
           <div style="color:var(--text-muted);font-size:11px;margin-top:2px;">${j.email||'SEM E-MAIL VINCULADO'}</div>
@@ -1750,7 +1754,7 @@ function renderJogadores() {
         </div>`;
     if (podeMudar) {
       return `
-    <div class="swipe-wrap" data-swipe-id="${j.id}" data-swipe-nome="${_escHtml(j.nome)}">
+    <div class="swipe-wrap" data-swipe-id="${j.id}" data-swipe-nome="${_escHtml(_nomeExibicao(j))}">
       <div class="swipe-bg">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
         <span class="swipe-bg-label">EXCLUIR</span>
@@ -1799,6 +1803,10 @@ window.editarJogador = (id) => {
         <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">NOME COMPLETO</label>
         <input class="input" id="i-nome-edit" value="${j.nome.replace(/"/g,'&quot;')}" autocomplete="off" style="text-transform:uppercase;">
       </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">APELIDO <span style="color:var(--text-muted);font-weight:400;font-size:10px;">(OPCIONAL)</span></label>
+        <input class="input" id="i-apelido-edit" autocomplete="off" style="text-transform:uppercase;" placeholder="EX: NEYMAR" value="${(j.apelido||'').replace(/"/g,'&quot;')}">
+      </div>
       ${isMasterUser ? `<div>
         <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">EMAIL</label>
         <input class="input" id="i-email-edit" type="email" value="${j.email||''}" autocomplete="off">
@@ -1836,6 +1844,7 @@ window.salvarEdicaoJogador = async (id) => {
   const isProprioJogador = usuario?.email && j?.email && j.email.toLowerCase() === usuario.email.toLowerCase();
   if (!isMasterUser && !isProprioJogador) { toast('SEM PERMISSAO','erro'); return; }
   const nome  = (document.getElementById('i-nome-edit')?.value.trim() || '').toUpperCase();
+  const apelido = (document.getElementById('i-apelido-edit')?.value.trim() || '').toUpperCase();
   const email = isMasterUser ? document.getElementById('i-email-edit')?.value.trim().toLowerCase() : (j.email || '');
   const celular = document.getElementById('i-celular-edit')?.value.trim() || '';
   const isMasterCheck = isMasterUser ? (document.getElementById('i-master-edit')?.checked || false) : j.master;
@@ -1854,7 +1863,7 @@ window.salvarEdicaoJogador = async (id) => {
         await updateDoc(doc(db,'jogadores',masterAtual.id), { master: false });
       }
     }
-    await updateDoc(doc(db,'jogadores',id), { nome, email: email||'', celular, master: isMasterCheck, fotoUrl });
+    await updateDoc(doc(db,'jogadores',id), { nome, apelido, email: email||'', celular, master: isMasterCheck, fotoUrl });
     fecharFullscreen(); await carregarJogadores(); atualizarDash();
   } catch(e) {
     console.error(e);
@@ -1915,6 +1924,10 @@ document.getElementById('btn-add-jog').addEventListener('click', () => {
       <div>
         <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">NOME COMPLETO</label>
         <input class="input" id="i-nome" autocomplete="off" style="text-transform:uppercase;">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">APELIDO <span style="color:var(--text-muted);font-weight:400;font-size:10px;">(OPCIONAL)</span></label>
+        <input class="input" id="i-apelido" autocomplete="off" style="text-transform:uppercase;" placeholder="EX: NEYMAR">
       </div>
       <div>
         <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">EMAIL</label>
@@ -2183,6 +2196,7 @@ window.previewFoto = (input) => {
 
 window.salvarJogador = async () => {
   const nome  = (document.getElementById('i-nome')?.value.trim() || '').toUpperCase();
+  const apelido = (document.getElementById('i-apelido')?.value.trim() || '').toUpperCase();
   const email = document.getElementById('i-email')?.value.trim().toLowerCase();
   const celular = document.getElementById('i-celular')?.value.trim() || '';
   const isMaster = document.getElementById('i-master')?.checked || false;
@@ -2211,7 +2225,7 @@ window.salvarJogador = async () => {
       const masterAtual = getMaster();
       if (masterAtual) await updateDoc(doc(db,'jogadores',masterAtual.id), { master: false });
     }
-    await addDoc(collection(db, 'jogadores'), { nome, email: email||'', celular, master: isMaster, fotoUrl, criadoEm: serverTimestamp() });
+    await addDoc(collection(db, 'jogadores'), { nome, apelido, email: email||'', celular, master: isMaster, fotoUrl, criadoEm: serverTimestamp() });
     fecharFullscreen(); await carregarJogadores(); atualizarDash();
   } catch(e) {
     console.error(e);
@@ -2429,7 +2443,7 @@ function renderAmistosos() {
       </div>
       <select id="ami-filtro-jog" onchange="_filtrarAmiJog(this.value)" style="width:100%;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;margin-bottom:10px;">
         <option value="">JOGADOR: TODOS</option>
-        ${jogadores.map(j=>`<option value="${j.id}" ${_amiState.filtroJog===j.id?'selected':''}>${j.nome.toUpperCase()}</option>`).join('')}
+        ${jogadores.map(j=>`<option value="${j.id}" ${_amiState.filtroJog===j.id?'selected':''}>${_nomeExibicao(j).toUpperCase()}</option>`).join('')}
       </select>
       <div id="ami-fin-lista"></div>
       <div class="pag-row" id="ami-fin-pag"></div>
@@ -2532,12 +2546,12 @@ window.filtrarJogsJC = () => {
   const q = (document.getElementById('jc-search')?.value || '').toLowerCase();
   const drop = document.getElementById('jc-dropdown');
   if (!drop) return;
-  const disponiveis = jogadores.filter(j => !_jcSel.has(j.id) && (!q || j.nome.toLowerCase().includes(q)));
+  const disponiveis = jogadores.filter(j => !_jcSel.has(j.id) && (!q || j.nome.toLowerCase().includes(q) || (j.apelido||'').toLowerCase().includes(q)));
   if (!disponiveis.length) { drop.style.display = 'none'; return; }
   drop.innerHTML = disponiveis.map(j =>
-    `<div onclick="selecionarJogJC('${j.id}','${j.nome.replace(/'/g,"\\'").replace(/"/g,'&quot;')}');document.getElementById('jc-search').value='';document.getElementById('jc-dropdown').style.display='none';"
+    `<div onclick="selecionarJogJC('${j.id}','${_nomeExibicao(j).replace(/'/g,"\\'").replace(/"/g,'&quot;')}');document.getElementById('jc-search').value='';document.getElementById('jc-dropdown').style.display='none';"
       style="padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.05);font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;">
-      ${SVG_USER_CHIP}<span>${j.nome}</span>
+      ${SVG_USER_CHIP}<span>${_nomeExibicao(j)}</span>
     </div>`
   ).join('');
   drop.style.display = 'block';
@@ -2621,7 +2635,7 @@ function _preencherUltimoJogo() {
   const ids2 = ultimo.time2?.jogadoresIds || [];
   [...ids1, ...ids2].forEach(jid => {
     const j = jogadores.find(x => x.id === jid);
-    if (j && !_jcSel.has(jid)) _jcSel.set(jid, j.nome);
+    if (j && !_jcSel.has(jid)) _jcSel.set(jid, _nomeExibicao(j));
   });
   setTimeout(() => _renderTagsJC(), 50);
 }
@@ -2670,7 +2684,7 @@ function vsCardTime(t, jogadoresList, pool) {
     <div class="vs-team">${t.nome}</div>
     <div style="margin:4px 0;">${forcaBadge(t.forca)}</div>
     ${timeData.ataque != null ? `<div style="display:flex;justify-content:center;gap:3px;flex-wrap:wrap;margin-bottom:4px;">${atributosBadge(timeData)}</div>` : ''}
-    ${jogadoresList.map(j => `<div class="vs-label">${j.nome}</div>`).join('')}
+    ${jogadoresList.map(j => `<div class="vs-label">${_nomeExibicao(j)}</div>`).join('')}
   </div>`;
 }
 
@@ -3433,7 +3447,7 @@ function renderCampeonatos() {
       </div>
       <select id="camp-filtro-jog" onchange="_filtrarCampJog(this.value)" style="width:100%;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;margin-bottom:10px;">
         <option value="">JOGADOR: TODOS</option>
-        ${jogadores.map(j=>`<option value="${j.id}" ${_campState.filtroJog===j.id?'selected':''}>${j.nome.toUpperCase()}</option>`).join('')}
+        ${jogadores.map(j=>`<option value="${j.id}" ${_campState.filtroJog===j.id?'selected':''}>${_nomeExibicao(j).toUpperCase()}</option>`).join('')}
       </select>
       <div id="camp-fin-lista"></div>
       <div class="pag-row" id="camp-fin-pag"></div>
@@ -3535,12 +3549,12 @@ window.filtrarJogsCC = () => {
   const q = (document.getElementById('cc-search')?.value || '').toLowerCase();
   const drop = document.getElementById('cc-dropdown');
   if (!drop) return;
-  const disponiveis = jogadores.filter(j => !_ccSel.has(j.id) && (!q || j.nome.toLowerCase().includes(q)));
+  const disponiveis = jogadores.filter(j => !_ccSel.has(j.id) && (!q || j.nome.toLowerCase().includes(q) || (j.apelido||'').toLowerCase().includes(q)));
   if (!disponiveis.length) { drop.style.display = 'none'; return; }
   drop.innerHTML = disponiveis.map(j =>
-    `<div onclick="selecionarJogCC('${j.id}','${j.nome.replace(/'/g,"\\'").replace(/"/g,'&quot;')}');document.getElementById('cc-search').value='';document.getElementById('cc-dropdown').style.display='none';"
+    `<div onclick="selecionarJogCC('${j.id}','${_nomeExibicao(j).replace(/'/g,"\\'").replace(/"/g,'&quot;')}');document.getElementById('cc-search').value='';document.getElementById('cc-dropdown').style.display='none';"
       style="padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.05);font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;">
-      ${SVG_USER_CHIP}<span>${j.nome}</span>
+      ${SVG_USER_CHIP}<span>${_nomeExibicao(j)}</span>
     </div>`
   ).join('');
   drop.style.display = 'block';
@@ -3822,8 +3836,8 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
       ${temRes
         ? (() => {
             const g1 = m1.resultado, g2 = m2.resultado;
-            if (g1 > g2) return `<span class="tag tag-green">VITÓRIA: ${m1.nome}</span>`;
-            if (g2 > g1) return `<span class="tag tag-green">VITÓRIA: ${m2.nome}</span>`;
+            if (g1 > g2) return `<span class="tag tag-green">VITÓRIA: ${_nomeJogPorId(m1.jogadorId, m1.nome)}</span>`;
+            if (g2 > g1) return `<span class="tag tag-green">VITÓRIA: ${_nomeJogPorId(m2.jogadorId, m2.nome)}</span>`;
             return `<span class="tag tag-yellow">EMPATE</span>`;
           })()
         : `<span class="tag tag-cyan">EM ANDAMENTO</span>`}
@@ -3833,7 +3847,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
         <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${abreviarNome(m1.time?.nome||'?')}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${b1}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(m1.time?.id))}</div>
-        <div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;margin:0 auto;display:inline-block;">${m1.nome}</div>
+        <div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;margin:0 auto;display:inline-block;">${_nomeJogPorId(m1.jogadorId, m1.nome)}</div>
       </div>
       <div style="text-align:center;min-width:70px;padding-top:20px;">
         ${placarArea}
@@ -3842,7 +3856,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
         <div style="font-weight:900;font-size:16px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;">${abreviarNome(m2.time?.nome||'?')}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${b2}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(m2.time?.id))}</div>
-        <div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;margin:0 auto;display:inline-block;">${m2.nome}</div>
+        <div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;margin:0 auto;display:inline-block;">${_nomeJogPorId(m2.jogadorId, m2.nome)}</div>
       </div>
     </div>
   </div>`;
@@ -3864,7 +3878,7 @@ window.abrirCampeonato = (id) => {
       <div style="display:flex;justify-content:center;margin-bottom:4px;">${bc}</div>
       <div style="font-size:13px;font-weight:800;line-height:1.2;">${m.time?.nome||'?'}</div>
       <div style="margin-top:3px;">${eficBadge(eficienciaAtual(m.time?.id))}</div>
-      <div style="font-size:11px;color:var(--cyan);margin-top:3px;font-weight:700;">${m.nome}</div>
+      <div style="font-size:11px;color:var(--cyan);margin-top:3px;font-weight:700;">${_nomeJogPorId(m.jogadorId, m.nome)}</div>
     </div>`;
   };
 
@@ -3897,7 +3911,7 @@ window.abrirCampeonato = (id) => {
         ${ord.map((m,i)=>`<tr style="border-top:1px solid rgba(255,255,255,0.04);color:${i<2?'var(--cyan)':'var(--text)'}">
           <td style="padding:6px 8px;font-weight:800;color:${i===0?'var(--yellow)':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text-muted)'};">${i+1}°</td>
           <td style="padding:6px 4px;">
-            <div style="font-weight:700;font-size:11px;">${m.nome}</div>
+            <div style="font-weight:700;font-size:11px;">${_nomeJogPorId(m.jogadorId, m.nome)}</div>
             <div style="font-size:9px;color:var(--text-muted);">${m.time?.nome||'?'}</div>
           </td>
           <td style="text-align:center;padding:6px 4px;">${m.vit+m.emp+m.der}</td>
@@ -3950,7 +3964,7 @@ window.abrirCampeonato = (id) => {
           <div style="min-width:0;flex:1;">
             <div style="font-weight:900;font-size:13px;line-height:1.2;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.time?.nome||'?'}</div>
             <div style="margin-top:3px;">${eficBadge(eficienciaAtual(p.time?.id))}</div>
-            <div style="font-size:11px;color:var(--purple);font-weight:700;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nome}</div>
+            <div style="font-size:11px;color:var(--purple);font-weight:700;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${_nomeJogPorId(p.jogadorId, p.nome)}</div>
           </div>
         </div>`;
       }).join('')}
@@ -4049,7 +4063,7 @@ window.ressortearCampeonato = (id) => {
     <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">SELECIONE OS PARTICIPANTES E SORTEAREMOS OS TIMES NOVAMENTE PARA <strong>${c.nome.toUpperCase()}</strong></p>
     <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">PARTICIPANTES</label>
     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
-      ${jogadores.map(j => `<label class="check-row"><input type="checkbox" class="rsc" value="${j.id}" data-nome="${j.nome}" ${selecionados.has(j.id)?'checked':''}>${SVG_USER_CHIP}<span style="font-weight:700;">${j.nome}</span></label>`).join('')}
+      ${jogadores.map(j => `<label class="check-row"><input type="checkbox" class="rsc" value="${j.id}" data-nome="${_nomeExibicao(j).replace(/"/g,'&quot;')}" ${selecionados.has(j.id)?'checked':''}>${SVG_USER_CHIP}<span style="font-weight:700;">${_nomeExibicao(j)}</span></label>`).join('')}
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn-primary" onclick="confirmarRessortear('${id}')">SORTEAR</button>
@@ -4086,14 +4100,14 @@ window.regPartida = (cid, gi, j1Id, j2Id) => {
     <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:24px;">
       <div style="flex:1;text-align:center;">
         <div style="display:flex;justify-content:center;margin-bottom:8px;">${b1}</div>
-        <div style="font-weight:800;font-size:14px;">${m1.nome}</div>
+        <div style="font-weight:800;font-size:14px;">${_nomeJogPorId(m1.jogadorId, m1.nome)}</div>
         <div style="font-size:11px;color:var(--text-muted);">${m1.time?.nome||'?'}</div>
         <input id="rg1" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" class="input" style="text-align:center;font-size:40px;font-weight:900;padding:14px;margin-top:12px;">
       </div>
       <div style="color:var(--text-muted);font-size:32px;font-weight:900;padding-top:80px;flex-shrink:0;">×</div>
       <div style="flex:1;text-align:center;">
         <div style="display:flex;justify-content:center;margin-bottom:8px;">${b2}</div>
-        <div style="font-weight:800;font-size:14px;">${m2.nome}</div>
+        <div style="font-weight:800;font-size:14px;">${_nomeJogPorId(m2.jogadorId, m2.nome)}</div>
         <div style="font-size:11px;color:var(--text-muted);">${m2.time?.nome||'?'}</div>
         <input id="rg2" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" class="input" style="text-align:center;font-size:40px;font-weight:900;padding:14px;margin-top:12px;">
       </div>
@@ -4127,7 +4141,7 @@ window.salvarPartida = async (cid, gi) => {
 // ─── RANKING ─────────────────────────────────────────────────────────
 function calcularRankingAmistosos() {
   const s = {};
-  jogadores.forEach(j => { s[j.id]={id:j.id,nome:j.nome,fotoUrl:j.fotoUrl||'',vit:0,emp:0,der:0,gp:0,gc:0,pts:0,j:0}; });
+  jogadores.forEach(j => { s[j.id]={id:j.id,nome:_nomeExibicao(j),fotoUrl:j.fotoUrl||'',vit:0,emp:0,der:0,gp:0,gc:0,pts:0,j:0}; });
   amistosos.forEach(a => {
     if (!a.resultado) return;
     const {g1,g2}=a.resultado;
@@ -4139,7 +4153,7 @@ function calcularRankingAmistosos() {
 
 function calcularRankingTorneios() {
   const s = {};
-  jogadores.forEach(j => { s[j.id]={id:j.id,nome:j.nome,fotoUrl:j.fotoUrl||'',vit:0,emp:0,der:0,gp:0,gc:0,pts:0,j:0}; });
+  jogadores.forEach(j => { s[j.id]={id:j.id,nome:_nomeExibicao(j),fotoUrl:j.fotoUrl||'',vit:0,emp:0,der:0,gp:0,gc:0,pts:0,j:0}; });
   campeonatos.forEach(c=>(c.grupos||[]).forEach(g=>g.membros.forEach(m=>{if(!s[m.jogadorId])return;s[m.jogadorId].pts+=m.pts;s[m.jogadorId].vit+=m.vit;s[m.jogadorId].emp+=m.emp;s[m.jogadorId].der+=m.der;s[m.jogadorId].gp+=m.gp;s[m.jogadorId].gc+=m.gc;s[m.jogadorId].j+=m.vit+m.emp+m.der;})));
   return Object.values(s).filter(x=>x.j>0).sort((a,b)=>b.pts!==a.pts?b.pts-a.pts:(b.gp-b.gc)!==(a.gp-a.gc)?(b.gp-b.gc)-(a.gp-a.gc):b.gp-a.gp);
 }
@@ -4471,7 +4485,7 @@ function cardCampHome(c, modoLista=false) {
   // Tags dos jogadores participantes
   const tagsJogs = (c.participantes||[]).map(p =>
     `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);border-radius:20px;padding:3px 8px;font-size:11px;font-weight:700;">
-      ${avatarJogador({fotoUrl:''}, 16)}<span style="text-transform:uppercase;">${p.nome}</span>
+      ${avatarJogador({fotoUrl:''}, 16)}<span style="text-transform:uppercase;">${_nomeJogPorId(p.jogadorId, p.nome)}</span>
     </span>`
   ).join('');
 
