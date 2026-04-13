@@ -6,5 +6,6 @@
 ## MELHORIAS ##
 
 - [x] Nas tags de jogadores, sempre deve ser pego nome e sobrenome, ignorando tudo que vier depois disso (hash: 8fc3abb)
+- [x] Na pagina de torneio, onde eh apresentado os times, deixar o mesmo layout do card de amistosos em andamento, porem so a parte das informacoes do times e do jogador (hash: 2ed732b)
 
 
