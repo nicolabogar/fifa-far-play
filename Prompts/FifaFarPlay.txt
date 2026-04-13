@@ -6,4 +6,4 @@
 ## MELHORIAS ##
 
 - [x] A substituicao em toda aplicacao para apresentar o apelido do jogador ao inves do nome quando existir apelido nao estava funcionando em alguns cards (jogo em andamento, sorteio, detalhes, edicao, historico e compartilhamento WhatsApp) — revisado e corrigido em todos os lugares. Na lista de cadastro de jogadores o nome completo e exibido com o campo apelido aparecendo abaixo quando existir (hash: b511208)
-- [ ] [Descreva aqui a próxima melhoria desejada]
+- [x] Nos cards dos jogos o placar está centralizado no meio entre os time a e time b, quero que ele fique ainda nesse meio mas quero que ele fique na parte de baixo (hash: cef42ea)
