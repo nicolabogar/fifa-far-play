@@ -1480,7 +1480,7 @@ function abreviarNome(nome, maxChars = 14) {
   if (trimmed.length <= maxChars) return nome;
   const partes = trimmed.split(/\s+/);
   if (partes.length <= 1) return trimmed.slice(0, maxChars - 1) + '.';
-  // Encontra o índice da palavra mais longa; em empate, prefere a posterior (segunda)
+  // Encontra o índice da palavra mais longa; em empate, prefere a última (posterior)
   let longestIdx = 0;
   for (let i = 1; i < partes.length; i++) {
     if (partes[i].length >= partes[longestIdx].length) {
