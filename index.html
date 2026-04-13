@@ -4843,8 +4843,8 @@ function renderTimesEdit() {
     const inner = `<div class="entity-card" style="cursor:pointer;${ativoStyle}" onclick="editarTime('${t.id}')">
         ${icone}
         <div style="flex:1;min-width:0;">
+          <div style="margin-bottom:2px;">${countryInfo}</div>
           <div style="font-weight:800;font-size:14px;text-transform:uppercase;display:flex;align-items:center;gap:5px;flex-wrap:wrap;">${t.nome}${tagInativo}</div>
-          <div style="margin-top:2px;">${countryInfo}</div>
           ${eficTag ? `<div style="margin-top:4px;">${eficTag}</div>` : ''}
         </div>
       </div>`;
