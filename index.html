@@ -501,29 +501,49 @@
 
       <!-- Amistosos em andamento -->
       <div id="home-ami-sec" style="display:none;margin-bottom:24px;">
-        <p class="sec-title" style="margin-bottom:10px;">AMISTOSOS EM ANDAMENTO</p>
-        <div id="home-amistosos"></div>
+        <div class="grupo-header aberto" id="home-acc-header-ami" onclick="toggleHomeSection(this,'ami')">
+          <span class="grupo-titulo" style="color:var(--cyan);">AMISTOSOS EM ANDAMENTO</span>
+          <span class="grupo-seta">›</span>
+        </div>
+        <div class="grupo-body">
+          <div id="home-amistosos"></div>
+        </div>
       </div>
 
       <!-- Torneios em andamento -->
       <div id="home-camp-sec" style="display:none;margin-bottom:24px;">
-        <p class="sec-title" style="margin-bottom:10px;">TORNEIOS EM ANDAMENTO</p>
-        <div id="home-torneios"></div>
+        <div class="grupo-header aberto" id="home-acc-header-camp" onclick="toggleHomeSection(this,'camp')">
+          <span class="grupo-titulo" style="color:var(--yellow);">TORNEIOS EM ANDAMENTO</span>
+          <span class="grupo-seta">›</span>
+        </div>
+        <div class="grupo-body">
+          <div id="home-torneios"></div>
+        </div>
       </div>
 
       <!-- Ranking Amistosos -->
       <div style="margin-bottom:24px;">
-        <p class="sec-title" style="margin-bottom:10px;">RANKING AMISTOSOS</p>
-        <div id="home-rank-ami">
-          <p style="color:var(--text-muted);text-align:center;padding:16px 0;font-size:14px;">NENHUM AMISTOSO FINALIZADO</p>
+        <div class="grupo-header aberto" id="home-acc-header-rank-ami" onclick="toggleHomeSection(this,'rank-ami')">
+          <span class="grupo-titulo">RANKING AMISTOSOS</span>
+          <span class="grupo-seta">›</span>
+        </div>
+        <div class="grupo-body">
+          <div id="home-rank-ami">
+            <p style="color:var(--text-muted);text-align:center;padding:16px 0;font-size:14px;">NENHUM AMISTOSO FINALIZADO</p>
+          </div>
         </div>
       </div>
 
       <!-- Ranking Torneios -->
       <div style="margin-bottom:24px;">
-        <p class="sec-title" style="margin-bottom:10px;">RANKING TORNEIOS</p>
-        <div id="home-rank-camp">
-          <p style="color:var(--text-muted);text-align:center;padding:16px 0;font-size:14px;">NENHUM TORNEIO FINALIZADO</p>
+        <div class="grupo-header aberto" id="home-acc-header-rank-camp" onclick="toggleHomeSection(this,'rank-camp')">
+          <span class="grupo-titulo">RANKING TORNEIOS</span>
+          <span class="grupo-seta">›</span>
+        </div>
+        <div class="grupo-body">
+          <div id="home-rank-camp">
+            <p style="color:var(--text-muted);text-align:center;padding:16px 0;font-size:14px;">NENHUM TORNEIO FINALIZADO</p>
+          </div>
         </div>
       </div>
     </div>
@@ -2499,6 +2519,13 @@ window.toggleGrupo = (header) => {
   header.classList.toggle('aberto');
   const body = header.nextElementSibling;
   body.classList.toggle('fechado');
+};
+
+window.toggleHomeSection = (header, key) => {
+  header.classList.toggle('aberto');
+  const body = header.nextElementSibling;
+  body.classList.toggle('fechado');
+  try { localStorage.setItem('ffp_home_acc_' + key, header.classList.contains('aberto') ? '1' : '0'); } catch {}
 };
 
 window._filtrarAmi = (tipo) => {
@@ -4485,7 +4512,23 @@ function _renderHistorico() {
     : '';
 }
 
+let _homeAccInited = false;
+function initHomeAccordions() {
+  if (_homeAccInited) return;
+  _homeAccInited = true;
+  ['ami','camp','rank-ami','rank-camp'].forEach(key => {
+    const header = document.getElementById('home-acc-header-' + key);
+    if (!header) return;
+    const body = header.nextElementSibling;
+    if (localStorage.getItem('ffp_home_acc_' + key) === '0') {
+      header.classList.remove('aberto');
+      body.classList.add('fechado');
+    }
+  });
+}
+
 function atualizarDash() {
+  initHomeAccordions();
   // Ranking separados
   const rankAmi = calcularRankingAmistosos();
   const rankCamp = calcularRankingTorneios();

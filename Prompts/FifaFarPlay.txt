@@ -6,4 +6,6 @@
 ## MELHORIAS ##
 
 - [x] No card de torneio, exibir tipo do campeonato e quantidade de jogadores como tags separadas (em vez de texto) (hash: 2097f56)
+- [x] Na home, onde eh mostrado os amistosos, torneios em andamento e o ranking, adicionar accordions de abrir e fechar iguais aos das telas de amistosos; na home os accordions devem sempre iniciar abertos e conforme o usuario clicar manter a acao escolhida (aberto ou fechado) (hash: 98366a5)
+- [ ] [Descreva aqui a próxima melhoria desejada]
 
