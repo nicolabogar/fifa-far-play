@@ -5,5 +5,5 @@
 
 ## MELHORIAS ##
 
-- [ ] [Descreva aqui a próxima melhoria desejada]
+- [x] Quando remover o jogador, deve ser excluído os amistosos, torneios e rankings que ele estiver (hash: dfce579)
 
