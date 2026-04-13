@@ -1483,8 +1483,19 @@ function abreviarNome(nome, maxChars = 14) {
   const w1 = partes[0];
   const w2 = partes[1];
   const resto = partes.slice(2);
-  // Abrevia a palavra mais longa para os 3 primeiros caracteres + "."
+  // Quando a primeira palavra seria abreviada (w1 >= w2) e há uma terceira palavra,
+  // abrevia a última palavra (terceira em diante) para preservar o nome principal
   let abrev;
+  if (w1.length >= w2.length && resto.length > 0) {
+    const ultIdx = partes.length - 1;
+    const ult = partes[ultIdx];
+    const prefixo = partes.slice(0, ultIdx);
+    abrev = [...prefixo, ult.slice(0, 3) + '.'].join(' ');
+    if (abrev.length <= maxChars) return abrev;
+    abrev = [...prefixo, ult.slice(0, 1) + '.'].join(' ');
+    if (abrev.length <= maxChars) return abrev;
+  }
+  // Abrevia a palavra mais longa para os 3 primeiros caracteres + "."
   if (w1.length >= w2.length) {
     abrev = [w1.slice(0, 3) + '.', w2, ...resto].join(' ');
   } else {
