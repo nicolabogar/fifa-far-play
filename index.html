@@ -2954,15 +2954,22 @@ function _htmlNovoAmistoso() {
         <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">SELECIONE EXATAMENTE 4 JOGADORES</div>
       </div>
     </label>
-    <label class="check-row" style="margin-bottom:16px;" id="label-sorteio-auto">
+    <label class="check-row" style="margin-bottom:8px;" id="label-sorteio-auto">
       <input type="checkbox" id="ami-sorteio-auto" checked onchange="toggleSorteioAuto(this.checked)">
       <div>
         <div style="font-size:13px;font-weight:700;">SORTEAR TIMES ALEATORIAMENTE</div>
         <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">DESMARCADO: ESCOLHA O TIME DE CADA JOGADOR</div>
       </div>
     </label>
+    <label class="check-row" style="display:none;margin-bottom:16px;" id="label-dist-auto">
+      <input type="checkbox" id="ami-dist-auto" checked onchange="toggleDistAuto(this.checked)">
+      <div>
+        <div style="font-size:13px;font-weight:700;">SORTEAR JOGADORES ALEATORIAMENTE</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">DESMARCADO: ESCOLHA OS JOGADORES DE CADA TIME</div>
+      </div>
+    </label>
     <div id="ami-manual-times-box" style="display:none;margin-bottom:16px;"></div>
-    <div style="margin-bottom:16px;">
+    <div id="ami-limite-box" style="display:none;margin-bottom:16px;">
       <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">LIMITE DE PARTIDAS POR DUPLA (ULTIMA HORA)</label>
       <input id="ami-max-dupla" type="number" inputmode="numeric" min="0" max="99" value="0" class="input"
         placeholder="0 = SEM LIMITE"
@@ -2980,13 +2987,6 @@ function _htmlNovoAmistoso() {
     <div id="jc-tags" style="display:flex;flex-wrap:wrap;gap:6px;min-height:40px;padding:8px;background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;margin-bottom:12px;">
       <span style="color:var(--text-muted);font-size:12px;align-self:center;padding:4px 0;">NENHUM JOGADOR SELECIONADO</span>
     </div>
-    <label class="check-row" style="margin-bottom:8px;" id="label-dist-auto">
-      <input type="checkbox" id="ami-dist-auto" checked onchange="toggleDistAuto(this.checked)">
-      <div>
-        <div style="font-size:13px;font-weight:700;">DISTRIBUIR JOGADORES ALEATORIAMENTE</div>
-        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">DESMARCADO: ESCOLHA OS JOGADORES DE CADA TIME</div>
-      </div>
-    </label>
     <div id="ami-dist-manual-box" style="display:none;margin-bottom:12px;"></div>
     <div id="ami-efic-filtro-box" style="margin-bottom:16px;background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:12px 14px;">${htmlEficFiltro('ami-efic-filtro')}</div>
     <div id="ami-sorteio" style="display:none;margin-bottom:16px;"></div>
@@ -3117,6 +3117,11 @@ window.toggleModoDupla = (ativo) => {
   // Apenas feedback visual, a validação ocorre no sorteio
   const label = document.getElementById('label-dupla');
   if (label) label.style.borderColor = ativo ? 'var(--cyan)' : '';
+  // Mostrar/ocultar campos exclusivos de dupla
+  const labelDistAuto = document.getElementById('label-dist-auto');
+  if (labelDistAuto) labelDistAuto.style.display = ativo ? '' : 'none';
+  const limiteBox = document.getElementById('ami-limite-box');
+  if (limiteBox) limiteBox.style.display = ativo ? '' : 'none';
   // Resetar sorteio ao mudar modo
   const box = document.getElementById('ami-sorteio');
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
