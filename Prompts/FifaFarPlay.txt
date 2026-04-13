@@ -6,3 +6,4 @@
 ## MELHORIAS ##
 
 - [x] No cadastro de torneio, remover o botao de editar nome do torneio e substituir por campo de texto inline; ao sair do campo (blur), auto persistir se o valor foi alterado (hash: 795597f)
+- [x] Todos accordions da aplicacao com texto no mesmo estilo do titulo FIFA FAR PLAY (gradiente purple->cyan, font-weight:900) (hash: 2cc5879)

@@ -146,7 +146,8 @@
     /* ── Agrupadores ── */
     .grupo-header { display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:14px;cursor:pointer;margin-bottom:8px;user-select:none; }
     .grupo-header:hover { background:rgba(255,255,255,0.07); }
-    .grupo-header .grupo-titulo { font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.07em; }
+    .grupo-header .grupo-titulo { font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:0.07em;background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+    .grupo-header .grupo-titulo span { -webkit-text-fill-color:var(--text-muted); }
     .grupo-header .grupo-seta { font-size:14px;color:var(--text-muted);transition:transform 0.25s;display:inline-block; }
     .grupo-header.aberto .grupo-seta { transform:rotate(90deg); }
     .grupo-body { overflow:hidden;transition:max-height 0.3s ease; }
@@ -502,7 +503,7 @@
       <!-- Amistosos em andamento -->
       <div id="home-ami-sec" style="display:none;margin-bottom:24px;">
         <div class="grupo-header aberto" id="home-acc-header-ami" onclick="toggleHomeSection(this,'ami')">
-          <span class="grupo-titulo" style="color:var(--cyan);">AMISTOSOS EM ANDAMENTO</span>
+          <span class="grupo-titulo">AMISTOSOS EM ANDAMENTO</span>
           <span class="grupo-seta">›</span>
         </div>
         <div class="grupo-body">
@@ -513,7 +514,7 @@
       <!-- Torneios em andamento -->
       <div id="home-camp-sec" style="display:none;margin-bottom:24px;">
         <div class="grupo-header aberto" id="home-acc-header-camp" onclick="toggleHomeSection(this,'camp')">
-          <span class="grupo-titulo" style="color:var(--yellow);">TORNEIOS EM ANDAMENTO</span>
+          <span class="grupo-titulo">TORNEIOS EM ANDAMENTO</span>
           <span class="grupo-seta">›</span>
         </div>
         <div class="grupo-body">
@@ -2518,7 +2519,7 @@ function renderAmistosos() {
   // ── EM ANDAMENTO ──
   if (abertos.length) {
     html += `<div class="grupo-header aberto" onclick="toggleGrupo(this)">
-      <span class="grupo-titulo" style="color:var(--cyan);">EM ANDAMENTO <span style="color:var(--text-muted);font-weight:600;">(${abertos.length})</span></span>
+      <span class="grupo-titulo">EM ANDAMENTO <span style="color:var(--text-muted);font-weight:600;">(${abertos.length})</span></span>
       <span class="grupo-seta">›</span>
     </div>
     <div class="grupo-body" id="grupo-ami-abertos">
@@ -2529,7 +2530,7 @@ function renderAmistosos() {
   // ── FINALIZADOS ──
   if (finalizados.length) {
     html += `<div class="grupo-header" onclick="toggleGrupo(this)" style="margin-top:${abertos.length?'12':'0'}px;">
-      <span class="grupo-titulo" style="color:var(--text-muted);">FINALIZADOS <span style="color:var(--text-muted);font-weight:600;">(${finalizados.length})</span></span>
+      <span class="grupo-titulo">FINALIZADOS <span style="color:var(--text-muted);font-weight:600;">(${finalizados.length})</span></span>
       <span class="grupo-seta">›</span>
     </div>
     <div class="grupo-body fechado" id="grupo-ami-finalizados">
@@ -3538,7 +3539,7 @@ function renderCampeonatos() {
   // ── EM ANDAMENTO ──
   if (andamento.length) {
     html += `<div class="grupo-header aberto" onclick="toggleGrupo(this)">
-      <span class="grupo-titulo" style="color:var(--cyan);">EM ANDAMENTO <span style="color:var(--text-muted);font-weight:600;">(${andamento.length})</span></span>
+      <span class="grupo-titulo">EM ANDAMENTO <span style="color:var(--text-muted);font-weight:600;">(${andamento.length})</span></span>
       <span class="grupo-seta">›</span>
     </div>
     <div class="grupo-body" id="grupo-camp-andamento">
@@ -3549,7 +3550,7 @@ function renderCampeonatos() {
   // ── FINALIZADOS ──
   if (finalizados.length) {
     html += `<div class="grupo-header" onclick="toggleGrupo(this)" style="margin-top:${andamento.length?'12':'0'}px;">
-      <span class="grupo-titulo" style="color:var(--text-muted);">FINALIZADOS <span style="color:var(--text-muted);font-weight:600;">(${finalizados.length})</span></span>
+      <span class="grupo-titulo">FINALIZADOS <span style="color:var(--text-muted);font-weight:600;">(${finalizados.length})</span></span>
       <span class="grupo-seta">›</span>
     </div>
     <div class="grupo-body fechado" id="grupo-camp-finalizados">
@@ -3854,7 +3855,7 @@ window.selCampTipo = (k, el) => {
     regrasBox.style.display = '';
     regrasBox.innerHTML = `
       <div class="grupo-header" onclick="toggleGrupo(this)" style="margin-top:4px;">
-        <span class="grupo-titulo" style="color:var(--text-muted);font-size:11px;">COMO FUNCIONA</span>
+        <span class="grupo-titulo" style="font-size:11px;">COMO FUNCIONA</span>
         <span class="grupo-seta">›</span>
       </div>
       <div class="grupo-body fechado">
@@ -4070,7 +4071,7 @@ window.abrirCampeonato = (id) => {
 
     ${meta.desc ? `
     <div class="grupo-header" onclick="toggleGrupo(this)" style="margin-bottom:8px;">
-      <span class="grupo-titulo" style="color:var(--text-muted);">COMO FUNCIONA</span>
+      <span class="grupo-titulo">COMO FUNCIONA</span>
       <span class="grupo-seta">›</span>
     </div>
     <div class="grupo-body fechado" style="margin-bottom:16px;">
