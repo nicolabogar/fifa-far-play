@@ -6,4 +6,5 @@
 ## MELHORIAS ##
 
 - [x] Ao criar amistosos e torneios, o sorteio sempre analisa as tags de eficiência dos times: se uma única tag estiver selecionada, apenas times com essa tag participam do sorteio; sempre deve haver pelo menos uma tag selecionada; a regra de paridade é bom x bom, bom x moderado, moderado x moderado, moderado x ruim, ruim x ruim. (hash: f770d48)
+- [x] O título dos torneios tem mais destaque nos cards: título maior (18px, gradiente purple→cyan) em div própria no topo do card, separado por linha divisória das tags. (hash: f088748)
 
