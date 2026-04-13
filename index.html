@@ -979,6 +979,9 @@ function timeFlagInline(timeId, tipo) {
 // ─── ESTADO ─────────────────────────────────────────────────────────
 let usuario    = null;
 let jogadores  = [];
+
+// Retorna o apelido do jogador se informado, senão o nome completo
+function nomeExibicao(j) { return j.apelido || j.nome; }
 let amistosos  = [];
 let campeonatos= [];
 let clubes     = [...CLUBES_DEFAULT];
@@ -1695,10 +1698,11 @@ function renderJogadores() {
         ${avatarJogador(j, 46)}
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:6px;">
-            <span style="font-weight:700;font-size:15px;text-transform:uppercase;">${_escHtml(j.nome)}</span>
+            <span style="font-weight:700;font-size:15px;text-transform:uppercase;">${_escHtml(nomeExibicao(j))}</span>
             ${j.master ? `<span class="tag tag-yellow">MASTER</span>` : ''}
           </div>
-          <div style="color:var(--text-muted);font-size:11px;margin-top:2px;">${j.email||'SEM E-MAIL VINCULADO'}</div>
+          ${j.apelido ? `<div style="color:var(--text-muted);font-size:11px;margin-top:2px;text-transform:uppercase;">${_escHtml(j.nome)}</div>` : ''}
+          <div style="color:var(--text-muted);font-size:11px;margin-top:${j.apelido?'1':'2'}px;">${j.email||'SEM E-MAIL VINCULADO'}</div>
           ${j.celular ? `<div style="color:var(--text-muted);font-size:11px;margin-top:1px;">${j.celular}</div>` : ''}
         </div>
       </div>
@@ -1708,10 +1712,11 @@ function renderJogadores() {
         ${avatarJogador(j, 46)}
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:6px;">
-            <span style="font-weight:700;font-size:15px;text-transform:uppercase;">${_escHtml(j.nome)}</span>
+            <span style="font-weight:700;font-size:15px;text-transform:uppercase;">${_escHtml(nomeExibicao(j))}</span>
             ${j.master ? `<span class="tag tag-yellow">MASTER</span>` : ''}
           </div>
-          <div style="color:var(--text-muted);font-size:11px;margin-top:2px;">${j.email||'SEM E-MAIL VINCULADO'}</div>
+          ${j.apelido ? `<div style="color:var(--text-muted);font-size:11px;margin-top:2px;text-transform:uppercase;">${_escHtml(j.nome)}</div>` : ''}
+          <div style="color:var(--text-muted);font-size:11px;margin-top:${j.apelido?'1':'2'}px;">${j.email||'SEM E-MAIL VINCULADO'}</div>
           ${j.celular ? `<div style="color:var(--text-muted);font-size:11px;margin-top:1px;">${j.celular}</div>` : ''}
         </div>
       </div>
@@ -1739,6 +1744,10 @@ window.editarJogador = (id) => {
       <div>
         <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">NOME COMPLETO</label>
         <input class="input" id="i-nome-edit" value="${j.nome.replace(/"/g,'&quot;')}" autocomplete="off" style="text-transform:uppercase;">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">APELIDO <span style="font-weight:400;font-style:italic;text-transform:none;">(opcional)</span></label>
+        <input class="input" id="i-apelido-edit" value="${(j.apelido||'').replace(/"/g,'&quot;')}" autocomplete="off" style="text-transform:uppercase;" placeholder="EX: NEYMAR, CRAQUE...">
       </div>
       <div>
         <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">EMAIL</label>
@@ -1772,6 +1781,7 @@ window.previewFotoEdit = (input) => {
 
 window.salvarEdicaoJogador = async (id) => {
   const nome  = (document.getElementById('i-nome-edit')?.value.trim() || '').toUpperCase();
+  const apelido = (document.getElementById('i-apelido-edit')?.value.trim() || '').toUpperCase();
   const email = document.getElementById('i-email-edit')?.value.trim().toLowerCase();
   const celular = document.getElementById('i-celular-edit')?.value.trim() || '';
   const isMaster = document.getElementById('i-master-edit')?.checked || false;
@@ -1790,7 +1800,7 @@ window.salvarEdicaoJogador = async (id) => {
         await updateDoc(doc(db,'jogadores',masterAtual.id), { master: false });
       }
     }
-    await updateDoc(doc(db,'jogadores',id), { nome, email: email||'', celular, master: isMaster, fotoUrl });
+    await updateDoc(doc(db,'jogadores',id), { nome, apelido: apelido||'', email: email||'', celular, master: isMaster, fotoUrl });
     fecharFullscreen(); await carregarJogadores(); atualizarDash();
   } catch(e) {
     console.error(e);
@@ -1851,6 +1861,10 @@ document.getElementById('btn-add-jog').addEventListener('click', () => {
       <div>
         <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">NOME COMPLETO</label>
         <input class="input" id="i-nome" autocomplete="off" style="text-transform:uppercase;">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">APELIDO <span style="font-weight:400;font-style:italic;text-transform:none;">(opcional)</span></label>
+        <input class="input" id="i-apelido" autocomplete="off" style="text-transform:uppercase;" placeholder="EX: NEYMAR, CRAQUE...">
       </div>
       <div>
         <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">EMAIL</label>
@@ -2119,6 +2133,7 @@ window.previewFoto = (input) => {
 
 window.salvarJogador = async () => {
   const nome  = (document.getElementById('i-nome')?.value.trim() || '').toUpperCase();
+  const apelido = (document.getElementById('i-apelido')?.value.trim() || '').toUpperCase();
   const email = document.getElementById('i-email')?.value.trim().toLowerCase();
   const celular = document.getElementById('i-celular')?.value.trim() || '';
   const isMaster = document.getElementById('i-master')?.checked || false;
@@ -2147,7 +2162,7 @@ window.salvarJogador = async () => {
       const masterAtual = getMaster();
       if (masterAtual) await updateDoc(doc(db,'jogadores',masterAtual.id), { master: false });
     }
-    await addDoc(collection(db, 'jogadores'), { nome, email: email||'', celular, master: isMaster, fotoUrl, criadoEm: serverTimestamp() });
+    await addDoc(collection(db, 'jogadores'), { nome, apelido: apelido||'', email: email||'', celular, master: isMaster, fotoUrl, criadoEm: serverTimestamp() });
     fecharFullscreen(); await carregarJogadores(); atualizarDash();
   } catch(e) {
     console.error(e);
@@ -2345,7 +2360,7 @@ function renderAmistosos() {
       </div>
       <select id="ami-filtro-jog" onchange="_filtrarAmiJog(this.value)" style="width:100%;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;margin-bottom:10px;">
         <option value="">JOGADOR: TODOS</option>
-        ${jogadores.map(j=>`<option value="${j.id}" ${_amiState.filtroJog===j.id?'selected':''}>${j.nome.toUpperCase()}</option>`).join('')}
+        ${jogadores.map(j=>`<option value="${j.id}" ${_amiState.filtroJog===j.id?'selected':''}>${nomeExibicao(j).toUpperCase()}</option>`).join('')}
       </select>
       <div id="ami-fin-lista"></div>
       <div class="pag-row" id="ami-fin-pag"></div>
@@ -2448,12 +2463,12 @@ window.filtrarJogsJC = () => {
   const q = (document.getElementById('jc-search')?.value || '').toLowerCase();
   const drop = document.getElementById('jc-dropdown');
   if (!drop) return;
-  const disponiveis = jogadores.filter(j => !_jcSel.has(j.id) && (!q || j.nome.toLowerCase().includes(q)));
+  const disponiveis = jogadores.filter(j => !_jcSel.has(j.id) && (!q || nomeExibicao(j).toLowerCase().includes(q) || j.nome.toLowerCase().includes(q)));
   if (!disponiveis.length) { drop.style.display = 'none'; return; }
   drop.innerHTML = disponiveis.map(j =>
-    `<div onclick="selecionarJogJC('${j.id}','${j.nome.replace(/'/g,"\\'").replace(/"/g,'&quot;')}');document.getElementById('jc-search').value='';document.getElementById('jc-dropdown').style.display='none';"
+    `<div onclick="selecionarJogJC('${j.id}','${nomeExibicao(j).replace(/'/g,"\\'").replace(/"/g,'&quot;')}');document.getElementById('jc-search').value='';document.getElementById('jc-dropdown').style.display='none';"
       style="padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.05);font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;">
-      ${SVG_USER_CHIP}<span>${j.nome}</span>
+      ${SVG_USER_CHIP}<span>${nomeExibicao(j)}</span>
     </div>`
   ).join('');
   drop.style.display = 'block';
@@ -2537,7 +2552,7 @@ function _preencherUltimoJogo() {
   const ids2 = ultimo.time2?.jogadoresIds || [];
   [...ids1, ...ids2].forEach(jid => {
     const j = jogadores.find(x => x.id === jid);
-    if (j && !_jcSel.has(jid)) _jcSel.set(jid, j.nome);
+    if (j && !_jcSel.has(jid)) _jcSel.set(jid, nomeExibicao(j));
   });
   setTimeout(() => _renderTagsJC(), 50);
 }
@@ -2586,7 +2601,7 @@ function vsCardTime(t, jogadoresList, pool) {
     <div class="vs-team">${t.nome}</div>
     <div style="margin:4px 0;">${forcaBadge(t.forca)}</div>
     ${timeData.ataque != null ? `<div style="display:flex;justify-content:center;gap:3px;flex-wrap:wrap;margin-bottom:4px;">${atributosBadge(timeData)}</div>` : ''}
-    ${jogadoresList.map(j => `<div class="vs-label">${j.nome}</div>`).join('')}
+    ${jogadoresList.map(j => `<div class="vs-label">${nomeExibicao(j)}</div>`).join('')}
   </div>`;
 }
 
@@ -3193,7 +3208,7 @@ window.editarAmistoso = (id) => {
   const todosNomes = [...(a.time1?.jogadores||[]), ...(a.time2?.jogadores||[])];
   todosJogs.forEach((jid, i) => {
     const jog = jogadores.find(j => j.id === jid);
-    if (jog) _jcSel.set(jid, jog.nome);
+    if (jog) _jcSel.set(jid, nomeExibicao(jog));
     else if (todosNomes[i]) _jcSel.set(jid || `jog-${i}`, todosNomes[i]);
   });
 
@@ -3339,7 +3354,7 @@ function renderCampeonatos() {
       </div>
       <select id="camp-filtro-jog" onchange="_filtrarCampJog(this.value)" style="width:100%;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;margin-bottom:10px;">
         <option value="">JOGADOR: TODOS</option>
-        ${jogadores.map(j=>`<option value="${j.id}" ${_campState.filtroJog===j.id?'selected':''}>${j.nome.toUpperCase()}</option>`).join('')}
+        ${jogadores.map(j=>`<option value="${j.id}" ${_campState.filtroJog===j.id?'selected':''}>${nomeExibicao(j).toUpperCase()}</option>`).join('')}
       </select>
       <div id="camp-fin-lista"></div>
       <div class="pag-row" id="camp-fin-pag"></div>
@@ -3441,12 +3456,12 @@ window.filtrarJogsCC = () => {
   const q = (document.getElementById('cc-search')?.value || '').toLowerCase();
   const drop = document.getElementById('cc-dropdown');
   if (!drop) return;
-  const disponiveis = jogadores.filter(j => !_ccSel.has(j.id) && (!q || j.nome.toLowerCase().includes(q)));
+  const disponiveis = jogadores.filter(j => !_ccSel.has(j.id) && (!q || nomeExibicao(j).toLowerCase().includes(q) || j.nome.toLowerCase().includes(q)));
   if (!disponiveis.length) { drop.style.display = 'none'; return; }
   drop.innerHTML = disponiveis.map(j =>
-    `<div onclick="selecionarJogCC('${j.id}','${j.nome.replace(/'/g,"\\'").replace(/"/g,'&quot;')}');document.getElementById('cc-search').value='';document.getElementById('cc-dropdown').style.display='none';"
+    `<div onclick="selecionarJogCC('${j.id}','${nomeExibicao(j).replace(/'/g,"\\'").replace(/"/g,'&quot;')}');document.getElementById('cc-search').value='';document.getElementById('cc-dropdown').style.display='none';"
       style="padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.05);font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;">
-      ${SVG_USER_CHIP}<span>${j.nome}</span>
+      ${SVG_USER_CHIP}<span>${nomeExibicao(j)}</span>
     </div>`
   ).join('');
   drop.style.display = 'block';
@@ -3955,7 +3970,7 @@ window.ressortearCampeonato = (id) => {
     <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">SELECIONE OS PARTICIPANTES E SORTEAREMOS OS TIMES NOVAMENTE PARA <strong>${c.nome.toUpperCase()}</strong></p>
     <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">PARTICIPANTES</label>
     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
-      ${jogadores.map(j => `<label class="check-row"><input type="checkbox" class="rsc" value="${j.id}" data-nome="${j.nome}" ${selecionados.has(j.id)?'checked':''}>${SVG_USER_CHIP}<span style="font-weight:700;">${j.nome}</span></label>`).join('')}
+      ${jogadores.map(j => `<label class="check-row"><input type="checkbox" class="rsc" value="${j.id}" data-nome="${_escHtml(nomeExibicao(j))}" ${selecionados.has(j.id)?'checked':''}>${SVG_USER_CHIP}<span style="font-weight:700;">${nomeExibicao(j)}</span></label>`).join('')}
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn-primary" onclick="confirmarRessortear('${id}')">SORTEAR</button>
@@ -4033,8 +4048,7 @@ window.salvarPartida = async (cid, gi) => {
 // ─── RANKING ─────────────────────────────────────────────────────────
 function calcularRankingAmistosos() {
   const s = {};
-  jogadores.forEach(j => { s[j.id]={id:j.id,nome:j.nome,fotoUrl:j.fotoUrl||'',vit:0,emp:0,der:0,gp:0,gc:0,pts:0,j:0}; });
-  amistosos.forEach(a => {
+  jogadores.forEach(j => { s[j.id]={id:j.id,nome:nomeExibicao(j),fotoUrl:j.fotoUrl||'',vit:0,emp:0,der:0,gp:0,gc:0,pts:0,j:0}; });
     if (!a.resultado) return;
     const {g1,g2}=a.resultado;
     const add=(ids,gf,gc)=>ids?.forEach(id=>{if(!s[id])return;s[id].gp+=gf;s[id].gc+=gc;s[id].j++;s[id].vit+=gf>gc?1:0;s[id].emp+=gf===gc?1:0;s[id].der+=gf<gc?1:0;s[id].pts+=gf>gc?3:gf===gc?1:0;});
@@ -4045,7 +4059,7 @@ function calcularRankingAmistosos() {
 
 function calcularRankingTorneios() {
   const s = {};
-  jogadores.forEach(j => { s[j.id]={id:j.id,nome:j.nome,fotoUrl:j.fotoUrl||'',vit:0,emp:0,der:0,gp:0,gc:0,pts:0,j:0}; });
+  jogadores.forEach(j => { s[j.id]={id:j.id,nome:nomeExibicao(j),fotoUrl:j.fotoUrl||'',vit:0,emp:0,der:0,gp:0,gc:0,pts:0,j:0}; });
   campeonatos.forEach(c=>(c.grupos||[]).forEach(g=>g.membros.forEach(m=>{if(!s[m.jogadorId])return;s[m.jogadorId].pts+=m.pts;s[m.jogadorId].vit+=m.vit;s[m.jogadorId].emp+=m.emp;s[m.jogadorId].der+=m.der;s[m.jogadorId].gp+=m.gp;s[m.jogadorId].gc+=m.gc;s[m.jogadorId].j+=m.vit+m.emp+m.der;})));
   return Object.values(s).filter(x=>x.j>0).sort((a,b)=>b.pts!==a.pts?b.pts-a.pts:(b.gp-b.gc)!==(a.gp-a.gc)?(b.gp-b.gc)-(a.gp-a.gc):b.gp-a.gp);
 }
