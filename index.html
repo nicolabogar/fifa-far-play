@@ -1502,7 +1502,7 @@ function distribuirTimesBalanceadosMulti(participantes, pool, usados, qtd) {
     for (let k = 0; k < qtd; k++) {
       // Snake draft por rodada
       const idx = k % 2 === 0 ? k * n + i : k * n + (n - 1 - i);
-      myTimes.push(selecionados[idx < total ? idx : idx % total] || pool[i % pool.length]);
+      myTimes.push(selecionados[idx % total] || pool[i % pool.length]);
     }
     return { ...p, times: myTimes, time: myTimes[0] };
   });
@@ -4241,7 +4241,7 @@ let _ccParesManual = [];
 
 window.selecionarTimeManualCC = (jogId, idx, timeId, timeNome, forca, tipo) => {
   // Compatibilidade: se idx é string (ID de time), é chamada antiga sem idx
-  if (typeof idx === 'string' && !Number.isInteger(idx) && isNaN(Number(idx))) {
+  if (typeof idx === 'string') {
     // Chamada antiga: selecionarTimeManualCC(jogId, timeId, timeNome, forca, tipo)
     const realTimeId = idx; const realNome = timeId; const realForca = timeNome; const realTipo = forca;
     _ccManualSel.set(jogId, {timeId: realTimeId, nome: realNome, forca: realForca, _tipo: realTipo});
@@ -4346,7 +4346,8 @@ window._renderDuplasManualUI = () => {
   }
   const nPares = jogs.length / 2;
   // Inicializar pares se necessário ou se mudou o número de jogadores
-  if (_ccParesManual.length !== nPares || !_ccParesManual.every(par => jogs.some(j => j.id === par.j1Id) && jogs.some(j => j.id === par.j2Id))) {
+  const jogIds = new Set(jogs.map(j => j.id));
+  if (_ccParesManual.length !== nPares || !_ccParesManual.every(par => jogIds.has(par.j1Id) && jogIds.has(par.j2Id))) {
     // Reinicializar pares com jogadores disponíveis
     const jogsCopy = [...jogs];
     _ccParesManual = Array.from({length: nPares}, (_, i) => {
@@ -4355,12 +4356,6 @@ window._renderDuplasManualUI = () => {
       return {j1Id: j1.id, j1Nome: j1.nome, j2Id: j2.id, j2Nome: j2.nome};
     });
   }
-  // Todos os jogadores já alocados
-  const alocados = _ccParesManual.flatMap(p => [p.j1Id, p.j2Id]).filter(Boolean);
-  const disponiveis = (paridx, slot) => jogs.filter(j => {
-    if (j.id === _ccParesManual[paridx]?.[`j${slot}Id`]) return true;
-    return !alocados.includes(j.id) || !_ccParesManual.some((par, pi) => pi !== paridx && (par.j1Id === j.id || par.j2Id === j.id));
-  });
   const rows = Array.from({length: nPares}, (_, i) => {
     const par = _ccParesManual[i];
     const makeSelect = (slot) => {
@@ -4455,7 +4450,6 @@ window.criarCampeonato = async () => {
       });
     } else {
       // Single-time manual
-      const partic2 = partic.filter(p => _ccManualSel.has(p.jogadorId));
       const semTime = partic.filter(p => !_ccManualSel.has(p.jogadorId));
       if (semTime.length > 0) { toast(`SELECIONE O TIME DE: ${semTime.map(p=>p.nome).join(', ')}`, 'erro'); _unlockBtn(btn); return; }
       distribuidos = partic.map(p => {
@@ -4758,7 +4752,7 @@ window.abrirCampeonato = (id) => {
 // Salva partida diretamente dos inputs no card (sem modal)
 window.salvarPartidaDireta = async (cid, gi, j1Id, j2Id, timeIndex, btnEl) => {
   // Compatibilidade: se timeIndex é um elemento DOM (chamada antiga sem timeIndex), ajustar
-  if (timeIndex && typeof timeIndex === 'object' && timeIndex.tagName) {
+  if (timeIndex instanceof HTMLElement) {
     btnEl = timeIndex;
     timeIndex = 0;
   }
