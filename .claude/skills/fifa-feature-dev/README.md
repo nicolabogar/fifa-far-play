@@ -52,6 +52,18 @@ Ou descrever no chat:
 📝 Novo FifaFarPlay.txt criado (vazio)
 ```
 
+## Regras de Design — Cards de Jogo
+
+**Todos os cards de jogo devem seguir o mesmo padrão visual**, sem exceção:
+
+- **Classe CSS**: `match-card` (background `var(--card)`, border `1px solid var(--card-border)`, border-radius `18px`, padding `14px`)
+- **Layout interno**: `display:grid; grid-template-columns:1fr auto 1fr; column-gap:16px; row-gap:8px;`
+- **Linha de topo**: tags (tipo do jogo, modalidade, resultado/status) usando a classe `.tag` com variantes `tag-purple`, `tag-gray`, `tag-cyan`, `tag-green`, `tag-yellow`, `tag-red`
+- **Coluna dos times**: nome (16px, 900, uppercase) → ícone (`badgeTimeIcon`) → eficiência (`eficBadge`) → jogadores (11px, cyan, uppercase)
+- **Coluna central** (placar): inputs `placar-input` (40px, 22px font, border-radius 8px) ou placar estático em amarelo (29px, 900)
+- **Única coisa que varia**: as tags no topo (AMISTOSO / TORNEIO / CAMPEONATO, resultado, status)
+- Qualquer tela de **edição de jogo** (fullscreen, modal, etc.) deve usar o mesmo `match-card` com os mesmos estilos — nunca criar um container próprio com estilos diferentes
+
 ## Checklist de Cada Feature
 
 Antes de passar para a próxima:
@@ -60,6 +72,7 @@ Antes de passar para a próxima:
 - ✅ Responsividade testada (mobile, tablet, desktop)
 - ✅ Animações funcionando suavemente
 - ✅ localStorage persistindo dados (se aplicável)
+- ✅ Cards de jogo seguem o padrão `match-card` (ver seção acima)
 - ✅ Git commit feito com hash válido
 - ✅ Git push bem-sucedido
 - ✅ FifaFarPlay.txt atualizado com [x] + hash
