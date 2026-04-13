@@ -1085,11 +1085,7 @@ window.badgeTime = badgeTime;
 
 /** Renderiza apenas a info de país do time (bandeira pequena + nome do país) */
 function badgeTimeCountryInfo(timeId, nomeTime, tipo, align='center') {
-  if (tipo === 'selecoes') {
-    const d = SELECAO_PAIS[timeId] || { pais:'', paisNome: nomeTime||'' };
-    if (!d.pais) return '';
-    return `<div style="display:flex;align-items:center;justify-content:${align};gap:3px;white-space:nowrap;">${flagImg(d.pais, 20)}<span style="font-size:9px;color:var(--text-muted);font-weight:600;">${d.paisNome}</span></div>`;
-  }
+  if (tipo === 'selecoes') return '';
   const d = TEAM_DATA[timeId] || { pais:'eu', paisNome:'' };
   return `<div style="display:flex;align-items:center;justify-content:${align};gap:3px;white-space:nowrap;">${flagImg(d.pais, 20)}<span style="font-size:9px;color:var(--text-muted);font-weight:600;">${d.paisNome}</span></div>`;
 }
@@ -1471,8 +1467,8 @@ function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
 
 /**
  * Abrevia nome de time longo para caber em espaços compactos.
- * Ex: "BAYER MUNICH" → "BAYER M.", "MANCHESTER UNITED" → "MANCHESTER U."
- * Se o nome couber em maxWords palavras, retorna sem mudança.
+ * Ex: "BAYER DE MUNICK" → "BAYER DE MUN.", "MANCHESTER UNITED" → "MAN. UNITED"
+ * Abrevia a palavra mais longa; em empate de tamanho, abrevia a segunda (posterior).
  */
 function abreviarNome(nome, maxChars = 14) {
   if (!nome) return nome;
@@ -1480,34 +1476,18 @@ function abreviarNome(nome, maxChars = 14) {
   if (trimmed.length <= maxChars) return nome;
   const partes = trimmed.split(/\s+/);
   if (partes.length <= 1) return trimmed.slice(0, maxChars - 1) + '.';
-  const w1 = partes[0];
-  const w2 = partes[1];
-  const resto = partes.slice(2);
-  // Quando a primeira palavra seria abreviada (w1 >= w2) e há uma terceira palavra,
-  // abrevia a última palavra (terceira em diante) para preservar o nome principal
-  let abrev;
-  if (w1.length >= w2.length && resto.length > 0) {
-    const ultIdx = partes.length - 1;
-    const ult = partes[ultIdx];
-    const prefixo = partes.slice(0, ultIdx);
-    abrev = [...prefixo, ult.slice(0, 3) + '.'].join(' ');
-    if (abrev.length <= maxChars) return abrev;
-    abrev = [...prefixo, ult.slice(0, 1) + '.'].join(' ');
-    if (abrev.length <= maxChars) return abrev;
+  // Encontra o índice da palavra mais longa; em empate, prefere a última (posterior)
+  let longestIdx = 0;
+  for (let i = 1; i < partes.length; i++) {
+    if (partes[i].length >= partes[longestIdx].length) {
+      longestIdx = i;
+    }
   }
   // Abrevia a palavra mais longa para os 3 primeiros caracteres + "."
-  if (w1.length >= w2.length) {
-    abrev = [w1.slice(0, 3) + '.', w2, ...resto].join(' ');
-  } else {
-    abrev = [w1, w2.slice(0, 3) + '.', ...resto].join(' ');
-  }
+  let abrev = partes.map((p, i) => i === longestIdx ? p.slice(0, 3) + '.' : p).join(' ');
   if (abrev.length <= maxChars) return abrev;
   // Se ainda ultrapassar, reduz para 1 caractere + "."
-  if (w1.length >= w2.length) {
-    abrev = [w1.slice(0, 1) + '.', w2, ...resto].join(' ');
-  } else {
-    abrev = [w1, w2.slice(0, 1) + '.', ...resto].join(' ');
-  }
+  abrev = partes.map((p, i) => i === longestIdx ? p.slice(0, 1) + '.' : p).join(' ');
   return abrev.length <= maxChars ? abrev : abrev.slice(0, maxChars - 1) + '.';
 }
 window.abreviarNome = abreviarNome;
