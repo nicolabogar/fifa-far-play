@@ -1587,6 +1587,7 @@ function fullscreen(title, html, secao, secaoView) {
 function fecharFullscreen() {
   document.getElementById('fullscreen-overlay').style.display = 'none';
   document.getElementById('main').style.display = '';
+  _editandoAmiId = null;
 }
 window.fecharFullscreen = fecharFullscreen;
 
@@ -2591,7 +2592,7 @@ function carregarAmistosos() {
   });
 }
 
-function cardAmistoso(a, compact=false, readonly=false) {
+function cardAmistoso(a, compact=false, readonly=false, noSwipe=false) {
   const temRes = a.resultado != null;
   const master = temPermissao(); // RG7b: controle de acesso no card
   const diff = temRes ? Math.abs(a.resultado.g1 - a.resultado.g2) : null;
@@ -2628,11 +2629,11 @@ function cardAmistoso(a, compact=false, readonly=false) {
         </div>
         <button disabled onclick="event.stopPropagation()" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:not-allowed;opacity:0.4;">FIM</button>`;
   const cardId = `ami-card-${a.id}`;
-  const swipeOuter = master
+  const swipeOuter = (master && !noSwipe)
     ? `<div class="swipe-wrap" data-swipe-id="${a.id}" data-swipe-nome="Amistoso">`
     : `<div id="${cardId}" style="margin-bottom:10px;">`;
-  const swipeClose = master ? `</div>` : `</div>`;
-  const swipeBg = master ? `<div class="swipe-bg"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg><span class="swipe-bg-label">EXCLUIR</span></div>` : '';
+  const swipeClose = `</div>`;
+  const swipeBg = (master && !noSwipe) ? `<div class="swipe-bg"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg><span class="swipe-bg-label">EXCLUIR</span></div>` : '';
   return `${swipeOuter}${swipeBg}
   <div id="${cardId}" class="match-card" style="${compact?'padding:12px;':''}" ${readonly || a.resultado || !master ? '' : `onclick="editarAmistoso('${a.id}')" style="cursor:pointer;"`}>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${compact?'8':'10'}px;">
@@ -3199,6 +3200,7 @@ window.selecionarTimeManualJog = (jogId, timeId, timeNome, forca, tipo) => {
 };
 
 let _sorteioAmi = null;
+let _editandoAmiId = null;
 // F8: expor _sorteioAmi no window para que onclick inline possa acessar
 Object.defineProperty(window, '_sorteioAmi', { get: () => _sorteioAmi });
 window.sortearAmistoso = () => {
@@ -3306,6 +3308,18 @@ function _renderSorteioBox(sorteio, eq, diff) {
   const j2 = n2.map(n => ({ nome: n }));
   const box = document.getElementById('ami-sorteio');
   box.style.display = '';
+
+  // Modo edição: exibir card idêntico ao da home (match-card)
+  if (_editandoAmiId) {
+    const realAmi = amistosos.find(x => x.id === _editandoAmiId);
+    if (realAmi) {
+      const mockAmi = { ...realAmi, tipo: sorteio.tipo, modoDupla: sorteio.modoDupla, time1: sorteio.time1, time2: sorteio.time2 };
+      box.innerHTML = cardAmistoso(mockAmi, false, true, true);
+      document.getElementById('btn-ami-salvar').style.display = '';
+      return;
+    }
+  }
+
   // Badge clicável — abre edição rápida do time (eficiência + inativo) sem fechar o sorteio
   const badgeInativo = (timeId, timeNome, tipoT) =>
     `<div onclick="editarTimeRapido('${timeId}','${timeNome.replace(/'/g,"\\'")}','${tipoT}')"
@@ -3653,6 +3667,7 @@ window.editarAmistoso = (id) => {
 
   // Amistoso em andamento: edição completa com jogadores e sorteio
   _jcSel.clear();
+  _editandoAmiId = id;
   // Pré-selecionar os jogadores do amistoso
   const todosJogs = [...(a.time1?.jogadoresIds||[]), ...(a.time2?.jogadoresIds||[])];
   const todosNomes = [...(a.time1?.jogadores||[]), ...(a.time2?.jogadores||[])];
