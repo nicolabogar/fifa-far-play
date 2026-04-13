@@ -1196,7 +1196,7 @@ window.toggleEficFiltro = (val) => {
 function htmlEficFiltro(containerId) {
   const sel = carregarEficFiltro();
   return `<div>
-    <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">FILTRAR POR EFICIÊNCIA</label>
+    <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">EFICIENCIA DOS TIMES</label>
     <div class="efic-tags" id="${containerId}">
       ${EFIC_TODAS.map(e=>`<span class="efic-tag${sel.has(e)?' selecionado':''}" data-efic="${e}" onclick="toggleEficFiltro('${e}')">${e}</span>`).join('')}
     </div>
@@ -1299,7 +1299,7 @@ function htmlMsDropPaisTimes(paises) {
 }
 function htmlEficFiltroTimes() {
   return `<div style="margin-bottom:14px;">
-    <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">FILTRAR POR EFICIENCIA</label>
+    <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">EFICIENCIA DOS TIMES</label>
     ${htmlMsDropEficTimes()}
   </div>`;
 }
@@ -4011,6 +4011,11 @@ function abrirModalCriarCamp(secao, secaoView) {
   fullscreen('NOVO', `
     <div style="display:flex;flex-direction:column;gap:14px;">
       <div>
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">NOME DO TORNEIO</label>
+        <span style="display:block;font-size:11px;color:var(--text-muted);margin-bottom:6px;">TITULO OFICIAL QUE IDENTIFICARA O TORNEIO</span>
+        <input class="input" id="cn" placeholder="NOME DO TORNEIO" autocomplete="off" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div>
         <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">FORMATO</label>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
           ${Object.entries(CAMP_META).map(([k,v]) => {
@@ -4021,10 +4026,6 @@ function abrirModalCriarCamp(secao, secaoView) {
         </div>
         <input type="hidden" id="ct" value="champions">
         <div id="ct-regras-box" style="display:none;margin-top:8px;"></div>
-      </div>
-      <div>
-        <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">NOME DO TORNEIO</label>
-        <input class="input" id="cn" placeholder="NOME DO TORNEIO" autocomplete="off" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
       </div>
       <div>
         <label class="check-row" style="margin-bottom:8px;">
@@ -4408,7 +4409,7 @@ window.abrirCampeonato = (id) => {
       }).join('')}
     </div>
 
-    ${podeMudar ? `<input id="torneio-nome-inline-${c.id}" class="input" value="${c.nome.toUpperCase().replace(/"/g,'&quot;')}" style="text-transform:uppercase;margin-bottom:8px;width:100%;box-sizing:border-box;" autocomplete="off" oninput="this.value=this.value.toUpperCase()" onblur="_autoSalvarNomeTorneio('${c.id}',this.value)">` : ''}
+    ${podeMudar ? `<label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">NOME DO TORNEIO</label><span style="display:block;font-size:11px;color:var(--text-muted);margin-bottom:6px;">TITULO OFICIAL QUE IDENTIFICARA O TORNEIO</span><input id="torneio-nome-inline-${c.id}" class="input" value="${c.nome.toUpperCase().replace(/"/g,'&quot;')}" style="text-transform:uppercase;margin-bottom:8px;width:100%;box-sizing:border-box;" autocomplete="off" oninput="this.value=this.value.toUpperCase()" onblur="_autoSalvarNomeTorneio('${c.id}',this.value)">` : ''}
     ${podeMudar ? `
       <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">FORMATO</label>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
