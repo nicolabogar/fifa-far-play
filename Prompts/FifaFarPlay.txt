@@ -5,4 +5,4 @@
 
 ## MELHORIAS ##
 
-- [ ] [Descreva aqui a próxima melhoria desejada]
+- [x] Todos accordions da aplicacao com texto no mesmo estilo do titulo FIFA FAR PLAY (gradiente purple->cyan, font-weight:900) (hash: 2cc5879)
