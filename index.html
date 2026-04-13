@@ -3868,7 +3868,7 @@ window.selCampTipo = (k, el) => {
 window.criarCampeonato = async () => {
   const btn = document.getElementById('btn-camp-salvar');
   if (_lockBtn(btn)) return;
-  const nome = document.getElementById('cn').value.trim();
+  const nome = document.getElementById('cn').value.trim().toUpperCase();
   const tipo = document.getElementById('ct').value;
   if (!nome) { toast('DIGITE O NOME DO TORNEIO', 'erro'); _unlockBtn(btn); return; }
   if (campeonatos.some(c => c.nome.trim().toLowerCase() === nome.toLowerCase())) { toast('JA EXISTE UM TORNEIO COM ESSE NOME', 'erro'); _unlockBtn(btn); return; }
@@ -4656,7 +4656,7 @@ function cardCampHome(c, modoLista=false) {
   const podeMudar = temPermissao();
   const cardHtml = `<div ${idAttr}class="match-card" style="margin-bottom:${modoLista?'0':'10px'};padding:12px;cursor:pointer;" onclick="abrirCampeonato('${c.id}')">
     <div style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.07);">
-      <div style="font-weight:900;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.02em;">${c.nome}</div>
+      <div style="font-weight:900;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.02em;">${c.nome.toUpperCase()}</div>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;">
