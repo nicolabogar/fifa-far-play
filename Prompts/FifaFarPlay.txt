@@ -9,3 +9,4 @@
 - [x] Nos cards dos jogos o placar está centralizado no meio entre os time a e time b, quero que ele fique ainda nesse meio mas quero que ele fique na parte de baixo (hash: cef42ea)
 - [x] No card de jogos, criar duas divs para organizar componentes: primeira div com a tag do jogador, nome do time, icone e descricao do pais (time A esquerda, time B direita); segunda div com o icone do time e eficiencia (time A esquerda, time B direita) e placar centralizado (hash: a36871d)
 - [x] deixar o título do torneio nos cards em upper case, e no momento do cadastro também (hash: 4e3129c)
+- [ ] Em torneios, quando eh exibido os times que foram sorteados está ficando 2 em cada linha, quero que seja apenas 1 em cada linha, e quero que a eficiência embaixo da imagem do time, e que o nome do jogador fique como tag igual eh feito no card em andamento
