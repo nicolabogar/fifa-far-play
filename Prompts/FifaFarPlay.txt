@@ -5,5 +5,5 @@
 
 ## MELHORIAS ##
 
-- [ ] [Descreva aqui a próxima melhoria desejada]
+- [x] No card de torneio, exibir tipo do campeonato e quantidade de jogadores como tags separadas (em vez de texto) (hash: 2097f56)
 
