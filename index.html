@@ -1226,7 +1226,7 @@ function modal(html) {
 }
 function fecharModal() { document.getElementById('modal-overlay').classList.remove('open'); if (window._swipeCancelCb) { window._swipeCancelCb(); window._swipeCancelCb = null; } }
 window.fecharModal = fecharModal;
-document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target.id === 'modal-overlay') fecharModal(); });
+document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target.id === 'modal-overlay' && !window._modalObrigatorio) fecharModal(); });
 
 const _viewLabels = {jogadores:'JOGADORES',amistosos:'AMISTOSOS',campeonatos:'TORNEIOS',ranking:'RANKING',times:'TIMES'};
 function fullscreen(title, html, secao, secaoView) {
@@ -1403,14 +1403,60 @@ async function _autoCadastrarJogador(u) {
     const snap = await getDocs(collection(db, 'jogadores'));
     const todos = snap.docs.map(d => d.data());
     if (todos.some(j => j.email && j.email.toLowerCase() === emailNorm)) return;
-    // Criar jogador automaticamente
+    // Solicitar celular antes de criar o jogador (obrigatório)
+    const celular = await _solicitarCelularNovoCadastro(u);
     const nome = u.displayName || u.email.split('@')[0];
     await addDoc(collection(db, 'jogadores'), {
-      nome, email: emailNorm, celular: '', master: false,
+      nome, email: emailNorm, celular, master: false,
       fotoUrl: u.photoURL || '', criadoEm: serverTimestamp(), _autoCriado: true
     });
     await carregarJogadores();
   } catch(e) { console.warn('auto-cadastro jogador:', e); }
+}
+
+// RG4-CEL: exibe modal bloqueante solicitando o celular no primeiro cadastro
+function _solicitarCelularNovoCadastro(u) {
+  return new Promise((resolve) => {
+    const nome = (u.displayName || u.email.split('@')[0]).toUpperCase();
+    window._modalObrigatorio = true;
+    modal(`
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="text-align:center;padding:8px 0 4px;">
+          <div style="font-size:32px;margin-bottom:10px;">📱</div>
+          <div style="font-size:16px;font-weight:900;color:var(--text);">BEM-VINDO, ${nome}!</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:6px;line-height:1.5;">Para completar seu cadastro,<br>informe seu número de celular.</div>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">CELULAR <span style="color:#F87171;">*</span></label>
+          <input class="input" id="i-celular-cadastro" type="tel" placeholder="(11) 99999-9999" autocomplete="tel">
+        </div>
+        <button class="btn-primary" id="btn-confirmar-celular" onclick="window._confirmarCelularCadastro()">CONFIRMAR</button>
+      </div>
+    `);
+    let inp = null;
+    let _onKeyDown = null;
+    const _cleanup = () => {
+      window._modalObrigatorio = false;
+      window._confirmarCelularCadastro = null;
+      if (inp && _onKeyDown) inp.removeEventListener('keydown', _onKeyDown);
+    };
+    window._confirmarCelularCadastro = () => {
+      const cel = (document.getElementById('i-celular-cadastro')?.value || '').trim();
+      if (!cel) { toast('INFORME O NÚMERO DE CELULAR', 'erro'); return; }
+      if (cel.replace(/\D/g, '').length < 8) { toast('NÚMERO DE CELULAR INVÁLIDO', 'erro'); return; }
+      _cleanup();
+      fecharModal();
+      resolve(cel);
+    };
+    setTimeout(() => {
+      inp = document.getElementById('i-celular-cadastro');
+      if (inp) {
+        inp.focus();
+        _onKeyDown = e => { if (e.key === 'Enter') window._confirmarCelularCadastro?.(); };
+        inp.addEventListener('keydown', _onKeyDown);
+      }
+    }, 100);
+  });
 }
 
 // ─── TIMES (FIRESTORE) ───────────────────────────────────────────────
