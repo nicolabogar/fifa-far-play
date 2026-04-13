@@ -8,3 +8,5 @@
 - [x] No cadastro de torneio, remover o botao de editar nome do torneio e substituir por campo de texto inline; ao sair do campo (blur), auto persistir se o valor foi alterado (hash: 795597f)
 - [x] Todos accordions da aplicacao com texto no mesmo estilo do titulo FIFA FAR PLAY (gradiente purple->cyan, font-weight:900) (hash: 2cc5879)
 - [x] Adicionar div sem estilo no centro dos cards de jogos (amistoso e torneio), dividindo time A e time B na linha de tag do jogador e nome do time, com tamanho ajustado dinamicamente via CSS Grid para alinhar com os componentes abaixo (imagem do time e eficiência) (hash: 83e4822)
+- [x] Os titulos dos accordions do projeto devem ter o mesmo tamanho da fonte que o titulo FIFA FAR PLAY (18px, igual ao header nav) (hash: fb777bf)
+- [x] O nome do torneio no card de torneio deve ser menor (reduzir font-size) (hash: fb777bf)
