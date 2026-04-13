@@ -1192,16 +1192,18 @@ function htmlEficFiltro(containerId) {
     </div>
   </div>`;
 }
-window.toggleEficFiltroTimes = (val) => {
+window.toggleEficFiltroTimes = (e, val) => {
+  if (e && e.stopPropagation) e.stopPropagation();
   if (_eficFiltroTimesSet.has(val)) {
-    const restantes = EFIC_TODAS.filter(e => e !== val && _eficFiltroTimesSet.has(e));
+    const restantes = EFIC_TODAS.filter(v => v !== val && _eficFiltroTimesSet.has(v));
     if (restantes.length === 0) { toast('SELECIONE PELO MENOS UMA TAG DE EFICIENCIA', 'erro'); return; }
     _eficFiltroTimesSet.delete(val);
   } else { _eficFiltroTimesSet.add(val); }
   _atualizarMsDropdown('ms-efic-times');
   _renderTimesLista();
 };
-window.togglePaisFiltroTimes = (val) => {
+window.togglePaisFiltroTimes = (e, val) => {
+  if (e && e.stopPropagation) e.stopPropagation();
   if (_paisFiltroTimesSet.has(val)) { _paisFiltroTimesSet.delete(val); }
   else { _paisFiltroTimesSet.add(val); }
   _atualizarMsDropdown('ms-pais-times');
@@ -1213,7 +1215,8 @@ document.addEventListener('click', e => {
     document.querySelectorAll('.ms-drop.open').forEach(el => el.classList.remove('open'));
   }
 });
-window._toggleMsDrop = id => {
+window._toggleMsDrop = (e, id) => {
+  if (e && e.stopPropagation) e.stopPropagation();
   const el = document.getElementById(id);
   if (!el) return;
   const wasOpen = el.classList.contains('open');
@@ -1249,7 +1252,7 @@ function _msTriggerLabel(dropId) {
 function htmlMsDropEficTimes() {
   const label = _msTriggerLabel('ms-efic-times');
   return `<div class="ms-drop" id="ms-efic-times">
-    <button class="ms-trigger" onclick="_toggleMsDrop('ms-efic-times')" type="button">
+    <button class="ms-trigger" onclick="_toggleMsDrop(event,'ms-efic-times')" type="button">
       <span class="ms-trigger-label">${label}</span>
       <span class="ms-trigger-arrow">▼</span>
     </button>
@@ -1257,7 +1260,7 @@ function htmlMsDropEficTimes() {
       ${EFIC_TODAS.map(e => {
         const checked = _eficFiltroTimesSet.has(e);
         const cor = e==='Ruim'?'#ef4444':e==='Moderado'?'#eab308':'#22c55e';
-        return `<div class="ms-opt${checked?' checked':''}" data-val="${e}" onclick="toggleEficFiltroTimes('${e}')">
+        return `<div class="ms-opt${checked?' checked':''}" data-val="${e}" onclick="toggleEficFiltroTimes(event,'${e}')">
           <div class="ms-opt-check">${checked?'✓':''}</div>
           <span style="color:${cor};text-transform:uppercase;font-size:12px;">${e}</span>
         </div>`;
@@ -1268,14 +1271,14 @@ function htmlMsDropEficTimes() {
 function htmlMsDropPaisTimes(paises) {
   const label = _msTriggerLabel('ms-pais-times');
   return `<div class="ms-drop" id="ms-pais-times">
-    <button class="ms-trigger" onclick="_toggleMsDrop('ms-pais-times')" type="button">
+    <button class="ms-trigger" onclick="_toggleMsDrop(event,'ms-pais-times')" type="button">
       <span class="ms-trigger-label">${label}</span>
       <span class="ms-trigger-arrow">▼</span>
     </button>
     <div class="ms-panel">
       ${paises.map(p => {
         const checked = _paisFiltroTimesSet.has(p.nome);
-        return `<div class="ms-opt${checked?' checked':''}" data-val="${window._escSQ(p.nome)}" onclick="togglePaisFiltroTimes('${window._escSQ(p.nome)}')">
+        return `<div class="ms-opt${checked?' checked':''}" data-val="${window._escSQ(p.nome)}" onclick="togglePaisFiltroTimes(event,'${window._escSQ(p.nome)}')">
           <div class="ms-opt-check">${checked?'✓':''}</div>
           ${p.code ? `<img src="https://flagcdn.com/w40/${p.code}.png" style="width:22px;height:16px;object-fit:cover;border-radius:3px;" loading="lazy">` : ''}
           <span style="text-transform:uppercase;font-size:12px;">${p.nome}</span>
