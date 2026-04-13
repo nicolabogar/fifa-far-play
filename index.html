@@ -1419,7 +1419,8 @@ async function _autoCadastrarJogador(u) {
     if (todos.some(j => j.email && j.email.toLowerCase() === emailNorm)) return;
     // Solicitar celular antes de criar o jogador (obrigatório)
     const celular = await _solicitarCelularNovoCadastro(u);
-    const nome = ((u.displayName || u.email.split('@')[0]) || '').trim().toUpperCase() || 'JOGADOR';
+    const rawNome = u.displayName || u.email.split('@')[0] || '';
+    const nome = rawNome.trim().toUpperCase() || 'JOGADOR';
     await addDoc(collection(db, 'jogadores'), {
       nome, email: emailNorm, celular, master: false,
       fotoUrl: u.photoURL || '', criadoEm: serverTimestamp(), _autoCriado: true
