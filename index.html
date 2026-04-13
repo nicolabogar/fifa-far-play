@@ -1484,6 +1484,31 @@ function distribuirTimesBalanceados(participantes, pool, usados = []) {
   }));
 }
 
+function distribuirTimesBalanceadosMulti(participantes, pool, usados, qtd) {
+  if (qtd <= 1) {
+    return distribuirTimesBalanceados(participantes, pool, usados).map(p => ({ ...p, times: [p.time] }));
+  }
+  pool = pool.filter(t => !t.inativo);
+  const n = participantes.length;
+  const total = n * qtd;
+  const janela = Math.max(total, Math.floor(pool.length / 2));
+  let disp = pool.filter(t => !usados.slice(-janela).includes(t.id));
+  if (disp.length < total) disp = [...pool];
+  const candidatos = shuffle(disp).slice(0, Math.max(total * 2, total + 4));
+  candidatos.sort((a, b) => b.forca - a.forca);
+  const selecionados = candidatos.slice(0, total);
+  const ps = shuffle([...participantes]);
+  return ps.map((p, i) => {
+    const myTimes = [];
+    for (let k = 0; k < qtd; k++) {
+      // Snake draft por rodada
+      const idx = k % 2 === 0 ? k * n + i : k * n + (n - 1 - i);
+      myTimes.push(selecionados[idx % total] || pool[i % pool.length]);
+    }
+    return { ...p, times: myTimes, time: myTimes[0] };
+  });
+}
+
 function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
 
 /**
@@ -4219,19 +4244,25 @@ window.selecionarJogCC = (id, nome) => {
   _ccSel.set(id, nome);
   _renderTagsCC();
   if (document.getElementById('manual-times')?.checked) _renderTimesManualCC();
+  if (document.getElementById('camp-escolher-duplas')?.checked) _renderDuplasManualUI();
 };
 
 window.removerJogCC = (id) => {
   _ccSel.delete(id);
   _ccManualSel.delete(id);
+  _ccManualTimesArr.delete(id);
   _renderTagsCC();
   if (document.getElementById('manual-times')?.checked) _renderTimesManualCC();
+  if (document.getElementById('camp-escolher-duplas')?.checked) _renderDuplasManualUI();
 };
 
 function abrirModalCriarCamp(secao, secaoView) {
   if (jogadores.length < 2) { toast('CADASTRE PELO MENOS 2 JOGADORES', 'erro'); return; }
   _ccSel.clear();
   _ccManualSel.clear();
+  _ccManualTimesArr.clear();
+  _ccQtdTimes = 1;
+  _ccParesManual = [];
   fullscreen('NOVO', `
     <div style="display:flex;flex-direction:column;gap:14px;">
       <div>
@@ -4252,13 +4283,28 @@ function abrirModalCriarCamp(secao, secaoView) {
         <div id="ct-regras-box" style="display:none;margin-top:8px;"></div>
       </div>
       <div>
-        <label class="check-row" style="margin-bottom:8px;">
-          <input type="checkbox" id="camp-dupla" style="width:18px;height:18px;accent-color:var(--purple);">
+        <label class="check-row" style="margin-bottom:4px;">
+          <input type="checkbox" id="camp-dupla" style="width:18px;height:18px;accent-color:var(--purple);" onchange="_onToggleCampDupla(this.checked)">
           <div>
             <div style="font-size:13px;font-weight:700;">MODO DUPLA (2 POR TIME)</div>
             <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">PARTICIPANTES EM DUPLAS — EXIGE NUMERO PAR DE JOGADORES</div>
           </div>
         </label>
+        <label class="check-row" id="label-escolher-duplas" style="display:none;margin-top:8px;margin-bottom:4px;">
+          <input type="checkbox" id="camp-escolher-duplas" style="width:18px;height:18px;accent-color:var(--cyan);" onchange="_onToggleEscolherDuplas(this.checked)">
+          <div>
+            <div style="font-size:13px;font-weight:700;">ESCOLHER DUPLAS MANUALMENTE</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">DESMARCADO: DUPLAS SORTEADAS AUTOMATICAMENTE</div>
+          </div>
+        </label>
+        <div id="camp-duplas-box" style="display:none;margin-top:8px;"></div>
+      </div>
+      <div>
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;" id="label-qtd-times-titulo">TIMES POR JOGADOR</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="camp-qtd-times-btns">
+          ${[1,2,3,4,5].map(n => `<div class="tipo-btn${n===1?' sel':''}" data-qtd="${n}" onclick="_selQtdTimes(${n},this)" style="font-size:12px;padding:8px 12px;min-width:36px;text-align:center;">${n}</div>`).join('')}
+        </div>
+        <input type="hidden" id="camp-qtd-times" value="1">
       </div>
       <div>
         <label class="check-row" style="margin-bottom:8px;">
@@ -4318,7 +4364,6 @@ window.toggleSelManual = () => {
 function _renderTimesManualCC() {
   const tipo = document.getElementById('ct')?.value;
   const meta = tipo ? CAMP_META[tipo] : null;
-  const pool = meta?.tipo === 'selecoes' ? selecoes : clubes;
   const box = document.getElementById('manual-times-box');
   if (!box) return;
   const jogsList = [..._ccSel.entries()].map(([id, nome]) => ({ id, nome }));
@@ -4327,29 +4372,42 @@ function _renderTimesManualCC() {
     box.innerHTML = '';
     return;
   }
-  const rows = jogsList.map(j => `
-    <div style="margin-bottom:8px;">
-      <div style="font-size:12px;font-weight:700;color:var(--cyan);margin-bottom:4px;text-transform:uppercase;">${j.nome}</div>
-      <div style="position:relative;">
-        <input type="text" class="input" placeholder="BUSCAR TIME..." id="cc-manual-search-${j.id}" autocomplete="off"
-          oninput="_filtrarTimesManualCC('${j.id}')"
-          onfocus="_abrirDropdownManualCC('${j.id}')"
-          onblur="setTimeout(()=>{const d=document.getElementById('cc-manual-drop-${j.id}');if(d)d.style.display='none';},200)"
+  const qtd = _ccQtdTimes || 1;
+  // Gerar inputs de time para cada jogador: qtd inputs por jogador
+  const rows = jogsList.map(j => {
+    const timesAtual = _ccManualTimesArr.get(j.id) || [];
+    const inputsHtml = Array.from({length: qtd}, (_, k) => {
+      const selAtual = timesAtual[k];
+      return `
+      <div style="position:relative;margin-bottom:4px;">
+        <input type="text" class="input" placeholder="TIME ${k+1}..." id="cc-manual-search-${j.id}-${k}" autocomplete="off"
+          oninput="_filtrarTimesManualCC('${j.id}',${k})"
+          onfocus="_abrirDropdownManualCC('${j.id}',${k})"
+          onblur="setTimeout(()=>{const d=document.getElementById('cc-manual-drop-${j.id}-${k}');if(d)d.style.display='none';},200)"
+          value="${selAtual ? selAtual.nome.replace(/"/g,'&quot;') : ''}"
           style="margin-bottom:0;font-size:13px;padding:10px 14px;">
-        <div id="cc-manual-drop-${j.id}" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:25;background:var(--bg);border:1px solid var(--card-border);border-radius:12px;max-height:180px;overflow-y:auto;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,0.5);"></div>
-      </div>
-    </div>`).join('');
+        <div id="cc-manual-drop-${j.id}-${k}" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:25;background:var(--bg);border:1px solid var(--card-border);border-radius:12px;max-height:180px;overflow-y:auto;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,0.5);"></div>
+      </div>`;
+    }).join('');
+    return `
+    <div style="margin-bottom:10px;background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:10px;">
+      <div style="font-size:12px;font-weight:700;color:var(--cyan);margin-bottom:6px;text-transform:uppercase;">${j.nome}</div>
+      ${inputsHtml}
+    </div>`;
+  }).join('');
   box.style.display = 'block';
-  box.innerHTML = `<p style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">ESCOLHA O TIME DE CADA PARTICIPANTE</p>${rows}`;
+  box.innerHTML = `<p style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">ESCOLHA ${qtd > 1 ? `OS ${qtd} TIMES DE CADA PARTICIPANTE` : 'O TIME DE CADA PARTICIPANTE'}</p>${rows}`;
 }
 
-window._abrirDropdownManualCC = (jogId) => {
+window._abrirDropdownManualCC = (jogId, idx=0) => {
   const tipo = document.getElementById('ct')?.value;
   const meta = tipo ? CAMP_META[tipo] : null;
   const pool = meta?.tipo === 'selecoes' ? selecoes : clubes;
-  const q = (document.getElementById('cc-manual-search-'+jogId)?.value||'').toLowerCase();
+  const inputId = `cc-manual-search-${jogId}-${idx}`;
+  const dropId = `cc-manual-drop-${jogId}-${idx}`;
+  const q = (document.getElementById(inputId)?.value||'').toLowerCase();
   const filtrado = pool.filter(t => !q || t.nome.toLowerCase().includes(q));
-  const drop = document.getElementById('cc-manual-drop-'+jogId);
+  const drop = document.getElementById(dropId);
   if (!drop) return;
   if (!filtrado.length) { drop.style.display='none'; return; }
   const isSel = meta?.tipo === 'selecoes';
@@ -4359,7 +4417,7 @@ window._abrirDropdownManualCC = (jogId) => {
     const flagEl = paisCode ? `<img src="https://flagcdn.com/w40/${paisCode}.png" alt="" loading="lazy" style="width:22px;height:16px;object-fit:cover;border-radius:2px;flex-shrink:0;" onerror="this.style.display='none'">` : '';
     const shieldEl = !isSel ? `<div style="width:22px;height:22px;border-radius:5px;background:${_td.fundo};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:${_td.cor};flex-shrink:0;border:1px solid rgba(255,255,255,0.1);">${_td.abrev}</div>` : '';
     const eficEl = t.eficiencia ? eficBadge(t.eficiencia) : '';
-    return `<div onclick="selecionarTimeManualCC('${jogId}','${t.id}','${t.nome.replace(/'/g,"\\'")}',${t.forca},'${isSel?'selecoes':'clubes'}')"
+    return `<div onclick="selecionarTimeManualCC('${jogId}',${idx},'${t.id}','${t.nome.replace(/'/g,"\\'")}',${t.forca},'${isSel?'selecoes':'clubes'}')"
       style="padding:9px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);font-weight:600;font-size:12px;display:flex;align-items:center;gap:8px;">
       ${flagEl}${shieldEl}
       <span style="text-transform:uppercase;flex:1;">${t.nome}</span>
@@ -4368,16 +4426,39 @@ window._abrirDropdownManualCC = (jogId) => {
   drop.style.display='block';
 };
 
-window._filtrarTimesManualCC = (jogId) => { _abrirDropdownManualCC(jogId); };
+window._filtrarTimesManualCC = (jogId, idx=0) => { _abrirDropdownManualCC(jogId, idx); };
 
 // _ccManualSel: Map de jogadorId -> {timeId, nome, forca, _tipo}
 const _ccManualSel = new Map();
+// _ccManualTimesArr: Map de jogadorId -> [{timeId, nome, forca, _tipo}, ...] para modo multi-times
+const _ccManualTimesArr = new Map();
+// Quantidade de times por jogador/dupla no torneio
+let _ccQtdTimes = 1;
+// Pares manuais para modo dupla: [{j1Id, j1Nome, j2Id, j2Nome}, ...]
+let _ccParesManual = [];
 
-window.selecionarTimeManualCC = (jogId, timeId, timeNome, forca, tipo) => {
-  _ccManualSel.set(jogId, {timeId, nome: timeNome, forca, _tipo: tipo});
-  const inp = document.getElementById('cc-manual-search-'+jogId);
+window.selecionarTimeManualCC = (jogId, idx, timeId, timeNome, forca, tipo) => {
+  // Compatibilidade: se idx é string (ID de time), é chamada antiga sem idx
+  if (typeof idx === 'string') {
+    // Chamada antiga: selecionarTimeManualCC(jogId, timeId, timeNome, forca, tipo)
+    const realTimeId = idx; const realNome = timeId; const realForca = timeNome; const realTipo = forca;
+    _ccManualSel.set(jogId, {timeId: realTimeId, nome: realNome, forca: realForca, _tipo: realTipo});
+    const arr = _ccManualTimesArr.get(jogId) || [];
+    arr[0] = {timeId: realTimeId, nome: realNome, forca: realForca, _tipo: realTipo};
+    _ccManualTimesArr.set(jogId, arr);
+    const inp = document.getElementById('cc-manual-search-'+jogId);
+    if (inp) inp.value = realNome;
+    const drop = document.getElementById('cc-manual-drop-'+jogId);
+    if (drop) drop.style.display='none';
+    return;
+  }
+  const arr = _ccManualTimesArr.get(jogId) || [];
+  arr[idx] = {timeId, nome: timeNome, forca, _tipo: tipo};
+  _ccManualTimesArr.set(jogId, arr);
+  if (idx === 0) _ccManualSel.set(jogId, {timeId, nome: timeNome, forca, _tipo: tipo});
+  const inp = document.getElementById(`cc-manual-search-${jogId}-${idx}`);
   if (inp) inp.value = timeNome;
-  const drop = document.getElementById('cc-manual-drop-'+jogId);
+  const drop = document.getElementById(`cc-manual-drop-${jogId}-${idx}`);
   if (drop) drop.style.display='none';
 };
 
@@ -4413,41 +4494,194 @@ window.selCampTipo = (k, el) => {
   }
 };
 
+window._selQtdTimes = (n, el) => {
+  _ccQtdTimes = n;
+  document.querySelectorAll('[data-qtd]').forEach(b => b.classList.remove('sel'));
+  el?.classList.add('sel');
+  const inp = document.getElementById('camp-qtd-times');
+  if (inp) inp.value = n;
+  // Atualizar label
+  const lbl = document.getElementById('label-qtd-times-titulo');
+  const isDupla = document.getElementById('camp-dupla')?.checked;
+  if (lbl) lbl.textContent = isDupla ? 'TIMES POR DUPLA' : 'TIMES POR JOGADOR';
+  // Re-render times manual se ativo
+  if (document.getElementById('manual-times')?.checked) _renderTimesManualCC();
+};
+
+window._onToggleCampDupla = (ativo) => {
+  const labelEscolher = document.getElementById('label-escolher-duplas');
+  const duplasBox = document.getElementById('camp-duplas-box');
+  const lbl = document.getElementById('label-qtd-times-titulo');
+  if (labelEscolher) labelEscolher.style.display = ativo ? '' : 'none';
+  if (!ativo && duplasBox) { duplasBox.style.display = 'none'; duplasBox.innerHTML = ''; }
+  if (!ativo) {
+    const cb = document.getElementById('camp-escolher-duplas');
+    if (cb) cb.checked = false;
+  }
+  if (lbl) lbl.textContent = ativo ? 'TIMES POR DUPLA' : 'TIMES POR JOGADOR';
+};
+
+window._onToggleEscolherDuplas = (ativo) => {
+  const box = document.getElementById('camp-duplas-box');
+  if (!box) return;
+  if (ativo) {
+    box.style.display = '';
+    _renderDuplasManualUI();
+  } else {
+    box.style.display = 'none';
+    box.innerHTML = '';
+    _ccParesManual = [];
+  }
+};
+
+window._renderDuplasManualUI = () => {
+  const box = document.getElementById('camp-duplas-box');
+  if (!box || box.style.display === 'none') return;
+  const jogs = [..._ccSel.entries()].map(([id, nome]) => ({id, nome}));
+  if (jogs.length < 2 || jogs.length % 2 !== 0) {
+    box.innerHTML = '<p style="font-size:12px;color:var(--yellow);font-weight:700;">SELECIONE UM NUMERO PAR DE JOGADORES PARA CONFIGURAR AS DUPLAS</p>';
+    return;
+  }
+  const nPares = jogs.length / 2;
+  // Inicializar pares se necessário ou se mudou o número de jogadores
+  const jogIds = new Set(jogs.map(j => j.id));
+  if (_ccParesManual.length !== nPares || !_ccParesManual.every(par => jogIds.has(par.j1Id) && jogIds.has(par.j2Id))) {
+    // Reinicializar pares com jogadores disponíveis
+    const jogsCopy = [...jogs];
+    _ccParesManual = Array.from({length: nPares}, (_, i) => {
+      const j1 = jogsCopy[i * 2] || {id: '', nome: ''};
+      const j2 = jogsCopy[i * 2 + 1] || {id: '', nome: ''};
+      return {j1Id: j1.id, j1Nome: j1.nome, j2Id: j2.id, j2Nome: j2.nome};
+    });
+  }
+  const rows = Array.from({length: nPares}, (_, i) => {
+    const par = _ccParesManual[i];
+    const makeSelect = (slot) => {
+      const field = `j${slot}`;
+      const val = par[`${field}Id`];
+      const nome = par[`${field}Nome`];
+      const opts = jogs.map(j => `<option value="${j.id}"${j.id===val?' selected':''}>${j.nome}</option>`).join('');
+      return `<select class="input" style="font-size:12px;padding:8px 10px;" onchange="_setPar(${i},${slot},this.value,this.options[this.selectedIndex].text)">
+        <option value="">ESCOLHER...</option>
+        ${opts}
+      </select>`;
+    };
+    return `<div style="background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.25);border-radius:12px;padding:10px;margin-bottom:8px;">
+      <div style="font-size:11px;font-weight:700;color:var(--cyan);margin-bottom:8px;">DUPLA ${i+1}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        ${makeSelect(1)}
+        ${makeSelect(2)}
+      </div>
+    </div>`;
+  }).join('');
+  box.innerHTML = `<p style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">CONFIGURE AS DUPLAS</p>${rows}`;
+};
+
+window._setPar = (paridx, slot, jogId, jogNome) => {
+  if (!_ccParesManual[paridx]) return;
+  const field = `j${slot}`;
+  const oldId = _ccParesManual[paridx][`${field}Id`];
+  // Verificar se o jogador já está em outra dupla/slot
+  let swapPar = -1, swapSlot = -1;
+  for (let i = 0; i < _ccParesManual.length; i++) {
+    if (i === paridx) continue;
+    if (_ccParesManual[i].j1Id === jogId) { swapPar = i; swapSlot = 1; break; }
+    if (_ccParesManual[i].j2Id === jogId) { swapPar = i; swapSlot = 2; break; }
+  }
+  // Verificar se já está no outro slot da mesma dupla
+  const otherSlot = slot === 1 ? 2 : 1;
+  if (_ccParesManual[paridx][`j${otherSlot}Id`] === jogId) {
+    _ccParesManual[paridx][`j${otherSlot}Id`] = oldId;
+    _ccParesManual[paridx][`j${otherSlot}Nome`] = _ccSel.get(oldId) || '';
+  } else if (swapPar >= 0) {
+    _ccParesManual[swapPar][`j${swapSlot}Id`] = oldId;
+    _ccParesManual[swapPar][`j${swapSlot}Nome`] = _ccSel.get(oldId) || '';
+  }
+  _ccParesManual[paridx][`${field}Id`] = jogId;
+  _ccParesManual[paridx][`${field}Nome`] = jogNome;
+  _renderDuplasManualUI();
+};
+
 window.criarCampeonato = async () => {
   const btn = document.getElementById('btn-camp-salvar');
   if (_lockBtn(btn)) return;
   const nome = document.getElementById('cn').value.trim().toUpperCase();
   const tipo = document.getElementById('ct').value;
   const modoDupla = document.getElementById('camp-dupla')?.checked || false;
+  const qtdTimes = parseInt(document.getElementById('camp-qtd-times')?.value) || 1;
+  const escolherDuplas = modoDupla && (document.getElementById('camp-escolher-duplas')?.checked || false);
   if (!nome) { toast('DIGITE O NOME DO TORNEIO', 'erro'); _unlockBtn(btn); return; }
   if (campeonatos.some(c => c.nome.trim().toLowerCase() === nome.toLowerCase())) { toast('JA EXISTE UM TORNEIO COM ESSE NOME', 'erro'); _unlockBtn(btn); return; }
   if (_ccSel.size < 2) { toast('SELECIONE 2+ PARTICIPANTES', 'erro'); _unlockBtn(btn); return; }
   if (modoDupla && _ccSel.size % 2 !== 0) { toast('MODO DUPLA: SELECIONE UM NUMERO PAR DE JOGADORES', 'erro'); _unlockBtn(btn); return; }
+  // Validar pares manuais
+  if (escolherDuplas) {
+    const nPares = _ccSel.size / 2;
+    if (_ccParesManual.length !== nPares || _ccParesManual.some(p => !p.j1Id || !p.j2Id)) {
+      toast('CONFIGURE TODAS AS DUPLAS ANTES DE SALVAR', 'erro'); _unlockBtn(btn); return;
+    }
+    const allIds = _ccParesManual.flatMap(p => [p.j1Id, p.j2Id]);
+    if (new Set(allIds).size !== allIds.length) { toast('CADA JOGADOR SO PODE ESTAR EM UMA DUPLA', 'erro'); _unlockBtn(btn); return; }
+  }
   const meta = CAMP_META[tipo];
   const isManual = document.getElementById('manual-times')?.checked;
   const hist = historicoIds(meta.tipo);
-  const partic = [..._ccSel.entries()].map(([jogadorId, nome]) => ({ jogadorId, nome }));
+  const pool = filtrarPoolEfic(meta.tipo === 'selecoes' ? selecoes : clubes);
 
   let distribuidos;
   if (isManual) {
-    // Verifica se todos os participantes têm time selecionado
-    const semTime = partic.filter(p => !_ccManualSel.has(p.jogadorId));
-    if (semTime.length > 0) { toast(`SELECIONE O TIME DE: ${semTime.map(p=>p.nome).join(', ')}`, 'erro'); _unlockBtn(btn); return; }
-    // Atribui times manualmente
-    distribuidos = partic.map(p => {
-      const tm = _ccManualSel.get(p.jogadorId);
-      return { ...p, time: { id: tm.timeId, nome: tm.nome, forca: tm.forca } };
-    });
+    const partic = [..._ccSel.entries()].map(([jogadorId, nome]) => ({ jogadorId, nome }));
+    if (qtdTimes > 1) {
+      // Multi-times manual: cada jogador precisa ter qtdTimes times selecionados
+      const semTimes = partic.filter(p => {
+        const arr = _ccManualTimesArr.get(p.jogadorId) || [];
+        return arr.filter(Boolean).length < qtdTimes;
+      });
+      if (semTimes.length > 0) {
+        toast(`SELECIONE ${qtdTimes} TIMES PARA: ${semTimes.map(p=>p.nome).join(', ')}`, 'erro');
+        _unlockBtn(btn); return;
+      }
+      distribuidos = partic.map(p => {
+        const arr = (_ccManualTimesArr.get(p.jogadorId) || []).slice(0, qtdTimes);
+        const tms = arr.map(tm => ({ id: tm.timeId, nome: tm.nome, forca: tm.forca }));
+        return { ...p, times: tms, time: tms[0] };
+      });
+    } else {
+      // Single-time manual
+      const semTime = partic.filter(p => !_ccManualSel.has(p.jogadorId));
+      if (semTime.length > 0) { toast(`SELECIONE O TIME DE: ${semTime.map(p=>p.nome).join(', ')}`, 'erro'); _unlockBtn(btn); return; }
+      distribuidos = partic.map(p => {
+        const tm = _ccManualSel.get(p.jogadorId);
+        return { ...p, time: { id: tm.timeId, nome: tm.nome, forca: tm.forca }, times: [{ id: tm.timeId, nome: tm.nome, forca: tm.forca }] };
+      });
+    }
   } else {
-    const pool = filtrarPoolEfic(meta.tipo === 'selecoes' ? selecoes : clubes);
-    distribuidos = distribuirTimesBalanceados(partic, pool, hist);
+    const partic = [..._ccSel.entries()].map(([jogadorId, nome]) => ({ jogadorId, nome }));
+    distribuidos = distribuirTimesBalanceadosMulti(partic, pool, hist, qtdTimes);
   }
+
+  // Dupla: determinar duplaIndex
   if (modoDupla) {
-    distribuidos = distribuidos.map((p, i) => ({ ...p, duplaIndex: Math.floor(i / 2) }));
+    if (escolherDuplas && _ccParesManual.length) {
+      // Ordenar participantes conforme pares manuais
+      const ordered = [];
+      _ccParesManual.forEach((par, di) => {
+        const p1 = distribuidos.find(p => p.jogadorId === par.j1Id);
+        const p2 = distribuidos.find(p => p.jogadorId === par.j2Id);
+        if (p1) ordered.push({ ...p1, duplaIndex: di });
+        if (p2) ordered.push({ ...p2, duplaIndex: di });
+      });
+      // Adicionar quaisquer não encontrados (fallback)
+      distribuidos.forEach(p => { if (!ordered.some(o => o.jogadorId === p.jogadorId)) ordered.push({ ...p, duplaIndex: Math.floor(ordered.length / 2) }); });
+      distribuidos = ordered;
+    } else {
+      distribuidos = distribuidos.map((p, i) => ({ ...p, duplaIndex: Math.floor(i / 2) }));
+    }
   }
+
   const grupos = gerarGrupos(distribuidos, tipo);
   try {
-    const docRef = await addDoc(collection(db, 'campeonatos'), { nome, tipo, modoDupla, participantes: distribuidos, grupos, fase:'grupos', status:'ativo', criadoEm: serverTimestamp() });
+    const docRef = await addDoc(collection(db, 'campeonatos'), { nome, tipo, modoDupla, qtdTimes, participantes: distribuidos, grupos, fase:'grupos', status:'ativo', criadoEm: serverTimestamp() });
     fecharFullscreen(); await carregarCampeonatos(); atualizarDash();
     abrirCampeonato(docRef.id);
   } catch(e) { toast('ERRO AO SALVAR', 'erro'); } finally { _unlockBtn(btn); }
@@ -4464,27 +4698,33 @@ function gerarGrupos(partic, tipo) {
   }));
 }
 
-function calcularDisp(g) {
+function calcularDisp(g, qtdTimes=1) {
   const disp = [];
   for (let i=0;i<g.membros.length;i++) for (let j=i+1;j<g.membros.length;j++) {
     const m1=g.membros[i],m2=g.membros[j];
-    if (!(g.partidas||[]).some(p=>(p.j1Id===m1.jogadorId&&p.j2Id===m2.jogadorId)||(p.j1Id===m2.jogadorId&&p.j2Id===m1.jogadorId))) disp.push({m1,m2});
+    for (let k=0; k<qtdTimes; k++) {
+      if (!(g.partidas||[]).some(p=>
+        ((p.j1Id===m1.jogadorId&&p.j2Id===m2.jogadorId)||(p.j1Id===m2.jogadorId&&p.j2Id===m1.jogadorId))
+        && (p.timeIndex??0) === k
+      )) disp.push({m1,m2,timeIndex:k});
+    }
   }
   return disp;
 }
 
 /** Card de jogo de torneio — estilo idêntico ao cardAmistoso (TO3) */
-function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true, modoDupla=false) {
+function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true, modoDupla=false, timeIndex=0) {
   const tipo = isSel ? 'selecoes' : 'clubes';
   const temRes = !!played;
   const g1r = temRes ? (played.j1Id===m1.jogadorId ? played.g1 : played.g2) : null;
   const g2r = temRes ? (played.j1Id===m1.jogadorId ? played.g2 : played.g1) : null;
-  const forca1 = m1.time?.forca;
-  const forca2 = m2.time?.forca;
+  // Suporte a múltiplos times: usa times[timeIndex] ou time como fallback
+  const t1 = m1.times?.[timeIndex] || m1.time;
+  const t2 = m2.times?.[timeIndex] || m2.time;
 
   // Usar badgeTime (grande, igual ao amistoso não-compact)
-  const b1 = badgeTime(m1.time?.id||'', m1.time?.nome||'', tipo);
-  const b2 = badgeTime(m2.time?.id||'', m2.time?.nome||'', tipo);
+  const b1 = badgeTime(t1?.id||'', t1?.nome||'', tipo);
+  const b2 = badgeTime(t2?.id||'', t2?.nome||'', tipo);
   const nome1 = _nomeJogPorId(m1.jogadorId, m1.nome);
   const nome2 = _nomeJogPorId(m2.jogadorId, m2.nome);
 
@@ -4496,7 +4736,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
             <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="2" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
           </div>
-          <button onclick="event.stopPropagation();salvarPartidaDireta('${cid}',${gi},'${m1.jogadorId}','${m2.jogadorId}',this)" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">FIM</button>`
+          <button onclick="event.stopPropagation();salvarPartidaDireta('${cid}',${gi},'${m1.jogadorId}','${m2.jogadorId}',${timeIndex},this)" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">FIM</button>`
       : `<div style="display:flex;align-items:center;gap:4px;opacity:0.4;">
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="1" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;cursor:not-allowed;">
             <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
@@ -4522,20 +4762,20 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
     </div>
     <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-        ${_htmlCountryRow(m1.time?.id||'', m1.time?.nome||'', tipo)}
-        <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${abreviarNome(m1.time?.nome||'?')}</div>
-        <div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(m1.time?.id||'', m1.time?.nome||'', tipo)}</div>
-        <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(m1.time?.id))}</div>
+        ${_htmlCountryRow(t1?.id||'', t1?.nome||'', tipo)}
+        <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${abreviarNome(t1?.nome||'?')}</div>
+        <div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(t1?.id||'', t1?.nome||'', tipo)}</div>
+        <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(t1?.id))}</div>
         ${nome1 ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;"><div style="font-size:11px;color:#67E8F9;font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.2);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${nome1}</div></div>` : ''}
       </div>
       <div style="text-align:center;min-width:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
         ${placarArea}
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-        ${_htmlCountryRow(m2.time?.id||'', m2.time?.nome||'', tipo)}
-        <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${abreviarNome(m2.time?.nome||'?')}</div>
-        <div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(m2.time?.id||'', m2.time?.nome||'', tipo)}</div>
-        <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(m2.time?.id))}</div>
+        ${_htmlCountryRow(t2?.id||'', t2?.nome||'', tipo)}
+        <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${abreviarNome(t2?.nome||'?')}</div>
+        <div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(t2?.id||'', t2?.nome||'', tipo)}</div>
+        <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(t2?.id))}</div>
         ${nome2 ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;"><div style="font-size:11px;color:#67E8F9;font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.2);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${nome2}</div></div>` : ''}
       </div>
     </div>
@@ -4552,28 +4792,39 @@ window.abrirCampeonato = (id) => {
   const naoIniciado = totalJogosReg === 0;
   const podeMudar = temPermissao();
 
+  const qtdTimes = c.qtdTimes || 1;
+
   const blocoTime = (m) => {
-    const bc = isSel ? badgeTimeCompact(m.time?.id||'','','selecoes') : badgeTimeCompact(m.time?.id||'',m.time?.nome||'','clubes');
+    const times = m.times || [m.time].filter(Boolean);
+    const primTime = times[0] || m.time;
+    const bc = isSel ? badgeTimeCompact(primTime?.id||'','','selecoes') : badgeTimeCompact(primTime?.id||'',primTime?.nome||'','clubes');
+    const timesExtras = times.length > 1 ? `<div style="font-size:9px;color:var(--text-muted);margin-top:2px;">${times.map(t=>t?.nome||'').filter(Boolean).join(' · ')}</div>` : '';
     return `<div style="flex:1;text-align:center;min-width:0;">
       <div style="display:flex;justify-content:center;margin-bottom:4px;">${bc}</div>
-      <div style="font-size:13px;font-weight:800;line-height:1.2;">${m.time?.nome||'?'}</div>
-      <div style="margin-top:3px;">${eficBadge(eficienciaAtual(m.time?.id))}</div>
+      <div style="font-size:13px;font-weight:800;line-height:1.2;">${primTime?.nome||'?'}</div>
+      ${timesExtras}
+      <div style="margin-top:3px;">${eficBadge(eficienciaAtual(primTime?.id))}</div>
       <div style="font-size:11px;color:#67E8F9;margin-top:3px;font-weight:700;">${_nomeJogPorId(m.jogadorId, m.nome)}</div>
     </div>`;
   };
 
   const gruposHTML = (c.grupos||[]).map((g,gi) => {
     const ord = [...g.membros].sort((a,b)=>b.pts!==a.pts?b.pts-a.pts:(b.gp-b.gc)!==(a.gp-a.gc)?(b.gp-b.gc)-(a.gp-a.gc):b.gp-a.gp);
-    const disp = calcularDisp(g);
-    const totalJogos = g.membros.length*(g.membros.length-1)/2;
+    const disp = calcularDisp(g, qtdTimes);
+    const totalJogos = g.membros.length*(g.membros.length-1)/2 * qtdTimes;
     const jogados = (g.partidas||[]).length;
     const todosConf = [];
-    for (let i=0;i<g.membros.length;i++) for (let j=i+1;j<g.membros.length;j++) todosConf.push({m1:g.membros[i],m2:g.membros[j]});
+    for (let i=0;i<g.membros.length;i++) for (let j=i+1;j<g.membros.length;j++) {
+      for (let k=0; k<qtdTimes; k++) todosConf.push({m1:g.membros[i],m2:g.membros[j],timeIndex:k});
+    }
 
-    const jogosHTML = todosConf.map(({m1,m2}) => {
-      const played = (g.partidas||[]).find(p=>(p.j1Id===m1.jogadorId&&p.j2Id===m2.jogadorId)||(p.j1Id===m2.jogadorId&&p.j2Id===m1.jogadorId));
-      const confKey = `${c.id}-${gi}-${m1.jogadorId}-${m2.jogadorId}`;
-      return cardJogoTorneio(m1, m2, played||null, confKey, c.id, gi, isSel, podeMudar, c.modoDupla||false);
+    const jogosHTML = todosConf.map(({m1,m2,timeIndex}) => {
+      const played = (g.partidas||[]).find(p=>
+        ((p.j1Id===m1.jogadorId&&p.j2Id===m2.jogadorId)||(p.j1Id===m2.jogadorId&&p.j2Id===m1.jogadorId))
+        && (p.timeIndex??0) === timeIndex
+      );
+      const confKey = `${c.id}-${gi}-${m1.jogadorId}-${m2.jogadorId}-${timeIndex}`;
+      return cardJogoTorneio(m1, m2, played||null, confKey, c.id, gi, isSel, podeMudar, c.modoDupla||false, timeIndex);
     }).join('');
 
     return `<div class="grupo-header aberto" onclick="toggleGrupo(this)" style="margin-bottom:8px;">
@@ -4588,11 +4839,14 @@ window.abrirCampeonato = (id) => {
           <td style="text-align:center;padding:6px 4px;">E</td><td style="text-align:center;padding:6px 4px;">D</td>
           <td style="text-align:center;padding:6px 4px;">SG</td><td style="text-align:center;padding:6px 8px;font-weight:800;">PTS</td>
         </tr>
-        ${ord.map((m,i)=>`<tr style="border-top:1px solid rgba(255,255,255,0.04);color:${i<2?'var(--cyan)':'var(--text)'}">
+        ${ord.map((m,i)=>{
+          const times = m.times || [m.time].filter(Boolean);
+          const timesStr = times.length > 1 ? times.map(t=>t?.nome||'').filter(Boolean).join(', ') : (m.time?.nome||'?');
+          return `<tr style="border-top:1px solid rgba(255,255,255,0.04);color:${i<2?'var(--cyan)':'var(--text)'}">
           <td style="padding:6px 8px;font-weight:800;color:${i===0?'var(--yellow)':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text-muted)'};">${i+1}°</td>
           <td style="padding:6px 4px;">
             <div style="font-weight:700;font-size:11px;">${_nomeJogPorId(m.jogadorId, m.nome)}</div>
-            <div style="font-size:9px;color:var(--text-muted);">${m.time?.nome||'?'}</div>
+            <div style="font-size:9px;color:var(--text-muted);">${timesStr}</div>
           </td>
           <td style="text-align:center;padding:6px 4px;">${m.vit+m.emp+m.der}</td>
           <td style="text-align:center;padding:6px 4px;">${m.vit}</td>
@@ -4600,7 +4854,7 @@ window.abrirCampeonato = (id) => {
           <td style="text-align:center;padding:6px 4px;">${m.der}</td>
           <td style="text-align:center;padding:6px 4px;">${m.gp-m.gc>0?'+':''}${m.gp-m.gc}</td>
           <td style="text-align:center;padding:6px 8px;font-weight:900;color:var(--yellow);">${m.pts}</td>
-        </tr>`).join('')}
+        </tr>`;}).join('')}
       </table>
       <p style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">JOGOS</p>
       ${jogosHTML}
@@ -4614,6 +4868,7 @@ window.abrirCampeonato = (id) => {
           <span class="tag tag-purple">${meta.nome.toUpperCase()}</span>
           <span class="tag ${c.status==='finalizado'?'tag-gray':'tag-green'}">${c.status==='finalizado'?'FINALIZADO':'EM ANDAMENTO'}</span>
           ${c.modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
+          ${qtdTimes > 1 ? `<span class="tag tag-yellow">${qtdTimes}X TIMES</span>` : ''}
         </div>
         <p style="color:var(--text-muted);font-size:12px;">${c.participantes?.length||0} PARTICIPANTES · ${totalJogosReg} JOGOS REGISTRADOS</p>
       </div>
@@ -4693,13 +4948,25 @@ window.abrirCampeonato = (id) => {
 };
 
 // Salva partida diretamente dos inputs no card (sem modal)
-window.salvarPartidaDireta = async (cid, gi, j1Id, j2Id, btnEl) => {
+window.salvarPartidaDireta = async (cid, gi, j1Id, j2Id, timeIndex, btnEl) => {
+  // Compatibilidade: se timeIndex é um elemento DOM (chamada antiga sem timeIndex), ajustar
+  if (timeIndex instanceof HTMLElement) {
+    btnEl = timeIndex;
+    timeIndex = 0;
+  }
+  timeIndex = timeIndex ?? 0;
   const c = campeonatos.find(x=>x.id===cid);
   if (!c) return;
   const g = c.grupos[gi];
   const m1 = g.membros.find(m=>m.jogadorId===j1Id);
   const m2 = g.membros.find(m=>m.jogadorId===j2Id);
   if (!m1||!m2) return;
+  // Verificar se já existe partida com esse timeIndex
+  const jaJogou = (g.partidas||[]).some(p=>
+    ((p.j1Id===m1.jogadorId&&p.j2Id===m2.jogadorId)||(p.j1Id===m2.jogadorId&&p.j2Id===m1.jogadorId))
+    && (p.timeIndex??0) === timeIndex
+  );
+  if (jaJogou) { toast('ESSE JOGO JA FOI REGISTRADO', 'erro'); return; }
   // Busca inputs relativos ao botão para evitar conflito de IDs duplicados
   const container = btnEl ? btnEl.closest('.match-card') || btnEl.parentElement : null;
   const el1 = container ? container.querySelector('[data-tpdc="1"]') : null;
@@ -4715,7 +4982,7 @@ window.salvarPartidaDireta = async (cid, gi, j1Id, j2Id, btnEl) => {
       else if (m.jogadorId===m2.jogadorId) { mm.gp+=g2;mm.gc+=g1;mm.vit+=g2>g1?1:0;mm.emp+=g1===g2?1:0;mm.der+=g2<g1?1:0;mm.pts+=g2>g1?3:g1===g2?1:0; }
       return mm;
     });
-    return {...gr,membros,partidas:[...(gr.partidas||[]),{j1Id:m1.jogadorId,j1Nome:m1.nome,j2Id:m2.jogadorId,j2Nome:m2.nome,g1,g2}]};
+    return {...gr,membros,partidas:[...(gr.partidas||[]),{j1Id:m1.jogadorId,j1Nome:m1.nome,j2Id:m2.jogadorId,j2Nome:m2.nome,g1,g2,timeIndex}]};
   });
   await updateDoc(doc(db,'campeonatos',cid),{grupos});
   await carregarCampeonatos(); atualizarDash(); abrirCampeonato(cid);
@@ -4790,9 +5057,15 @@ window.ressortearCampeonato = (id) => {
   if (!c) return;
   const meta = CAMP_META[c.tipo] || { emoji:'🏆', nome: c.tipo };
   const selecionados = new Set((c.participantes||[]).map(p=>p.jogadorId));
+  const qtdAtual = c.qtdTimes || 1;
   fullscreen('RESSORTEAR', `
     <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">SELECIONE OS PARTICIPANTES E SORTEAREMOS OS TIMES NOVAMENTE PARA <strong>${c.nome.toUpperCase()}</strong></p>
     ${c.modoDupla ? `<p style="color:var(--yellow);font-size:12px;font-weight:700;margin-bottom:12px;">MODO DUPLA ATIVO — SELECIONE UM NUMERO PAR DE JOGADORES</p>` : ''}
+    <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">${c.modoDupla ? 'TIMES POR DUPLA' : 'TIMES POR JOGADOR'}</label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+      ${[1,2,3,4,5].map(n => `<div class="tipo-btn${n===qtdAtual?' sel':''}" data-rqtd="${n}" onclick="_selRessortearQtd(${n},this)" style="font-size:12px;padding:8px 12px;min-width:36px;text-align:center;">${n}</div>`).join('')}
+    </div>
+    <input type="hidden" id="rsc-qtd-times" value="${qtdAtual}">
     <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">PARTICIPANTES</label>
     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
       ${jogadores.map(j => `<label class="check-row"><input type="checkbox" class="rsc" value="${j.id}" data-nome="${_nomeExibicao(j).replace(/"/g,'&quot;')}" ${selecionados.has(j.id)?'checked':''}>${SVG_USER_CHIP}<span style="font-weight:700;">${_nomeExibicao(j)}</span></label>`).join('')}
@@ -4801,6 +5074,14 @@ window.ressortearCampeonato = (id) => {
       <button class="btn-primary" onclick="confirmarRessortear('${id}')">SORTEAR</button>
     </div>`);
 };
+
+window._selRessortearQtd = (n, el) => {
+  document.querySelectorAll('[data-rqtd]').forEach(b => b.classList.remove('sel'));
+  el?.classList.add('sel');
+  const inp = document.getElementById('rsc-qtd-times');
+  if (inp) inp.value = n;
+};
+
 window.confirmarRessortear = async (id) => {
   const c = campeonatos.find(x=>x.id===id);
   if (!c) return;
@@ -4810,13 +5091,14 @@ window.confirmarRessortear = async (id) => {
   const meta = CAMP_META[c.tipo];
   const pool = filtrarPoolEfic(meta.tipo === 'selecoes' ? selecoes : clubes);
   const hist = historicoIds(meta.tipo);
+  const qtdTimes = parseInt(document.getElementById('rsc-qtd-times')?.value) || c.qtdTimes || 1;
   const partic = checks.map(ch => ({ jogadorId: ch.value, nome: ch.dataset.nome }));
-  let distribuidos = distribuirTimesBalanceados(partic, pool, hist);
+  let distribuidos = distribuirTimesBalanceadosMulti(partic, pool, hist, qtdTimes);
   if (c.modoDupla) {
     distribuidos = distribuidos.map((p, i) => ({ ...p, duplaIndex: Math.floor(i / 2) }));
   }
   const grupos = gerarGrupos(distribuidos, c.tipo);
-  await updateDoc(doc(db,'campeonatos',id), { participantes: distribuidos, grupos, fase:'grupos', status:'ativo' });
+  await updateDoc(doc(db,'campeonatos',id), { participantes: distribuidos, grupos, fase:'grupos', status:'ativo', qtdTimes });
   fecharFullscreen(); await carregarCampeonatos(); atualizarDash(); abrirCampeonato(id);
 };
 
@@ -5257,8 +5539,9 @@ function atualizarDash() {
 
 function cardCampHome(c, modoLista=false) {
   const meta = CAMP_META[c.tipo] || { nome: c.tipo };
+  const qtdTimes = c.qtdTimes || 1;
   const totalParts  = (c.grupos||[]).reduce((s,g)=>s+(g.partidas||[]).length,0);
-  const totalPoss   = (c.grupos||[]).reduce((s,g)=>{const m=g.membros?.length||0; return s+m*(m-1)/2;},0);
+  const totalPoss   = (c.grupos||[]).reduce((s,g)=>{const m=g.membros?.length||0; return s+m*(m-1)/2*qtdTimes;},0);
   const pct = totalPoss > 0 ? Math.round((totalParts/totalPoss)*100) : 0;
   const isSel = CAMP_META[c.tipo]?.tipo === 'selecoes';
   const finalizado = c.status === 'finalizado';
@@ -5276,13 +5559,18 @@ function cardCampHome(c, modoLista=false) {
   (c.grupos||[]).forEach((g,gi) => {
     for (let i=0;i<g.membros.length;i++) for (let j=i+1;j<g.membros.length;j++) {
       const m1=g.membros[i],m2=g.membros[j];
-      const played = (g.partidas||[]).some(p=>(p.j1Id===m1.jogadorId&&p.j2Id===m2.jogadorId)||(p.j1Id===m2.jogadorId&&p.j2Id===m1.jogadorId));
-      if (!played) jogosPendentes.push({m1,m2,gi,g});
+      for (let k=0; k<qtdTimes; k++) {
+        const played = (g.partidas||[]).some(p=>
+          ((p.j1Id===m1.jogadorId&&p.j2Id===m2.jogadorId)||(p.j1Id===m2.jogadorId&&p.j2Id===m1.jogadorId))
+          && (p.timeIndex??0) === k
+        );
+        if (!played) jogosPendentes.push({m1,m2,gi,g,timeIndex:k});
+      }
     }
   });
-  const jogosHtml = jogosPendentes.slice(0,2).map(({m1,m2,gi,g}) => {
-    const confKey = `home-${c.id}-${gi}-${m1.jogadorId}-${m2.jogadorId}`;
-    return cardJogoTorneio(m1, m2, null, confKey, c.id, gi, isSel, temPermissao(), c.modoDupla||false);
+  const jogosHtml = jogosPendentes.slice(0,2).map(({m1,m2,gi,g,timeIndex}) => {
+    const confKey = `home-${c.id}-${gi}-${m1.jogadorId}-${m2.jogadorId}-${timeIndex}`;
+    return cardJogoTorneio(m1, m2, null, confKey, c.id, gi, isSel, temPermissao(), c.modoDupla||false, timeIndex);
   }).join('');
 
   const idAttr = modoLista ? '' : `id="camp-home-${c.id}" `;
