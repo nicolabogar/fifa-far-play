@@ -1,12 +1,9 @@
-# FIFA FAR PLAY - Prompts de Features v16
+# FIFA FAR PLAY - Prompts de Features v17
 # FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
 # O agente deve marcar o hash do commit ao concluir cada item.
-# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v16.txt e um novo é criado.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v17.txt e um novo é criado.
 
 ## MELHORIAS ##
 
-- [ ] Na página de jogadores, ordenar os jogadores por ordem alfabética
-- [ ] Na página de times, ordenar por ordem alfabética e adicionar filtro por nome do clube ou seleção (cards se escondem ao digitar)
-- [ ] Quando alterado a eficiência do time, deve ser refletido nos cards de amistosos e torneios dinamicamente
-- [ ] Quando excluir um amistoso ou campeonato, deve ser excluído também do ranking; revisar jogos finalizados e atualizar ranking corretamente
+- [ ] [Descreva aqui a próxima melhoria desejada]
 
