@@ -2036,9 +2036,9 @@ function renderJogadores() {
   const c = document.getElementById('lista-jog');
   if (!jogadores.length) { c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">Nenhum jogador cadastrado</p>'; return; }
   const master = getMaster();
-  // RG-SIM: no cadastro de jogadores, usa sempre a permissao real (nao impersonificada)
+  // RG-SIM: no cadastro de jogadores, usa sempre a permissão real (não impersonificada)
   const podeMudar = _isMasterReal();
-  // RG5b: não-master pode editar apenas o próprio cadastro (usa email real, nao impersonificado)
+  // RG5b: não-master pode editar apenas o próprio cadastro (usa email real, não impersonificado)
   const emailReal = usuario?.email || null;
   const meuJogadorId = !podeMudar && emailReal
     ? (jogadores.find(j => j.email && j.email.toLowerCase() === emailReal.toLowerCase())?.id || null)
@@ -2087,13 +2087,13 @@ window.editarJogador = (id) => {
   _croppedBlob = null;
   const j = jogadores.find(x => x.id === id);
   if (!j) return;
-  // RG-SIM: no cadastro de jogadores, usa sempre a permissao real (nao impersonificada)
+  // RG-SIM: no cadastro de jogadores, usa sempre a permissão real (não impersonificada)
   const isMasterUser = _isMasterReal();
-  // RG5b: não-master só pode editar o próprio cadastro (usa email real, nao impersonificado)
+  // RG5b: não-master só pode editar o próprio cadastro (usa email real, não impersonificado)
   const emailReal = usuario?.email || null;
   const isProprioJogador = emailReal && j.email && j.email.toLowerCase() === emailReal.toLowerCase();
   if (!isMasterUser && !isProprioJogador) return;
-  // RG-SIM: dropdown de impersonificacao — apenas para master editando o proprio cadastro
+  // RG-SIM: dropdown de impersonificação — apenas para master editando o próprio cadastro
   const mostrarSimulacao = isMasterUser && isProprioJogador;
   const opcoesSimulacao = mostrarSimulacao
     ? `<option value="">NENHUM (MINHA VISAO)</option>` +
@@ -2159,10 +2159,10 @@ window.previewFotoEdit = (input) => {
 };
 
 window.salvarEdicaoJogador = async (id) => {
-  // RG-SIM: no cadastro de jogadores, usa sempre a permissao real (nao impersonificada)
+  // RG-SIM: no cadastro de jogadores, usa sempre a permissão real (não impersonificada)
   const isMasterUser = _isMasterReal();
   const j = jogadores.find(x => x.id === id);
-  // RG5b: não-master só pode editar o próprio cadastro (usa email real, nao impersonificado)
+  // RG5b: não-master só pode editar o próprio cadastro (usa email real, não impersonificado)
   const emailReal = usuario?.email || null;
   const isProprioJogador = emailReal && j?.email && j.email.toLowerCase() === emailReal.toLowerCase();
   if (!isMasterUser && !isProprioJogador) { toast('SEM PERMISSAO','erro'); return; }
@@ -2172,7 +2172,7 @@ window.salvarEdicaoJogador = async (id) => {
   const celular = document.getElementById('i-celular-edit')?.value.trim() || '';
   const isMasterCheck = isMasterUser ? (document.getElementById('i-master-edit')?.checked || false) : j.master;
   if (!nome) { toast('DIGITE O NOME','erro'); return; }
-  // RG-SIM: lê seleção de impersonificacao (só disponivel para master editando proprio cadastro)
+  // RG-SIM: lê seleção de impersonificação (só disponível para master editando próprio cadastro)
   const simSelect = document.getElementById('i-simular-edit');
   const novaSimulacao = simSelect ? simSelect.value : null;
   const btn = document.getElementById('btn-salvar-edit');
@@ -2186,7 +2186,7 @@ window.salvarEdicaoJogador = async (id) => {
     // permite múltiplos masters: não remove o master atual ao promover outro
     await updateDoc(doc(db,'jogadores',id), { nome, apelido, email: email||'', celular, master: isMasterCheck, fotoUrl });
     fecharFullscreen(); await carregarJogadores(); atualizarDash();
-    // RG-SIM: aplica impersonificacao selecionada (apenas quando master editou proprio cadastro)
+    // RG-SIM: aplica impersonificação selecionada (apenas quando master editou próprio cadastro)
     if (novaSimulacao !== null) {
       simularUsuario(novaSimulacao);
     }
