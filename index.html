@@ -156,6 +156,7 @@
     .filtro-row { display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px; }
     .filtro-btn { padding:5px 12px;border-radius:20px;border:1px solid var(--card-border);background:rgba(255,255,255,0.04);color:var(--text-muted);font-size:11px;font-weight:700;cursor:pointer;text-transform:uppercase; }
     .filtro-btn.ativo { border-color:var(--purple);background:rgba(139,92,246,0.15);color:#A78BFA; }
+    .filtro-btn.ativo::after { content:' ×'; font-size:13px; font-weight:900; opacity:0.8; }
     /* ── Paginação ── */
     .pag-row { display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px; }
     .pag-btn { padding:6px 14px;border-radius:10px;border:1px solid var(--card-border);background:rgba(255,255,255,0.05);color:var(--text-muted);font-size:12px;font-weight:700;cursor:pointer; }
@@ -346,6 +347,7 @@
     .efic-tag.selecionado[data-efic="Ruim"]     { background: rgba(239,68,68,0.3);  border-color: #ef4444; }
     .efic-tag.selecionado[data-efic="Moderado"] { background: rgba(234,179,8,0.3);  border-color: #eab308; }
     .efic-tag.selecionado[data-efic="Bom"]      { background: rgba(34,197,94,0.3);  border-color: #22c55e; }
+    .efic-tag.selecionado::after { content:' ×'; font-size:13px; font-weight:900; opacity:0.8; }
 
     /* Multi-select dropdown */
     .ms-drop { position:relative; margin-bottom:14px; }
