@@ -2631,7 +2631,7 @@ function cardAmistoso(a, compact=false, readonly=false) {
       <div style="display:flex;align-items:center;gap:6px;">
         <span class="tag tag-purple">AMISTOSO</span>
         <span class="tag tag-gray">${a.tipo === 'selecoes' ? 'SELECOES' : 'CLUBES'}</span>
-        ${a.modoDupla ? `<span class="tag tag-cyan">2v2</span>` : ''}
+        ${a.modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
       </div>
       ${temRes ? (() => {
         const g1 = a.resultado.g1, g2 = a.resultado.g2;
@@ -2940,7 +2940,7 @@ function _htmlNovoAmistoso() {
     <label class="check-row" style="margin-bottom:8px;" id="label-dupla">
       <input type="checkbox" id="ami-dupla" onchange="toggleModoDupla(this.checked)">
       <div>
-        <div style="font-size:13px;font-weight:700;">MODO DUPLA (2v2)</div>
+        <div style="font-size:13px;font-weight:700;">MODO DUPLA</div>
         <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">SELECIONE EXATAMENTE 4 JOGADORES</div>
       </div>
     </label>
@@ -4234,7 +4234,7 @@ function calcularDisp(g) {
 }
 
 /** Card de jogo de torneio — estilo idêntico ao cardAmistoso (TO3) */
-function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true) {
+function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true, modoDupla=false) {
   const tipo = isSel ? 'selecoes' : 'clubes';
   const temRes = !!played;
   const g1r = temRes ? (played.j1Id===m1.jogadorId ? played.g1 : played.g2) : null;
@@ -4269,6 +4269,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
       <div style="display:flex;align-items:center;gap:6px;">
         <span class="tag tag-purple">TORNEIO</span>
         <span class="tag tag-gray">${isSel ? 'SELECOES' : 'CLUBES'}</span>
+        ${modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
       </div>
       ${temRes
         ? (() => {
@@ -4337,7 +4338,7 @@ window.abrirCampeonato = (id) => {
     const jogosHTML = todosConf.map(({m1,m2}) => {
       const played = (g.partidas||[]).find(p=>(p.j1Id===m1.jogadorId&&p.j2Id===m2.jogadorId)||(p.j1Id===m2.jogadorId&&p.j2Id===m1.jogadorId));
       const confKey = `${c.id}-${gi}-${m1.jogadorId}-${m2.jogadorId}`;
-      return cardJogoTorneio(m1, m2, played||null, confKey, c.id, gi, isSel, podeMudar);
+      return cardJogoTorneio(m1, m2, played||null, confKey, c.id, gi, isSel, podeMudar, c.modoDupla||false);
     }).join('');
 
     return `<div class="grupo-header aberto" onclick="toggleGrupo(this)" style="margin-bottom:8px;">
@@ -5026,7 +5027,7 @@ function cardCampHome(c, modoLista=false) {
   });
   const jogosHtml = jogosPendentes.slice(0,2).map(({m1,m2,gi,g}) => {
     const confKey = `home-${c.id}-${gi}-${m1.jogadorId}-${m2.jogadorId}`;
-    return cardJogoTorneio(m1, m2, null, confKey, c.id, gi, isSel, temPermissao());
+    return cardJogoTorneio(m1, m2, null, confKey, c.id, gi, isSel, temPermissao(), c.modoDupla||false);
   }).join('');
 
   const idAttr = modoLista ? '' : `id="camp-home-${c.id}" `;
