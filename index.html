@@ -1514,7 +1514,7 @@ async function carregarTimes() {
   const snap = await getDocs(collection(db, 'times'));
   const custom = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   const deletados = custom.filter(t => t._deleted).map(t => t.id);
-  const adicionados = custom.filter(t => !t._deleted);
+  const adicionados = custom.filter(t => !t._deleted && !deletados.includes(t.id));
   // Mapa de inatividade e eficiência por id
   const inativoMap = {};
   const eficienciaMap = {};
