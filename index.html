@@ -1195,13 +1195,14 @@ window.toggleEficFiltro = (val) => {
     sel.delete(val);
   } else { sel.add(val); }
   salvarEficFiltro(sel);
-  // Atualiza visual em ambos os containers possíveis
-  ['ami-efic-filtro','cc-efic-filtro'].forEach(cid => {
+  // Atualiza visual em todos os containers possíveis
+  ['ami-efic-filtro','cc-efic-filtro','times-efic-filtro'].forEach(cid => {
     const c = document.getElementById(cid);
     if (c) c.querySelectorAll('.efic-tag').forEach(el => {
       el.classList.toggle('selecionado', sel.has(el.dataset.efic));
     });
   });
+  if (typeof _renderTimesLista === 'function') _renderTimesLista();
 };
 function htmlEficFiltro(containerId) {
   const sel = carregarEficFiltro();
@@ -1308,10 +1309,7 @@ function htmlMsDropPaisTimes(paises) {
   </div>`;
 }
 function htmlEficFiltroTimes() {
-  return `<div style="margin-bottom:14px;">
-    <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">EFICIENCIA DOS TIMES</label>
-    ${htmlMsDropEficTimes()}
-  </div>`;
+  return `<div style="margin-bottom:14px;">${htmlEficFiltro('times-efic-filtro')}</div>`;
 }
 
 // ─── ALGORITMO DE BALANCEAMENTO ──────────────────────────────────────
@@ -5169,8 +5167,9 @@ function _renderTimesLista() {
     items = items.filter(t => t.nome.toLowerCase().includes(_nomeFiltroTimes));
   }
   // Eficiência filter
-  if (!EFIC_TODAS.every(e => _eficFiltroTimesSet.has(e))) {
-    items = items.filter(t => _eficFiltroTimesSet.has(t.eficiencia || 'Bom'));
+  const _eficSel = carregarEficFiltro();
+  if (!EFIC_TODAS.every(e => _eficSel.has(e))) {
+    items = items.filter(t => _eficSel.has(t.eficiencia || 'Bom'));
   }
   items = [...items].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }));
 
