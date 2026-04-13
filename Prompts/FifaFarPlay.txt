@@ -5,5 +5,5 @@
 
 ## MELHORIAS ##
 
-- [ ] [Descreva aqui a próxima melhoria desejada]
+- [ ] Quando remover o jogador, deve ser excluído os amistosos, torneios e rankings que ele estiver
 

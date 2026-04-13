@@ -1780,23 +1780,14 @@ window.excluirJogador = (id, nome, onCancel) => {
   if (onCancel) window._swipeCancelCb = onCancel;
 };
 window.confirmarExcluirJog = async id => {
-  // RG10: remover referências do jogador nos amistosos (jogadoresIds)
+  // RG10: excluir amistosos em que o jogador participou
   const amiComJog = amistosos.filter(a =>
     (a.time1?.jogadoresIds||[]).includes(id) || (a.time2?.jogadoresIds||[]).includes(id)
   );
   for (const a of amiComJog) {
-    const t1ids = (a.time1?.jogadoresIds||[]).filter(x => x !== id);
-    const t1nomes = (a.time1?.jogadores||[]).filter((_,i) => (a.time1?.jogadoresIds||[])[i] !== id);
-    const t2ids = (a.time2?.jogadoresIds||[]).filter(x => x !== id);
-    const t2nomes = (a.time2?.jogadores||[]).filter((_,i) => (a.time2?.jogadoresIds||[])[i] !== id);
-    await updateDoc(doc(db, 'amistosos', a.id), {
-      'time1.jogadoresIds': t1ids,
-      'time1.jogadores': t1nomes,
-      'time2.jogadoresIds': t2ids,
-      'time2.jogadores': t2nomes,
-    });
+    await deleteDoc(doc(db, 'amistosos', a.id));
   }
-  // RG10b: remover jogador de campeonatos (participantes, grupos.membros, grupos.partidas)
+  // RG10b: excluir campeonatos em que o jogador participou
   const campComJog = campeonatos.filter(c =>
     (c.participantes||[]).some(p => p.jogadorId === id) ||
     (c.grupos||[]).some(g =>
@@ -1805,13 +1796,7 @@ window.confirmarExcluirJog = async id => {
     )
   );
   for (const c of campComJog) {
-    const participantes = (c.participantes||[]).filter(p => p.jogadorId !== id);
-    const grupos = (c.grupos||[]).map(g => ({
-      ...g,
-      membros: (g.membros||[]).filter(m => m.jogadorId !== id),
-      partidas: (g.partidas||[]).filter(p => p.j1Id !== id && p.j2Id !== id),
-    }));
-    await updateDoc(doc(db, 'campeonatos', c.id), { participantes, grupos });
+    await deleteDoc(doc(db, 'campeonatos', c.id));
   }
   await deleteDoc(doc(db, 'jogadores', id));
   fecharModal(); await carregarJogadores(); await carregarAmistosos(); await carregarCampeonatos(); atualizarDash();
