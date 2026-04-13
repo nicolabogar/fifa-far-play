@@ -3038,8 +3038,12 @@ window.salvarTimeRapido = async (timeId, tipoT) => {
     if (_sorteioAmi.time2?.timeId === timeId) {
       _sorteioAmi.time2.eficiencia = eficiencia;
     }
-    // Se o time foi inativado, ressortear; caso contrário, apenas re-renderizar
-    if (inativo) {
+    // Se o time foi inativado OU a nova eficiência está fora do filtro ativo, ressortear
+    const selectedEfficiencies = carregarEficFiltro();
+    const allEfficienciesSelected = EFIC_TODAS.every(e => selectedEfficiencies.has(e));
+    const efficiencyOutsideFilter = !allEfficienciesSelected && !selectedEfficiencies.has(eficiencia);
+    const teamInCurrentDraw = (_sorteioAmi.time1?.timeId === timeId || _sorteioAmi.time2?.timeId === timeId);
+    if (inativo || (efficiencyOutsideFilter && teamInCurrentDraw)) {
       setTimeout(() => window.sortearAmistoso && window.sortearAmistoso(), 100);
     } else {
       const diff = Math.abs((_sorteioAmi.time1?.forca||75) - (_sorteioAmi.time2?.forca||75));
