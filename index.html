@@ -429,8 +429,8 @@
 
   <!-- HEADER -->
   <header id="header">
-    <div style="display:flex; align-items:center; gap:10px;">
-      <button id="btn-hamburger" title="Menu" style="background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(6,182,212,0.15));border:1px solid rgba(139,92,246,0.35);color:var(--text);border-radius:12px;padding:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(139,92,246,0.2);transition:all 0.15s;">
+    <div style="display:flex; align-items:center; gap:10px; min-width:0; flex:1;">
+      <button id="btn-hamburger" title="Menu" style="background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(6,182,212,0.15));border:1px solid rgba(139,92,246,0.35);color:var(--text);border-radius:12px;padding:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(139,92,246,0.2);transition:all 0.15s;flex-shrink:0;">
         <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
           <circle cx="50" cy="50" r="46" fill="white" stroke="#555" stroke-width="4"/>
           <polygon points="50,18 62,30 58,45 42,45 38,30" fill="#333"/>
@@ -441,7 +441,15 @@
           <polygon points="20,42 32,38 44,46 40,60 26,58" fill="#333"/>
         </svg>
       </button>
-      <span style="font-weight:900; font-size:18px; letter-spacing:-0.5px; cursor:pointer;" class="grad" onclick="irParaHome()">FIFA FAR PLAY</span>
+      <span style="font-weight:900; font-size:18px; letter-spacing:-0.5px; cursor:pointer;flex-shrink:0;" class="grad" onclick="irParaHome()">FIFA FAR PLAY</span>
+      <!-- RG-SIM: tag de impersonificacao no header — visivel apenas quando simulando -->
+      <div id="header-sim-tag" style="display:none;align-items:center;gap:6px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4);border-radius:8px;padding:3px 8px 3px 6px;min-width:0;overflow:hidden;">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FCD34D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span id="header-sim-nome" style="font-size:10px;font-weight:800;color:#FCD34D;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px;"></span>
+        <button onclick="simularUsuario('')" style="background:none;border:none;color:#FCD34D;cursor:pointer;padding:0;display:flex;align-items:center;flex-shrink:0;" title="REMOVER IMPERSONIFICACAO">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
     </div>
     <div id="menu-hamburger-dropdown" style="display:none;position:fixed;top:60px;left:12px;right:12px;background:rgba(12,12,28,0.98);border:1px solid rgba(139,92,246,0.25);border-radius:20px;z-index:500;box-shadow:0 16px 48px rgba(0,0,0,0.7),0 0 0 1px rgba(139,92,246,0.1);overflow:hidden;backdrop-filter:blur(24px);">
       <div id="ham-user-info" style="padding:16px 18px 14px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(6,182,212,0.06));">
@@ -489,16 +497,6 @@
           TIMES
         </button>
         <div style="height:1px;background:rgba(255,255,255,0.07);margin:6px 0;"></div>
-        <!-- RG-SIM: seção de simulação de visão — apenas para masters reais -->
-        <div id="ham-sim-section" style="display:none;">
-          <div style="padding:8px 10px 4px;font-size:10px;font-weight:800;color:var(--text-muted);letter-spacing:0.08em;">SIMULAR VISAO</div>
-          <div style="padding:0 10px 8px;">
-            <select id="sim-usuario-select" onchange="simularUsuario(this.value)" style="width:100%;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;text-transform:uppercase;cursor:pointer;outline:none;">
-              <option value="">NENHUM (MINHA VISAO)</option>
-            </select>
-          </div>
-        </div>
-        <div style="height:1px;background:rgba(255,255,255,0.07);margin:6px 0;"></div>
         <button id="btn-sair" class="ham-menu-btn" style="color:#FCA5A5;">
           <span class="ham-menu-ico" style="background:rgba(239,68,68,0.15);color:#FCA5A5;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -508,14 +506,6 @@
       </div>
     </div>
   </header>
-  <!-- RG-SIM: banner de simulação de visão -->
-  <div id="banner-simulacao" style="display:none;background:linear-gradient(135deg,rgba(245,158,11,0.25),rgba(239,68,68,0.2));border-bottom:1px solid rgba(245,158,11,0.4);padding:6px 16px;align-items:center;justify-content:space-between;gap:8px;">
-    <div style="display:flex;align-items:center;gap:8px;min-width:0;">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FCD34D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-      <span id="banner-sim-nome" style="font-size:11px;font-weight:800;color:#FCD34D;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
-    </div>
-    <button onclick="simularUsuario('')" style="background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.4);color:#FCD34D;border-radius:8px;padding:3px 8px;font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;">SAIR</button>
-  </div>
 
   <!-- CONTEÚDO -->
   <main style="flex:1; overflow-y:auto;" id="main">
@@ -1715,7 +1705,6 @@ onAuthStateChanged(auth, async u => {
 // RG5: controle de acesso — oculta funcionalidades de master para usuários normais
 function _aplicarControleAcesso() {
   const master = temPermissao();
-  const masterReal = _isMasterReal();
   // Botão + CRIAR na home: apenas para master (oculta o wrapper inteiro para não deixar espaço em branco)
   const wrapBtnCriarHome = document.getElementById('wrap-btn-criar-home');
   if (wrapBtnCriarHome) wrapBtnCriarHome.style.display = master ? '' : 'none';
@@ -1731,43 +1720,23 @@ function _aplicarControleAcesso() {
   // Botão sincronizar ranking: apenas para master
   const btnSyncRanking = document.getElementById('btn-sync-ranking');
   if (btnSyncRanking) btnSyncRanking.style.display = master ? '' : 'none';
-  // RG-SIM: seção de simulação no menu hamburger — apenas para masters reais
-  const hamSimSection = document.getElementById('ham-sim-section');
-  if (hamSimSection) {
-    hamSimSection.style.display = masterReal ? '' : 'none';
-    if (masterReal) _popularSelectSimulacao();
-  }
-  // Atualizar banner de simulação
+  // RG-SIM: atualiza a tag de impersonificacao no header
   _atualizarBannerSimulacao();
   // Itens do menu hamburger para não-master: apenas home e ranking visíveis
   // (mantém acesso de leitura; criação bloqueada via botões)
 }
 
-// RG-SIM: popula o select com jogadores não-master
-function _popularSelectSimulacao() {
-  const sel = document.getElementById('sim-usuario-select');
-  if (!sel) return;
-  const naoMasters = jogadores.filter(j => !j.master);
-  const html = `<option value="">NENHUM (MINHA VISAO)</option>` +
-    naoMasters.map(j => {
-      const nome = _escHtml((j.apelido || j.nome || '').toUpperCase());
-      const sel_ = j.id === _simulandoJogadorId ? ' selected' : '';
-      return `<option value="${j.id}"${sel_}>${nome}</option>`;
-    }).join('');
-  sel.innerHTML = html;
-}
-
-// RG-SIM: atualiza o banner de simulação no topo
+// RG-SIM: atualiza a tag de impersonificacao no header
 function _atualizarBannerSimulacao() {
-  const banner = document.getElementById('banner-simulacao');
-  if (!banner) return;
+  const tag = document.getElementById('header-sim-tag');
+  if (!tag) return;
   if (_simulandoJogadorId) {
     const j = jogadores.find(x => x.id === _simulandoJogadorId);
-    const nomeEl = document.getElementById('banner-sim-nome');
-    if (nomeEl) nomeEl.textContent = 'SIMULANDO: ' + ((j?.apelido || j?.nome || 'JOGADOR')).toUpperCase();
-    banner.style.display = 'flex';
+    const nomeEl = document.getElementById('header-sim-nome');
+    if (nomeEl) nomeEl.textContent = (j?.apelido || j?.nome || 'JOGADOR').toUpperCase();
+    tag.style.display = 'flex';
   } else {
-    banner.style.display = 'none';
+    tag.style.display = 'none';
   }
 }
 
@@ -1913,8 +1882,8 @@ function carregarJogadores() {
       snap => {
         jogadores = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderJogadores();
-        // RG-SIM: atualiza o select de simulação ao recarregar jogadores
-        if (_isMasterReal()) _popularSelectSimulacao();
+        // RG-SIM: atualiza a tag de impersonificacao ao recarregar jogadores
+        _atualizarBannerSimulacao();
         resolve();
       },
       err => { console.error('jogadores onSnapshot:', err); resolve(); }
@@ -2067,11 +2036,12 @@ function renderJogadores() {
   const c = document.getElementById('lista-jog');
   if (!jogadores.length) { c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">Nenhum jogador cadastrado</p>'; return; }
   const master = getMaster();
-  const podeMudar = temPermissao();
-  // RG5b: não-master pode editar apenas o próprio cadastro
-  const _effEmail = _emailEfetivo();
-  const meuJogadorId = !podeMudar && _effEmail
-    ? (jogadores.find(j => j.email && j.email.toLowerCase() === _effEmail.toLowerCase())?.id || null)
+  // RG-SIM: no cadastro de jogadores, usa sempre a permissão real (não impersonificada)
+  const podeMudar = _isMasterReal();
+  // RG5b: não-master pode editar apenas o próprio cadastro (usa email real, não impersonificado)
+  const emailReal = usuario?.email || null;
+  const meuJogadorId = !podeMudar && emailReal
+    ? (jogadores.find(j => j.email && j.email.toLowerCase() === emailReal.toLowerCase())?.id || null)
     : null;
   const sorted = [...jogadores].sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' }));
   c.innerHTML = sorted.map(j => {
@@ -2117,10 +2087,22 @@ window.editarJogador = (id) => {
   _croppedBlob = null;
   const j = jogadores.find(x => x.id === id);
   if (!j) return;
-  const isMasterUser = temPermissao();
-  // RG5b: não-master só pode editar o próprio cadastro
-  const isProprioJogador = _emailEfetivo() && j.email && j.email.toLowerCase() === _emailEfetivo().toLowerCase();
+  // RG-SIM: no cadastro de jogadores, usa sempre a permissão real (não impersonificada)
+  const isMasterUser = _isMasterReal();
+  // RG5b: não-master só pode editar o próprio cadastro (usa email real, não impersonificado)
+  const emailReal = usuario?.email || null;
+  const isProprioJogador = emailReal && j.email && j.email.toLowerCase() === emailReal.toLowerCase();
   if (!isMasterUser && !isProprioJogador) return;
+  // RG-SIM: dropdown de impersonificação — apenas para master editando o próprio cadastro
+  const mostrarSimulacao = isMasterUser && isProprioJogador;
+  const opcoesSimulacao = mostrarSimulacao
+    ? `<option value="">NENHUM (MINHA VISAO)</option>` +
+      jogadores.filter(jj => !jj.master).map(jj => {
+        const nome = _escHtml((jj.apelido || jj.nome || '').toUpperCase());
+        const sel_ = jj.id === _simulandoJogadorId ? ' selected' : '';
+        return `<option value="${jj.id}"${sel_}>${nome}</option>`;
+      }).join('')
+    : '';
   const masterVal = j.master ? '1' : '0';
   fullscreen('EDIÇÃO', `
     <div style="display:flex;flex-direction:column;gap:14px;max-width:400px;margin:0 auto;">
@@ -2156,6 +2138,11 @@ window.editarJogador = (id) => {
           <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">PERMISSAO PARA GERENCIAR O APP</div>
         </div>
       </label>` : ''}
+      ${mostrarSimulacao ? `<div>
+        <label style="font-size:11px;font-weight:700;color:rgba(245,158,11,0.9);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">SIMULAR VISAO DE JOGADOR</label>
+        <select id="i-simular-edit" style="width:100%;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;text-transform:uppercase;cursor:pointer;outline:none;">${opcoesSimulacao}</select>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">SELECIONE UM JOGADOR PARA VER O APP COMO ELE</div>
+      </div>` : ''}
       <button class="btn-primary" id="btn-salvar-edit" onclick="salvarEdicaoJogador('${id}')" style="margin-top:10px;">SALVAR</button>
       <button class="btn-ghost" onclick="fecharFullscreen()" style="margin-top:8px;">CANCELAR</button>
     </div>`);
@@ -2172,10 +2159,12 @@ window.previewFotoEdit = (input) => {
 };
 
 window.salvarEdicaoJogador = async (id) => {
-  const isMasterUser = temPermissao();
+  // RG-SIM: no cadastro de jogadores, usa sempre a permissão real (não impersonificada)
+  const isMasterUser = _isMasterReal();
   const j = jogadores.find(x => x.id === id);
-  // RG5b: não-master só pode editar o próprio cadastro
-  const isProprioJogador = _emailEfetivo() && j?.email && j.email.toLowerCase() === _emailEfetivo().toLowerCase();
+  // RG5b: não-master só pode editar o próprio cadastro (usa email real, não impersonificado)
+  const emailReal = usuario?.email || null;
+  const isProprioJogador = emailReal && j?.email && j.email.toLowerCase() === emailReal.toLowerCase();
   if (!isMasterUser && !isProprioJogador) { toast('SEM PERMISSAO','erro'); return; }
   const nome  = (document.getElementById('i-nome-edit')?.value.trim() || '').toUpperCase();
   const apelido = (document.getElementById('i-apelido-edit')?.value.trim() || '').toUpperCase();
@@ -2183,6 +2172,9 @@ window.salvarEdicaoJogador = async (id) => {
   const celular = document.getElementById('i-celular-edit')?.value.trim() || '';
   const isMasterCheck = isMasterUser ? (document.getElementById('i-master-edit')?.checked || false) : j.master;
   if (!nome) { toast('DIGITE O NOME','erro'); return; }
+  // RG-SIM: lê seleção de impersonificação (só disponível para master editando próprio cadastro)
+  const simSelect = document.getElementById('i-simular-edit');
+  const novaSimulacao = simSelect ? simSelect.value : null;
   const btn = document.getElementById('btn-salvar-edit');
   if (btn) { btn.textContent = 'SALVANDO...'; btn.disabled = true; }
   try {
@@ -2194,6 +2186,10 @@ window.salvarEdicaoJogador = async (id) => {
     // permite múltiplos masters: não remove o master atual ao promover outro
     await updateDoc(doc(db,'jogadores',id), { nome, apelido, email: email||'', celular, master: isMasterCheck, fotoUrl });
     fecharFullscreen(); await carregarJogadores(); atualizarDash();
+    // RG-SIM: aplica impersonificação selecionada (apenas quando master editou próprio cadastro)
+    if (novaSimulacao !== null) {
+      simularUsuario(novaSimulacao);
+    }
   } catch(e) {
     console.error(e);
     toast('ERRO AO SALVAR JOGADOR','erro');
