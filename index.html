@@ -1003,7 +1003,7 @@ function badgeTimeCompact(timeId, nomeTime, tipo) {
   if (d.crest) {
     return `<div style="position:relative;width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">
       <span class="crest-fallback">${d.abrev}</span>
-      <img src="${d.crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='';this.previousElementSibling.style.display='none'" onerror="window._crestError(this)">
+      <img src="${d.crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='';this.previousElementSibling.style.display='none';this.parentElement.style.background='transparent';this.parentElement.style.border='none';" onerror="window._crestError(this)">
     </div>`;
   }
   return `<div style="width:44px;height:44px;border-radius:10px;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.abrev}</div>`;
@@ -3703,7 +3703,7 @@ function abrirModalCriarCamp(secao, secaoView) {
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
           ${Object.entries(CAMP_META).map(([k,v]) => {
             return `<div class="tipo-btn" data-ct="${k}" onclick="selCampTipo('${k}',this)" style="font-size:11px;padding:10px 6px;">
-              <div style="font-weight:700;line-height:1.2;font-size:10px;">${v.nome}</div>
+              <div style="font-weight:700;line-height:1.2;font-size:10px;">${v.nome.toUpperCase()}</div>
             </div>`;
           }).join('')}
         </div>
@@ -4086,7 +4086,7 @@ window.abrirCampeonato = (id) => {
             </div>`
           : `<div style="position:relative;width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;background:${TEAM_DATA[p.time?.id]?.fundo||'#1E1E35'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:${TEAM_DATA[p.time?.id]?.cor||'#fff'};">
               <span class="crest-fallback">${(TEAM_DATA[p.time?.id]?.abrev||'?').slice(0,3)}</span>
-              ${TEAM_DATA[p.time?.id]?.crest ? `<img src="${TEAM_DATA[p.time?.id].crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='';this.previousElementSibling.style.display='none'" onerror="window._crestError(this)">` : ''}
+              ${TEAM_DATA[p.time?.id]?.crest ? `<img src="${TEAM_DATA[p.time?.id].crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='';this.previousElementSibling.style.display='none';this.parentElement.style.background='transparent';this.parentElement.style.border='none';" onerror="window._crestError(this)">` : ''}
             </div>`;
         return `<div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:12px;">
           ${timeIcon}
@@ -4763,7 +4763,7 @@ function renderTimesEdit() {
       const crestHtml = d.crest
         ? `<div style="position:relative;width:57px;height:57px;border-radius:12px;overflow:hidden;flex-shrink:0;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">
             <span class="crest-fallback">${d.abrev}</span>
-            <img src="${d.crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='';this.previousElementSibling.style.display='none'" onerror="window._crestError(this)">
+            <img src="${d.crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='';this.previousElementSibling.style.display='none';this.parentElement.style.background='transparent';this.parentElement.style.border='none';" onerror="window._crestError(this)">
           </div>`
         : `<div style="width:57px;height:57px;border-radius:12px;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.abrev}</div>`;
       icone = crestHtml;
