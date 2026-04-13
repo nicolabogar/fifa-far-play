@@ -4421,7 +4421,7 @@ window.abrirCampeonato = (id) => {
           <div style="display:flex;flex-direction:column;align-items:center;margin-top:8px;">
             <div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(p.time?.id, p.time?.nome, tipo)}</div>
             <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(p.time?.id))}</div>
-            ${jogNome ? `<div style="margin-top:2px;display:flex;flex-direction:column;align-items:center;gap:2px;"><span class="tag tag-cyan" style="font-size:13px !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${jogNome.toUpperCase()}</span></div>` : ''}
+            ${jogNome ? `<div style="margin-top:2px;display:flex;flex-direction:column;align-items:center;gap:2px;"><span class="tag tag-cyan" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${jogNome.toUpperCase()}</span></div>` : ''}
           </div>
         </div>`;
       }).join('')}
@@ -5029,7 +5029,7 @@ function cardCampHome(c, modoLista=false) {
   // Tags dos jogadores participantes
   const tagsJogs = (c.participantes||[]).map(p => {
     const jog = jogadores.find(x => x.id === p.jogadorId);
-    return `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);border-radius:20px;padding:3px 8px;font-size:11px;font-weight:700;white-space:nowrap;">
+    return `<span class="tag tag-purple" style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap;">
       ${avatarJogador({fotoUrl: jog?.fotoUrl||''}, 16)}<span style="text-transform:uppercase;">${_nomeJogPorId(p.jogadorId, p.nome)}</span>
     </span>`;
   }).join('');
