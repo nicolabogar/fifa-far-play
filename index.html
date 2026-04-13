@@ -1046,7 +1046,12 @@ function filtrarPoolEfic(pool) {
 }
 window.toggleEficFiltro = (val) => {
   const sel = carregarEficFiltro();
-  if (sel.has(val)) { sel.delete(val); } else { sel.add(val); }
+  if (sel.has(val)) {
+    // Garante que pelo menos uma tag de eficiência fique selecionada
+    const restantes = EFIC_TODAS.filter(e => e !== val && sel.has(e));
+    if (restantes.length === 0) { toast('SELECIONE PELO MENOS UMA TAG DE EFICIENCIA', 'erro'); return; }
+    sel.delete(val);
+  } else { sel.add(val); }
   salvarEficFiltro(sel);
   // Atualiza visual em ambos os containers possíveis
   ['ami-efic-filtro','cc-efic-filtro'].forEach(cid => {
@@ -4075,7 +4080,7 @@ window.confirmarRessortear = async (id) => {
   const checks = [...document.querySelectorAll('.rsc:checked')];
   if (checks.length < 2) { toast('SELECIONE 2+ PARTICIPANTES','erro'); return; }
   const meta = CAMP_META[c.tipo];
-  const pool = meta.tipo === 'selecoes' ? selecoes : clubes;
+  const pool = filtrarPoolEfic(meta.tipo === 'selecoes' ? selecoes : clubes);
   const hist = historicoIds(meta.tipo);
   const partic = checks.map(ch => ({ jogadorId: ch.value, nome: ch.dataset.nome }));
   const distribuidos = distribuirTimesBalanceados(partic, pool, hist);
