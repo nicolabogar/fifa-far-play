@@ -5006,11 +5006,12 @@ function cardCampHome(c, modoLista=false) {
   const finalizado = c.status === 'finalizado';
 
   // Tags dos jogadores participantes
-  const tagsJogs = (c.participantes||[]).map(p =>
-    `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);border-radius:20px;padding:3px 8px;font-size:11px;font-weight:700;">
-      ${avatarJogador({fotoUrl:''}, 16)}<span style="text-transform:uppercase;">${_nomeJogPorId(p.jogadorId, p.nome)}</span>
-    </span>`
-  ).join('');
+  const tagsJogs = (c.participantes||[]).map(p => {
+    const jog = jogadores.find(x => x.id === p.jogadorId);
+    return `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);border-radius:20px;padding:3px 8px;font-size:11px;font-weight:700;white-space:nowrap;">
+      ${avatarJogador({fotoUrl: jog?.fotoUrl||''}, 16)}<span style="text-transform:uppercase;">${_nomeJogPorId(p.jogadorId, p.nome)}</span>
+    </span>`;
+  }).join('');
 
   // Jogos em andamento (pendentes sem placar) — mostrar até 2
   const jogosPendentes = [];
@@ -5051,7 +5052,7 @@ function cardCampHome(c, modoLista=false) {
       </div>
       <span style="font-size:10px;color:var(--text-muted);white-space:nowrap;">${totalParts}/${totalPoss} JOGOS</span>
     </div>` : ''}
-    ${tagsJogs ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;">${tagsJogs}</div>` : ''}
+    ${tagsJogs ? `<div style="display:flex;flex-wrap:nowrap;gap:4px;margin-top:8px;overflow-x:auto;">${tagsJogs}</div>` : ''}
     ${!finalizado && jogosHtml ? `<div style="margin-top:8px;" onclick="event.stopPropagation();abrirCampeonato('${c.id}')">${jogosHtml}</div>` : ''}
   </div>`;
 
