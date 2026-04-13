@@ -2923,54 +2923,136 @@ function _renderJcPanels() {
   if (!container) return;
   const maxPerTime = _maxJogsPerTime();
   const modoDupla = maxPerTime === 2;
+  const sorteioAuto = document.getElementById('ami-sorteio-auto')?.checked !== false;
 
-  const renderTeamPanel = (timeNum, teamMap, cor) => {
-    const players = [...teamMap.entries()];
-    const tags = players.map(([id, nome]) =>
+  if (!modoDupla) {
+    // Modo normal: TIME 1 e TIME 2 lado a lado
+    const renderTeamPanel = (timeNum, teamMap, cor) => {
+      const players = [...teamMap.entries()];
+      const tags = players.map(([id, nome]) =>
+        `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(6,182,212,0.2);border:1px solid rgba(6,182,212,0.35);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;color:#67E8F9;">
+          ${_nomeTag(nome)}
+          <span onclick="removerJogJC('${id}',${timeNum})" style="cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;margin-left:2px;">×</span>
+        </span>`
+      ).join('');
+      const placeholders = [];
+      for (let i = players.length; i < maxPerTime; i++) {
+        placeholders.push(`<span style="color:var(--text-muted);font-size:11px;font-style:italic;padding:2px 0;">JOGADOR ${timeNum === 1 ? i+1 : 2}</span>`);
+      }
+      return `
+        <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:10px;">
+          <div style="font-size:11px;font-weight:800;color:${cor};text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">TIME ${timeNum}</div>
+          <div style="min-height:28px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
+            ${tags || ''}${placeholders.join('')}
+          </div>
+        </div>`;
+    };
+    container.innerHTML = `
+      <div style="display:flex;gap:8px;margin-bottom:4px;">
+        ${renderTeamPanel(1, _jcT1, '#7C3AED')}
+        ${renderTeamPanel(2, _jcT2, '#06B6D4')}
+      </div>`;
+    const total = _jcT1.size + _jcT2.size;
+    const inp = document.getElementById('jc-search');
+    if (inp) {
+      inp.disabled = total >= 2;
+      inp.style.opacity = total >= 2 ? '0.4' : '';
+      inp.style.cursor = total >= 2 ? 'not-allowed' : '';
+    }
+  } else if (sorteioAuto) {
+    // Dupla + sortear automático: painel invisível até o sorteio — mostrar lista flat de jogadores
+    const allPlayers = [..._jcSel.entries()];
+    const playerTags = allPlayers.map(([id, nome]) =>
       `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(6,182,212,0.2);border:1px solid rgba(6,182,212,0.35);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;color:#67E8F9;">
         ${_nomeTag(nome)}
-        <span onclick="removerJogJC('${id}',${timeNum})" style="cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;margin-left:2px;">×</span>
+        <span onclick="removerJogJC('${id}',0)" style="cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;margin-left:2px;">×</span>
       </span>`
     ).join('');
-    const placeholders = [];
-    for (let i = players.length; i < maxPerTime; i++) {
-      const num = timeNum === 1 ? (i + 1) : (modoDupla ? (i + 3) : 2);
-      placeholders.push(`<span style="color:var(--text-muted);font-size:11px;font-style:italic;padding:2px 0;">JOGADOR ${num}</span>`);
-    }
-    return `
-      <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:10px;">
-        <div style="font-size:11px;font-weight:800;color:${cor};text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">TIME ${timeNum}</div>
+    container.innerHTML = `
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:10px;margin-bottom:4px;">
+        <div style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">JOGADORES SELECIONADOS (${_jcSel.size}/4)</div>
         <div style="min-height:28px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
-          ${tags || ''}${placeholders.join('')}
+          ${playerTags || '<span style="color:var(--text-muted);font-size:11px;">NENHUM JOGADOR</span>'}
         </div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:8px;font-weight:600;">DUPLA 1 E DUPLA 2 SERAO DEFINIDAS APOS O SORTEIO</div>
       </div>`;
-  };
-
-  container.innerHTML = `
-    <div style="display:flex;gap:8px;margin-bottom:4px;">
-      ${renderTeamPanel(1, _jcT1, '#7C3AED')}
-      ${renderTeamPanel(2, _jcT2, '#06B6D4')}
-    </div>`;
-
-  // Desabilitar combo quando cheio
-  const total = _jcT1.size + _jcT2.size;
-  const maxTotal = maxPerTime * 2;
-  const inp = document.getElementById('jc-search');
-  if (inp) {
-    inp.disabled = total >= maxTotal;
-    inp.style.opacity = total >= maxTotal ? '0.4' : '';
-    inp.style.cursor = total >= maxTotal ? 'not-allowed' : '';
+    const inp = document.getElementById('jc-search');
+    if (inp) {
+      inp.disabled = _jcSel.size >= 4;
+      inp.style.opacity = _jcSel.size >= 4 ? '0.4' : '';
+      inp.style.cursor = _jcSel.size >= 4 ? 'not-allowed' : '';
+    }
+  } else {
+    // Dupla + selecao manual: DUPLA 1 e DUPLA 2 em linhas separadas com busca de jogador e time
+    container.innerHTML =
+      _htmlDuplaManualPanel(1, _jcT1, '#7C3AED') +
+      _htmlDuplaManualPanel(2, _jcT2, '#06B6D4');
+    const full = _jcT1.size >= 2 && _jcT2.size >= 2;
+    const inp = document.getElementById('jc-search');
+    if (inp) {
+      inp.disabled = full;
+      inp.style.opacity = full ? '0.4' : '';
+      inp.style.cursor = full ? 'not-allowed' : '';
+    }
   }
 
   _renderPreviewCard();
+}
+
+function _htmlDuplaManualPanel(duplaNum, teamMap, cor) {
+  const duplaId = `dupla${duplaNum}`;
+  const players = [...teamMap.entries()];
+  const tags = players.map(([id, nome]) =>
+    `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(6,182,212,0.2);border:1px solid rgba(6,182,212,0.35);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;color:#67E8F9;">
+      ${_nomeTag(nome)}
+      <span onclick="removerJogJC('${id}',${duplaNum})" style="cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;margin-left:2px;">×</span>
+    </span>`
+  ).join('');
+  const teamObj = duplaNum === 1 ? _dupla1Team : _dupla2Team;
+  const teamVal = teamObj ? teamObj.nome.toUpperCase() : '';
+  const canAdd = teamMap.size < 2;
+  return `
+    <div style="background:rgba(255,255,255,0.03);border:1px solid ${cor}55;border-radius:12px;padding:12px;margin-bottom:10px;">
+      <div style="font-size:12px;font-weight:800;color:${cor};text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">DUPLA ${duplaNum}</div>
+      <div style="min-height:28px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-bottom:${canAdd ? '8px' : '0'};">
+        ${tags || '<span style="color:var(--text-muted);font-size:11px;">NENHUM JOGADOR</span>'}
+      </div>
+      ${canAdd ? `
+      <div style="position:relative;margin-bottom:8px;">
+        <input type="text" class="input" placeholder="BUSCAR JOGADOR..." id="jc-search-${duplaId}" autocomplete="off"
+          oninput="_filtrarJogsDupla(${duplaNum})"
+          onfocus="this.value='';_filtrarJogsDupla(${duplaNum})"
+          onblur="setTimeout(()=>{const d=document.getElementById('jc-drop-${duplaId}');if(d)d.style.display='none';},200)"
+          style="margin-bottom:0;font-size:13px;padding:10px 14px;">
+        <div id="jc-drop-${duplaId}" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:25;background:var(--bg);border:1px solid var(--card-border);border-radius:12px;max-height:180px;overflow-y:auto;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,0.5);"></div>
+      </div>` : ''}
+      <div>
+        <label style="display:block;font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">TIME DA DUPLA ${duplaNum}</label>
+        <div style="position:relative;">
+          <input type="text" class="input" placeholder="BUSCAR TIME..." id="ami-dupla-time-search-${duplaNum}" autocomplete="off"
+            oninput="_filtrarTimesDupla(${duplaNum})"
+            onfocus="this.value='';_abrirDropdownTimesDupla(${duplaNum})"
+            onblur="setTimeout(()=>{const d=document.getElementById('ami-dupla-time-drop-${duplaNum}');if(d)d.style.display='none';},200)"
+            value="${teamVal.replace(/"/g,'&quot;')}"
+            style="margin-bottom:0;font-size:13px;padding:10px 14px;text-transform:uppercase;">
+          <div id="ami-dupla-time-drop-${duplaNum}" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:26;background:var(--bg);border:1px solid var(--card-border);border-radius:12px;max-height:180px;overflow-y:auto;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,0.5);"></div>
+        </div>
+      </div>
+    </div>`;
 }
 
 function _renderPreviewCard() {
   const container = document.getElementById('ami-preview-card');
   if (!container) return;
   const modoDupla = document.getElementById('ami-dupla')?.checked || false;
+  const sorteioAuto = document.getElementById('ami-sorteio-auto')?.checked !== false;
 
   const getTimeName = (timeNum) => {
+    if (modoDupla && !sorteioAuto) {
+      const teamObj = timeNum === 1 ? _dupla1Team : _dupla2Team;
+      if (teamObj?.nome) return teamObj.nome.toUpperCase();
+      return `DUPLA ${timeNum}`;
+    }
     const teamMap = timeNum === 1 ? _jcT1 : _jcT2;
     const firstId = teamMap.keys().next().value;
     if (firstId) {
@@ -3077,6 +3159,7 @@ window.removerJogJC = (id, timeNum) => {
 window.limparJogadoresJC = () => {
   _jcT1.clear(); _jcT2.clear();
   _amiManualSel.clear();
+  _dupla1Team = null; _dupla2Team = null;
   _syncJcMaps();
   _renderJcPanels();
   const box = document.getElementById('ami-sorteio');
@@ -3098,7 +3181,7 @@ function _htmlNovoAmistoso() {
       <input type="checkbox" id="ami-dupla" onchange="toggleModoDupla(this.checked)">
       <div>
         <div style="font-size:13px;font-weight:700;">MODO DUPLA</div>
-        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">SELECIONE EXATAMENTE 4 JOGADORES</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">2 JOGADORES POR TIME — DUPLA 1 vs DUPLA 2</div>
       </div>
     </label>
     <label class="check-row" style="margin-bottom:8px;" id="label-sorteio-auto">
@@ -3171,6 +3254,7 @@ document.getElementById('btn-criar-ami').addEventListener('click', () => {
   if (jogadores.length < 2) { toast('CADASTRE PELO MENOS 2 JOGADORES', 'erro'); return; }
   _jcT1.clear(); _jcT2.clear(); _jcSel.clear();
   _amiManualSel.clear();
+  _dupla1Team = null; _dupla2Team = null;
   _amiTiposSel.clear(); _amiTiposSel.add('clubes'); _amiTiposSel.add('selecoes');
   _amiDistSel.t1.clear(); _amiDistSel.t2.clear();
   fullscreen('NOVO', _htmlNovoAmistoso());
@@ -3191,6 +3275,7 @@ window.iniciarPartida = () => {
   if (jogadores.length < 2) { toast('CADASTRE PELO MENOS 2 JOGADORES', 'erro'); return; }
   _jcT1.clear(); _jcT2.clear(); _jcSel.clear();
   _amiManualSel.clear();
+  _dupla1Team = null; _dupla2Team = null;
   _amiTiposSel.clear(); _amiTiposSel.add('clubes'); _amiTiposSel.add('selecoes');
   _amiDistSel.t1.clear(); _amiDistSel.t2.clear();
   fullscreen('NOVO', _htmlNovoAmistoso(), 'AMISTOSOS', 'amistosos');
@@ -3280,6 +3365,7 @@ window.toggleModoDupla = (ativo) => {
   // Limpar jogadores ao mudar modo (max por time muda)
   _jcT1.clear(); _jcT2.clear();
   _amiManualSel.clear();
+  _dupla1Team = null; _dupla2Team = null;
   _syncJcMaps();
   _renderJcPanels();
   // Resetar sorteio ao mudar modo
@@ -3305,14 +3391,26 @@ window.toggleSorteioAuto = (ativo) => {
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
   const btnSalvar = document.getElementById('btn-ami-salvar');
   if (btnSalvar) btnSalvar.style.display = 'none';
-  // A6: botão PRÓXIMO/sortear só visível quando sorteio automático marcado
+  // Botao SORTEAR visivel em modo auto; em modo manual mostra CRIAR PARTIDA
   const btnProximo = document.getElementById('btn-ami-proximo');
-  if (btnProximo) btnProximo.style.display = ativo ? '' : 'none';
+  if (btnProximo) {
+    btnProximo.style.display = '';
+    btnProximo.textContent = ativo ? 'SORTEAR' : 'CRIAR PARTIDA';
+  }
+  // Re-renderizar paineis para atualizar visao de dupla
+  _renderJcPanels();
 };
 
 function _renderSorteioManual() {
   const manualBox = document.getElementById('ami-manual-times-box');
   if (!manualBox) return;
+  // Em modo dupla, a selecao de time e feita dentro de cada painel de dupla
+  const modoDupla = document.getElementById('ami-dupla')?.checked || false;
+  if (modoDupla) {
+    manualBox.style.display = 'none';
+    manualBox.innerHTML = '';
+    return;
+  }
   const tiposDisponiveis = [..._amiTiposSel];
   // Determinar pool de times disponíveis
   let pool = [];
@@ -3351,6 +3449,10 @@ function _renderSorteioManual() {
 
 // _amiManualSel: Map de jogadorId -> {timeId, nome, forca, _tipo}
 const _amiManualSel = new Map();
+
+// ── Times escolhidos por dupla no modo manual ──
+let _dupla1Team = null; // {timeId, nome, forca, _tipo}
+let _dupla2Team = null;
 
 // ── Distribuicao manual de jogadores por time ──
 const _amiDistSel = { t1: new Map(), t2: new Map() };
@@ -3563,6 +3665,83 @@ window.selecionarTimeManualJog = (jogId, timeId, timeNome, forca, tipo) => {
   _renderPreviewCard();
 };
 
+// ── Busca de jogadores específica para cada painel de dupla ──
+window._filtrarJogsDupla = (duplaNum) => {
+  const duplaId = `dupla${duplaNum}`;
+  const q = (document.getElementById(`jc-search-${duplaId}`)?.value||'').toLowerCase();
+  const teamMap = duplaNum === 1 ? _jcT1 : _jcT2;
+  const disponiveis = jogadores.filter(j =>
+    !_jcSel.has(j.id) && teamMap.size < 2 &&
+    (!q || j.nome.toLowerCase().includes(q) || (j.apelido||'').toLowerCase().includes(q))
+  );
+  const drop = document.getElementById(`jc-drop-${duplaId}`);
+  if (!drop) return;
+  if (!disponiveis.length) { drop.style.display = 'none'; return; }
+  drop.innerHTML = disponiveis.map(j =>
+    `<div onclick="_selecionarJogDupla(${duplaNum},'${j.id}','${_nomeExibicao(j).replace(/'/g,"\\'").replace(/"/g,'&quot;')}')"
+      style="padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.05);font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;">
+      ${SVG_USER_CHIP}<span>${_nomeExibicao(j)}</span>
+    </div>`
+  ).join('');
+  drop.style.display = 'block';
+};
+
+window._selecionarJogDupla = (duplaNum, id, nome) => {
+  const teamMap = duplaNum === 1 ? _jcT1 : _jcT2;
+  if (teamMap.size >= 2) return;
+  teamMap.set(id, nome);
+  _syncJcMaps();
+  _renderJcPanels();
+  const box = document.getElementById('ami-sorteio');
+  if (box) { box.style.display = 'none'; box.innerHTML = ''; }
+  const btnSalvar = document.getElementById('btn-ami-salvar');
+  if (btnSalvar) btnSalvar.style.display = 'none';
+};
+
+// ── Busca e selecao de time por dupla (modo manual) ──
+window._abrirDropdownTimesDupla = (duplaNum) => {
+  const q = (document.getElementById(`ami-dupla-time-search-${duplaNum}`)?.value||'').toLowerCase();
+  const tiposDisponiveis = [..._amiTiposSel];
+  let pool = [];
+  if (tiposDisponiveis.length > 1) pool = [...clubes.map(t=>({...t,_tipo:'clubes'})), ...selecoes.map(t=>({...t,_tipo:'selecoes'}))];
+  else if (tiposDisponiveis[0]==='selecoes') pool = selecoes.map(t=>({...t,_tipo:'selecoes'}));
+  else pool = clubes.map(t=>({...t,_tipo:'clubes'}));
+  // Filtrar time já escolhido pela outra dupla
+  const outroTeam = duplaNum === 1 ? _dupla2Team : _dupla1Team;
+  const filtrado = pool.filter(t => (!outroTeam || t.id !== outroTeam.timeId) && (!q || t.nome.toLowerCase().includes(q)));
+  const drop = document.getElementById(`ami-dupla-time-drop-${duplaNum}`);
+  if (!drop) return;
+  if (!filtrado.length) { drop.style.display='none'; return; }
+  drop.innerHTML = filtrado.slice(0,30).map(t => {
+    const isSel = t._tipo==='selecoes';
+    const _td = !isSel ? _teamDataOuFallback(t.id, t.nome) : null;
+    const paisCode = isSel ? (SELECAO_PAIS[t.id]?.pais||'') : (_td?.pais||'');
+    const flagEl = paisCode ? `<img src="https://flagcdn.com/w40/${paisCode}.png" alt="" loading="lazy" style="width:22px;height:16px;object-fit:cover;border-radius:2px;flex-shrink:0;" onerror="this.style.display='none'">` : '';
+    const shieldEl = !isSel ? `<div style="width:22px;height:22px;border-radius:5px;background:${_td.fundo};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:${_td.cor};flex-shrink:0;border:1px solid rgba(255,255,255,0.1);">${_td.abrev}</div>` : '';
+    const eficEl = t.eficiencia ? eficBadge(t.eficiencia) : '';
+    return `<div onclick="_selecionarTimeDupla(${duplaNum},'${t.id}','${t.nome.replace(/'/g,"\\'")}',${t.forca},'${t._tipo}')"
+      style="padding:9px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);font-weight:600;font-size:12px;display:flex;align-items:center;gap:8px;">
+      ${flagEl}${shieldEl}
+      <span style="text-transform:uppercase;flex:1;">${t.nome}</span>
+      ${eficEl}
+    </div>`;
+  }).join('');
+  drop.style.display='block';
+};
+
+window._filtrarTimesDupla = (duplaNum) => { _abrirDropdownTimesDupla(duplaNum); };
+
+window._selecionarTimeDupla = (duplaNum, timeId, timeNome, forca, tipo) => {
+  const teamData = { timeId, nome: timeNome, forca, _tipo: tipo };
+  if (duplaNum === 1) _dupla1Team = teamData;
+  else _dupla2Team = teamData;
+  const inp = document.getElementById(`ami-dupla-time-search-${duplaNum}`);
+  if (inp) inp.value = timeNome.toUpperCase();
+  const drop = document.getElementById(`ami-dupla-time-drop-${duplaNum}`);
+  if (drop) drop.style.display='none';
+  _renderPreviewCard();
+};
+
 let _sorteioAmi = null;
 let _editandoAmiId = null;
 // F8: expor _sorteioAmi no window para que onclick inline possa acessar
@@ -3579,6 +3758,29 @@ window.sortearAmistoso = () => {
 
   // Modo manual de times: usar times escolhidos manualmente
   if (!sorteioAuto) {
+    if (modoDupla) {
+      // Modo dupla manual: validar duplas e times por dupla
+      if (_jcT1.size !== 2) { toast('DUPLA 1: SELECIONE EXATAMENTE 2 JOGADORES', 'erro'); return; }
+      if (_jcT2.size !== 2) { toast('DUPLA 2: SELECIONE EXATAMENTE 2 JOGADORES', 'erro'); return; }
+      if (!_dupla1Team) { toast('ESCOLHA O TIME DA DUPLA 1', 'erro'); return; }
+      if (!_dupla2Team) { toast('ESCOLHA O TIME DA DUPLA 2', 'erro'); return; }
+      const j1 = [..._jcT1.entries()].map(([id, nome]) => ({ id, nome }));
+      const j2 = [..._jcT2.entries()].map(([id, nome]) => ({ id, nome }));
+      const t1data = _dupla1Team;
+      const t2data = _dupla2Team;
+      const tipo = t1data._tipo === 'selecoes' ? 'selecoes' : 'clubes';
+      const diff = Math.abs(t1data.forca - t2data.forca);
+      const eq = diff <= 2 ? 'EQUILIBRADO' : diff <= 5 ? 'LEVEMENTE DESIGUAL' : 'DESIGUAL';
+      _sorteioAmi = {
+        tipo,
+        modoDupla,
+        maxPartidaDupla: maxDupla,
+        time1: { nome: t1data.nome, timeId: t1data.timeId, forca: t1data.forca, eficiencia: t1data.eficiencia||'Bom', jogadores: j1.map(j=>_nomeExibicao(j)), jogadoresIds: j1.map(j=>j.id) },
+        time2: { nome: t2data.nome, timeId: t2data.timeId, forca: t2data.forca, eficiencia: t2data.eficiencia||'Bom', jogadores: j2.map(j=>_nomeExibicao(j)), jogadoresIds: j2.map(j=>j.id) },
+      };
+      _renderSorteioBox(_sorteioAmi, eq, diff);
+      return;
+    }
     const jogsList = [..._jcSel.entries()].map(([id, nome]) => ({ id, nome }));
     for (const j of jogsList) {
       if (!_amiManualSel.has(j.id)) { toast(`ESCOLHA O TIME DE: ${j.nome}`, 'erro'); return; }
@@ -4029,6 +4231,7 @@ window.editarAmistoso = (id) => {
   // Amistoso em andamento: edição completa com jogadores e sorteio
   _jcT1.clear(); _jcT2.clear(); _jcSel.clear();
   _amiManualSel.clear();
+  _dupla1Team = null; _dupla2Team = null;
   _amiDistSel.t1.clear(); _amiDistSel.t2.clear();
   _editandoAmiId = id;
   // Pré-selecionar os jogadores do amistoso por time
@@ -4176,6 +4379,7 @@ window._criarNovoJogoMesmosParams = () => {
 
   _jcT1.clear(); _jcT2.clear(); _jcSel.clear();
   _amiManualSel.clear();
+  _dupla1Team = null; _dupla2Team = null;
   _amiTiposSel.clear();
   if (a.tipo === 'clubes') _amiTiposSel.add('clubes');
   else if (a.tipo === 'selecoes') _amiTiposSel.add('selecoes');
