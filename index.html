@@ -1439,6 +1439,9 @@ function _aplicarControleAcesso() {
   // (mantém acesso de leitura; criação bloqueada via botões)
 }
 
+function _normalizarNome(s) { return String(s||'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9 ]/g,'').trim() || 'JOGADOR'; }
+function _escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
 // RG4: verifica se usuário tem cadastro como jogador, cria se não existir
 async function _autoCadastrarJogador(u) {
   try {
@@ -1452,8 +1455,7 @@ async function _autoCadastrarJogador(u) {
     if (todos.some(j => j.email && j.email.toLowerCase() === emailNorm)) return;
     // Solicitar celular antes de criar o jogador (obrigatório)
     const celular = await _solicitarCelularNovoCadastro(u);
-    const rawNome = u.displayName || u.email.split('@')[0] || '';
-    const nome = rawNome.trim().toUpperCase() || 'JOGADOR';
+    const nome = _normalizarNome(u.displayName || u.email.split('@')[0] || '');
     await addDoc(collection(db, 'jogadores'), {
       nome, email: emailNorm, celular, master: false,
       fotoUrl: u.photoURL || '', criadoEm: serverTimestamp(), _autoCriado: true
@@ -1465,7 +1467,7 @@ async function _autoCadastrarJogador(u) {
 // RG4-CEL: exibe modal bloqueante solicitando o celular no primeiro cadastro
 function _solicitarCelularNovoCadastro(u) {
   return new Promise((resolve) => {
-    const nome = (u.displayName || u.email.split('@')[0]).toUpperCase();
+    const nome = _normalizarNome(u.displayName || u.email.split('@')[0]);
     window._modalObrigatorio = true;
     modal(`
       <div style="display:flex;flex-direction:column;gap:16px;">
@@ -1684,7 +1686,7 @@ function renderJogadores() {
   const podeMudar = temPermissao();
   const sorted = [...jogadores].sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' }));
   c.innerHTML = sorted.map(j => podeMudar ? `
-    <div class="swipe-wrap" data-swipe-id="${j.id}" data-swipe-nome="${(j.nome || '').replace(/"/g,'&quot;')}">
+    <div class="swipe-wrap" data-swipe-id="${j.id}" data-swipe-nome="${_escHtml(j.nome)}">
       <div class="swipe-bg">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
         <span class="swipe-bg-label">EXCLUIR</span>
@@ -1693,7 +1695,7 @@ function renderJogadores() {
         ${avatarJogador(j, 46)}
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:6px;">
-            <span style="font-weight:700;font-size:15px;text-transform:uppercase;">${j.nome}</span>
+            <span style="font-weight:700;font-size:15px;text-transform:uppercase;">${_escHtml(j.nome)}</span>
             ${j.master ? `<span class="tag tag-yellow">MASTER</span>` : ''}
           </div>
           <div style="color:var(--text-muted);font-size:11px;margin-top:2px;">${j.email||'SEM E-MAIL VINCULADO'}</div>
@@ -1706,7 +1708,7 @@ function renderJogadores() {
         ${avatarJogador(j, 46)}
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:6px;">
-            <span style="font-weight:700;font-size:15px;text-transform:uppercase;">${j.nome}</span>
+            <span style="font-weight:700;font-size:15px;text-transform:uppercase;">${_escHtml(j.nome)}</span>
             ${j.master ? `<span class="tag tag-yellow">MASTER</span>` : ''}
           </div>
           <div style="color:var(--text-muted);font-size:11px;margin-top:2px;">${j.email||'SEM E-MAIL VINCULADO'}</div>
