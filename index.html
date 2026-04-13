@@ -3868,7 +3868,7 @@ window.selCampTipo = (k, el) => {
 window.criarCampeonato = async () => {
   const btn = document.getElementById('btn-camp-salvar');
   if (_lockBtn(btn)) return;
-  const nome = document.getElementById('cn').value.trim();
+  const nome = document.getElementById('cn').value.trim().toUpperCase();
   const tipo = document.getElementById('ct').value;
   if (!nome) { toast('DIGITE O NOME DO TORNEIO', 'erro'); _unlockBtn(btn); return; }
   if (campeonatos.some(c => c.nome.trim().toLowerCase() === nome.toLowerCase())) { toast('JA EXISTE UM TORNEIO COM ESSE NOME', 'erro'); _unlockBtn(btn); return; }
@@ -3936,22 +3936,18 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
   const placarArea = temRes
     ? `<div style="font-size:29px;font-weight:900;letter-spacing:1px;color:var(--yellow);">${g1r}<span style="color:var(--text-muted);font-size:13px;"> × </span>${g2r}</div>`
     : podeMudar
-      ? `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-          <div style="display:flex;align-items:center;gap:4px;">
+      ? `<div style="display:flex;align-items:center;gap:4px;">
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="1" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
             <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="2" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
           </div>
-          <button onclick="event.stopPropagation();salvarPartidaDireta('${cid}',${gi},'${m1.jogadorId}','${m2.jogadorId}',this)" class="btn-primary" style="margin-top:14px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">FIM</button>
-        </div>`
-      : `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-          <div style="display:flex;align-items:center;gap:4px;opacity:0.4;">
+          <button onclick="event.stopPropagation();salvarPartidaDireta('${cid}',${gi},'${m1.jogadorId}','${m2.jogadorId}',this)" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">FIM</button>`
+      : `<div style="display:flex;align-items:center;gap:4px;opacity:0.4;">
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="1" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;cursor:not-allowed;">
             <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="2" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;cursor:not-allowed;">
           </div>
-          <button disabled onclick="event.stopPropagation()" class="btn-primary" style="margin-top:14px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:not-allowed;opacity:0.4;">FIM</button>
-        </div>`;
+          <button disabled onclick="event.stopPropagation()" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:not-allowed;opacity:0.4;">FIM</button>`;
 
   return `<div class="match-card" style="margin-bottom:10px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -4660,7 +4656,7 @@ function cardCampHome(c, modoLista=false) {
   const podeMudar = temPermissao();
   const cardHtml = `<div ${idAttr}class="match-card" style="margin-bottom:${modoLista?'0':'10px'};padding:12px;cursor:pointer;" onclick="abrirCampeonato('${c.id}')">
     <div style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.07);">
-      <div style="font-weight:900;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.02em;">${c.nome}</div>
+      <div style="font-weight:900;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.02em;">${c.nome.toUpperCase()}</div>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;">
