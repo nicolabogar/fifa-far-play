@@ -336,6 +336,7 @@
 
     /* Tags de eficiência */
     .efic-tags { display:flex; gap:8px; flex-wrap:wrap; }
+    .efic-panel { background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:12px; padding:12px 14px; }
     .efic-tag {
       padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
       letter-spacing: 0.02em; cursor: pointer; border: 2px solid transparent;
@@ -1309,7 +1310,7 @@ function htmlMsDropPaisTimes(paises) {
   </div>`;
 }
 function htmlEficFiltroTimes() {
-  return `<div style="margin-bottom:14px;">${htmlEficFiltro('times-efic-filtro')}</div>`;
+  return `<div class="efic-panel" style="margin-bottom:14px;">${htmlEficFiltro('times-efic-filtro')}</div>`;
 }
 
 // ─── ALGORITMO DE BALANCEAMENTO ──────────────────────────────────────
@@ -2988,7 +2989,7 @@ function _htmlNovoAmistoso() {
       <span style="color:var(--text-muted);font-size:12px;align-self:center;padding:4px 0;">NENHUM JOGADOR SELECIONADO</span>
     </div>
     <div id="ami-dist-manual-box" style="display:none;margin-bottom:12px;"></div>
-    <div id="ami-efic-filtro-box" style="margin-bottom:16px;background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:12px 14px;">${htmlEficFiltro('ami-efic-filtro')}</div>
+    <div id="ami-efic-filtro-box" class="efic-panel" style="margin-bottom:16px;">${htmlEficFiltro('ami-efic-filtro')}</div>
     <div id="ami-sorteio" style="display:none;margin-bottom:16px;"></div>
     <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
       <div style="display:flex;gap:10px;">
@@ -3551,7 +3552,7 @@ window.editarTimeRapido = (timeId, timeNome, tipoT) => {
   const t = pool.find(x => x.id === timeId) || { eficiencia:'Bom', inativo:false };
   const inativo = t.inativo || false;
   modal(`<p class="modal-title">${timeNome.toUpperCase()}</p>
-    <div style="margin-bottom:14px;">
+    <div class="efic-panel" style="margin-bottom:14px;">
       <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">EFICIÊNCIA</label>
       <div class="efic-tags" id="etr-efic-tags" data-selected="${t.eficiencia||'Bom'}">
         ${['Ruim','Moderado','Bom'].map(e=>`<span class="efic-tag${(t.eficiencia||'Bom')===e?' selecionado':''}" data-efic="${e}" onclick="selecionarEficienciaETR('${e}')">${e}</span>`).join('')}
@@ -3640,7 +3641,7 @@ window.editarTimeAmistoso = (amiId, timeId, timeNome, tipoT) => {
   const pool = tipoT === 'selecoes' ? selecoes : clubes;
   const t = pool.find(x => x.id === timeId) || { eficiencia:'Bom', inativo:false };
   modal(`<p class="modal-title">${timeNome.toUpperCase()}</p>
-    <div style="margin-bottom:14px;">
+    <div class="efic-panel" style="margin-bottom:14px;">
       <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">EFICIENCIA</label>
       <div class="efic-tags" id="etami-efic-tags" data-selected="${t.eficiencia||'Bom'}">
         ${['Ruim','Moderado','Bom'].map(e=>`<span class="efic-tag${(t.eficiencia||'Bom')===e?' selecionado':''}" data-efic="${e}" onclick="selecionarEficienciaETAmi('${e}')">${e}</span>`).join('')}
@@ -4284,7 +4285,7 @@ function abrirModalCriarCamp(secao, secaoView) {
         <div id="manual-times-box" style="display:none;"></div>
       </div>
     </div>
-    <div id="cc-efic-filtro-box">${htmlEficFiltro('cc-efic-filtro')}</div>
+    <div id="cc-efic-filtro-box" class="efic-panel" style="margin-bottom:16px;">${htmlEficFiltro('cc-efic-filtro')}</div>
     <div style="display:flex;flex-direction:column;gap:8px;margin-top:20px;">
       <button id="btn-camp-salvar" class="btn-primary" onclick="criarCampeonato()">SALVAR</button>
       <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
@@ -5488,7 +5489,7 @@ function abrirModalAddTime(tipoInicial) {
             </label>
           </div>
         </div>
-        <div>
+        <div class="efic-panel">
           <label style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">EFICIÊNCIA</label>
           <div class="efic-tags" id="nt-efic-tags">
             <span class="efic-tag${_eficienciaNT==='Ruim'?' selecionado':''}" data-efic="Ruim"     onclick="selecionarEficienciaNT('Ruim')">Ruim</span>
@@ -5515,7 +5516,7 @@ function abrirModalAddTime(tipoInicial) {
           <div id="nt-preview" style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"></div>
         </div>
 
-        <div>
+        <div class="efic-panel">
           <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">EFICIÊNCIA</label>
           <div class="efic-tags" id="nt-efic-tags-sel">
             <span class="efic-tag${_eficienciaNT==='Ruim'?' selecionado':''}" data-efic="Ruim"     onclick="selecionarEficienciaNTSel('Ruim')">Ruim</span>
@@ -5687,7 +5688,7 @@ window.editarTime = (id) => {
   fullscreen(t.nome.toUpperCase(), `
     <div style="display:flex;flex-direction:column;gap:16px;max-width:400px;margin:0 auto;">
       <div style="display:flex;justify-content:center;padding:16px 0;">${badgeHtml}</div>
-      <div>
+      <div class="efic-panel">
         <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">EFICIÊNCIA DO TIME</label>
         <div class="efic-tags" id="et-efic-tags" data-selected="${t.eficiencia||'Bom'}">
           ${['Ruim','Moderado','Bom'].map(e=>`<span class="efic-tag${(t.eficiencia||'Bom')===e?' selecionado':''}" data-efic="${e}" onclick="selecionarEficienciaET('${e}')">${e}</span>`).join('')}
