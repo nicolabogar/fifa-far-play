@@ -4869,6 +4869,17 @@ window.removerJogCC = (id) => {
   _atualizarTimesManualCC();
 };
 
+window.limparJogsCC = () => {
+  _ccSel.clear();
+  _ccTimesManual.clear();
+  _ccParesManual = [];
+  _renderTagsCC();
+  const duplasBox = document.getElementById('camp-duplas-box');
+  if (duplasBox) { duplasBox.style.display = 'none'; duplasBox.innerHTML = ''; }
+  const manualPanel = document.getElementById('cc-times-manual-panel');
+  if (manualPanel) { manualPanel.style.display = 'none'; manualPanel.innerHTML = ''; }
+};
+
 function abrirModalCriarCamp(secao, secaoView) {
   if (jogadores.length < 2) { toast('CADASTRE PELO MENOS 2 JOGADORES', 'erro'); return; }
   _ccSel.clear();
@@ -4876,6 +4887,7 @@ function abrirModalCriarCamp(secao, secaoView) {
   _ccParesManual = [];
   _ccModoTimes = 'auto';
   _ccTimesManual.clear();
+  _ccTiposSel.clear(); _ccTiposSel.add('clubes'); _ccTiposSel.add('selecoes');
   fullscreen('NOVO', `
     <div style="display:flex;flex-direction:column;gap:14px;">
       <div>
@@ -4894,6 +4906,13 @@ function abrirModalCriarCamp(secao, secaoView) {
         </div>
         <input type="hidden" id="ct" value="champions">
         <div id="ct-regras-box" style="display:none;margin-top:8px;"></div>
+      </div>
+      <div>
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">TIPO</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="tipo-btn sel" id="cc-tp-clubes" onclick="toggleTipoCC('clubes')"><span style="font-size:12px;font-weight:700;">CLUBES</span></div>
+          <div class="tipo-btn sel" id="cc-tp-selecoes" onclick="toggleTipoCC('selecoes')"><span style="font-size:12px;font-weight:700;">SELECOES</span></div>
+        </div>
       </div>
       <div>
         <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;" id="label-qtd-times-titulo">TIMES POR JOGADOR</label>
@@ -4934,13 +4953,16 @@ function abrirModalCriarCamp(secao, secaoView) {
         <div id="cc-tags" style="display:flex;flex-wrap:wrap;gap:6px;min-height:40px;padding:8px;background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;margin-bottom:8px;">
           <span style="color:var(--text-muted);font-size:12px;align-self:center;padding:4px 0;">NENHUM JOGADOR SELECIONADO</span>
         </div>
+        <div style="display:flex;justify-content:center;margin-bottom:4px;">
+          <button onclick="limparJogsCC()" class="btn-ghost" style="font-size:13px;padding:10px 24px;width:100%;">LIMPAR JOGADORES</button>
+        </div>
       </div>
       <div id="cc-times-escolha-section">
         <label class="check-row" style="margin-bottom:4px;">
-          <input type="checkbox" id="cc-manual-times" style="width:18px;height:18px;accent-color:var(--purple);" onchange="_onToggleTimesManual(this.checked)">
+          <input type="checkbox" id="cc-sortear-times" checked style="width:18px;height:18px;accent-color:var(--purple);" onchange="_onToggleSortearTimesCC(this.checked)">
           <div>
-            <div style="font-size:13px;font-weight:700;">ESCOLHER TIMES</div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">DESMARCADO: TIMES SERAO SORTEADOS AUTOMATICAMENTE</div>
+            <div style="font-size:13px;font-weight:700;">SORTEAR TIMES</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">DESMARCADO: ESCOLHA O TIME DE CADA JOGADOR</div>
           </div>
         </label>
         <div id="cc-times-manual-panel" style="display:none;margin-top:8px;"></div>
@@ -4973,6 +4995,18 @@ let _ccParesManual = [];
 let _ccModoTimes = 'auto';
 // Times manuais: key (jogadorId ou 'dup:N') → [timeObj|null, ...] (length = _ccQtdTimes)
 let _ccTimesManual = new Map();
+// Tipos de times habilitados no torneio: 'clubes' e/ou 'selecoes'
+const _ccTiposSel = new Set(['clubes', 'selecoes']);
+
+window.toggleTipoCC = (tipo) => {
+  if (_ccTiposSel.has(tipo)) {
+    if (_ccTiposSel.size > 1) _ccTiposSel.delete(tipo);
+  } else {
+    _ccTiposSel.add(tipo);
+  }
+  document.getElementById('cc-tp-clubes')?.classList.toggle('sel', _ccTiposSel.has('clubes'));
+  document.getElementById('cc-tp-selecoes')?.classList.toggle('sel', _ccTiposSel.has('selecoes'));
+};
 
 window.selCampTipo = (k, el) => {
   document.querySelectorAll('[data-ct]').forEach(b => b.classList.remove('sel'));
@@ -5121,9 +5155,14 @@ window._setPar = (paridx, slot, jogId, jogNome) => {
 // ── Selecao manual de times para torneio ──
 
 function _ccGetPool() {
-  const tipo = document.getElementById('ct')?.value;
-  const meta = CAMP_META[tipo] || {};
-  const basePool = meta.tipo === 'selecoes' ? selecoes : clubes;
+  let basePool;
+  if (_ccTiposSel.has('clubes') && _ccTiposSel.has('selecoes')) {
+    basePool = [...clubes, ...selecoes];
+  } else if (_ccTiposSel.has('selecoes')) {
+    basePool = selecoes;
+  } else {
+    basePool = clubes;
+  }
   return filtrarPoolEfic(basePool);
 }
 
@@ -5140,11 +5179,11 @@ function _atualizarTimesManualCC() {
   _renderTimesManualCC();
 }
 
-window._onToggleTimesManual = (ativo) => {
-  _ccModoTimes = ativo ? 'manual' : 'auto';
+window._onToggleSortearTimesCC = (sortear) => {
+  _ccModoTimes = sortear ? 'auto' : 'manual';
   const panel = document.getElementById('cc-times-manual-panel');
   if (!panel) return;
-  if (ativo) {
+  if (!sortear) {
     panel.style.display = '';
     _ccTimesManual.clear();
     _renderTimesManualCC();
@@ -5254,8 +5293,7 @@ window._abrirPickerTimeTorneio = (key, slotIdx) => {
   const slotAtual = _ccTimesManual.get(key)?.[slotIdx];
   if (slotAtual) usedIds.delete(slotAtual.id);
   const available = pool.filter(t => !usedIds.has(t.id));
-  const tipo = document.getElementById('ct')?.value;
-  const isSel = CAMP_META[tipo]?.tipo === 'selecoes';
+  const isSel = !_ccTiposSel.has('clubes') && _ccTiposSel.has('selecoes');
 
   const renderLista = (q) => {
     const filtrado = available.filter(t => !q || t.nome.toLowerCase().includes(q.toLowerCase())).slice(0, 60);
@@ -5310,8 +5348,7 @@ window._renderCCPickerLista = (q) => {
   const slotAtual = _ccTimesManual.get(key)?.[slotIdx];
   if (slotAtual) usedIds.delete(slotAtual.id);
   const available = pool.filter(t => !usedIds.has(t.id));
-  const tipo = document.getElementById('ct')?.value;
-  const isSel = CAMP_META[tipo]?.tipo === 'selecoes';
+  const isSel = !_ccTiposSel.has('clubes') && _ccTiposSel.has('selecoes');
   const filtrado = available.filter(t => !q || t.nome.toLowerCase().includes(q.toLowerCase())).slice(0, 60);
   if (!filtrado.length) return '<div style="padding:12px;color:var(--text-muted);font-size:12px;text-align:center;">NENHUM TIME DISPONIVEL</div>';
   return filtrado.map(t => {
@@ -5391,8 +5428,17 @@ window.criarCampeonato = async () => {
     if (new Set(allIds).size !== allIds.length) { toast('CADA JOGADOR SO PODE ESTAR EM UMA DUPLA', 'erro'); _unlockBtn(btn); return; }
   }
   const meta = CAMP_META[tipo];
-  const hist = historicoIds(meta.tipo);
-  const pool = filtrarPoolEfic(meta.tipo === 'selecoes' ? selecoes : clubes);
+  let pool, hist;
+  if (_ccTiposSel.has('clubes') && _ccTiposSel.has('selecoes')) {
+    pool = filtrarPoolEfic([...clubes, ...selecoes]);
+    hist = [...historicoIds('clubes'), ...historicoIds('selecoes')];
+  } else if (_ccTiposSel.has('selecoes')) {
+    pool = filtrarPoolEfic(selecoes);
+    hist = historicoIds('selecoes');
+  } else {
+    pool = filtrarPoolEfic(clubes);
+    hist = historicoIds('clubes');
+  }
   const partic = [..._ccSel.entries()].map(([jogadorId, nome]) => ({ jogadorId, nome }));
 
   let distribuidos;
