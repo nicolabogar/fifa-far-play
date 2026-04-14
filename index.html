@@ -6239,18 +6239,18 @@ function abrirModalAddTime(tipoInicial) {
         </div>
         <div>
           <label style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">NOME ABREVIADO (OPCIONAL)</label>
-          <input class="input" id="nt-clube-nomeAbrev" placeholder="Ex: MAN. UTD" autocomplete="off">
+          <input class="input" id="nt-clube-nomeAbrev" placeholder="Ex: MAN. UTD" autocomplete="off" style="text-transform:uppercase;">
         </div>
         <div>
           <label style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">BRASÃO (OPCIONAL)</label>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div id="nt-clube-crest-preview" style="width:52px;height:52px;border-radius:10px;background:rgba(255,255,255,0.05);border:1.5px dashed rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">
-              <span style="font-size:22px;color:var(--text-muted);">🛡️</span>
-            </div>
-            <label style="flex:1;cursor:pointer;">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <label style="cursor:pointer;">
               <div class="btn-ghost" style="text-align:center;pointer-events:none;font-size:13px;padding:10px;">ESCOLHER IMAGEM</div>
               <input type="file" accept="image/*" id="nt-clube-crest-input" style="display:none;" onchange="_ntClubeCarregarCrest(this)">
             </label>
+            <div id="nt-clube-crest-preview" style="width:52px;height:52px;border-radius:10px;background:rgba(255,255,255,0.05);border:1.5px dashed rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">
+              <span style="font-size:22px;color:var(--text-muted);">🛡️</span>
+            </div>
           </div>
         </div>
         <div class="efic-panel">
@@ -6459,15 +6459,10 @@ window.editarTime = (id) => {
     </div>`;
   } else {
     const d = _teamDataOuFallback(t.id, t.nome);
-    badgeHtml = `<div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-      <div style="display:flex;align-items:center;gap:4px;white-space:nowrap;">
-        ${flagImg(d.pais, 20)}
-        <span style="font-size:12px;color:var(--text-muted);font-weight:600;">${d.paisNome||''}</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-weight:900;font-size:16px;text-transform:uppercase;">${t.nome}</span>
-        ${shieldClube(t.id, t.nome, 48)}
-      </div>
+    badgeHtml = `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+      ${d.pais ? `<img src="https://flagcdn.com/w40/${d.pais}.png" alt="${d.paisNome||''}" loading="lazy" decoding="async" style="width:24px;height:18px;object-fit:cover;border-radius:3px;box-shadow:0 1px 4px rgba(0,0,0,0.3);" onerror="this.style.display='none'">` : ''}
+      <span style="font-weight:900;font-size:16px;text-transform:uppercase;">${t.nome}</span>
+      ${shieldClube(t.id, t.nome, 48)}
     </div>`;
   }
   const inativoAtual = t.inativo || false;
@@ -6477,7 +6472,7 @@ window.editarTime = (id) => {
       <div style="display:flex;justify-content:center;padding:16px 0;">${badgeHtml}</div>
       <div>
         <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">NOME ABREVIADO (OPCIONAL)</label>
-        <input class="input" id="et-nomeAbreviado" placeholder="Ex: MAN. UTD" autocomplete="off" value="${nomeAbreviadoAtual.replace(/"/g,'&quot;')}">
+        <input class="input" id="et-nomeAbreviado" placeholder="Ex: MAN. UTD" autocomplete="off" style="text-transform:uppercase;" value="${nomeAbreviadoAtual.replace(/"/g,'&quot;')}">
         ${nomeAbreviadoAtual ? `<div style="margin-top:4px;font-size:11px;color:var(--text-muted);">Exibido nos placares: <strong style="color:var(--text);">${nomeAbreviadoAtual.toUpperCase()}</strong></div>` : '<div style="margin-top:4px;font-size:11px;color:var(--text-muted);">Quando preenchido, substitui o nome nos placares</div>'}
       </div>
       <div class="efic-panel">
