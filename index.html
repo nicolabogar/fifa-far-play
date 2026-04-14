@@ -4909,7 +4909,7 @@ function abrirModalCriarCamp(secao, secaoView) {
       </div>
       <div>
         <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">TIPO</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
           <div class="tipo-btn sel" id="cc-tp-clubes" onclick="toggleTipoCC('clubes')"><span style="font-size:12px;font-weight:700;">CLUBES</span></div>
           <div class="tipo-btn sel" id="cc-tp-selecoes" onclick="toggleTipoCC('selecoes')"><span style="font-size:12px;font-weight:700;">SELECOES</span></div>
         </div>
@@ -4923,20 +4923,22 @@ function abrirModalCriarCamp(secao, secaoView) {
       </div>
       <div>
         <label class="check-row" style="margin-bottom:4px;" id="cc-label-dupla">
-          <input type="checkbox" id="camp-dupla" style="width:18px;height:18px;accent-color:var(--purple);" onchange="_onToggleCampDupla(this.checked)">
-          <div>
+          <input type="checkbox" id="camp-dupla" onchange="_onToggleCampDupla(this.checked)">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex:1;">
             <div style="font-size:13px;font-weight:700;">DUPLA</div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">PARTICIPANTES EM DUPLAS — EXIGE NUMERO PAR DE JOGADORES</div>
+            <span onclick="event.preventDefault();event.stopPropagation();toggleInfoAmi('info-cc-dupla')" title="Mostrar informacao" style="cursor:pointer;color:var(--text-muted);font-size:11px;font-weight:800;background:rgba(255,255,255,0.1);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.2);">?</span>
           </div>
         </label>
-        <div id="cc-sortear-dupla-box" style="display:none;margin-top:8px;margin-bottom:4px;">
-          <label class="check-row" style="margin-bottom:4px;">
-            <input type="checkbox" id="camp-sortear-dupla-auto" style="width:18px;height:18px;accent-color:var(--cyan);" onchange="_onToggleSortearDuplaCC(this.checked)">
-            <div>
+        <div id="info-cc-dupla" style="display:none;font-size:11px;color:var(--text-muted);margin:-2px 0 8px;padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--card-border);">PARTICIPANTES EM DUPLAS — EXIGE NUMERO PAR DE JOGADORES</div>
+        <div id="cc-sortear-dupla-box" style="display:none;margin-bottom:4px;">
+          <label class="check-row" style="margin-bottom:4px;" id="cc-label-sortear-dup-auto">
+            <input type="checkbox" id="camp-sortear-dupla-auto" onchange="_onToggleSortearDuplaCC(this.checked)">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex:1;">
               <div style="font-size:13px;font-weight:700;">SORTEAR DUPLA</div>
-              <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">DESMARCADO: CONFIGURE AS DUPLAS MANUALMENTE</div>
+              <span onclick="event.preventDefault();event.stopPropagation();toggleInfoAmi('info-cc-sortear-dup')" title="Mostrar informacao" style="cursor:pointer;color:var(--text-muted);font-size:11px;font-weight:800;background:rgba(255,255,255,0.1);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.2);">?</span>
             </div>
           </label>
+          <div id="info-cc-sortear-dup" style="display:none;font-size:11px;color:var(--text-muted);margin:-2px 0 8px;padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--card-border);">DESMARCADO: SELECIONE MANUALMENTE QUEM EH A DUPLA 1 E 2</div>
         </div>
         <div id="camp-duplas-box" style="display:none;margin-top:8px;"></div>
       </div>
@@ -4958,13 +4960,14 @@ function abrirModalCriarCamp(secao, secaoView) {
         </div>
       </div>
       <div id="cc-times-escolha-section">
-        <label class="check-row" style="margin-bottom:4px;">
-          <input type="checkbox" id="cc-sortear-times" checked style="width:18px;height:18px;accent-color:var(--purple);" onchange="_onToggleSortearTimesCC(this.checked)">
-          <div>
+        <label class="check-row" style="margin-bottom:4px;" id="cc-label-sorteio-auto">
+          <input type="checkbox" id="cc-sortear-times" checked onchange="_onToggleSortearTimesCC(this.checked)">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex:1;">
             <div style="font-size:13px;font-weight:700;">SORTEAR TIMES</div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">DESMARCADO: ESCOLHA O TIME DE CADA JOGADOR</div>
+            <span onclick="event.preventDefault();event.stopPropagation();toggleInfoAmi('info-cc-sorteio-auto')" title="Mostrar informacao" style="cursor:pointer;color:var(--text-muted);font-size:11px;font-weight:800;background:rgba(255,255,255,0.1);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.2);">?</span>
           </div>
         </label>
+        <div id="info-cc-sorteio-auto" style="display:none;font-size:11px;color:var(--text-muted);margin:-2px 0 8px;padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--card-border);">DESMARCADO: ESCOLHA O TIME DE CADA JOGADOR</div>
         <div id="cc-times-manual-panel" style="display:none;margin-top:8px;"></div>
       </div>
     </div>
