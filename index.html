@@ -4247,7 +4247,7 @@ window.salvarAmistoso = async () => {
     _unlockBtn(btn); return;
   }
   try {
-    await addDoc(collection(db, 'amistosos'), { ..._sorteioAmi, criadoEm: serverTimestamp() });
+    await addDoc(collection(db, 'amistosos'), { ..._sorteioAmi, tiposHabilitados: [..._amiTiposSel], criadoEm: serverTimestamp() });
     fecharFullscreen(); _sorteioAmi = null;
     await carregarAmistosos(); atualizarDash();
   } catch(e) { toast('ERRO AO SALVAR', 'erro'); } finally { _unlockBtn(btn); }
@@ -4419,8 +4419,14 @@ window.editarAmistoso = (id) => {
 
   // Após renderizar, configurar os campos com os dados existentes
   setTimeout(() => {
-    // Selecionar o tipo correto
-    selTipoAmi(a.tipo);
+    // Selecionar o tipo correto (restaurar tipos habilitados se disponível)
+    const th = a.tiposHabilitados;
+    if (th && th.length > 0) {
+      const tipoRestore = (th.includes('clubes') && th.includes('selecoes')) ? 'ambos' : th[0];
+      selTipoAmi(tipoRestore);
+    } else {
+      selTipoAmi(a.tipo);
+    }
 
     // Modo dupla (sem limpar jogadores pre-carregados)
     const duplaCb = document.getElementById('ami-dupla');
@@ -4491,6 +4497,7 @@ window.salvarEdicaoAmistoso = async (id) => {
     await updateDoc(doc(db, 'amistosos', id), {
       tipo: _sorteioAmi.tipo,
       modoDupla: _sorteioAmi.modoDupla || false,
+      tiposHabilitados: [..._amiTiposSel],
       time1: _sorteioAmi.time1,
       time2: _sorteioAmi.time2,
     });
@@ -4543,9 +4550,15 @@ window._criarNovoJogoMesmosParams = () => {
   _jcT1.clear(); _jcT2.clear(); _jcSel.clear();
   _amiManualSel.clear();
   _amiTiposSel.clear();
-  if (a.tipo === 'clubes') _amiTiposSel.add('clubes');
-  else if (a.tipo === 'selecoes') _amiTiposSel.add('selecoes');
-  else { _amiTiposSel.add('clubes'); _amiTiposSel.add('selecoes'); }
+  if (a.tiposHabilitados && a.tiposHabilitados.length > 0) {
+    a.tiposHabilitados.forEach(t => _amiTiposSel.add(t));
+  } else if (a.tipo === 'clubes') {
+    _amiTiposSel.add('clubes');
+  } else if (a.tipo === 'selecoes') {
+    _amiTiposSel.add('selecoes');
+  } else {
+    _amiTiposSel.add('clubes'); _amiTiposSel.add('selecoes');
+  }
 
   const ids1 = a.time1?.jogadoresIds || [];
   const ids2 = a.time2?.jogadoresIds || [];
@@ -4565,7 +4578,8 @@ window._criarNovoJogoMesmosParams = () => {
   fullscreen('NOVO', _htmlNovoAmistoso());
 
   setTimeout(() => {
-    selTipoAmi(a.tipo || 'clubes');
+    const tipoRestore = (a.tiposHabilitados?.includes('clubes') && a.tiposHabilitados?.includes('selecoes')) ? 'ambos' : (a.tiposHabilitados?.[0] || a.tipo || 'clubes');
+    selTipoAmi(tipoRestore);
 
     const duplaCb = document.getElementById('ami-dupla');
     if (duplaCb && a.modoDupla) {
