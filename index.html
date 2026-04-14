@@ -1358,7 +1358,7 @@ function atributosBadge(t) {
 }
 
 // ─── MEMÓRIA ANTI-REPETIÇÃO (F3) ─────────────────────────────────────
-const MEMORIA_MAX = 20; // últimos N sorteios armazenados por tipo
+const MEMORIA_MAX = 40; // últimos N sorteios armazenados por tipo
 function _memoriaKey(tipo) { return `sorteio_mem_${tipo}`; }
 function lerMemoria(tipo) {
   try { return JSON.parse(localStorage.getItem(_memoriaKey(tipo)) || '[]'); } catch { return []; }
@@ -1459,9 +1459,8 @@ function sortearBalanceado(pool, historicoIds = [], tipo = '') {
     const painel = novos.length > 0 ? novos : pares;
     // Ordena por menor diferença percentual
     painel.sort((a, b) => a.pct - b.pct);
-    // Escolhe aleatoriamente entre os top 30% (mínimo 1, máximo MAX_TOP_PAIRS)
-    const MAX_TOP_PAIRS = 10;
-    const topN = Math.min(MAX_TOP_PAIRS, Math.max(1, Math.ceil(painel.length * 0.30)));
+    // Escolhe aleatoriamente entre os top 50% (mínimo 1, sem teto rígido)
+    const topN = Math.max(1, Math.ceil(painel.length * 0.50));
     return painel[Math.floor(Math.random() * topN)];
   };
 
@@ -1497,10 +1496,9 @@ function distribuirTimesBalanceados(participantes, pool, usados = []) {
   let disp = pool.filter(t => !usados.slice(-janela).includes(t.id));
   if (disp.length < n) disp = [...pool];
 
-  // Pega n times aleatórios, depois ordena por força
-  const candidatos = shuffle(disp).slice(0, Math.max(n * 2, n + 4));
-  candidatos.sort((a, b) => b.forca - a.forca);
-  const selecionados = candidatos.slice(0, n);
+  // Pega n times aleatórios de todo o pool disponível, depois ordena por força para draft serpentina
+  const selecionados = shuffle(disp).slice(0, n);
+  selecionados.sort((a, b) => b.forca - a.forca);
 
   // Embaralha participantes e atribui por draft serpentina
   const ps = shuffle([...participantes]);
@@ -1520,9 +1518,8 @@ function distribuirTimesBalanceadosMulti(participantes, pool, usados, qtd) {
   const janela = Math.max(total, Math.floor(pool.length / 2));
   let disp = pool.filter(t => !usados.slice(-janela).includes(t.id));
   if (disp.length < total) disp = [...pool];
-  const candidatos = shuffle(disp).slice(0, Math.max(total * 2, total + 4));
-  candidatos.sort((a, b) => b.forca - a.forca);
-  const selecionados = candidatos.slice(0, total);
+  const selecionados = shuffle(disp).slice(0, total);
+  selecionados.sort((a, b) => b.forca - a.forca);
   const ps = shuffle([...participantes]);
   return ps.map((p, i) => {
     const myTimes = [];
@@ -1573,10 +1570,18 @@ window.abreviarNome = abreviarNome;
 
 // Coleta histórico de IDs de times usados nos amistosos
 function historicoIds(tipo) {
-  return amistosos
+  const ids = amistosos
     .filter(a => a.tipo === tipo)
     .flatMap(a => [a.time1?.timeId, a.time2?.timeId])
     .filter(Boolean);
+  // Deduplica preservando ordem de recência (cada time aparece só na posição mais recente)
+  const seen = new Set();
+  const unique = [];
+  for (let i = ids.length - 1; i >= 0; i--) {
+    if (!seen.has(ids[i])) { seen.add(ids[i]); unique.push(ids[i]); }
+  }
+  unique.reverse();
+  return unique;
 }
 
 // ─── HELPERS UI ──────────────────────────────────────────────────────
