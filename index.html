@@ -5711,6 +5711,11 @@ window.abrirCampeonato = (id) => {
           }
         }).join('')}
       </div>` : ''}
+    ${naoIniciado && podeMudar ? `
+      <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">${c.modoDupla ? 'TIMES POR DUPLA' : 'TIMES POR JOGADOR'}</label>
+      <div style="display:flex;gap:6px;margin-bottom:12px;">
+        ${[1,2,3,4,5].map(n => `<div class="tipo-btn${n===qtdTimes?' sel':''}" onclick="_salvarQtdTimesTorneio('${c.id}',${n})" style="font-size:12px;padding:8px 12px;flex:1;text-align:center;cursor:pointer;">${n}</div>`).join('')}
+      </div>` : ''}
     ${podeMudar ? (naoIniciado
       ? `<button onclick="ressortearCampeonato('${c.id}')" style="width:100%;background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(6,182,212,0.2));border:1px solid rgba(139,92,246,0.4);color:#C4B5FD;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:16px;">SORTEAR TIMES / ADICIONAR JOGADORES</button>`
       : `<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:10px 12px;margin-bottom:16px;display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">⚠️</span><span style="font-size:12px;color:#FCD34D;font-weight:700;">TORNEIO EM ANDAMENTO — NÃO É POSSÍVEL SORTEAR OU ADICIONAR JOGADORES</span></div>`)
@@ -5864,6 +5869,30 @@ window._salvarTipoTorneio = async (id, tipo) => {
   const totalJogosReg = (c.grupos||[]).reduce((acc,g)=>acc+(g.partidas||[]).length,0);
   if (totalJogosReg > 0) { toast('NAO E POSSIVEL ALTERAR O FORMATO COM JOGOS REGISTRADOS', 'erro'); return; }
   await updateDoc(doc(db, 'campeonatos', id), { tipo });
+  await carregarCampeonatos(); atualizarDash(); abrirCampeonato(id);
+};
+
+window._salvarQtdTimesTorneio = async (id, n) => {
+  const c = campeonatos.find(x => x.id === id);
+  if (!c) return;
+  const totalJogosReg = (c.grupos||[]).reduce((acc,g)=>acc+(g.partidas||[]).length,0);
+  if (totalJogosReg > 0) { toast('NAO E POSSIVEL ALTERAR O NUMERO DE TIMES COM JOGOS REGISTRADOS', 'erro'); return; }
+  if ((c.qtdTimes || 1) === n) return;
+  const partic = (c.participantes||[]).map(p => ({ jogadorId: p.jogadorId, nome: p.nome, duplaIndex: p.duplaIndex }));
+  if (partic.length === 0) {
+    await updateDoc(doc(db, 'campeonatos', id), { qtdTimes: n });
+  } else {
+    const meta = CAMP_META[c.tipo];
+    const pool = filtrarPoolEfic(meta.tipo === 'selecoes' ? selecoes : clubes);
+    const hist = historicoIds(meta.tipo);
+    const particSimples = partic.map(p => ({ jogadorId: p.jogadorId, nome: p.nome }));
+    let distribuidos = distribuirTimesBalanceadosMulti(particSimples, pool, hist, n);
+    if (c.modoDupla) {
+      distribuidos = distribuidos.map((p, i) => ({ ...p, duplaIndex: partic[i]?.duplaIndex ?? Math.floor(i / 2) }));
+    }
+    const grupos = gerarGrupos(distribuidos, c.tipo);
+    await updateDoc(doc(db, 'campeonatos', id), { participantes: distribuidos, grupos, qtdTimes: n });
+  }
   await carregarCampeonatos(); atualizarDash(); abrirCampeonato(id);
 };
 
