@@ -4862,8 +4862,8 @@ function abrirModalCriarCamp(secao, secaoView) {
       </div>
       <div>
         <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;" id="label-qtd-times-titulo">TIMES POR JOGADOR</label>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="camp-qtd-times-btns">
-          ${[1,2,3,4,5,6,7,8,9,10].map(n => `<div class="tipo-btn${n===1?' sel':''}" data-qtd="${n}" onclick="_selQtdTimes(${n},this)" style="font-size:12px;padding:8px 12px;min-width:36px;text-align:center;">${n}</div>`).join('')}
+        <div style="display:flex;gap:6px;" id="camp-qtd-times-btns">
+          ${[1,2,3,4,5].map(n => `<div class="tipo-btn${n===1?' sel':''}" data-qtd="${n}" onclick="_selQtdTimes(${n},this)" style="font-size:12px;padding:8px 12px;flex:1;text-align:center;">${n}</div>`).join('')}
         </div>
         <input type="hidden" id="camp-qtd-times" value="1">
       </div>
@@ -5728,8 +5728,8 @@ window.ressortearCampeonato = (id) => {
     <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">SELECIONE OS PARTICIPANTES E SORTEAREMOS OS TIMES NOVAMENTE PARA <strong>${c.nome.toUpperCase()}</strong></p>
     ${c.modoDupla ? `<p style="color:var(--yellow);font-size:12px;font-weight:700;margin-bottom:12px;">MODO DUPLA ATIVO — SELECIONE UM NUMERO PAR DE JOGADORES</p>` : ''}
     <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">${c.modoDupla ? 'TIMES POR DUPLA' : 'TIMES POR JOGADOR'}</label>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
-      ${[1,2,3,4,5].map(n => `<div class="tipo-btn${n===qtdAtual?' sel':''}" data-rqtd="${n}" onclick="_selRessortearQtd(${n},this)" style="font-size:12px;padding:8px 12px;min-width:36px;text-align:center;">${n}</div>`).join('')}
+    <div style="display:flex;gap:6px;margin-bottom:16px;">
+      ${[1,2,3,4,5].map(n => `<div class="tipo-btn${n===qtdAtual?' sel':''}" data-rqtd="${n}" onclick="_selRessortearQtd(${n},this)" style="font-size:12px;padding:8px 12px;flex:1;text-align:center;">${n}</div>`).join('')}
     </div>
     <input type="hidden" id="rsc-qtd-times" value="${qtdAtual}">
     <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">PARTICIPANTES</label>
