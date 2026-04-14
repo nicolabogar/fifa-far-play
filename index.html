@@ -2782,52 +2782,17 @@ function renderAmistosos() {
   }
 
   const abertos = amistosos.filter(a => !a.resultado);
-  const finalizados = amistosos.filter(a => a.resultado != null);
 
-  let html = '';
-
-  // ── EM ANDAMENTO ──
-  if (abertos.length) {
-    html += `<div class="grupo-header aberto" onclick="toggleGrupo(this)">
-      <span class="grupo-titulo">EM ANDAMENTO <span style="color:var(--text-muted);font-weight:600;">(${abertos.length})</span></span>
-      <span class="grupo-seta">›</span>
-    </div>
-    <div class="grupo-body" id="grupo-ami-abertos">
-      ${abertos.map(a => cardAmistoso(a)).join('')}
-    </div>`;
+  if (!abertos.length) {
+    c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">NENHUM AMISTOSO EM ANDAMENTO</p>';
+    return;
   }
 
-  // ── FINALIZADOS ──
-  if (finalizados.length) {
-    html += `<div class="grupo-header" onclick="toggleGrupo(this)" style="margin-top:${abertos.length?'12':'0'}px;">
-      <span class="grupo-titulo">FINALIZADOS <span style="color:var(--text-muted);font-weight:600;">(${finalizados.length})</span></span>
-      <span class="grupo-seta">›</span>
-    </div>
-    <div class="grupo-body fechado" id="grupo-ami-finalizados">
-      <div class="filtro-row" id="ami-filtros">
-        <button class="filtro-btn ${_amiState.filtroTipo==='todos'?'ativo':''}" onclick="_filtrarAmi('todos')">TODOS</button>
-        <button class="filtro-btn ${_amiState.filtroTipo==='clubes'?'ativo':''}" onclick="_filtrarAmi('clubes')">CLUBES</button>
-        <button class="filtro-btn ${_amiState.filtroTipo==='selecoes'?'ativo':''}" onclick="_filtrarAmi('selecoes')">SELECOES</button>
-      </div>
-      <select id="ami-filtro-jog" onchange="_filtrarAmiJog(this.value)" style="width:100%;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;margin-bottom:10px;">
-        <option value="">JOGADOR: TODOS</option>
-        ${jogadores.map(j=>`<option value="${j.id}" ${_amiState.filtroJog===j.id?'selected':''}>${_nomeExibicao(j).toUpperCase()}</option>`).join('')}
-      </select>
-      <div id="ami-fin-lista"></div>
-      <div class="pag-row" id="ami-fin-pag"></div>
-    </div>`;
-  }
+  c.innerHTML = abertos.map(a => cardAmistoso(a)).join('');
 
-  c.innerHTML = html;
-
-  // Iniciar swipe em abertos
   if (temPermissao()) {
-    const grpAbertos = document.getElementById('grupo-ami-abertos');
-    if (grpAbertos) initSwipe(grpAbertos, 'amistoso');
+    initSwipe(c, 'amistoso');
   }
-
-  // Renderiza finalizados
-  _renderFinalizadosAmi();
 }
 
 window.toggleGrupo = (header) => {
@@ -3101,6 +3066,9 @@ function _htmlNovoAmistoso() {
         <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">SELECIONE EXATAMENTE 4 JOGADORES</div>
       </div>
     </label>
+    <div id="ami-sortear-dupla-box" style="display:none;margin-bottom:8px;">
+      <button id="btn-sortear-dupla" class="btn-primary" style="background:linear-gradient(135deg,var(--cyan),#0EA5E9);width:100%;" onclick="sortearDupla()">SORTEAR DUPLA</button>
+    </div>
     <label class="check-row" style="margin-bottom:8px;" id="label-sorteio-auto">
       <input type="checkbox" id="ami-sorteio-auto" checked onchange="toggleSorteioAuto(this.checked)">
       <div>
@@ -3136,6 +3104,7 @@ function _htmlNovoAmistoso() {
         <button id="btn-ami-proximo" class="btn-primary" style="background:linear-gradient(135deg,#7C3AED,#06B6D4);" onclick="sortearAmistoso()">SORTEAR</button>
         <button id="btn-ami-salvar" style="display:none;" class="btn-primary" onclick="salvarAmistoso()">SALVAR</button>
       </div>
+      <div id="btn-ami-excluir-slot" style="display:none;"></div>
       <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
     </div>`;
 }
@@ -3277,6 +3246,8 @@ window.toggleModoDupla = (ativo) => {
   if (label) label.style.borderColor = ativo ? 'var(--cyan)' : '';
   const limiteBox = document.getElementById('ami-limite-box');
   if (limiteBox) limiteBox.style.display = ativo ? '' : 'none';
+  const sortearDuplaBox = document.getElementById('ami-sortear-dupla-box');
+  if (sortearDuplaBox) sortearDuplaBox.style.display = ativo ? '' : 'none';
   // Limpar jogadores ao mudar modo (max por time muda)
   _jcT1.clear(); _jcT2.clear();
   _amiManualSel.clear();
@@ -3290,6 +3261,31 @@ window.toggleModoDupla = (ativo) => {
   // Atualizar manual times box se visivel
   const sorteioAuto = document.getElementById('ami-sorteio-auto');
   if (sorteioAuto && !sorteioAuto.checked) _renderSorteioManual();
+};
+
+window.sortearDupla = () => {
+  const jogsList = [..._jcSel.entries()];
+  if (jogsList.length !== 4) {
+    toast('SELECIONE EXATAMENTE 4 JOGADORES PARA SORTEAR A DUPLA', 'erro');
+    return;
+  }
+  // Embaralhar aleatoriamente
+  for (let i = jogsList.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [jogsList[i], jogsList[j]] = [jogsList[j], jogsList[i]];
+  }
+  _jcT1.clear(); _jcT2.clear();
+  _jcT1.set(jogsList[0][0], jogsList[0][1]);
+  _jcT1.set(jogsList[1][0], jogsList[1][1]);
+  _jcT2.set(jogsList[2][0], jogsList[2][1]);
+  _jcT2.set(jogsList[3][0], jogsList[3][1]);
+  _syncJcMaps();
+  // Resetar sorteio de times ao trocar duplas
+  const sorteioBox = document.getElementById('ami-sorteio');
+  if (sorteioBox) { sorteioBox.style.display = 'none'; sorteioBox.innerHTML = ''; }
+  const btnSalvar = document.getElementById('btn-ami-salvar');
+  if (btnSalvar) btnSalvar.style.display = 'none';
+  _renderJcPanels();
 };
 
 window.toggleSorteioAuto = (ativo) => {
@@ -4096,14 +4092,10 @@ window.editarAmistoso = (id) => {
     }
 
     // Adicionar botão de exclusão do amistoso em andamento
-    const btnCancelar = document.querySelector('#fullscreen-body .btn-ghost');
-    if (btnCancelar) {
-      const btnExcluir = document.createElement('button');
-      btnExcluir.className = 'btn-primary';
-      btnExcluir.style.cssText = 'background:linear-gradient(135deg,#EF4444,#DC2626);border-color:transparent;color:#fff;';
-      btnExcluir.textContent = 'EXCLUIR AMISTOSO';
-      btnExcluir.onclick = () => confirmarExcluirAmistoso(id);
-      btnCancelar.parentElement.insertBefore(btnExcluir, btnCancelar);
+    const excluirSlot = document.getElementById('btn-ami-excluir-slot');
+    if (excluirSlot) {
+      excluirSlot.style.display = '';
+      excluirSlot.innerHTML = `<button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);border-color:transparent;color:#fff;" onclick="confirmarExcluirAmistoso('${id}')">EXCLUIR AMISTOSO</button>`;
     }
 
     // Event listener para fechar dropdown ao clicar fora
