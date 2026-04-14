@@ -3045,7 +3045,7 @@ function _htmlNovoAmistoso() {
       <input type="checkbox" id="ami-dupla" onchange="toggleModoDupla(this.checked)">
       <div style="display:flex;align-items:center;justify-content:space-between;flex:1;">
         <div style="font-size:13px;font-weight:700;">DUPLA</div>
-        <span onclick="event.preventDefault();event.stopPropagation();toggleInfoAmi('info-ami-dupla')" style="cursor:pointer;color:var(--text-muted);font-size:11px;font-weight:800;background:rgba(255,255,255,0.1);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.2);">?</span>
+        <span onclick="event.preventDefault();event.stopPropagation();toggleInfoAmi('info-ami-dupla')" title="Mostrar informacao" style="cursor:pointer;color:var(--text-muted);font-size:11px;font-weight:800;background:rgba(255,255,255,0.1);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.2);">?</span>
       </div>
     </label>
     <div id="info-ami-dupla" style="display:none;font-size:11px;color:var(--text-muted);margin:-2px 0 8px;padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--card-border);">SELECIONE EXATAMENTE 4 JOGADORES</div>
@@ -3054,7 +3054,7 @@ function _htmlNovoAmistoso() {
         <input type="checkbox" id="ami-sortear-dup-auto" onchange="toggleSortearDuplaAuto(this.checked)">
         <div style="display:flex;align-items:center;justify-content:space-between;flex:1;">
           <div style="font-size:13px;font-weight:700;">SORTEAR DUPLA</div>
-          <span onclick="event.preventDefault();event.stopPropagation();toggleInfoAmi('info-ami-sortear-dup')" style="cursor:pointer;color:var(--text-muted);font-size:11px;font-weight:800;background:rgba(255,255,255,0.1);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.2);">?</span>
+          <span onclick="event.preventDefault();event.stopPropagation();toggleInfoAmi('info-ami-sortear-dup')" title="Mostrar informacao" style="cursor:pointer;color:var(--text-muted);font-size:11px;font-weight:800;background:rgba(255,255,255,0.1);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.2);">?</span>
         </div>
       </label>
       <div id="info-ami-sortear-dup" style="display:none;font-size:11px;color:var(--text-muted);margin:-2px 0 8px;padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--card-border);">DESMARCADO: SELECIONE MANUALMENTE QUEM EH A DUPLA 1 E 2</div>
@@ -3083,7 +3083,7 @@ function _htmlNovoAmistoso() {
       <input type="checkbox" id="ami-sorteio-auto" checked onchange="toggleSorteioAuto(this.checked)">
       <div style="display:flex;align-items:center;justify-content:space-between;flex:1;">
         <div style="font-size:13px;font-weight:700;">SORTEAR TIMES</div>
-        <span onclick="event.preventDefault();event.stopPropagation();toggleInfoAmi('info-ami-sorteio-auto')" style="cursor:pointer;color:var(--text-muted);font-size:11px;font-weight:800;background:rgba(255,255,255,0.1);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.2);">?</span>
+        <span onclick="event.preventDefault();event.stopPropagation();toggleInfoAmi('info-ami-sorteio-auto')" title="Mostrar informacao" style="cursor:pointer;color:var(--text-muted);font-size:11px;font-weight:800;background:rgba(255,255,255,0.1);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.2);">?</span>
       </div>
     </label>
     <div id="info-ami-sorteio-auto" style="display:none;font-size:11px;color:var(--text-muted);margin:-2px 0 8px;padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--card-border);">DESMARCADO: ESCOLHA O TIME DE CADA JOGADOR</div>
@@ -3472,6 +3472,7 @@ window.toggleInfoAmi = (id) => {
 
 window.toggleSorteioAuto = (ativo) => {
   _amiDuplaTimeSel.clear();
+  _renderPlayersPanel();
   _renderDuplaPanel(1);
   _renderDuplaPanel(2);
   const box = document.getElementById('ami-sorteio');
