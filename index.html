@@ -3351,19 +3351,15 @@ window.toggleSortearDuplaAuto = (ativo) => {
   const resultPanel = document.getElementById('ami-dupla-result-panel');
 
   if (ativo) {
-    // Checkbox marcado: verificar jogadores ANTES de limpar, depois sortear
-    const jogsList = [..._jcSel.entries()];
-    if (jogsList.length !== 4) {
-      toast('SELECIONE EXATAMENTE 4 JOGADORES PARA SORTEAR A DUPLA', 'erro');
-      const cb = document.getElementById('ami-sortear-dup-auto');
-      if (cb) cb.checked = false;
-      return;
-    }
+    // Checkbox marcado: exibir painel de todos os jogadores para sortear dupla
+    _jcT1.clear(); _jcT2.clear();
     _amiManualSel.clear();
     _amiDuplaTimeSel.clear();
+    _syncJcMaps();
     if (manualBox) manualBox.style.display = 'none';
     if (autoSection) autoSection.style.display = '';
-    sortearDupla(); // sortearDupla re-embaralha _jcSel e atualiza T1/T2
+    if (resultPanel) { resultPanel.style.display = 'none'; resultPanel.innerHTML = ''; }
+    _renderPlayersPanel();
   } else {
     // Checkbox desmarcado: modo manual
     _jcT1.clear(); _jcT2.clear();
@@ -3896,6 +3892,8 @@ window.sortearAmistoso = () => {
   const maxDupla = parseInt(document.getElementById('ami-max-dupla')?.value) || 0;
   if (modoDupla) {
     if (_jcSel.size !== 4) { toast('MODO DUPLA: SELECIONE EXATAMENTE 4 JOGADORES', 'erro'); return; }
+    // Sortear dupla automaticamente ao clicar em sortear
+    if (sortearDuplaAuto) { sortearDupla(); }
   } else {
     if (_jcSel.size < 2) { toast('SELECIONE 2+ JOGADORES', 'erro'); return; }
   }
