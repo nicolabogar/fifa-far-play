@@ -3925,7 +3925,7 @@ window.sortearAmistoso = () => {
     const diff = Math.abs(t1data.forca - t2data.forca);
     const eq = diff <= 2 ? 'EQUILIBRADO' : diff <= 5 ? 'LEVEMENTE DESIGUAL' : 'DESIGUAL';
     _sorteioAmi = {
-      tipo, modoDupla, maxPartidaDupla: maxDupla,
+      tipo, modoDupla, sortearDuplaAuto, maxPartidaDupla: maxDupla,
       time1: { nome: t1data.nome, timeId: t1data.timeId, forca: t1data.forca, eficiencia: t1data.eficiencia||'Bom', jogadores: j1.map(j=>_nomeExibicao(j)), jogadoresIds: j1.map(j=>j.id) },
       time2: { nome: t2data.nome, timeId: t2data.timeId, forca: t2data.forca, eficiencia: t2data.eficiencia||'Bom', jogadores: j2.map(j=>_nomeExibicao(j)), jogadoresIds: j2.map(j=>j.id) },
     };
@@ -3950,6 +3950,7 @@ window.sortearAmistoso = () => {
     _sorteioAmi = {
       tipo,
       modoDupla,
+      sortearDuplaAuto,
       maxPartidaDupla: maxDupla,
       time1: { nome: t1data.nome, timeId: t1data.timeId, forca: t1data.forca, eficiencia: t1data.eficiencia||'Bom', jogadores: j1.map(j=>_nomeExibicao(j)), jogadoresIds: j1.map(j=>j.id) },
       time2: { nome: t2data.nome, timeId: t2data.timeId, forca: t2data.forca, eficiencia: t2data.eficiencia||'Bom', jogadores: j2.map(j=>_nomeExibicao(j)), jogadoresIds: j2.map(j=>j.id) },
@@ -3975,6 +3976,7 @@ window.sortearAmistoso = () => {
     _sorteioAmi = {
       tipo,
       modoDupla,
+      sortearDuplaAuto,
       maxPartidaDupla: maxDupla,
       time1: { nome: t1.nome, timeId: t1.id, forca: t1.forca, eficiencia: t1.eficiencia||'Bom', jogadores: j1.map(j => j.nome), jogadoresIds: j1.map(j => j.id) },
       time2: { nome: t2.nome, timeId: t2.id, forca: t2.forca, eficiencia: t2.eficiencia||'Bom', jogadores: j2.map(j => j.nome), jogadoresIds: j2.map(j => j.id) },
@@ -3996,6 +3998,7 @@ window.sortearAmistoso = () => {
   _sorteioAmi = {
     tipo,
     modoDupla,
+    sortearDuplaAuto,
     maxPartidaDupla: maxDupla,
     time1: { nome: t1.nome, timeId: t1.id, forca: t1.forca, eficiencia: t1.eficiencia||'Bom', jogadores: j1.map(j => j.nome), jogadoresIds: j1.map(j => j.id) },
     time2: { nome: t2.nome, timeId: t2.id, forca: t2.forca, eficiencia: t2.eficiencia||'Bom', jogadores: j2.map(j => j.nome), jogadoresIds: j2.map(j => j.id) },
@@ -4391,6 +4394,15 @@ window.editarAmistoso = (id) => {
       if (limiteBox) limiteBox.style.display = '';
       const sortearDuplaBox = document.getElementById('ami-sortear-dupla-box');
       if (sortearDuplaBox) sortearDuplaBox.style.display = '';
+      // Restaurar estado do checkbox de sortear dupla automaticamente
+      const sortearDupAutoCb = document.getElementById('ami-sortear-dup-auto');
+      if (sortearDupAutoCb && a.sortearDuplaAuto) {
+        sortearDupAutoCb.checked = true;
+        const manualBox = document.getElementById('ami-dupla-manual-box');
+        if (manualBox) manualBox.style.display = 'none';
+        const autoSection = document.getElementById('ami-jogadores-auto-section');
+        if (autoSection) autoSection.style.display = '';
+      }
       // Mostrar painel de duplas com os jogadores ja pre-carregados
       _renderDuplasResultPanel();
     }
@@ -4527,6 +4539,15 @@ window._criarNovoJogoMesmosParams = () => {
       if (limiteBox) limiteBox.style.display = '';
       const sortearDuplaBox = document.getElementById('ami-sortear-dupla-box');
       if (sortearDuplaBox) sortearDuplaBox.style.display = '';
+      // Restaurar estado do checkbox de sortear dupla automaticamente
+      const sortearDupAutoCb = document.getElementById('ami-sortear-dup-auto');
+      if (sortearDupAutoCb && a.sortearDuplaAuto) {
+        sortearDupAutoCb.checked = true;
+        const manualBox = document.getElementById('ami-dupla-manual-box');
+        if (manualBox) manualBox.style.display = 'none';
+        const autoSection = document.getElementById('ami-jogadores-auto-section');
+        if (autoSection) autoSection.style.display = '';
+      }
       _renderDuplasResultPanel();
     }
 
