@@ -2998,7 +2998,34 @@ function _htmlNovoAmistoso() {
       </div>
     </label>
     <div id="ami-sortear-dupla-box" style="display:none;margin-bottom:8px;">
+      <label class="check-row" style="margin-bottom:8px;" id="label-sortear-dup-auto">
+        <input type="checkbox" id="ami-sortear-dup-auto" checked onchange="toggleSortearDuplaAuto(this.checked)">
+        <div>
+          <div style="font-size:13px;font-weight:700;">SORTEAR DUPLA ALEATORIAMENTE</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">DESMARCADO: SELECIONE MANUALMENTE QUEM EH A DUPLA 1 E 2</div>
+        </div>
+      </label>
       <button id="btn-sortear-dupla" class="btn-primary" style="background:linear-gradient(135deg,var(--cyan),#0EA5E9);width:100%;" onclick="sortearDupla()">SORTEAR DUPLA</button>
+    </div>
+    <div id="ami-dupla-manual-box" style="display:none;margin-bottom:8px;">
+      <label style="display:block;font-size:12px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">DUPLA 1</label>
+      <div style="position:relative;margin-bottom:6px;">
+        <input id="jc-search-d1" type="text" class="input" placeholder="BUSCAR JOGADOR..." autocomplete="off"
+          oninput="filtrarJogsDupla(1)" onfocus="this.value='';filtrarJogsDupla(1)"
+          onblur="setTimeout(()=>{const d=document.getElementById('jc-dropdown-d1');if(d)d.style.display='none';},200)"
+          style="margin-bottom:0;">
+        <div id="jc-dropdown-d1" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:20;background:var(--bg);border:1px solid var(--card-border);border-radius:12px;max-height:200px;overflow-y:auto;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,0.5);"></div>
+      </div>
+      <div id="jc-panel-d1" style="margin-bottom:12px;"></div>
+      <label style="display:block;font-size:12px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">DUPLA 2</label>
+      <div style="position:relative;margin-bottom:6px;">
+        <input id="jc-search-d2" type="text" class="input" placeholder="BUSCAR JOGADOR..." autocomplete="off"
+          oninput="filtrarJogsDupla(2)" onfocus="this.value='';filtrarJogsDupla(2)"
+          onblur="setTimeout(()=>{const d=document.getElementById('jc-dropdown-d2');if(d)d.style.display='none';},200)"
+          style="margin-bottom:0;">
+        <div id="jc-dropdown-d2" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:20;background:var(--bg);border:1px solid var(--card-border);border-radius:12px;max-height:200px;overflow-y:auto;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,0.5);"></div>
+      </div>
+      <div id="jc-panel-d2" style="margin-bottom:8px;"></div>
     </div>
     <label class="check-row" style="margin-bottom:8px;" id="label-sorteio-auto">
       <input type="checkbox" id="ami-sorteio-auto" checked onchange="toggleSorteioAuto(this.checked)">
@@ -3015,6 +3042,7 @@ function _htmlNovoAmistoso() {
       <div style="font-size:11px;color:var(--text-muted);">0 = SEM LIMITE. SE MAIOR QUE 0, DUPLAS QUE JA JOGARAM N VEZES NA ULTIMA HORA NAO SERAO SORTEADAS JUNTAS.</div>
     </div>
     <div id="ami-efic-filtro-box" class="efic-panel" style="margin-bottom:16px;">${htmlEficFiltro('ami-efic-filtro')}</div>
+    <div id="ami-jogadores-auto-section">
     <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">JOGADORES</label>
     <div style="position:relative;margin-bottom:8px;">
       <input id="jc-search" type="text" class="input" placeholder="BUSCAR JOGADOR..." autocomplete="off"
@@ -3026,6 +3054,7 @@ function _htmlNovoAmistoso() {
     <div id="jc-players-panel" style="margin-bottom:8px;"></div>
     <div style="display:flex;justify-content:center;margin-bottom:12px;">
       <button onclick="limparJogadoresJC()" class="btn-ghost" style="font-size:11px;padding:6px 16px;">LIMPAR JOGADORES</button>
+    </div>
     </div>
     <div id="ami-sorteio" style="display:none;margin-bottom:16px;"></div>
     <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
@@ -3177,6 +3206,15 @@ window.toggleModoDupla = (ativo) => {
   if (limiteBox) limiteBox.style.display = ativo ? '' : 'none';
   const sortearDuplaBox = document.getElementById('ami-sortear-dupla-box');
   if (sortearDuplaBox) sortearDuplaBox.style.display = ativo ? '' : 'none';
+  // Ao desativar modo dupla, resetar toggle sortear e esconder manual box
+  if (!ativo) {
+    const sortearAuto = document.getElementById('ami-sortear-dup-auto');
+    if (sortearAuto) sortearAuto.checked = true;
+    const manualBox = document.getElementById('ami-dupla-manual-box');
+    if (manualBox) manualBox.style.display = 'none';
+    const autoSection = document.getElementById('ami-jogadores-auto-section');
+    if (autoSection) autoSection.style.display = '';
+  }
   // Limpar jogadores ao mudar modo (max por time muda)
   _jcT1.clear(); _jcT2.clear();
   _amiManualSel.clear();
@@ -3211,7 +3249,95 @@ window.sortearDupla = () => {
   if (sorteioBox) { sorteioBox.style.display = 'none'; sorteioBox.innerHTML = ''; }
   const btnSalvar = document.getElementById('btn-ami-salvar');
   if (btnSalvar) btnSalvar.style.display = 'none';
-  _renderJcPanels();
+  _renderPlayersPanel();
+};
+
+window.toggleSortearDuplaAuto = (ativo) => {
+  const btnSortear = document.getElementById('btn-sortear-dupla');
+  if (btnSortear) btnSortear.style.display = ativo ? '' : 'none';
+  const manualBox = document.getElementById('ami-dupla-manual-box');
+  if (manualBox) manualBox.style.display = ativo ? 'none' : '';
+  const autoSection = document.getElementById('ami-jogadores-auto-section');
+  if (autoSection) autoSection.style.display = ativo ? '' : 'none';
+  // Limpar seleções ao trocar modo
+  _jcT1.clear(); _jcT2.clear();
+  _amiManualSel.clear();
+  _syncJcMaps();
+  _renderPlayersPanel();
+  _renderDuplaPanel(1);
+  _renderDuplaPanel(2);
+  const box = document.getElementById('ami-sorteio');
+  if (box) { box.style.display = 'none'; box.innerHTML = ''; }
+  const btnSalvar = document.getElementById('btn-ami-salvar');
+  if (btnSalvar) btnSalvar.style.display = 'none';
+};
+
+function _renderDuplaPanel(duplaNum) {
+  const container = document.getElementById(`jc-panel-d${duplaNum}`);
+  if (!container) return;
+  const map = duplaNum === 1 ? _jcT1 : _jcT2;
+  const entries = [...map.entries()];
+  if (!entries.length) { container.innerHTML = ''; return; }
+  const tags = entries.map(([id, nome]) =>
+    `<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.35);border-radius:20px;padding:5px 10px;font-size:12px;font-weight:700;color:#67E8F9;margin:2px;">
+      ${_nomeTag(nome)}
+      <span onclick="removerJogDupla('${id}',${duplaNum})" style="cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;margin-left:4px;">×</span>
+    </div>`
+  ).join('');
+  container.innerHTML = `<div style="background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:8px;margin-top:4px;">
+    <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;min-height:28px;">${tags}</div>
+  </div>`;
+  // Desabilitar input quando dupla cheia
+  const inp = document.getElementById(`jc-search-d${duplaNum}`);
+  if (inp) {
+    inp.disabled = map.size >= 2;
+    inp.style.opacity = map.size >= 2 ? '0.4' : '';
+    inp.style.cursor = map.size >= 2 ? 'not-allowed' : '';
+  }
+}
+
+window.filtrarJogsDupla = (duplaNum) => {
+  const q = (document.getElementById(`jc-search-d${duplaNum}`)?.value || '').toLowerCase();
+  const drop = document.getElementById(`jc-dropdown-d${duplaNum}`);
+  if (!drop) return;
+  const disponiveis = jogadores.filter(j =>
+    !_jcSel.has(j.id) &&
+    (!q || j.nome.toLowerCase().includes(q) || (j.apelido||'').toLowerCase().includes(q))
+  );
+  if (!disponiveis.length) { drop.style.display = 'none'; return; }
+  drop.innerHTML = disponiveis.map(j =>
+    `<div onclick="selecionarJogDupla('${j.id}','${_nomeExibicao(j).replace(/'/g,"\\'").replace(/"/g,'&quot;')}',${duplaNum});document.getElementById('jc-search-d${duplaNum}').value='';document.getElementById('jc-dropdown-d${duplaNum}').style.display='none';"
+      style="padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.05);font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;">
+      ${SVG_USER_CHIP}<span>${_nomeExibicao(j)}</span>
+    </div>`
+  ).join('');
+  drop.style.display = 'block';
+};
+
+window.selecionarJogDupla = (id, nome, duplaNum) => {
+  const map = duplaNum === 1 ? _jcT1 : _jcT2;
+  if (map.size >= 2) return;
+  map.set(id, nome);
+  _syncJcMaps();
+  _renderDuplaPanel(1);
+  _renderDuplaPanel(2);
+  const box = document.getElementById('ami-sorteio');
+  if (box) { box.style.display = 'none'; box.innerHTML = ''; }
+  const btnSalvar = document.getElementById('btn-ami-salvar');
+  if (btnSalvar) btnSalvar.style.display = 'none';
+};
+
+window.removerJogDupla = (id, duplaNum) => {
+  const map = duplaNum === 1 ? _jcT1 : _jcT2;
+  map.delete(id);
+  _amiManualSel.delete(id);
+  _syncJcMaps();
+  _renderDuplaPanel(1);
+  _renderDuplaPanel(2);
+  const box = document.getElementById('ami-sorteio');
+  if (box) { box.style.display = 'none'; box.innerHTML = ''; }
+  const btnSalvar = document.getElementById('btn-ami-salvar');
+  if (btnSalvar) btnSalvar.style.display = 'none';
 };
 
 window.toggleSorteioAuto = (ativo) => {
@@ -4040,6 +4166,8 @@ window.editarAmistoso = (id) => {
       if (label) label.style.borderColor = 'var(--cyan)';
       const limiteBox = document.getElementById('ami-limite-box');
       if (limiteBox) limiteBox.style.display = '';
+      const sortearDuplaBox = document.getElementById('ami-sortear-dupla-box');
+      if (sortearDuplaBox) sortearDuplaBox.style.display = '';
     }
 
     // Limite de partidas por dupla
@@ -4066,7 +4194,7 @@ window.editarAmistoso = (id) => {
     const excluirSlot = document.getElementById('btn-ami-excluir-slot');
     if (excluirSlot) {
       excluirSlot.style.display = '';
-      excluirSlot.innerHTML = `<button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);border-color:transparent;color:#fff;" onclick="confirmarExcluirAmistoso('${id}')">EXCLUIR AMISTOSO</button>`;
+      excluirSlot.innerHTML = `<button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);border-color:transparent;color:#fff;width:100%;" onclick="confirmarExcluirAmistoso('${id}')">EXCLUIR</button>`;
     }
 
     // Event listener para fechar dropdown ao clicar fora
@@ -4172,6 +4300,8 @@ window._criarNovoJogoMesmosParams = () => {
       if (label) label.style.borderColor = 'var(--cyan)';
       const limiteBox = document.getElementById('ami-limite-box');
       if (limiteBox) limiteBox.style.display = '';
+      const sortearDuplaBox = document.getElementById('ami-sortear-dupla-box');
+      if (sortearDuplaBox) sortearDuplaBox.style.display = '';
     }
 
     _renderPlayersPanel();
