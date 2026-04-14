@@ -2733,7 +2733,7 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false) {
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-width:0;">
         <div style="font-weight:800;font-size:13px;line-height:1.2;text-transform:uppercase;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${abreviarNome(a.time2?.nome || '?')}</div>
         ${b2}
-        ${_nomesTime(a.time2).length ? `<div style="font-size:10px;color:var(--cyan);font-weight:700;">${_nomesTime(a.time2).join(' · ')}</div>` : ''}
+        ${_nomesTime(a.time2).length ? `<div style="font-size:10px;color:${a.modoDupla ? 'var(--yellow)' : 'var(--cyan)'};font-weight:700;">${_nomesTime(a.time2).join(' · ')}</div>` : ''}
       </div>
     </div>` : `
     <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
@@ -2755,7 +2755,7 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false) {
         ${lpIcon2}
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(a.time2?.timeId))}</div>
         ${_nomesTime(a.time2).length
-          ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;">${_nomesTime(a.time2).map(n=>`<div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>`
+          ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;">${_nomesTime(a.time2).map(n=>`<div style="font-size:11px;color:${a.modoDupla ? 'var(--yellow)' : 'var(--cyan)'};font-weight:700;text-transform:uppercase;background:${a.modoDupla ? 'rgba(245,158,11,0.08)' : 'rgba(6,182,212,0.08)'};border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>`
           : ''}
       </div>
     </div>`}
@@ -3067,7 +3067,7 @@ function _htmlNovoAmistoso() {
         <div id="jc-dropdown-d1" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:20;background:var(--bg);border:1px solid var(--card-border);border-radius:12px;max-height:200px;overflow-y:auto;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,0.5);"></div>
       </div>
       <div id="jc-panel-d1" style="margin-bottom:12px;"></div>
-      <label style="display:block;font-size:12px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">DUPLA 2</label>
+      <label style="display:block;font-size:12px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">DUPLA 2</label>
       <div style="position:relative;margin-bottom:6px;">
         <input id="jc-search-d2" type="text" class="input" placeholder="BUSCAR JOGADOR..." autocomplete="off"
           oninput="filtrarJogsDupla(2)" onfocus="this.value='';filtrarJogsDupla(2)"
@@ -3330,9 +3330,14 @@ function _renderDuplasResultPanel() {
     return;
   }
   const renderDupla = (num, map) => {
-    const nomes = [...map.values()].map(n => `<div style="display:inline-flex;align-items:center;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.35);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;color:#67E8F9;text-transform:uppercase;">${_nomeTag(n)}</div>`).join('');
-    return `<div style="flex:1;text-align:center;background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.25);border-radius:10px;padding:8px;">
-      <div style="font-size:10px;font-weight:800;color:var(--cyan);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px;">DUPLA ${num}</div>
+    const isD1 = num === 1;
+    const tagBg = isD1 ? 'rgba(6,182,212,0.12)' : 'rgba(245,158,11,0.12)';
+    const tagBorder = isD1 ? 'rgba(6,182,212,0.35)' : 'rgba(245,158,11,0.35)';
+    const tagColor = isD1 ? '#67E8F9' : '#FCD34D';
+    const titleColor = isD1 ? 'var(--cyan)' : 'var(--yellow)';
+    const nomes = [...map.values()].map(n => `<div style="display:inline-flex;align-items:center;background:${tagBg};border:1px solid ${tagBorder};border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;color:${tagColor};text-transform:uppercase;">${_nomeTag(n)}</div>`).join('');
+    return `<div style="flex:1;text-align:center;background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:10px;padding:8px;">
+      <div style="font-size:10px;font-weight:800;color:${titleColor};text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px;">DUPLA ${num}</div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">${nomes}</div>
     </div>`;
   };
@@ -3386,8 +3391,12 @@ function _renderDuplaPanel(duplaNum) {
   const map = duplaNum === 1 ? _jcT1 : _jcT2;
   const entries = [...map.entries()];
   if (!entries.length) { container.innerHTML = ''; return; }
+  const isD1 = duplaNum === 1;
+  const tagBg = isD1 ? 'rgba(6,182,212,0.12)' : 'rgba(245,158,11,0.12)';
+  const tagBorder = isD1 ? 'rgba(6,182,212,0.35)' : 'rgba(245,158,11,0.35)';
+  const tagColor = isD1 ? '#67E8F9' : '#FCD34D';
   const tags = entries.map(([id, nome]) =>
-    `<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.35);border-radius:20px;padding:5px 10px;font-size:12px;font-weight:700;color:#67E8F9;margin:2px;">
+    `<div style="display:inline-flex;align-items:center;gap:4px;background:${tagBg};border:1px solid ${tagBorder};border-radius:20px;padding:5px 10px;font-size:12px;font-weight:700;color:${tagColor};margin:2px;">
       ${_nomeTag(nome)}
       <span onclick="removerJogDupla('${id}',${duplaNum})" style="cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;margin-left:4px;">×</span>
     </div>`
@@ -4275,7 +4284,7 @@ window.verAmistoso = (id) => {
           <div style="display:flex;justify-content:center;margin-bottom:8px;">${b2}</div>
           <div style="font-weight:800;font-size:14px;text-transform:uppercase;">${a.time2?.nome||'?'}</div>
           <div style="margin-top:4px;">${eficBadge(eficienciaAtual(a.time2?.timeId))}</div>
-          <div style="font-size:11px;color:var(--cyan);margin-top:4px;">${_nomesTime(a.time2).join(', ')}</div>
+          <div style="font-size:11px;color:${a.modoDupla ? 'var(--yellow)' : 'var(--cyan)'};margin-top:4px;">${_nomesTime(a.time2).join(', ')}</div>
         </div>
       </div>
       ${temRes ? `<div>
@@ -4333,7 +4342,7 @@ window.editarAmistoso = (id) => {
               <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${abreviarNome(a.time2?.nome||'?')}</div>
               <div style="display:flex;justify-content:center;margin-bottom:4px;">${icon2}</div>
               <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(a.time2?.timeId))}</div>
-              ${_nomesTime(a.time2).length ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;">${_nomesTime(a.time2).map(n=>`<div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>` : ''}
+              ${_nomesTime(a.time2).length ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;">${_nomesTime(a.time2).map(n=>`<div style="font-size:11px;color:${a.modoDupla ? 'var(--yellow)' : 'var(--cyan)'};font-weight:700;text-transform:uppercase;background:${a.modoDupla ? 'rgba(245,158,11,0.08)' : 'rgba(6,182,212,0.08)'};border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>` : ''}
             </div>
           </div>
         </div>
