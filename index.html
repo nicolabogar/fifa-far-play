@@ -1361,8 +1361,10 @@ function atributosBadge(t) {
 const MEMORIA_MAX = 40; // últimos N sorteios armazenados por tipo
 // Memória de sessão: times individuais dos últimos sorteios na sessão atual (sem salvar)
 let _sessionRecentTeams = [];
-const SESSION_DRAWS_TO_REMEMBER = 4; // quantos sorteios recentes excluir na sessão
+const SESSION_DRAWS_TO_REMEMBER = 10; // quantos sorteios recentes excluir na sessão
 const SESSION_RECENT_WINDOW = SESSION_DRAWS_TO_REMEMBER * 2; // 2 times por sorteio
+// Frequência de uso de cada time na sessão atual (timeId -> contagem)
+let _sessionTeamFrequency = {};
 function _memoriaKey(tipo) { return `sorteio_mem_${tipo}`; }
 function lerMemoria(tipo) {
   try { return JSON.parse(localStorage.getItem(_memoriaKey(tipo)) || '[]'); } catch { return []; }
@@ -1422,8 +1424,9 @@ function _parEficValido(e1, e2) {
  * - Exclui times usados nos últimos N amistosos (histórico Firestore + sessão atual).
  * - Gera todos os pares válidos (eficiência + discrepância ≤ 50%).
  * - Prioriza pares NÃO presentes na memória anti-repetição (localStorage).
- * - Usa seleção aleatória ponderada: pares mais equilibrados têm maior peso,
- *   mas todos os pares válidos têm chance de ser sorteados.
+ * - Usa seleção aleatória ponderada com distribuição uniforme:
+ *   times menos usados na sessão têm peso exponencialmente maior (fator principal),
+ *   com leve preferência por pares mais equilibrados (fator secundário).
  * - Fallbacks progressivos para garantir sempre retornar um resultado.
  */
 function sortearBalanceado(pool, historicoIds = [], tipo = '') {
@@ -1461,26 +1464,33 @@ function sortearBalanceado(pool, historicoIds = [], tipo = '') {
     return pares;
   };
 
-  // Seleção ponderada: pares mais equilibrados têm maior peso, mas todos têm chance.
-  // Isso evita que os mesmos times "mais equilibrados" saiam sempre.
+  // Seleção ponderada com distribuição mais uniforme de times.
+  // Fator principal: times menos usados na sessão têm peso MUITO maior.
+  // Fator secundário: leve preferência por pares mais equilibrados.
   const _escolherDoPainel = (pares) => {
     if (pares.length === 0) return null;
     // Prioriza pares não vistos na memória
     const novos = pares.filter(p => !p.emMem);
     const painel = novos.length > 0 ? novos : pares;
-    // Ordena por menor diferença percentual (mais equilibrados primeiro)
-    painel.sort((a, b) => a.pct - b.pct);
-    // Peso linear decrescente: posição 1 recebe peso n, posição 2 recebe n-1, etc.
-    // Todos os pares têm chance, mas equilibrados têm peso maior.
-    const n = painel.length;
-    const pesos = painel.map((_, i) => n - i);
+    // Calcula peso combinando frescor dos times (principal) e equilíbrio (secundário)
+    const pesos = painel.map(p => {
+      // Frescor: times usados menos vezes têm peso exponencialmente maior
+      // 1/(freq+1)^2 para cada time, multiplicados entre si
+      const freq1 = _sessionTeamFrequency[p.t1.id] || 0;
+      const freq2 = _sessionTeamFrequency[p.t2.id] || 0;
+      const frescor = 1 / ((freq1 + 1) * (freq1 + 1) * (freq2 + 1) * (freq2 + 1));
+      // Equilíbrio suave: pct varia de 0 a 0.5, transforma em fator de 0.7 a 1.0
+      const equilibrio = 1 - p.pct * 0.6;
+      return frescor * equilibrio;
+    });
     const totalPeso = pesos.reduce((s, p) => s + p, 0);
+    if (totalPeso <= 0) return painel[0];
     let r = Math.random() * totalPeso;
-    for (let i = 0; i < n; i++) {
+    for (let i = 0; i < painel.length; i++) {
       r -= pesos[i];
       if (r <= 0) return painel[i];
     }
-    return painel[n - 1];
+    return painel[painel.length - 1];
   };
 
   let escolhido = _escolherDoPainel(_gerarPares(disp));
@@ -1501,6 +1511,9 @@ function sortearBalanceado(pool, historicoIds = [], tipo = '') {
   if (resultado[0] && resultado[1]) {
     _sessionRecentTeams = [resultado[0].id, resultado[1].id, ..._sessionRecentTeams]
       .slice(0, SESSION_RECENT_WINDOW);
+    // Atualiza frequência de uso individual de cada time na sessão
+    _sessionTeamFrequency[resultado[0].id] = (_sessionTeamFrequency[resultado[0].id] || 0) + 1;
+    _sessionTeamFrequency[resultado[1].id] = (_sessionTeamFrequency[resultado[1].id] || 0) + 1;
   }
   if (tipo && resultado[0] && resultado[1]) {
     salvarMemoria(tipo, [resultado[0].id, resultado[1].id]);
@@ -1686,6 +1699,7 @@ function fecharFullscreen() {
   document.getElementById('main').style.display = '';
   _editandoAmiId = null;
   _sessionRecentTeams = []; // reseta memória de sessão ao sair do sorteio
+  _sessionTeamFrequency = {}; // reseta frequência de times ao sair do sorteio
 }
 window.fecharFullscreen = fecharFullscreen;
 
@@ -3296,6 +3310,7 @@ window.toggleTipoAmi = tipo => {
   const btnSalvar = document.getElementById('btn-ami-salvar');
   if (btnSalvar) btnSalvar.style.display = 'none';
   _sessionRecentTeams = []; // reseta memória de sessão ao mudar tipo
+  _sessionTeamFrequency = {}; // reseta frequência de times ao mudar tipo
 };
 
 window.toggleModoDupla = (ativo) => {
