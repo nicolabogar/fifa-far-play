@@ -1105,11 +1105,9 @@ window.badgeTimeCountryInfo = badgeTimeCountryInfo;
 /** Renderiza a linha de país (bandeira + nome) — visível para clubes, invisível para seleções */
 function _htmlCountryRow(timeId, nomeTime, tipo) {
   const isSel = tipo === 'selecoes';
-  const d = isSel
-    ? (SELECAO_PAIS[timeId] || { pais: '', paisNome: nomeTime || '' })
-    : _teamDataOuFallback(timeId, nomeTime);
-  const vis = isSel ? 'visibility:hidden;' : '';
-  return `<div style="display:flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap;${vis}">${flagImg(d.pais || 'eu', 20)}<span style="font-size:9px;color:var(--text-muted);font-weight:600;">${d.paisNome}</span></div>`;
+  if (isSel) return '';
+  const d = _teamDataOuFallback(timeId, nomeTime);
+  return `<div style="display:flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap;">${flagImg(d.pais || 'eu', 20)}<span style="font-size:9px;color:var(--text-muted);font-weight:600;">${d.paisNome}</span></div>`;
 }
 
 /** Renderiza apenas o ícone do time — para seleções retorna a bandeira, para clubes o escudo */
@@ -2740,9 +2738,9 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false) {
     </div>` : `
     <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        ${_htmlCountryRow(a.time1?.timeId, a.time1?.nome, a.tipo)}
         <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${abreviarNome(a.time1?.nome || '?')}</div>
         ${lpIcon1}
-        ${_htmlCountryRow(a.time1?.timeId, a.time1?.nome, a.tipo)}
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(a.time1?.timeId))}</div>
         ${_nomesTime(a.time1).length
           ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;">${_nomesTime(a.time1).map(n=>`<div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>`
@@ -2752,9 +2750,9 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false) {
         ${placarDireto}
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        ${_htmlCountryRow(a.time2?.timeId, a.time2?.nome, a.tipo)}
         <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${abreviarNome(a.time2?.nome || '?')}</div>
         ${lpIcon2}
-        ${_htmlCountryRow(a.time2?.timeId, a.time2?.nome, a.tipo)}
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(a.time2?.timeId))}</div>
         ${_nomesTime(a.time2).length
           ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;">${_nomesTime(a.time2).map(n=>`<div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>`
@@ -5362,8 +5360,8 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
     </div>
     <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-        <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${abreviarNome(t1?.nome||'?')}</div>
         ${_htmlCountryRow(t1?.id||'', t1?.nome||'', tipo)}
+        <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${abreviarNome(t1?.nome||'?')}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(t1?.id||'', t1?.nome||'', tipo)}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(t1?.id))}</div>
         ${nome1 ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;"><div style="font-size:11px;color:#67E8F9;font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.2);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${nome1}</div></div>` : ''}
@@ -5372,8 +5370,8 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
         ${placarArea}
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-        <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${abreviarNome(t2?.nome||'?')}</div>
         ${_htmlCountryRow(t2?.id||'', t2?.nome||'', tipo)}
+        <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${abreviarNome(t2?.nome||'?')}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(t2?.id||'', t2?.nome||'', tipo)}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(t2?.id))}</div>
         ${nome2 ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;"><div style="font-size:11px;color:#67E8F9;font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.2);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${nome2}</div></div>` : ''}
