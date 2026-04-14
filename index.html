@@ -1573,7 +1573,7 @@ window.abreviarNome = abreviarNome;
  * usa nomeAbreviado cadastrado (se houver), senão aplica abreviarNome.
  */
 function _nomeAbrevTime(timeId, nomeCompleto) {
-  const t = [...clubes, ...selecoes].find(x => x.id === timeId);
+  const t = clubes.find(x => x.id === timeId) || selecoes.find(x => x.id === timeId);
   if (t?.nomeAbreviado) return t.nomeAbreviado;
   return abreviarNome(nomeCompleto);
 }
