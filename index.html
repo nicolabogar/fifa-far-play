@@ -1216,6 +1216,7 @@ window.toggleEficFiltro = (val) => {
     });
   });
   if (typeof _renderTimesLista === 'function') _renderTimesLista();
+  if (typeof _atualizarTimesManualCC === 'function') _atualizarTimesManualCC();
 };
 function htmlEficFiltro(containerId) {
   const sel = carregarEficFiltro();
@@ -4857,12 +4858,15 @@ window.selecionarJogCC = (id, nome) => {
   _ccSel.set(id, nome);
   _renderTagsCC();
   if (document.getElementById('camp-dupla')?.checked && !document.getElementById('camp-sortear-dupla-auto')?.checked) _renderDuplasManualUI();
+  _atualizarTimesManualCC();
 };
 
 window.removerJogCC = (id) => {
   _ccSel.delete(id);
+  _ccTimesManual.delete(id);
   _renderTagsCC();
   if (document.getElementById('camp-dupla')?.checked && !document.getElementById('camp-sortear-dupla-auto')?.checked) _renderDuplasManualUI();
+  _atualizarTimesManualCC();
 };
 
 function abrirModalCriarCamp(secao, secaoView) {
@@ -4870,6 +4874,8 @@ function abrirModalCriarCamp(secao, secaoView) {
   _ccSel.clear();
   _ccQtdTimes = 1;
   _ccParesManual = [];
+  _ccModoTimes = 'auto';
+  _ccTimesManual.clear();
   fullscreen('NOVO', `
     <div style="display:flex;flex-direction:column;gap:14px;">
       <div>
@@ -4929,6 +4935,16 @@ function abrirModalCriarCamp(secao, secaoView) {
           <span style="color:var(--text-muted);font-size:12px;align-self:center;padding:4px 0;">NENHUM JOGADOR SELECIONADO</span>
         </div>
       </div>
+      <div id="cc-times-escolha-section">
+        <label class="check-row" style="margin-bottom:4px;">
+          <input type="checkbox" id="cc-manual-times" style="width:18px;height:18px;accent-color:var(--purple);" onchange="_onToggleTimesManual(this.checked)">
+          <div>
+            <div style="font-size:13px;font-weight:700;">ESCOLHER TIMES</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">DESMARCADO: TIMES SERAO SORTEADOS AUTOMATICAMENTE</div>
+          </div>
+        </label>
+        <div id="cc-times-manual-panel" style="display:none;margin-top:8px;"></div>
+      </div>
     </div>
     <div id="cc-efic-filtro-box" class="efic-panel" style="margin-bottom:16px;">${htmlEficFiltro('cc-efic-filtro')}</div>
     <div style="display:flex;flex-direction:column;gap:8px;margin-top:20px;">
@@ -4953,6 +4969,10 @@ window.iniciarCampeonato = () => abrirModalCriarCamp('TORNEIOS', 'campeonatos');
 let _ccQtdTimes = 1;
 // Pares manuais para modo dupla: [{j1Id, j1Nome, j2Id, j2Nome}, ...]
 let _ccParesManual = [];
+// Modo de escolha de times: 'auto' = sortear | 'manual' = escolher
+let _ccModoTimes = 'auto';
+// Times manuais: key (jogadorId ou 'dup:N') → [timeObj|null, ...] (length = _ccQtdTimes)
+let _ccTimesManual = new Map();
 
 window.selCampTipo = (k, el) => {
   document.querySelectorAll('[data-ct]').forEach(b => b.classList.remove('sel'));
@@ -4979,6 +4999,7 @@ window.selCampTipo = (k, el) => {
   } else if (regrasBox) {
     regrasBox.style.display = 'none';
   }
+  _atualizarTimesManualCC();
 };
 
 window._selQtdTimes = (n, el) => {
@@ -4991,6 +5012,7 @@ window._selQtdTimes = (n, el) => {
   const lbl = document.getElementById('label-qtd-times-titulo');
   const isDupla = document.getElementById('camp-dupla')?.checked;
   if (lbl) lbl.textContent = isDupla ? 'TIMES POR DUPLA' : 'TIMES POR JOGADOR';
+  _atualizarTimesManualCC();
 };
 
 window._onToggleCampDupla = (ativo) => {
@@ -5011,6 +5033,7 @@ window._onToggleCampDupla = (ativo) => {
     _ccParesManual = [];
   }
   if (lbl) lbl.textContent = ativo ? 'TIMES POR DUPLA' : 'TIMES POR JOGADOR';
+  _atualizarTimesManualCC();
 };
 
 window._onToggleSortearDuplaCC = (auto) => {
@@ -5023,6 +5046,7 @@ window._onToggleSortearDuplaCC = (auto) => {
     // Modo manual: mostrar configuracao de duplas
     if (duplasBox) { duplasBox.style.display = ''; _renderDuplasManualUI(); }
   }
+  _atualizarTimesManualCC();
 };
 
 window._renderDuplasManualUI = () => {
@@ -5091,7 +5115,258 @@ window._setPar = (paridx, slot, jogId, jogNome) => {
   _ccParesManual[paridx][`${field}Id`] = jogId;
   _ccParesManual[paridx][`${field}Nome`] = jogNome;
   _renderDuplasManualUI();
+  _atualizarTimesManualCC();
 };
+
+// ── Selecao manual de times para torneio ──
+
+function _ccGetPool() {
+  const tipo = document.getElementById('ct')?.value;
+  const meta = CAMP_META[tipo] || {};
+  const basePool = meta.tipo === 'selecoes' ? selecoes : clubes;
+  return filtrarPoolEfic(basePool);
+}
+
+function _ccGetAllUsedTeamIds() {
+  const used = new Set();
+  _ccTimesManual.forEach(slots => slots.forEach(t => { if (t) used.add(t.id); }));
+  return used;
+}
+
+function _atualizarTimesManualCC() {
+  if (_ccModoTimes !== 'manual') return;
+  const panel = document.getElementById('cc-times-manual-panel');
+  if (!panel || panel.style.display === 'none') return;
+  _renderTimesManualCC();
+}
+
+window._onToggleTimesManual = (ativo) => {
+  _ccModoTimes = ativo ? 'manual' : 'auto';
+  const panel = document.getElementById('cc-times-manual-panel');
+  if (!panel) return;
+  if (ativo) {
+    panel.style.display = '';
+    _ccTimesManual.clear();
+    _renderTimesManualCC();
+  } else {
+    panel.style.display = 'none';
+    panel.innerHTML = '';
+    _ccTimesManual.clear();
+  }
+};
+
+function _renderTimesManualCC() {
+  const panel = document.getElementById('cc-times-manual-panel');
+  if (!panel) return;
+  const isDupla = document.getElementById('camp-dupla')?.checked;
+  const sortearAuto = document.getElementById('camp-sortear-dupla-auto')?.checked;
+  const qtd = _ccQtdTimes;
+
+  if (isDupla) {
+    if (sortearAuto) {
+      panel.innerHTML = '<p style="font-size:12px;color:var(--yellow);font-weight:700;padding:8px 0;">DESMARQUE SORTEAR DUPLA AUTOMATICAMENTE PARA ESCOLHER OS TIMES</p>';
+      return;
+    }
+    const pares = _ccParesManual.filter(p => p.j1Id && p.j2Id);
+    if (!pares.length) {
+      panel.innerHTML = '<p style="font-size:12px;color:var(--yellow);font-weight:700;padding:8px 0;">CONFIGURE AS DUPLAS PRIMEIRO</p>';
+      return;
+    }
+    // Sync state
+    pares.forEach((par, di) => {
+      const key = `dup:${di}`;
+      if (!_ccTimesManual.has(key)) {
+        _ccTimesManual.set(key, new Array(qtd).fill(null));
+      } else {
+        const existing = _ccTimesManual.get(key);
+        if (existing.length !== qtd) {
+          const newArr = new Array(qtd).fill(null);
+          for (let k = 0; k < Math.min(qtd, existing.length); k++) newArr[k] = existing[k];
+          _ccTimesManual.set(key, newArr);
+        }
+      }
+    });
+    // Remove keys for stale duplas
+    [..._ccTimesManual.keys()].forEach(k => {
+      if (k.startsWith('dup:') && parseInt(k.split(':')[1]) >= pares.length) _ccTimesManual.delete(k);
+    });
+
+    panel.innerHTML = pares.map((par, di) => {
+      const key = `dup:${di}`;
+      const slots = _ccTimesManual.get(key) || new Array(qtd).fill(null);
+      const slotsHtml = slots.map((t, k) => {
+        const hasTime = !!t;
+        return `<button onclick="_abrirPickerTimeTorneio('${key}',${k})" style="width:100%;background:${hasTime ? 'rgba(6,182,212,0.15)' : 'rgba(255,255,255,0.05)'};border:1px solid ${hasTime ? 'rgba(6,182,212,0.5)' : 'var(--card-border)'};border-radius:8px;padding:8px 10px;color:${hasTime ? '#67E8F9' : 'var(--text-muted)'};font-size:11px;font-weight:700;cursor:pointer;text-transform:uppercase;text-align:left;display:flex;align-items:center;justify-content:space-between;box-sizing:border-box;">
+          <span>${hasTime ? t.nome.toUpperCase() : 'TIME ' + (k + 1)}</span>
+          ${hasTime ? `<span onclick="event.stopPropagation();_ccRemoveTime('${key}',${k})" style="color:var(--text-muted);font-size:16px;line-height:1;cursor:pointer;padding-left:4px;">×</span>` : ''}
+        </button>`;
+      }).join('');
+      return `<div style="background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.25);border-radius:12px;padding:10px;margin-bottom:8px;">
+        <div style="font-size:11px;font-weight:700;color:var(--cyan);margin-bottom:8px;">DUPLA ${di + 1}: ${par.j1Nome} &amp; ${par.j2Nome}</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">${slotsHtml}</div>
+      </div>`;
+    }).join('');
+  } else {
+    const jogs = [..._ccSel.entries()].map(([id, nome]) => ({ id, nome }));
+    if (!jogs.length) {
+      panel.innerHTML = '<p style="font-size:12px;color:var(--yellow);font-weight:700;padding:8px 0;">SELECIONE OS JOGADORES PRIMEIRO</p>';
+      return;
+    }
+    // Sync state
+    jogs.forEach(j => {
+      if (!_ccTimesManual.has(j.id)) {
+        _ccTimesManual.set(j.id, new Array(qtd).fill(null));
+      } else {
+        const existing = _ccTimesManual.get(j.id);
+        if (existing.length !== qtd) {
+          const newArr = new Array(qtd).fill(null);
+          for (let k = 0; k < Math.min(qtd, existing.length); k++) newArr[k] = existing[k];
+          _ccTimesManual.set(j.id, newArr);
+        }
+      }
+    });
+    // Remove stale player keys
+    [..._ccTimesManual.keys()].forEach(k => {
+      if (!k.startsWith('dup:') && !jogs.some(j => j.id === k)) _ccTimesManual.delete(k);
+    });
+
+    panel.innerHTML = jogs.map(j => {
+      const slots = _ccTimesManual.get(j.id) || new Array(qtd).fill(null);
+      const slotsHtml = slots.map((t, k) => {
+        const hasTime = !!t;
+        return `<button onclick="_abrirPickerTimeTorneio('${j.id}',${k})" style="width:100%;background:${hasTime ? 'rgba(139,92,246,0.15)' : 'rgba(255,255,255,0.05)'};border:1px solid ${hasTime ? 'rgba(139,92,246,0.5)' : 'var(--card-border)'};border-radius:8px;padding:8px 10px;color:${hasTime ? '#C4B5FD' : 'var(--text-muted)'};font-size:11px;font-weight:700;cursor:pointer;text-transform:uppercase;text-align:left;display:flex;align-items:center;justify-content:space-between;box-sizing:border-box;">
+          <span>${hasTime ? t.nome.toUpperCase() : 'TIME ' + (k + 1)}</span>
+          ${hasTime ? `<span onclick="event.stopPropagation();_ccRemoveTime('${j.id}',${k})" style="color:var(--text-muted);font-size:16px;line-height:1;cursor:pointer;padding-left:4px;">×</span>` : ''}
+        </button>`;
+      }).join('');
+      return `<div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.25);border-radius:12px;padding:10px;margin-bottom:8px;">
+        <div style="font-size:11px;font-weight:700;color:#C4B5FD;margin-bottom:8px;">${j.nome.toUpperCase()}</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">${slotsHtml}</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+window._abrirPickerTimeTorneio = (key, slotIdx) => {
+  const pool = _ccGetPool();
+  const usedIds = _ccGetAllUsedTeamIds();
+  // Allow re-selecting the current team in this slot
+  const slotAtual = _ccTimesManual.get(key)?.[slotIdx];
+  if (slotAtual) usedIds.delete(slotAtual.id);
+  const available = pool.filter(t => !usedIds.has(t.id));
+  const tipo = document.getElementById('ct')?.value;
+  const isSel = CAMP_META[tipo]?.tipo === 'selecoes';
+
+  const renderLista = (q) => {
+    const filtrado = available.filter(t => !q || t.nome.toLowerCase().includes(q.toLowerCase())).slice(0, 60);
+    if (!filtrado.length) return '<div style="padding:12px;color:var(--text-muted);font-size:12px;text-align:center;">NENHUM TIME DISPONIVEL</div>';
+    return filtrado.map(t => {
+      const _td = !isSel ? _teamDataOuFallback(t.id, t.nome) : null;
+      const paisCode = isSel ? (SELECAO_PAIS[t.id]?.pais || '') : (_td?.pais || '');
+      const flagEl = paisCode ? `<img src="https://flagcdn.com/w40/${paisCode}.png" alt="" loading="lazy" style="width:22px;height:16px;object-fit:cover;border-radius:2px;flex-shrink:0;" onerror="this.style.display='none'">` : '';
+      const shieldEl = !isSel && _td ? `<div style="width:22px;height:22px;border-radius:5px;background:${_td.fundo};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:${_td.cor};flex-shrink:0;border:1px solid rgba(255,255,255,0.1);">${_td.abrev}</div>` : '';
+      const eficEl = t.eficiencia ? eficBadge(t.eficiencia) : '';
+      const safeKey = key.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      const safeName = t.nome.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      const safeEfic = (t.eficiencia || 'Bom').replace(/'/g, "\\'");
+      return `<div onclick="_ccPickTime('${safeKey}',${slotIdx},'${t.id}','${safeName}',${t.forca || 50},'${safeEfic}',${isSel})"
+        style="padding:9px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);font-weight:600;font-size:12px;display:flex;align-items:center;gap:8px;">
+        ${flagEl}${shieldEl}
+        <span style="text-transform:uppercase;flex:1;">${t.nome}</span>
+        ${eficEl}
+      </div>`;
+    }).join('');
+  };
+
+  const isDupla = key.startsWith('dup:');
+  const labelSlot = isDupla
+    ? `DUPLA ${parseInt(key.split(':')[1]) + 1} · TIME ${slotIdx + 1}`
+    : `${_ccSel.get(key) || '?'} · TIME ${slotIdx + 1}`;
+  // Store context for search refresh
+  window._ccPickerKey = key;
+  window._ccPickerSlot = slotIdx;
+
+  modal(`
+    <p class="modal-title">ESCOLHER TIME</p>
+    <p style="font-size:12px;color:var(--cyan);font-weight:700;text-transform:uppercase;margin-bottom:12px;">${labelSlot}</p>
+    <div style="position:relative;margin-bottom:8px;">
+      <input id="cc-picker-time-search" type="text" class="input" placeholder="BUSCAR TIME..." autocomplete="off"
+        oninput="document.getElementById('cc-picker-time-list').innerHTML=window._renderCCPickerLista(this.value)"
+        style="margin-bottom:0;font-size:13px;padding:10px 14px;text-transform:uppercase;">
+    </div>
+    <div id="cc-picker-time-list" style="max-height:280px;overflow-y:auto;border:1px solid var(--card-border);border-radius:12px;background:var(--bg);margin-bottom:12px;">
+      ${renderLista('')}
+    </div>
+    <div style="display:flex;gap:8px;"><button class="btn-ghost" onclick="fecharModal()" style="flex:1;">CANCELAR</button></div>
+  `);
+  setTimeout(() => { document.getElementById('cc-picker-time-search')?.focus(); }, 50);
+};
+
+window._renderCCPickerLista = (q) => {
+  const key = window._ccPickerKey;
+  const slotIdx = window._ccPickerSlot;
+  const pool = _ccGetPool();
+  const usedIds = _ccGetAllUsedTeamIds();
+  const slotAtual = _ccTimesManual.get(key)?.[slotIdx];
+  if (slotAtual) usedIds.delete(slotAtual.id);
+  const available = pool.filter(t => !usedIds.has(t.id));
+  const tipo = document.getElementById('ct')?.value;
+  const isSel = CAMP_META[tipo]?.tipo === 'selecoes';
+  const filtrado = available.filter(t => !q || t.nome.toLowerCase().includes(q.toLowerCase())).slice(0, 60);
+  if (!filtrado.length) return '<div style="padding:12px;color:var(--text-muted);font-size:12px;text-align:center;">NENHUM TIME DISPONIVEL</div>';
+  return filtrado.map(t => {
+    const _td = !isSel ? _teamDataOuFallback(t.id, t.nome) : null;
+    const paisCode = isSel ? (SELECAO_PAIS[t.id]?.pais || '') : (_td?.pais || '');
+    const flagEl = paisCode ? `<img src="https://flagcdn.com/w40/${paisCode}.png" alt="" loading="lazy" style="width:22px;height:16px;object-fit:cover;border-radius:2px;flex-shrink:0;" onerror="this.style.display='none'">` : '';
+    const shieldEl = !isSel && _td ? `<div style="width:22px;height:22px;border-radius:5px;background:${_td.fundo};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:${_td.cor};flex-shrink:0;border:1px solid rgba(255,255,255,0.1);">${_td.abrev}</div>` : '';
+    const eficEl = t.eficiencia ? eficBadge(t.eficiencia) : '';
+    const safeKey = key.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const safeName = t.nome.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    const safeEfic = (t.eficiencia || 'Bom').replace(/'/g, "\\'");
+    return `<div onclick="_ccPickTime('${safeKey}',${slotIdx},'${t.id}','${safeName}',${t.forca || 50},'${safeEfic}',${isSel})"
+      style="padding:9px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);font-weight:600;font-size:12px;display:flex;align-items:center;gap:8px;">
+      ${flagEl}${shieldEl}
+      <span style="text-transform:uppercase;flex:1;">${t.nome}</span>
+      ${eficEl}
+    </div>`;
+  }).join('');
+};
+
+window._ccPickTime = (key, slotIdx, timeId, timeNome, forca, eficiencia, isSel) => {
+  if (!_ccTimesManual.has(key)) _ccTimesManual.set(key, new Array(_ccQtdTimes).fill(null));
+  const slots = _ccTimesManual.get(key);
+  slots[slotIdx] = { id: timeId, nome: timeNome, forca: forca || 50, eficiencia: eficiencia || 'Bom', _tipo: isSel ? 'selecoes' : 'clubes' };
+  fecharModal();
+  _renderTimesManualCC();
+};
+
+window._ccRemoveTime = (key, slotIdx) => {
+  const slots = _ccTimesManual.get(key);
+  if (slots) { slots[slotIdx] = null; _renderTimesManualCC(); }
+};
+
+// Distribui times por dupla (ambos jogadores da dupla recebem os mesmos times)
+function distribuirTimesPorDuplas(pares, pool, hist, qtd) {
+  pool = pool.filter(t => !t.inativo);
+  const nPares = pares.length;
+  const total = nPares * qtd;
+  const janela = Math.max(total, Math.floor(pool.length / 2));
+  let disp = pool.filter(t => !hist.slice(-janela).includes(t.id));
+  if (disp.length < total) disp = [...pool];
+  const selecionados = shuffle(disp).slice(0, total);
+  selecionados.sort((a, b) => b.forca - a.forca);
+  const distribuidos = [];
+  pares.forEach((par, di) => {
+    const myTimes = [];
+    for (let k = 0; k < qtd; k++) {
+      const idx = k % 2 === 0 ? k * nPares + di : k * nPares + (nPares - 1 - di);
+      myTimes.push(selecionados[idx % total] || pool[di % pool.length]);
+    }
+    distribuidos.push({ jogadorId: par.j1Id, nome: par.j1Nome, times: myTimes, time: myTimes[0], duplaIndex: di });
+    distribuidos.push({ jogadorId: par.j2Id, nome: par.j2Nome, times: myTimes, time: myTimes[0], duplaIndex: di });
+  });
+  return distribuidos;
+}
 
 window.criarCampeonato = async () => {
   const btn = document.getElementById('btn-camp-salvar');
@@ -5118,26 +5393,54 @@ window.criarCampeonato = async () => {
   const meta = CAMP_META[tipo];
   const hist = historicoIds(meta.tipo);
   const pool = filtrarPoolEfic(meta.tipo === 'selecoes' ? selecoes : clubes);
-
   const partic = [..._ccSel.entries()].map(([jogadorId, nome]) => ({ jogadorId, nome }));
-  let distribuidos = distribuirTimesBalanceadosMulti(partic, pool, hist, qtdTimes);
 
-  // Dupla: determinar duplaIndex
-  if (modoDupla) {
-    if (escolherDuplas && _ccParesManual.length) {
-      // Ordenar participantes conforme pares manuais
-      const ordered = [];
-      _ccParesManual.forEach((par, di) => {
-        const p1 = distribuidos.find(p => p.jogadorId === par.j1Id);
-        const p2 = distribuidos.find(p => p.jogadorId === par.j2Id);
-        if (p1) ordered.push({ ...p1, duplaIndex: di });
-        if (p2) ordered.push({ ...p2, duplaIndex: di });
+  let distribuidos;
+  if (_ccModoTimes === 'manual') {
+    if (modoDupla) {
+      // Modo manual + dupla: requer duplas configuradas manualmente
+      if (sortearDuplaAuto) { toast('PARA ESCOLHER TIMES EM MODO DUPLA, DESMARQUE SORTEAR DUPLA AUTOMATICAMENTE', 'erro'); _unlockBtn(btn); return; }
+      const pares = _ccParesManual.filter(p => p.j1Id && p.j2Id);
+      if (!pares.length) { toast('CONFIGURE AS DUPLAS ANTES DE ESCOLHER OS TIMES', 'erro'); _unlockBtn(btn); return; }
+      for (let di = 0; di < pares.length; di++) {
+        const slots = _ccTimesManual.get(`dup:${di}`);
+        if (!slots || slots.some(t => !t)) { toast(`ESCOLHA ${qtdTimes} TIMES PARA CADA DUPLA`, 'erro'); _unlockBtn(btn); return; }
+      }
+      distribuidos = [];
+      pares.forEach((par, di) => {
+        const times = (_ccTimesManual.get(`dup:${di}`) || []).map(t => t ? { id: t.id, nome: t.nome, forca: t.forca || 50, eficiencia: t.eficiencia || 'Bom' } : null);
+        [{ jogadorId: par.j1Id, nome: par.j1Nome }, { jogadorId: par.j2Id, nome: par.j2Nome }].forEach(j => {
+          distribuidos.push({ jogadorId: j.jogadorId, nome: j.nome, times, time: times[0], duplaIndex: di });
+        });
       });
-      // Adicionar quaisquer não encontrados (fallback)
-      distribuidos.forEach(p => { if (!ordered.some(o => o.jogadorId === p.jogadorId)) ordered.push({ ...p, duplaIndex: Math.floor(ordered.length / 2) }); });
-      distribuidos = ordered;
     } else {
-      distribuidos = distribuidos.map((p, i) => ({ ...p, duplaIndex: Math.floor(i / 2) }));
+      // Modo manual individual: cada jogador escolheu seus times
+      for (const [jogadorId] of _ccSel.entries()) {
+        const slots = _ccTimesManual.get(jogadorId);
+        if (!slots || slots.some(t => !t)) { toast(`ESCOLHA ${qtdTimes} TIMES PARA CADA JOGADOR`, 'erro'); _unlockBtn(btn); return; }
+      }
+      distribuidos = partic.map(p => {
+        const times = (_ccTimesManual.get(p.jogadorId) || []).map(t => t ? { id: t.id, nome: t.nome, forca: t.forca || 50, eficiencia: t.eficiencia || 'Bom' } : null);
+        return { ...p, times, time: times[0] };
+      });
+    }
+  } else {
+    // Modo auto: sorteio balanceado
+    if (modoDupla) {
+      if (escolherDuplas && _ccParesManual.length) {
+        // Duplas manuais, times por dupla sorteados
+        distribuidos = distribuirTimesPorDuplas(_ccParesManual, pool, hist, qtdTimes);
+      } else {
+        // Duplas auto: sortear pares e distribuir times por dupla
+        const jogs = shuffle([...partic]);
+        const pares = [];
+        for (let i = 0; i < Math.floor(jogs.length / 2); i++) {
+          pares.push({ j1Id: jogs[i * 2].jogadorId, j1Nome: jogs[i * 2].nome, j2Id: jogs[i * 2 + 1].jogadorId, j2Nome: jogs[i * 2 + 1].nome });
+        }
+        distribuidos = distribuirTimesPorDuplas(pares, pool, hist, qtdTimes);
+      }
+    } else {
+      distribuidos = distribuirTimesBalanceadosMulti(partic, pool, hist, qtdTimes);
     }
   }
 
@@ -5164,6 +5467,8 @@ function calcularDisp(g, qtdTimes=1) {
   const disp = [];
   for (let i=0;i<g.membros.length;i++) for (let j=i+1;j<g.membros.length;j++) {
     const m1=g.membros[i],m2=g.membros[j];
+    // Jogadores da mesma dupla nao se enfrentam
+    if (m1.duplaIndex !== undefined && m2.duplaIndex !== undefined && m1.duplaIndex === m2.duplaIndex) continue;
     for (let k=0; k<qtdTimes; k++) {
       if (!(g.partidas||[]).some(p=>
         ((p.j1Id===m1.jogadorId&&p.j2Id===m2.jogadorId)||(p.j1Id===m2.jogadorId&&p.j2Id===m1.jogadorId))
@@ -5273,12 +5578,14 @@ window.abrirCampeonato = (id) => {
   const gruposHTML = (c.grupos||[]).map((g,gi) => {
     const ord = [...g.membros].sort((a,b)=>b.pts!==a.pts?b.pts-a.pts:(b.gp-b.gc)!==(a.gp-a.gc)?(b.gp-b.gc)-(a.gp-a.gc):b.gp-a.gp);
     const disp = calcularDisp(g, qtdTimes);
-    const totalJogos = g.membros.length*(g.membros.length-1)/2 * qtdTimes;
-    const jogados = (g.partidas||[]).length;
     const todosConf = [];
     for (let i=0;i<g.membros.length;i++) for (let j=i+1;j<g.membros.length;j++) {
+      // Jogadores da mesma dupla nao se enfrentam
+      if (g.membros[i].duplaIndex !== undefined && g.membros[j].duplaIndex !== undefined && g.membros[i].duplaIndex === g.membros[j].duplaIndex) continue;
       for (let k=0; k<qtdTimes; k++) todosConf.push({m1:g.membros[i],m2:g.membros[j],timeIndex:k});
     }
+    const totalJogos = todosConf.length;
+    const jogados = (g.partidas||[]).length;
 
     const jogosHTML = todosConf.map(({m1,m2,timeIndex}) => {
       const played = (g.partidas||[]).find(p=>
