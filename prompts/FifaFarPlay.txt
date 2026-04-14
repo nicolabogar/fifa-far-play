@@ -5,4 +5,4 @@
 
 ## MELHORIAS ##
 
-- [ ] Selecao unica de times no torneio: ao criar torneio com 1-5 times por jogador, cada jogador controla essa quantidade de times; no modo manual os times selecionados desaparecem da listagem para outros jogadores; no sorteio automatico, distribuir times unicos por jogador sem repeticao; corrigir exibicao de todos os times do jogador na view do torneio e renderizacao correta de badge (clube vs selecao) nos cards de jogo e painel de jogadores
+- [x] Selecao unica de times no torneio: ao criar torneio com 1-5 times por jogador, cada jogador controla essa quantidade de times; no modo manual os times selecionados desaparecem da listagem para outros jogadores; no sorteio automatico, distribuir times unicos por jogador sem repeticao; corrigir exibicao de todos os times do jogador na view do torneio e renderizacao correta de badge (clube vs selecao) nos cards de jogo e painel de jogadores (hash: 9591fc3)
