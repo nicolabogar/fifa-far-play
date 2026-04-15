@@ -6283,9 +6283,28 @@ function calcularRankingAmistosos() {
 
 function calcularRankingTorneios() {
   const s = {};
-  jogadores.forEach(j => { s[j.id]={id:j.id,nome:_nomeExibicao(j),fotoUrl:j.fotoUrl||'',vit:0,emp:0,der:0,gp:0,gc:0,pts:0,j:0}; });
-  campeonatos.forEach(c=>(c.grupos||[]).forEach(g=>g.membros.forEach(m=>{if(!s[m.jogadorId])return;s[m.jogadorId].pts+=m.pts;s[m.jogadorId].vit+=m.vit;s[m.jogadorId].emp+=m.emp;s[m.jogadorId].der+=m.der;s[m.jogadorId].gp+=m.gp;s[m.jogadorId].gc+=m.gc;s[m.jogadorId].j+=m.vit+m.emp+m.der;})));
-  return Object.values(s).filter(x=>x.j>0).sort((a,b)=>b.pts!==a.pts?b.pts-a.pts:(b.gp-b.gc)!==(a.gp-a.gc)?(b.gp-b.gc)-(a.gp-a.gc):b.gp-a.gp);
+  jogadores.forEach(j => { s[j.id]={id:j.id,nome:_nomeExibicao(j),fotoUrl:j.fotoUrl||'',titulos:0,vices:0,gp:0,gc:0,j:0}; });
+  campeonatos.forEach(c => {
+    (c.grupos||[]).forEach(g=>g.membros.forEach(m=>{if(!s[m.jogadorId])return;s[m.jogadorId].gp+=m.gp;s[m.jogadorId].gc+=m.gc;s[m.jogadorId].j+=m.vit+m.emp+m.der;}));
+    (c.fasesEliminatorias||[]).forEach(fase=>(fase.confrontos||[]).forEach(cf=>{
+      if(cf.vencedor===null||cf.g1===null||cf.g2===null)return;
+      if(s[cf.j1Id]){s[cf.j1Id].gp+=cf.g1;s[cf.j1Id].gc+=cf.g2;s[cf.j1Id].j++;}
+      if(s[cf.j2Id]){s[cf.j2Id].gp+=cf.g2;s[cf.j2Id].gc+=cf.g1;s[cf.j2Id].j++;}
+    }));
+    if(c.status==='finalizado'){
+      const finalFase=(c.fasesEliminatorias||[]).find(f=>f.fase==='final');
+      if(finalFase){
+        const cf=(finalFase.confrontos||[])[0];
+        if(cf&&cf.vencedor!==null){
+          const campeaoId=cf.vencedor;
+          const viceId=cf.vencedor===cf.j1Id?cf.j2Id:cf.j1Id;
+          if(s[campeaoId])s[campeaoId].titulos++;
+          if(s[viceId])s[viceId].vices++;
+        }
+      }
+    }
+  });
+  return Object.values(s).filter(x=>x.j>0||x.titulos>0||x.vices>0).sort((a,b)=>b.titulos!==a.titulos?b.titulos-a.titulos:b.vices!==a.vices?b.vices-a.vices:(b.gp-b.gc)!==(a.gp-a.gc)?(b.gp-b.gc)-(a.gp-a.gc):b.gp-a.gp);
 }
 
 function renderRankRow(p, i) {
@@ -6306,6 +6325,23 @@ function renderRankRow(p, i) {
   </div>`;
 }
 
+function renderRankRowTorneio(p, i) {
+  const foto = p.fotoUrl ? `<img src="${p.fotoUrl}" style="width:36px;height:36px;border-radius:10px;object-fit:cover;flex-shrink:0;" onerror="this.outerHTML=window.avatarSvg(36)">` : avatarSvg(36);
+  return `<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:12px;margin-bottom:8px;cursor:pointer;" onclick="abrirHistoricoJogador('${p.id}','${p.nome.replace(/'/g,"\\'")}')">
+    <div class="rank-pos" style="color:${i===0?'var(--yellow)':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text-muted)'};font-weight:900;">${i+1}°</div>
+    ${foto}
+    <div style="flex:1;min-width:0;">
+      <div style="font-weight:800;font-size:14px;text-transform:uppercase;">${p.nome}</div>
+    </div>
+    <div style="display:flex;gap:6px;font-size:11px;font-weight:700;color:var(--text-muted);">
+      <span title="TITULOS" style="color:var(--yellow);">🏆${p.titulos}</span>
+      <span title="VICE-CAMPEONATO" style="color:#C0C0C0;">🥈${p.vices}</span>
+      <span title="GOLS FEITOS" style="color:var(--green);">${p.gp}GF</span>
+      <span title="GOLS SOFRIDOS" style="color:var(--red);">${p.gc}GS</span>
+    </div>
+  </div>`;
+}
+
 function renderRankingAmistosos(rank) {
   const html = rank.length===0?'<p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:14px;">NENHUM AMISTOSO FINALIZADO</p>'
     :rank.map((p,i)=>renderRankRow(p,i)).join('');
@@ -6317,11 +6353,11 @@ function renderRankingAmistosos(rank) {
 
 function renderRankingTorneios(rank) {
   const html = rank.length===0?'<p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:14px;">NENHUM TORNEIO FINALIZADO</p>'
-    :rank.map((p,i)=>renderRankRow(p,i)).join('');
+    :rank.map((p,i)=>renderRankRowTorneio(p,i)).join('');
   const el1 = document.getElementById('lista-rank-camp');
   if (el1) el1.innerHTML = html;
   const el2 = document.getElementById('home-rank-camp');
-  if (el2) el2.innerHTML = rank.slice(0,5).length===0?'<p style="color:var(--text-muted);text-align:center;padding:16px 0;font-size:14px;">NENHUM TORNEIO FINALIZADO</p>':rank.slice(0,5).map((p,i)=>renderRankRow(p,i)).join('');
+  if (el2) el2.innerHTML = rank.slice(0,5).length===0?'<p style="color:var(--text-muted);text-align:center;padding:16px 0;font-size:14px;">NENHUM TORNEIO FINALIZADO</p>':rank.slice(0,5).map((p,i)=>renderRankRowTorneio(p,i)).join('');
 }
 
 async function sincronizarRanking(btn) {
