@@ -5904,8 +5904,18 @@ function _cardCampeao(c) {
 
   if (!membrosCard.length) return '';
 
+  // Determina o time especifico usado na final/partida decisiva
+  let campTime = null;
+  if (finalFase) {
+    const cf = (finalFase.confrontos||[])[0];
+    if (cf && cf.vencedor !== null) {
+      campTime = cf.vencedor === cf.j1Id ? (cf.j1Times||[])[0] : (cf.j2Times||[])[0];
+    }
+  }
+  if (!campTime) campTime = campeaoPart?.times?.[0] || campeaoPart?.time || null;
+
   const renderMembro = (p) => {
-    const times = p.times || [p.time].filter(Boolean);
+    const times = campTime ? [campTime] : (p.times || [p.time].filter(Boolean));
     const jogNome = _nomeJogPorId(p.jogadorId, p.nome);
     const foto = jogadores.find(j => j.id === p.jogadorId)?.fotoUrl;
     const avatar = foto
