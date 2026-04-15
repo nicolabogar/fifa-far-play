@@ -5808,9 +5808,8 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
       </div>
       ${temRes
         ? (() => {
-            const g1 = m1.resultado, g2 = m2.resultado;
-            if (g1 > g2) return `<span class="tag tag-green">VITÓRIA: ${nome1}</span>`;
-            if (g2 > g1) return `<span class="tag tag-green">VITÓRIA: ${nome2}</span>`;
+            if (g1r > g2r) return `<span class="tag tag-green">VITÓRIA: ${nome1}</span>`;
+            if (g2r > g1r) return `<span class="tag tag-green">VITÓRIA: ${nome2}</span>`;
             return `<span class="tag tag-yellow">EMPATE</span>`;
           })()
         : `<span class="tag tag-cyan">EM ANDAMENTO</span>`}
