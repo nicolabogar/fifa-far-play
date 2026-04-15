@@ -164,6 +164,8 @@
     .filtro-drop-cyan { background-color:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.35);color:#67E8F9;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2306B6D4' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
     .filtro-drop-green { background-color:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.35);color:#6EE7B7;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2310B981' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
     .filtro-drop-yellow { background-color:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);color:#FCD34D;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23F59E0B' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
+    /* Suprime o '×' para botoes de selecao unica (radio-style) como tipo e resultado */
+    .filtro-radio.ativo::after { content:'' !important; }
     /* ── Paginação ── */
     .pag-row { display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px; }
     .pag-btn { padding:6px 14px;border-radius:10px;border:1px solid var(--card-border);background:rgba(255,255,255,0.05);color:var(--text-muted);font-size:12px;font-weight:700;cursor:pointer; }
@@ -654,17 +656,18 @@
         <span class="breadcrumb-sep">›</span>
         <span class="breadcrumb-item active">RANKING</span>
       </div>
-      <div style="display:flex; align-items:center; justify-content:space-between; padding:0 0 20px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:0 0 16px;">
         <h2 style="font-size:22px; font-weight:900;" class="grad">RANKING</h2>
         <button id="btn-sync-ranking" class="btn-primary" onclick="sincronizarRanking(this)" style="width:auto; padding:10px 18px; font-size:13px;">🔄 SINCRONIZAR</button>
       </div>
-      <div style="margin-bottom:24px;">
+      <div id="rank-filtros" style="margin-bottom:20px;"></div>
+      <div id="rank-ami-sec" style="margin-bottom:24px;">
         <p class="sec-title" style="margin-bottom:10px;">RANKING AMISTOSOS</p>
         <div id="lista-rank-ami">
           <p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:14px;">NENHUM AMISTOSO FINALIZADO</p>
         </div>
       </div>
-      <div style="margin-bottom:24px;">
+      <div id="rank-camp-sec" style="margin-bottom:24px;">
         <p class="sec-title" style="margin-bottom:10px;">RANKING TORNEIOS</p>
         <div id="lista-rank-camp">
           <p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:14px;">NENHUM TORNEIO FINALIZADO</p>
@@ -672,7 +675,6 @@
       </div>
       <div id="rank-jogos-sec" style="margin-bottom:24px;">
         <p class="sec-title" style="margin-bottom:10px;">JOGOS</p>
-        <div id="rank-jogos-filtros" style="margin-bottom:14px;"></div>
         <div id="rank-jogos-resumo" style="margin-bottom:12px;"></div>
         <div id="rank-jogos-lista"></div>
       </div>
@@ -1685,7 +1687,7 @@ function irPara(view) {
     document.getElementById('main').style.paddingBottom = showNav ? '72px' : '';
   }
   if (view === 'times') renderTimesEdit();
-  if (view === 'ranking') { _rankJogosState.jogadorId = ''; _rankJogosState.filtroRes = 'todos'; renderRankingAmistosos(calcularRankingAmistosos()); renderRankingTorneios(calcularRankingTorneios()); _renderRankJogosFiltros(); _renderRankJogos(); }
+  if (view === 'ranking') { _rankState.jogadoresIds = []; _rankState.tipoFiltro = 'todos'; _rankState.torneioNome = ''; _rankState.filtroRes = 'todos'; _renderRankFiltros(); _renderRankTudo(); }
 }
 window.irPara = irPara;
 
@@ -6094,7 +6096,7 @@ window.abrirCampeonato = (id) => {
       : `<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:10px 12px;margin-bottom:16px;display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">⚠️</span><span style="font-size:12px;color:#FCD34D;font-weight:700;">TORNEIO EM ANDAMENTO — NÃO É POSSÍVEL SORTEAR OU ADICIONAR JOGADORES</span></div>`)
     : ''}
     ${podeMudar && naoIniciado ? `<button onclick="reiniciarTorneio('${c.id}')" style="width:100%;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);color:#FCD34D;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px;">REINICIAR TORNEIO</button>` : ''}
-    ${naoIniciado && podeMudar ? `<button onclick="excluirCampeonato('${c.id}')" style="width:100%;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.35);color:#EF4444;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:16px;">EXCLUIR TORNEIO</button>` : ''}
+    ${(naoIniciado || c.status === 'finalizado') && podeMudar ? `<button onclick="excluirCampeonato('${c.id}')" style="width:100%;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.35);color:#EF4444;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:16px;">EXCLUIR TORNEIO</button>` : ''}
 
     <p class="sec-title" style="margin-bottom:10px;">JOGADORES</p>
     ${(() => {
@@ -6276,10 +6278,11 @@ window.confirmarReiniciarTorneio = async (id) => {
 window.excluirCampeonato = (id) => {
   const c = campeonatos.find(x=>x.id===id);
   if (!c) return;
+  const eFinalizado = c.status === 'finalizado';
   modal(`<p class="modal-title">EXCLUIR TORNEIO?</p>
     <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
       <p style="font-weight:700;font-size:13px;color:#FCA5A5;margin-bottom:6px;">ATENÇÃO</p>
-      <p style="color:var(--text-muted);font-size:12px;line-height:1.5;">Excluir <strong style="color:var(--text)">${c.nome}</strong> removerá todos os grupos, jogos e classificação. Esta ação não pode ser desfeita.</p>
+      <p style="color:var(--text-muted);font-size:12px;line-height:1.5;">Excluir <strong style="color:var(--text)">${c.nome}</strong> removerá todos os grupos, jogos e classificação. Esta ação não pode ser desfeita.${eFinalizado ? ' <strong style="color:#FCA5A5;">O RANKING SERA ATUALIZADO.</strong>' : ''}</p>
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);" onclick="confirmarExcluirCamp('${id}')">CONFIRMAR</button>
@@ -6287,7 +6290,10 @@ window.excluirCampeonato = (id) => {
 };
 window.confirmarExcluirCamp = async (id) => {
   await deleteDoc(doc(db,'campeonatos',id));
-  fecharModal(); fecharFullscreen(); await carregarCampeonatos(); atualizarDash();
+  fecharModal(); fecharFullscreen(); await carregarCampeonatos();
+  const rankCamp = calcularRankingTorneios();
+  renderRankingTorneios(rankCamp);
+  atualizarDash();
 };
 
 window._autoSalvarNomeTorneio = async (id, valor) => {
@@ -6462,9 +6468,13 @@ window.salvarPartida = async (cid, gi) => {
 };
 
 // ─── RANKING ─────────────────────────────────────────────────────────
-function calcularRankingAmistosos() {
+function calcularRankingAmistosos(jogIds) {
+  const ids = jogIds || [];
   const s = {};
-  jogadores.forEach(j => { s[j.id]={id:j.id,nome:_nomeExibicao(j),fotoUrl:j.fotoUrl||'',vit:0,emp:0,der:0,gp:0,gc:0,pts:0,j:0}; });
+  jogadores.forEach(j => {
+    if (ids.length && !ids.includes(j.id)) return;
+    s[j.id]={id:j.id,nome:_nomeExibicao(j),fotoUrl:j.fotoUrl||'',vit:0,emp:0,der:0,gp:0,gc:0,pts:0,j:0};
+  });
   amistosos.forEach(a => {
     if (!a.resultado) return;
     const {g1,g2}=a.resultado;
@@ -6474,10 +6484,16 @@ function calcularRankingAmistosos() {
   return Object.values(s).filter(x=>x.j>0).sort((a,b)=>b.pts!==a.pts?b.pts-a.pts:(b.gp-b.gc)!==(a.gp-a.gc)?(b.gp-b.gc)-(a.gp-a.gc):b.gp-a.gp);
 }
 
-function calcularRankingTorneios() {
+function calcularRankingTorneios(jogIds, torneioNome) {
+  const ids = jogIds || [];
+  const tnome = torneioNome || '';
   const s = {};
-  jogadores.forEach(j => { s[j.id]={id:j.id,nome:_nomeExibicao(j),fotoUrl:j.fotoUrl||'',titulos:0,vices:0,gp:0,gc:0,j:0}; });
-  campeonatos.forEach(c => {
+  jogadores.forEach(j => {
+    if (ids.length && !ids.includes(j.id)) return;
+    s[j.id]={id:j.id,nome:_nomeExibicao(j),fotoUrl:j.fotoUrl||'',titulos:0,vices:0,gp:0,gc:0,j:0};
+  });
+  const camps = tnome ? campeonatos.filter(c=>c.nome===tnome) : campeonatos;
+  camps.forEach(c => {
     (c.grupos||[]).forEach(g=>g.membros.forEach(m=>{if(!s[m.jogadorId])return;s[m.jogadorId].gp+=m.gp;s[m.jogadorId].gc+=m.gc;s[m.jogadorId].j+=m.vit+m.emp+m.der;}));
     (c.fasesEliminatorias||[]).forEach(fase=>(fase.confrontos||[]).forEach(cf=>{
       if(cf.vencedor===null||cf.g1===null||cf.g2===null)return;
@@ -6579,85 +6595,166 @@ async function sincronizarRanking(btn) {
 const _histState = { jogadorId:'', nome:'', filtroTipo:'todos', filtroAdv:'', dataIni:'', dataFim:'', ordenacao:'data_desc', pag:0 };
 const _HIST_PAG = 100;
 
-// ── Estado dos jogos no ranking ──
-const _rankJogosState = { jogadorId: '', filtroRes: 'todos' };
+// ── Estado dos filtros do ranking ──
+const _rankState = { jogadoresIds: [], tipoFiltro: 'todos', torneioNome: '', filtroRes: 'todos' };
 
 // Navegar para ranking com jogador pré-selecionado (vindo da home)
 window.irParaRankingComJogador = (jogadorId) => {
-  irPara('ranking'); // resets state and renders all games
-  _rankJogosState.jogadorId = jogadorId;
-  _rankJogosState.filtroRes = 'todos';
-  _renderRankJogosFiltros();
-  _renderRankJogos();
+  irPara('ranking'); // resets state and renders all
+  _rankState.jogadoresIds = [jogadorId];
+  _rankState.filtroRes = 'todos';
+  _renderRankFiltros();
+  _renderRankTudo();
   setTimeout(() => {
     const el = document.getElementById('rank-jogos-sec');
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 350);
 };
 
-// Definir filtro de jogador na listagem do ranking
+// Definir filtro de jogador na listagem do ranking (clique no card do ranking)
 window._setRankJogFiltro = (jogadorId) => {
-  _rankJogosState.jogadorId = jogadorId;
-  _rankJogosState.filtroRes = 'todos';
-  _renderRankJogosFiltros();
-  _renderRankJogos();
+  _rankState.jogadoresIds = [jogadorId];
+  _rankState.filtroRes = 'todos';
+  _renderRankFiltros();
+  _renderRankTudo();
   setTimeout(() => {
     const el = document.getElementById('rank-jogos-sec');
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 100);
 };
 
-// Definir filtro de resultado na listagem do ranking
-window._setRankResFiltro = (res) => {
-  _rankJogosState.filtroRes = res;
-  _renderRankJogosFiltros();
+// Handlers dos filtros do ranking
+window._rankSetTipo = (tipo) => {
+  _rankState.tipoFiltro = tipo;
+  if (tipo === 'AMISTOSO') _rankState.torneioNome = '';
+  _rankState.filtroRes = 'todos';
+  _renderRankFiltros();
+  _renderRankTudo();
+};
+
+window._rankToggleJog = (jogId) => {
+  const idx = _rankState.jogadoresIds.indexOf(jogId);
+  if (idx >= 0) _rankState.jogadoresIds.splice(idx, 1);
+  else _rankState.jogadoresIds.push(jogId);
+  _rankState.filtroRes = 'todos';
+  _renderRankFiltros();
+  _renderRankTudo();
+};
+
+window._rankSetTorneio = (nome) => {
+  _rankState.torneioNome = nome;
+  _renderRankFiltros();
+  _renderRankTudo();
+};
+
+window._rankSetRes = (res) => {
+  _rankState.filtroRes = res;
+  _renderRankFiltros();
   _renderRankJogos();
 };
 
-function _renderRankJogosFiltros() {
-  const el = document.getElementById('rank-jogos-filtros');
+function _renderRankFiltros() {
+  const el = document.getElementById('rank-filtros');
   if (!el) return;
-  const { jogadorId, filtroRes } = _rankJogosState;
-  const temJog = !!jogadorId;
-  const selectStyle = 'width:100%;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;margin-bottom:8px;';
-  const jogSelect = `<select onchange="_setRankJogFiltro(this.value)" style="${selectStyle}">
-    <option value="">TODOS OS JOGADORES</option>
-    ${jogadores.map(j => `<option value="${j.id}" ${j.id===jogadorId?'selected':''}>${_nomeExibicao(j).toUpperCase()}</option>`).join('')}
-  </select>`;
-  const resButtons = `<div style="display:flex;flex-wrap:wrap;gap:6px;">
-    <button class="filtro-btn ${filtroRes==='todos'?'ativo':''}" onclick="_setRankResFiltro('todos')">TODOS</button>
-    <button class="filtro-btn ${temJog&&filtroRes==='V'?'ativo':''}" ${!temJog?'disabled style="opacity:0.4;cursor:default;"':''} onclick="${temJog?"_setRankResFiltro('V')":"void(0)"}">VITORIA</button>
-    <button class="filtro-btn ${temJog&&filtroRes==='E'?'ativo':''}" ${!temJog?'disabled style="opacity:0.4;cursor:default;"':''} onclick="${temJog?"_setRankResFiltro('E')":"void(0)"}">EMPATE</button>
-    <button class="filtro-btn ${temJog&&filtroRes==='D'?'ativo':''}" ${!temJog?'disabled style="opacity:0.4;cursor:default;"':''} onclick="${temJog?"_setRankResFiltro('D')":"void(0)"}">DERROTA</button>
+  const { jogadoresIds, tipoFiltro, torneioNome, filtroRes } = _rankState;
+  const exatoUm = jogadoresIds.length === 1;
+
+  // Botões tipo
+  const tipoBtns = `<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+    <button class="filtro-btn filtro-radio ${tipoFiltro==='todos'?'ativo':''}" onclick="_rankSetTipo('todos')">TODOS</button>
+    <button class="filtro-btn filtro-radio ${tipoFiltro==='AMISTOSO'?'ativo':''}" onclick="_rankSetTipo('AMISTOSO')">AMISTOSOS</button>
+    <button class="filtro-btn filtro-radio ${tipoFiltro==='TORNEIO'?'ativo':''}" onclick="_rankSetTipo('TORNEIO')">TORNEIOS</button>
   </div>`;
-  el.innerHTML = jogSelect + resButtons;
+
+  // Dropdown de torneio (apenas quando TORNEIOS ou TODOS selecionado)
+  const torneios = tipoFiltro !== 'AMISTOSO'
+    ? [...new Set((campeonatos||[]).map(c=>c.nome).filter(Boolean))].sort()
+    : [];
+  const torneioSelect = torneios.length ? `<select onchange="_rankSetTorneio(this.value)" style="width:100%;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;margin-bottom:10px;">
+    <option value="">TODOS OS TORNEIOS</option>
+    ${torneios.map(t=>`<option value="${t}" ${t===torneioNome?'selected':''}>${t.toUpperCase()}</option>`).join('')}
+  </select>` : '';
+
+  // Chips multi-select de jogadores
+  const jogChips = jogadores.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+    ${jogadores.map(j => {
+      const sel = jogadoresIds.includes(j.id);
+      const foto = j.fotoUrl ? `<img src="${j.fotoUrl}" style="width:18px;height:18px;border-radius:5px;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">` : '';
+      return `<button class="filtro-btn ${sel?'ativo':''}" onclick="_rankToggleJog('${j.id}')" style="display:flex;align-items:center;gap:5px;">${foto}${_nomeExibicao(j).toUpperCase()}</button>`;
+    }).join('')}
+  </div>` : '';
+
+  // Botões de resultado (só com exatamente 1 jogador)
+  const resBtns = exatoUm ? `<div style="display:flex;flex-wrap:wrap;gap:6px;">
+    <button class="filtro-btn filtro-radio ${filtroRes==='todos'?'ativo':''}" onclick="_rankSetRes('todos')">TODOS</button>
+    <button class="filtro-btn filtro-radio ${filtroRes==='V'?'ativo':''}" onclick="_rankSetRes('V')">VITORIA</button>
+    <button class="filtro-btn filtro-radio ${filtroRes==='E'?'ativo':''}" onclick="_rankSetRes('E')">EMPATE</button>
+    <button class="filtro-btn filtro-radio ${filtroRes==='D'?'ativo':''}" onclick="_rankSetRes('D')">DERROTA</button>
+  </div>` : '';
+
+  el.innerHTML = tipoBtns + torneioSelect + jogChips + resBtns;
+}
+
+// Atualiza visibilidade das seções e re-renderiza tudo conforme filtros
+function _renderRankTudo() {
+  const { tipoFiltro, jogadoresIds, torneioNome } = _rankState;
+  const amiSec = document.getElementById('rank-ami-sec');
+  const campSec = document.getElementById('rank-camp-sec');
+  const showAmi = tipoFiltro === 'todos' || tipoFiltro === 'AMISTOSO';
+  const showCamp = tipoFiltro === 'todos' || tipoFiltro === 'TORNEIO';
+  if (amiSec) amiSec.style.display = showAmi ? '' : 'none';
+  if (campSec) campSec.style.display = showCamp ? '' : 'none';
+  if (showAmi) renderRankingAmistosos(calcularRankingAmistosos(jogadoresIds));
+  if (showCamp) renderRankingTorneios(calcularRankingTorneios(jogadoresIds, torneioNome));
+  _renderRankJogos();
 }
 
 function _coletarJogosRanking() {
-  if (_rankJogosState.jogadorId) {
-    return _coletarJogosJogador(_rankJogosState.jogadorId);
+  const { jogadoresIds, tipoFiltro, torneioNome } = _rankState;
+
+  // Com exatamente 1 jogador: usa vista de perspectiva individual
+  if (jogadoresIds.length === 1) {
+    let jogos = _coletarJogosJogador(jogadoresIds[0]);
+    if (tipoFiltro !== 'todos') jogos = jogos.filter(j => j.tipo === tipoFiltro);
+    if (torneioNome) jogos = jogos.filter(j => j.torneio === torneioNome);
+    return jogos;
   }
-  // Todos os jogos finalizados de todos os jogadores
+
   const jogos = [];
-  amistosos.forEach(a => {
-    if (!a.resultado) return;
-    const ts = a.criadoEm?.seconds ? a.criadoEm.seconds * 1000 : null;
-    jogos.push({ tipo: 'AMISTOSO', amiId: a.id, ts });
-  });
-  campeonatos.forEach(c => (c.grupos||[]).forEach(g => (g.partidas||[]).forEach(p => {
-    if (p.g1 === undefined || p.g1 === null || p.g2 === undefined || p.g2 === null) return;
-    const ts = c.criadoEm?.seconds ? c.criadoEm.seconds * 1000 : null;
-    const isSel = CAMP_META[c.tipo]?.tipo === 'selecoes';
-    const m1 = g.membros.find(mb => mb.jogadorId === p.j1Id);
-    const m2 = g.membros.find(mb => mb.jogadorId === p.j2Id);
-    jogos.push({
-      tipo: 'TORNEIO_GERAL',
-      torneio: c.nome,
-      j1Nome: p.j1Nome, j1Id: p.j1Id, j1Time: m1?.time?.nome||'', j1TimeId: m1?.time?.id||'',
-      j2Nome: p.j2Nome, j2Id: p.j2Id, j2Time: m2?.time?.nome||'', j2TimeId: m2?.time?.id||'',
-      g1: p.g1, g2: p.g2, ts, isSel
+
+  if (tipoFiltro === 'todos' || tipoFiltro === 'AMISTOSO') {
+    amistosos.forEach(a => {
+      if (!a.resultado) return;
+      if (jogadoresIds.length > 0) {
+        const allIds = [...(a.time1?.jogadoresIds||[]), ...(a.time2?.jogadoresIds||[])];
+        if (!jogadoresIds.some(id => allIds.includes(id))) return;
+      }
+      const ts = a.criadoEm?.seconds ? a.criadoEm.seconds * 1000 : null;
+      jogos.push({ tipo: 'AMISTOSO', amiId: a.id, ts });
     });
-  })));
+  }
+
+  if (tipoFiltro === 'todos' || tipoFiltro === 'TORNEIO') {
+    campeonatos.forEach(c => {
+      if (torneioNome && c.nome !== torneioNome) return;
+      (c.grupos||[]).forEach(g => (g.partidas||[]).forEach(p => {
+        if (p.g1 === undefined || p.g1 === null || p.g2 === undefined || p.g2 === null) return;
+        if (jogadoresIds.length > 0 && !jogadoresIds.some(id => id === p.j1Id || id === p.j2Id)) return;
+        const ts = c.criadoEm?.seconds ? c.criadoEm.seconds * 1000 : null;
+        const isSel = CAMP_META[c.tipo]?.tipo === 'selecoes';
+        const m1 = g.membros.find(mb => mb.jogadorId === p.j1Id);
+        const m2 = g.membros.find(mb => mb.jogadorId === p.j2Id);
+        jogos.push({
+          tipo: 'TORNEIO_GERAL',
+          torneio: c.nome,
+          j1Nome: p.j1Nome, j1Id: p.j1Id, j1Time: m1?.time?.nome||'', j1TimeId: m1?.time?.id||'',
+          j2Nome: p.j2Nome, j2Id: p.j2Id, j2Time: m2?.time?.nome||'', j2TimeId: m2?.time?.id||'',
+          g1: p.g1, g2: p.g2, ts, isSel
+        });
+      }));
+    });
+  }
+
   jogos.sort((a,b) => (b.ts||0)-(a.ts||0));
   return jogos;
 }
@@ -6669,14 +6766,14 @@ function _renderRankJogos() {
 
   let jogos = _coletarJogosRanking();
 
-  // Filtro de resultado (apenas com jogador selecionado)
-  if (_rankJogosState.jogadorId && _rankJogosState.filtroRes !== 'todos') {
-    jogos = jogos.filter(j => j.res === _rankJogosState.filtroRes);
+  // Filtro de resultado (apenas com exatamente 1 jogador)
+  if (_rankState.jogadoresIds.length === 1 && _rankState.filtroRes !== 'todos') {
+    jogos = jogos.filter(j => j.res === _rankState.filtroRes);
   }
 
   // Resumo
   if (resumoEl) {
-    if (_rankJogosState.jogadorId && jogos.length) {
+    if (_rankState.jogadoresIds.length === 1 && jogos.length) {
       const v = jogos.filter(j=>j.res==='V').length;
       const d = jogos.filter(j=>j.res==='D').length;
       const e = jogos.filter(j=>j.res==='E').length;
@@ -7164,7 +7261,7 @@ function cardCampHome(c, modoLista=false) {
     ${!finalizado && jogosHtml ? `<div style="margin-top:8px;" onclick="event.stopPropagation();abrirCampeonato('${c.id}')">${jogosHtml}</div>` : ''}
   </div>`;
 
-  return !finalizado && podeMudar ? `<div class="swipe-wrap" data-swipe-id="${c.id}" data-swipe-nome="${c.nome}">
+  return podeMudar ? `<div class="swipe-wrap" data-swipe-id="${c.id}" data-swipe-nome="${c.nome}">
       <div class="swipe-bg">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
         <span class="swipe-bg-label">EXCLUIR</span>
