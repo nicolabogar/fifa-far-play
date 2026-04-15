@@ -7492,7 +7492,7 @@ document.getElementById('btn-add-time').addEventListener('click', () => {
 
 function abrirModalAddTime(tipoInicial) {
   _eficienciaNT = 'Bom';
-  const paisOptions = PAISES_FIFA.map(p => `<option value="${p.code}" data-nome="${p.nome}">${flagEmoji(p.code)} ${p.nome}</option>`).join('');
+  window._ntClubeCrest = null;
   fullscreen('NOVO', `
     <div style="display:flex;flex-direction:column;gap:14px;max-width:400px;margin:0 auto;">
       <div>
@@ -7513,16 +7513,22 @@ function abrirModalAddTime(tipoInicial) {
 
       <!-- CLUBE: formulário do zero -->
       <div id="nt-clube-section" style="display:${tipoInicial==='clube'?'flex':'none'};flex-direction:column;gap:14px;">
-        <div>
+        <div style="position:relative;">
           <label style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">PAÍS</label>
-          <select id="nt-clube-pais" class="input" style="cursor:pointer;" onchange="_ntClubePreview()">
-            <option value="">Selecione o país...</option>
-            ${paisOptions}
-          </select>
+          <input type="hidden" id="nt-clube-pais" value="">
+          <div id="nt-clube-pais-display" class="input" style="cursor:pointer;display:flex;align-items:center;gap:8px;min-height:42px;" onclick="_ntTogglePaisDropdown()">
+            <span style="color:var(--text-muted);font-size:14px;" id="nt-clube-pais-label">Selecione o país...</span>
+          </div>
+          <div id="nt-clube-pais-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;background:var(--card-bg,#1a1a2e);border:1px solid var(--card-border);border-radius:12px;margin-top:4px;max-height:240px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.5);">
+            <div style="padding:8px;border-bottom:1px solid var(--card-border);">
+              <input class="input" id="nt-clube-pais-busca" placeholder="Buscar país..." autocomplete="off" oninput="_ntFiltrarPaises()" style="font-size:13px;">
+            </div>
+            <div id="nt-clube-pais-lista" style="max-height:192px;overflow-y:auto;padding:4px;display:flex;flex-direction:column;gap:2px;"></div>
+          </div>
         </div>
         <div>
           <label style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">NOME DO CLUBE</label>
-          <input class="input" id="nt-clube-nome" placeholder="Nome do clube..." autocomplete="off" oninput="_ntClubePreview()">
+          <input class="input" id="nt-clube-nome" placeholder="Nome do clube..." autocomplete="off" oninput="_ntClubePreview()" style="text-transform:uppercase;">
         </div>
         <div>
           <label style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">NOME ABREVIADO (OPCIONAL)</label>
@@ -7548,6 +7554,9 @@ function abrirModalAddTime(tipoInicial) {
             <span class="efic-tag${_eficienciaNT==='Bom'?' selecionado':''}" data-efic="Bom"      onclick="selecionarEficienciaNT('Bom')">Bom</span>
           </div>
         </div>
+        <!-- Preview ao vivo do time -->
+        <div id="nt-clube-live-preview" style="display:none;background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.18);border-radius:14px;padding:16px;"></div>
+
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
           <button id="btn-salvar-time" class="btn-primary" onclick="salvarNovoTime()" disabled style="opacity:0.4;">CRIAR</button>
           <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
@@ -7592,6 +7601,7 @@ window.selecionarEficienciaNT = (val) => {
   document.querySelectorAll('#nt-efic-tags .efic-tag').forEach(el => {
     el.classList.toggle('selecionado', el.dataset.efic === _eficienciaNT);
   });
+  _ntClubePreview();
 };
 
 window.selecionarEficienciaNTSel = (val) => {
@@ -7603,12 +7613,100 @@ window.selecionarEficienciaNTSel = (val) => {
 
 window._ntClubePreview = () => {
   const nome = document.getElementById('nt-clube-nome')?.value.trim();
+  const paisCode = document.getElementById('nt-clube-pais')?.value;
   const btn = document.getElementById('btn-salvar-time');
   if (btn) {
-    const ok = !!(nome && document.getElementById('nt-clube-pais')?.value);
+    const ok = !!(nome && paisCode);
     btn.disabled = !ok;
     btn.style.opacity = ok ? '1' : '0.4';
   }
+  // Live preview
+  const previewEl = document.getElementById('nt-clube-live-preview');
+  if (!previewEl) return;
+  const hasAny = paisCode || nome || window._ntClubeCrest;
+  if (!hasAny) { previewEl.style.display = 'none'; return; }
+  previewEl.style.display = '';
+  const paisOpt = PAISES_FIFA.find(p => p.code === paisCode);
+  const paisNome = paisOpt?.nome || '';
+  const efic = _eficienciaNT || 'Bom';
+  const crest = window._ntClubeCrest || '';
+  const nomeDisplay = nome ? nome.toUpperCase() : '???';
+  // Country row
+  const countryRow = paisCode
+    ? `<div style="display:flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap;">${flagImg(paisCode, 20)}<span style="font-size:9px;color:var(--text-muted);font-weight:600;">${paisNome}</span></div>`
+    : `<div style="display:flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap;opacity:0.3;"><span style="font-size:9px;color:var(--text-muted);font-weight:600;">PAÍS</span></div>`;
+  // Badge/shield
+  let shieldHtml;
+  if (crest) {
+    shieldHtml = `<div style="width:48px;height:55px;flex-shrink:0;display:flex;align-items:center;justify-content:center;"><img src="${crest}" alt="" style="max-width:48px;max-height:55px;object-fit:contain;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.4));"></div>`;
+  } else {
+    // Simple DJB2 string hash for generating deterministic HSL color from team name
+    const hash = (nomeDisplay || 'X').split('').reduce((a,c)=>((a<<5)-a)+c.charCodeAt(0),0);
+    const hue = Math.abs(hash) % 360;
+    const fundo = `hsl(${hue},40%,25%)`;
+    const cor = `hsl(${hue},60%,85%)`;
+    const abrev = (nomeDisplay || '?').slice(0,3).toUpperCase();
+    shieldHtml = `<div style="flex-shrink:0;"><svg width="48" height="55" viewBox="0 0 56 64" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 3px 8px rgba(0,0,0,0.4));display:block;"><path d="M28 2 L54 11 L54 40 Q54 56 28 63 Q2 56 2 40 L2 11 Z" fill="${fundo}" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/><text x="28" y="37" text-anchor="middle" dominant-baseline="middle" fill="${cor}" font-weight="900" font-size="11" font-family="system-ui">${_escHtml(abrev)}</text></svg></div>`;
+  }
+  // Efficiency badge
+  const eficHtml = eficBadge(efic);
+  previewEl.innerHTML = `
+    <p style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;">PREVIEW DO TIME</p>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+      ${countryRow}
+      <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${nomeDisplay}</div>
+      <div style="display:flex;justify-content:center;margin-bottom:4px;">${shieldHtml}</div>
+      <div style="display:flex;justify-content:center;">${eficHtml}</div>
+    </div>`;
+};
+
+// ─── Custom country dropdown ─────────────────────────────────────────
+window._ntTogglePaisDropdown = () => {
+  const dd = document.getElementById('nt-clube-pais-dropdown');
+  if (!dd) return;
+  const isOpen = dd.style.display !== 'none';
+  if (isOpen) { dd.style.display = 'none'; return; }
+  dd.style.display = '';
+  const busca = document.getElementById('nt-clube-pais-busca');
+  if (busca) { busca.value = ''; busca.focus(); }
+  _ntFiltrarPaises();
+  // Close on click outside
+  setTimeout(() => {
+    const handler = (e) => {
+      const container = dd.parentElement;
+      if (container && !container.contains(e.target)) {
+        dd.style.display = 'none';
+        document.removeEventListener('pointerdown', handler, true);
+      }
+    };
+    document.addEventListener('pointerdown', handler, true);
+  }, 0);
+};
+
+window._ntFiltrarPaises = () => {
+  const filtro = (document.getElementById('nt-clube-pais-busca')?.value || '').toLowerCase().trim();
+  const lista = document.getElementById('nt-clube-pais-lista');
+  if (!lista) return;
+  const opcoes = PAISES_FIFA.filter(p => !filtro || p.nome.toLowerCase().includes(filtro) || p.code.includes(filtro));
+  if (!opcoes.length) { lista.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:16px;font-size:12px;">NENHUM PAÍS ENCONTRADO</p>'; return; }
+  const paisSel = document.getElementById('nt-clube-pais')?.value || '';
+  lista.innerHTML = opcoes.map(p => `
+    <button type="button" onclick="_ntSelecionarPais('${p.code}')" style="background:${paisSel===p.code?'rgba(139,92,246,0.2)':'rgba(255,255,255,0.03)'};border:1.5px solid ${paisSel===p.code?'var(--purple)':'transparent'};border-radius:10px;padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;">
+      <img src="https://flagcdn.com/w40/${p.code}.png" alt="" style="width:30px;height:22px;object-fit:cover;border-radius:4px;flex-shrink:0;" onerror="this.style.display='none'">
+      <span style="font-size:13px;font-weight:700;color:var(--text);flex:1;">${_escHtml(p.nome)}</span>
+    </button>`).join('');
+};
+
+window._ntSelecionarPais = (code) => {
+  const paisObj = PAISES_FIFA.find(p => p.code === code);
+  const nome = paisObj?.nome || code;
+  const hidden = document.getElementById('nt-clube-pais');
+  if (hidden) hidden.value = code;
+  const label = document.getElementById('nt-clube-pais-label');
+  if (label) label.innerHTML = `<img src="https://flagcdn.com/w40/${code}.png" alt="" style="width:24px;height:18px;object-fit:cover;border-radius:3px;vertical-align:middle;"> <span style="font-weight:700;font-size:14px;">${_escHtml(nome)}</span>`;
+  const dd = document.getElementById('nt-clube-pais-dropdown');
+  if (dd) dd.style.display = 'none';
+  _ntClubePreview();
 };
 
 window._ntClubeCarregarCrest = (input) => {
@@ -7620,6 +7718,7 @@ window._ntClubeCarregarCrest = (input) => {
     window._ntClubeCrest = dataUrl;
     const prev = document.getElementById('nt-clube-crest-preview');
     if (prev) prev.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:contain;">`;
+    _ntClubePreview();
   };
   reader.readAsDataURL(file);
 };
@@ -7702,10 +7801,10 @@ window.salvarNovoTime = async () => {
   const paisEl = document.getElementById('nt-clube-pais');
   const nomeEl = document.getElementById('nt-clube-nome');
   const pais = paisEl?.value;
-  const nome = nomeEl?.value.trim();
+  const nome = nomeEl?.value.trim().toUpperCase();
   if (!pais || !nome) { toast('PREENCHA PAÍS E NOME DO CLUBE', 'erro'); return; }
-  const opt = paisEl.options[paisEl.selectedIndex];
-  const paisNome = opt?.dataset?.nome || '';
+  const paisObj = PAISES_FIFA.find(p => p.code === pais);
+  const paisNome = paisObj?.nome || '';
   const eficiencia = _eficienciaNT || '';
   const crest = window._ntClubeCrest || '';
   const nomeAbreviado = document.getElementById('nt-clube-nomeAbrev')?.value.trim() || '';
