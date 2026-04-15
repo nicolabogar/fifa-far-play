@@ -157,6 +157,13 @@
     .filtro-btn { padding:5px 12px;border-radius:20px;border:1px solid var(--card-border);background:rgba(255,255,255,0.04);color:var(--text-muted);font-size:11px;font-weight:700;cursor:pointer;text-transform:uppercase; }
     .filtro-btn.ativo { border-color:var(--purple);background:rgba(139,92,246,0.15);color:#A78BFA; }
     .filtro-btn.ativo::after { content:' ×'; font-size:13px; font-weight:900; opacity:0.8; }
+    /* ── Filtros dropdown temáticos ── */
+    .filtro-drop { width:100%;border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;text-transform:uppercase;margin-bottom:8px;background-size:18px;background-repeat:no-repeat;background-position:right 10px center; }
+    .filtro-drop option { background:#1E1E35;color:#F1F5F9; }
+    .filtro-drop-purple { background-color:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.35);color:#A78BFA;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B5CF6' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
+    .filtro-drop-cyan { background-color:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.35);color:#67E8F9;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2306B6D4' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
+    .filtro-drop-green { background-color:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.35);color:#6EE7B7;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2310B981' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
+    .filtro-drop-yellow { background-color:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);color:#FCD34D;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23F59E0B' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
     /* Suprime o '×' para botoes de selecao unica (radio-style) como tipo e resultado */
     .filtro-radio.ativo::after { content:'' !important; }
     /* ── Paginação ── */
@@ -4725,7 +4732,7 @@ function carregarCampeonatos() {
   });
 }
 
-const _campState = { filtroTipo: 'todos', filtroTipoTime: 'todos', filtroJog: '', pag: 0 };
+const _campState = { filtroTipo: 'todos', filtroTipoTime: 'todos', filtroJog: '', filtroNome: '', filtroModoDupla: 'todos', pag: 0 };
 
 function _cardCampeonato(camp) {
   // Usa o mesmo visual do cardCampHome (T2)
@@ -4762,21 +4769,9 @@ function renderCampeonatos() {
       <span class="grupo-seta">›</span>
     </div>
     <div class="grupo-body fechado" id="grupo-camp-finalizados">
-      <div class="filtro-row" id="camp-filtros">
-        ${Object.entries(CAMP_META).map(([k,v]) =>
-          `<button class="filtro-btn ${_campState.filtroTipo===k?'ativo':''}" onclick="_filtrarCamp('${k}')">${v.nome.toUpperCase()}</button>`
-        ).join('')}
-        <button class="filtro-btn ${_campState.filtroTipo==='todos'?'ativo':''}" onclick="_filtrarCamp('todos')">TODOS</button>
+      <div id="camp-filtros-wrap">
+        ${_renderCampFiltrosHTML(campeonatos.filter(c => c.status === 'finalizado'))}
       </div>
-      <div class="filtro-row" style="margin-bottom:8px;">
-        <button class="filtro-btn ${_campState.filtroTipoTime==='todos'?'ativo':''}" onclick="_filtrarCampTipoTime('todos')">CLUBES + SELECOES</button>
-        <button class="filtro-btn ${_campState.filtroTipoTime==='clubes'?'ativo':''}" onclick="_filtrarCampTipoTime('clubes')">CLUBES</button>
-        <button class="filtro-btn ${_campState.filtroTipoTime==='selecoes'?'ativo':''}" onclick="_filtrarCampTipoTime('selecoes')">SELECOES</button>
-      </div>
-      <select id="camp-filtro-jog" onchange="_filtrarCampJog(this.value)" style="width:100%;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;margin-bottom:10px;">
-        <option value="">JOGADOR: TODOS</option>
-        ${jogadores.map(j=>`<option value="${j.id}" ${_campState.filtroJog===j.id?'selected':''}>${_nomeExibicao(j).toUpperCase()}</option>`).join('')}
-      </select>
       <div id="camp-fin-lista"></div>
       <div class="pag-row" id="camp-fin-pag"></div>
     </div>`;
@@ -4790,25 +4785,12 @@ function renderCampeonatos() {
 window._filtrarCamp = (tipo) => {
   _campState.filtroTipo = tipo;
   _campState.pag = 0;
-  document.querySelectorAll('#camp-filtros .filtro-btn').forEach(b => {
-    const meta = Object.entries(CAMP_META).find(([k]) => b.textContent.trim() === CAMP_META[k]?.nome?.toUpperCase());
-    const key = meta ? meta[0] : 'todos';
-    b.classList.toggle('ativo', key === tipo || (b.textContent.trim() === 'TODOS' && tipo === 'todos'));
-  });
   _renderFinalizadosCamp();
 };
 
 window._filtrarCampTipoTime = (tipoTime) => {
   _campState.filtroTipoTime = tipoTime;
   _campState.pag = 0;
-  document.querySelectorAll('#camp-filtros ~ .filtro-row .filtro-btn').forEach(b => {
-    const txt = b.textContent.trim();
-    b.classList.toggle('ativo',
-      (tipoTime === 'todos' && txt === 'CLUBES + SELECOES') ||
-      (tipoTime === 'clubes' && txt === 'CLUBES') ||
-      (tipoTime === 'selecoes' && txt === 'SELECOES')
-    );
-  });
   _renderFinalizadosCamp();
 };
 
@@ -4817,6 +4799,40 @@ window._filtrarCampJog = (jogId) => {
   _campState.pag = 0;
   _renderFinalizadosCamp();
 };
+
+window._filtrarCampNome = (nome) => {
+  _campState.filtroNome = nome;
+  _campState.pag = 0;
+  _renderFinalizadosCamp();
+};
+
+window._filtrarCampModoDupla = (modo) => {
+  _campState.filtroModoDupla = modo;
+  _campState.pag = 0;
+  _renderFinalizadosCamp();
+};
+
+function _renderCampFiltrosHTML(finalizados) {
+  const nomesUnicos = [...new Set(finalizados.map(c => c.nome).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  return `
+    <select class="filtro-drop filtro-drop-purple" onchange="_filtrarCamp(this.value)">
+      <option value="todos" ${_campState.filtroTipo==='todos'?'selected':''}>TIPO: TODOS</option>
+      ${Object.entries(CAMP_META).map(([k,v])=>`<option value="${k}" ${_campState.filtroTipo===k?'selected':''}>${v.emoji} ${v.nome.toUpperCase()}</option>`).join('')}
+    </select>
+    <select class="filtro-drop filtro-drop-cyan" onchange="_filtrarCampNome(this.value)">
+      <option value="" ${!_campState.filtroNome?'selected':''}>NOME: TODOS</option>
+      ${nomesUnicos.map(n=>`<option value="${_escHtml(n)}" ${_campState.filtroNome===n?'selected':''}>${_escHtml(n.toUpperCase())}</option>`).join('')}
+    </select>
+    <select class="filtro-drop filtro-drop-green" onchange="_filtrarCampJog(this.value)">
+      <option value="" ${!_campState.filtroJog?'selected':''}>JOGADOR: TODOS</option>
+      ${jogadores.map(j=>`<option value="${j.id}" ${_campState.filtroJog===j.id?'selected':''}>${_nomeExibicao(j).toUpperCase()}</option>`).join('')}
+    </select>
+    <select class="filtro-drop filtro-drop-yellow" onchange="_filtrarCampModoDupla(this.value)">
+      <option value="todos" ${_campState.filtroModoDupla==='todos'?'selected':''}>MODO: TODOS</option>
+      <option value="solo" ${_campState.filtroModoDupla==='solo'?'selected':''}>SOZINHO</option>
+      <option value="dupla" ${_campState.filtroModoDupla==='dupla'?'selected':''}>DUPLA</option>
+    </select>`;
+}
 
 function _renderFinalizadosCamp() {
   const lista = document.getElementById('camp-fin-lista');
@@ -4829,6 +4845,9 @@ function _renderFinalizadosCamp() {
   if (_campState.filtroJog) dados = dados.filter(c =>
     (c.participantes||[]).some(p => p.jogadorId === _campState.filtroJog)
   );
+  if (_campState.filtroNome) dados = dados.filter(c => c.nome === _campState.filtroNome);
+  if (_campState.filtroModoDupla === 'solo') dados = dados.filter(c => !c.modoDupla);
+  if (_campState.filtroModoDupla === 'dupla') dados = dados.filter(c => !!c.modoDupla);
 
   const total = dados.length;
   const totalPags = Math.ceil(total / _PAG_SIZE);
