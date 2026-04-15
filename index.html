@@ -5689,7 +5689,7 @@ async function _avancarFaseElim(cid, faseIdx) {
 }
 
 async function _finalizarTorneio(cid) {
-  await updateDoc(doc(db,'campeonatos',cid), { status: 'finalizado', fase: 'encerrado' });
+  await updateDoc(doc(db,'campeonatos',cid), { status: 'finalizado', fase: 'encerrado', finalizadoEm: serverTimestamp() });
   await carregarCampeonatos(); calcularRankingTorneios(); atualizarDash(); abrirCampeonato(cid);
   toast('TORNEIO FINALIZADO! CAMPEAO DEFINIDO!', 'ok');
 }
@@ -5904,38 +5904,49 @@ function _cardCampeao(c) {
 
   if (!membrosCard.length) return '';
 
+  // Coleta todos os times dos membros campeoes
+  const timesDosCampeoes = membrosCard.flatMap(p => p.times || [p.time].filter(Boolean));
+
   const renderMembro = (p) => {
-    const times = p.times || [p.time].filter(Boolean);
     const jogNome = _nomeJogPorId(p.jogadorId, p.nome);
     const foto = jogadores.find(j => j.id === p.jogadorId)?.fotoUrl;
     const avatar = foto
-      ? `<img src="${foto}" style="width:52px;height:52px;border-radius:14px;object-fit:cover;border:2px solid rgba(252,211,77,0.5);flex-shrink:0;" onerror="this.outerHTML=window.avatarSvg(52)">`
-      : avatarSvg(52);
-    const badgesHtml = times.map(t => {
-      const tt = selecoes.some(s => s.id === t?.id) ? 'selecoes' : 'clubes';
-      return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-        ${_htmlCountryRow(t?.id||'', t?.nome||'', tt)}
-        <div style="font-size:10px;font-weight:800;color:var(--text);text-transform:uppercase;text-align:center;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_nomeAbrevTime(t?.id, t?.nome||'?')}</div>
-        ${badgeTimeIcon(t?.id||'', t?.nome||'', tt)}
-        ${eficBadge(eficienciaAtual(t?.id))}
-      </div>`;
-    }).join('');
-    return `<div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;min-width:0;">
+      ? `<img src="${foto}" style="width:64px;height:64px;border-radius:16px;object-fit:cover;border:3px solid rgba(252,211,77,0.7);flex-shrink:0;box-shadow:0 0 20px rgba(252,211,77,0.3);" onerror="this.outerHTML=window.avatarSvg(64)">`
+      : avatarSvg(64);
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;min-width:0;">
       ${avatar}
-      ${jogNome ? `<div style="font-size:13px;font-weight:900;color:#FCD34D;text-transform:uppercase;text-align:center;letter-spacing:0.04em;">${jogNome}</div>` : ''}
-      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">${badgesHtml}</div>
+      ${jogNome ? `<div style="font-size:15px;font-weight:900;color:#FCD34D;text-transform:uppercase;text-align:center;letter-spacing:0.06em;text-shadow:0 0 16px rgba(252,211,77,0.4);">${jogNome}</div>` : ''}
     </div>`;
   };
 
   const titulo = isDupla ? 'DUPLA CAMPEA' : 'CAMPEAO';
   const membrosHtml = membrosCard.map(renderMembro).join(
-    `<div style="font-size:18px;color:rgba(252,211,77,0.5);font-weight:900;align-self:center;">×</div>`
+    `<div style="font-size:22px;color:rgba(252,211,77,0.6);font-weight:900;align-self:center;">×</div>`
   );
 
-  return `<div style="background:linear-gradient(135deg,rgba(252,211,77,0.18),rgba(245,158,11,0.12),rgba(252,211,77,0.08));border:2px solid rgba(252,211,77,0.65);border-radius:20px;padding:20px 16px 16px;margin-bottom:20px;text-align:center;box-shadow:0 0 32px rgba(252,211,77,0.22),0 4px 16px rgba(0,0,0,0.3);">
-  <div style="font-size:38px;margin-bottom:4px;line-height:1;">🏆</div>
-  <div style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:14px;">${titulo}</div>
-  <div style="display:flex;gap:12px;justify-content:center;align-items:flex-start;">${membrosHtml}</div>
+  // Render dos times campeoes em seção separada
+  const timesCampeaoHtml = timesDosCampeoes.map(t => {
+    const tt = selecoes.some(s => s.id === t?.id) ? 'selecoes' : 'clubes';
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:50px;">
+      ${_htmlCountryRow(t?.id||'', t?.nome||'', tt)}
+      <div style="font-size:10px;font-weight:800;color:var(--text);text-transform:uppercase;text-align:center;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_nomeAbrevTime(t?.id, t?.nome||'?')}</div>
+      ${badgeTimeIcon(t?.id||'', t?.nome||'', tt)}
+      ${eficBadge(eficienciaAtual(t?.id))}
+    </div>`;
+  }).join('');
+
+  return `<div style="background:linear-gradient(135deg,rgba(252,211,77,0.22),rgba(245,158,11,0.15),rgba(252,211,77,0.08));border:2.5px solid rgba(252,211,77,0.7);border-radius:22px;padding:22px 16px 18px;margin-bottom:20px;text-align:center;box-shadow:0 0 40px rgba(252,211,77,0.28),0 6px 24px rgba(0,0,0,0.35);position:relative;overflow:hidden;">
+  <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at center top,rgba(252,211,77,0.12),transparent 70%);pointer-events:none;"></div>
+  <div style="position:relative;z-index:1;">
+    <div style="font-size:46px;margin-bottom:6px;line-height:1;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.3));">🏆</div>
+    <div style="font-size:12px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:0.18em;margin-bottom:16px;text-shadow:0 0 12px rgba(252,211,77,0.3);">${titulo}</div>
+    <div style="display:flex;gap:14px;justify-content:center;align-items:flex-start;margin-bottom:14px;">${membrosHtml}</div>
+    ${timesDosCampeoes.length ? `
+    <div style="border-top:1px solid rgba(252,211,77,0.2);padding-top:14px;margin-top:4px;">
+      <div style="font-size:9px;font-weight:800;color:rgba(252,211,77,0.5);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:10px;">${timesDosCampeoes.length > 1 ? 'TIMES CAMPEOES' : 'TIME CAMPEAO'}</div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">${timesCampeaoHtml}</div>
+    </div>` : ''}
+  </div>
 </div>`;
 }
 
@@ -5947,6 +5958,10 @@ window.abrirCampeonato = (id) => {
   const totalJogosReg = (c.grupos||[]).reduce((acc,g)=>acc+(g.partidas||[]).length,0);
   const naoIniciado = totalJogosReg === 0;
   const podeMudar = temPermissao();
+
+  // Datas do torneio
+  const _dataInicioFS = c.criadoEm?.seconds ? new Date(c.criadoEm.seconds * 1000).toLocaleDateString('pt-BR') : '';
+  const _dataFimFS = c.finalizadoEm?.seconds ? new Date(c.finalizadoEm.seconds * 1000).toLocaleDateString('pt-BR') : '';
 
   const qtdTimes = c.qtdTimes || 1;
 
@@ -6055,10 +6070,15 @@ window.abrirCampeonato = (id) => {
           <span class="tag tag-purple">${meta.nome.toUpperCase()}</span>
           <span class="tag ${c.status==='finalizado'?'tag-gray':'tag-green'}">${c.status==='finalizado'?'FINALIZADO':'EM ANDAMENTO'}</span>
           ${temIdaVolta && c.status !== 'finalizado' ? `<span class="tag ${currentTurno === 2 ? 'tag-yellow' : 'tag-green'}">${currentTurno === 2 ? 'RETURNO' : 'TURNO'}</span>` : ''}
-          ${c.modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
+          ${c.modoDupla ? `<span class="tag tag-cyan">DUPLA</span><span class="tag tag-cyan">CASA</span>` : ''}
           ${qtdTimes > 1 ? `<span class="tag tag-yellow">${qtdTimes}X TIMES</span>` : ''}
+          <span class="tag tag-gray">${isSel?'SELECOES':'CLUBES'}</span>
         </div>
         <p style="color:var(--text-muted);font-size:12px;">${c.participantes?.length||0} PARTICIPANTES · ${totalJogosReg} JOGOS REGISTRADOS</p>
+        ${(_dataInicioFS || _dataFimFS) ? `<div style="display:flex;align-items:center;gap:10px;margin-top:4px;font-size:11px;color:var(--text-muted);">
+          ${_dataInicioFS ? `<span>📅 INICIO: <strong>${_dataInicioFS}</strong></span>` : ''}
+          ${_dataFimFS ? `<span>🏁 FIM: <strong>${_dataFimFS}</strong></span>` : ''}
+        </div>` : ''}
       </div>
     </div>
 
@@ -7203,6 +7223,10 @@ function cardCampHome(c, modoLista=false) {
   const isSel = CAMP_META[c.tipo]?.tipo === 'selecoes';
   const finalizado = c.status === 'finalizado';
 
+  // Datas do torneio
+  const dataInicio = c.criadoEm?.seconds ? new Date(c.criadoEm.seconds * 1000).toLocaleDateString('pt-BR') : '';
+  const dataFimTorneio = c.finalizadoEm?.seconds ? new Date(c.finalizadoEm.seconds * 1000).toLocaleDateString('pt-BR') : '';
+
   // Tags dos jogadores participantes
   const tagsJogs = (c.participantes||[]).map(p => {
     const jog = jogadores.find(x => x.id === p.jogadorId);
@@ -7233,10 +7257,72 @@ function cardCampHome(c, modoLista=false) {
     return cardJogoTorneio(m1, m2, null, confKey, c.id, gi, isSel, temPermissao(), c.modoDupla||false, timeIndex, turno, temIdaVoltaHome);
   }).join('');
 
+  // Mini campeão para cards finalizados
+  const campeaoMiniHtml = (() => {
+    if (!finalizado) return '';
+    let campeaoId = null;
+    const finalFase = (c.fasesEliminatorias||[]).find(f => f.fase === 'final');
+    if (finalFase) {
+      const cf = (finalFase.confrontos||[])[0];
+      if (cf && cf.vencedor !== null) campeaoId = cf.vencedor;
+    } else {
+      const todos = [];
+      (c.grupos||[]).forEach(g => g.membros.forEach(m => todos.push(m)));
+      if (todos.length) {
+        const ord = [...todos].sort((a,b)=>b.pts!==a.pts?b.pts-a.pts:(b.gp-b.gc)!==(a.gp-a.gc)?(b.gp-b.gc)-(a.gp-a.gc):b.gp-a.gp);
+        campeaoId = ord[0]?.jogadorId || null;
+      }
+    }
+    if (!campeaoId) return '';
+    const participantes = c.participantes || [];
+    const campeaoPart = participantes.find(p => p.jogadorId === campeaoId);
+    const isDupla = !!(c.modoDupla && campeaoPart?.duplaIndex !== undefined);
+    const membrosCard = isDupla
+      ? participantes.filter(p => p.duplaIndex === campeaoPart.duplaIndex)
+      : (campeaoPart ? [campeaoPart] : []);
+    if (!membrosCard.length) return '';
+
+    const nomesJogs = membrosCard.map(p => _nomeJogPorId(p.jogadorId, p.nome)).filter(Boolean);
+    const timesAll = membrosCard.flatMap(p => p.times || [p.time].filter(Boolean));
+    const timesNomes = timesAll.map(t => t?.nome || '').filter(Boolean);
+
+    const jogAvatars = membrosCard.map(p => {
+      const jog = jogadores.find(j => j.id === p.jogadorId);
+      const foto = jog?.fotoUrl;
+      return foto
+        ? `<img src="${foto}" style="width:32px;height:32px;border-radius:10px;object-fit:cover;border:2px solid rgba(252,211,77,0.5);flex-shrink:0;" onerror="this.outerHTML=window.avatarSvg(32)">`
+        : avatarSvg(32);
+    }).join('');
+
+    const timesBadges = timesAll.slice(0, 3).map(t => {
+      const tt = selecoes.some(s => s.id === t?.id) ? 'selecoes' : 'clubes';
+      return badgeTimeCompact(t?.id||'', t?.nome||'', tt);
+    }).join('');
+
+    const tituloMini = isDupla ? 'DUPLA CAMPEA' : 'CAMPEAO';
+    return `<div style="margin-top:10px;padding:10px 12px;background:linear-gradient(135deg,rgba(252,211,77,0.15),rgba(245,158,11,0.1));border:1.5px solid rgba(252,211,77,0.5);border-radius:14px;display:flex;align-items:center;gap:10px;">
+      <div style="font-size:24px;line-height:1;">🏆</div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">${jogAvatars}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:9px;font-weight:900;color:rgba(252,211,77,0.7);text-transform:uppercase;letter-spacing:0.12em;">${tituloMini}</div>
+        <div style="font-size:12px;font-weight:900;color:#FCD34D;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${nomesJogs.join(' & ')}</div>
+        ${timesNomes.length ? `<div style="font-size:10px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${timesNomes.join(' · ')}</div>` : ''}
+      </div>
+      <div style="display:flex;gap:4px;flex-shrink:0;">${timesBadges}</div>
+    </div>`;
+  })();
+
   const idAttr = modoLista ? '' : `id="camp-home-${c.id}" `;
   const statusTag = finalizado
     ? `<span class="tag tag-gray">FINALIZADO</span>`
     : `<span class="tag tag-yellow">EM ANDAMENTO</span>`;
+
+  // Datas formatadas
+  const datasHtml = (dataInicio || dataFimTorneio)
+    ? `<div style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:10px;color:var(--text-muted);">
+        ${dataInicio ? `<span>📅 INICIO: <strong>${dataInicio}</strong></span>` : ''}
+        ${dataFimTorneio ? `<span>🏁 FIM: <strong>${dataFimTorneio}</strong></span>` : ''}
+      </div>` : '';
 
   const podeMudar = temPermissao();
   const cardHtml = `<div ${idAttr}class="match-card" style="margin-bottom:${modoLista?'0':'10px'};padding:12px;cursor:pointer;" onclick="abrirCampeonato('${c.id}')">
@@ -7249,16 +7335,19 @@ function cardCampHome(c, modoLista=false) {
         ${statusTag}
         <span class="tag tag-gray">${isSel?'SELECOES':'CLUBES'}</span>
         <span class="tag tag-cyan">${(meta.nome||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase()}</span>
+        ${c.modoDupla ? `<span class="tag tag-cyan">DUPLA</span><span class="tag tag-cyan">CASA</span>` : ''}
         <span class="tag tag-gray">${c.participantes?.length||0} JOGADORES</span>
       </div>
     </div>
+    ${datasHtml}
     ${!finalizado ? `<div style="margin-top:6px;display:flex;align-items:center;gap:6px;">
       <div style="flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;">
         <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--yellow),var(--green));border-radius:2px;"></div>
       </div>
       <span style="font-size:10px;color:var(--text-muted);white-space:nowrap;">${totalParts}/${totalPoss} JOGOS</span>
     </div>` : ''}
-    ${tagsJogs ? `<div style="display:flex;flex-direction:column;gap:4px;margin-top:8px;">${tagsJogs}</div>` : ''}
+    ${tagsJogs ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;">${tagsJogs}</div>` : ''}
+    ${campeaoMiniHtml}
     ${!finalizado && jogosHtml ? `<div style="margin-top:8px;" onclick="event.stopPropagation();abrirCampeonato('${c.id}')">${jogosHtml}</div>` : ''}
   </div>`;
 
