@@ -1,0 +1,9 @@
+# FIFA FAR PLAY - Prompts de Features v28
+# FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
+# O agente deve marcar o hash do commit ao concluir cada item.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v28.txt e um novo é criado.
+
+## MELHORIAS ##
+
+- [x] Selecao unica de times no torneio: ao criar torneio com 1-5 times por jogador, cada jogador controla essa quantidade de times; no modo manual os times selecionados desaparecem da listagem para outros jogadores; no sorteio automatico, distribuir times unicos por jogador sem repeticao; corrigir exibicao de todos os times do jogador na view do torneio e renderizacao correta de badge (clube vs selecao) nos cards de jogo e painel de jogadores (hash: 9591fc3)
+- [x] Quando qualquer torneio e finalizado, exibir card destacado com o jogador ou dupla campea: card com gradiente dourado, foto do jogador, nome em destaque e badges dos times, suporte a modo dupla mostrando ambos os jogadores (hash: 0ac7948)
