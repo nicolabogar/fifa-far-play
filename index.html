@@ -5529,6 +5529,199 @@ function calcularDisp(g, qtdTimes=1) {
   return disp;
 }
 
+// ── FASES ELIMINATORIAS ───────────────────────────────────────────────────
+
+const FASE_KNOCKOUT_NOMES = { oitavas:'OITAVAS DE FINAL', quartas:'QUARTAS DE FINAL', semifinal:'SEMIFINAL', final:'FINAL' };
+const FASE_KNOCKOUT_SEQ   = ['oitavas','quartas','semifinal','final'];
+
+function _temFasesKnockout(tipo) {
+  return ['champions','libertadores','copa-do-mundo','paulistao'].includes(tipo);
+}
+
+function _classificadosPorGrupo(c) {
+  const classificados = [];
+  (c.grupos||[]).forEach(g => {
+    const ord = [...g.membros].sort((a,b)=>b.pts!==a.pts?b.pts-a.pts:(b.gp-b.gc)!==(a.gp-a.gc)?(b.gp-b.gc)-(a.gp-a.gc):b.gp-a.gp);
+    ord.slice(0,2).forEach(m => classificados.push(m));
+  });
+  return classificados;
+}
+
+function _verificarFaseGruposCompleta(c) {
+  const qtdTimes = c.qtdTimes || 1;
+  return (c.grupos||[]).length > 0 && (c.grupos||[]).every(g => calcularDisp(g, qtdTimes).length === 0);
+}
+
+function _verificarFaseElimCompleta(fase) {
+  return (fase.confrontos||[]).length > 0 && (fase.confrontos||[]).every(cf => cf.vencedor !== null);
+}
+
+function _criarConfrontosKnockout(classificados) {
+  // Separa 1os e 2os colocados de cada grupo para evitar rematches na primeira rodada
+  const primes  = classificados.filter((_,i) => i % 2 === 0);
+  const seconds = classificados.filter((_,i) => i % 2 === 1);
+  const confrontos = [];
+  const n = primes.length;
+  for (let i = 0; i < n; i++) {
+    const j1 = primes[i];
+    const j2 = seconds[(i + 1) % n];
+    confrontos.push({
+      j1Id: j1.jogadorId, j1Nome: j1.nome, j1Times: j1.times || [j1.time].filter(Boolean),
+      j2Id: j2.jogadorId, j2Nome: j2.nome, j2Times: j2.times || [j2.time].filter(Boolean),
+      g1: null, g2: null, vencedor: null
+    });
+  }
+  return confrontos;
+}
+
+function _criarConfrontosKnockoutSequencial(vencedores) {
+  const confrontos = [];
+  for (let i = 0; i < vencedores.length; i += 2) {
+    if (i + 1 < vencedores.length) {
+      const j1 = vencedores[i], j2 = vencedores[i + 1];
+      confrontos.push({
+        j1Id: j1.jogadorId, j1Nome: j1.nome, j1Times: j1.times || [j1.time].filter(Boolean),
+        j2Id: j2.jogadorId, j2Nome: j2.nome, j2Times: j2.times || [j2.time].filter(Boolean),
+        g1: null, g2: null, vencedor: null
+      });
+    }
+  }
+  return confrontos;
+}
+
+async function _criarPrimeiraFaseElim(cid) {
+  const c = campeonatos.find(x => x.id === cid);
+  if (!c) return;
+  const classificados = _classificadosPorGrupo(c);
+  if (classificados.length < 2) { await _finalizarTorneio(cid); return; }
+  const n = Math.pow(2, Math.floor(Math.log2(classificados.length)));
+  const selecionados = classificados.slice(0, n);
+  const primeiraFaseChave = n <= 2 ? 'final' : n <= 4 ? 'semifinal' : n <= 8 ? 'quartas' : 'oitavas';
+  const confrontos = _criarConfrontosKnockout(selecionados);
+  const fasesEliminatorias = [{ fase: primeiraFaseChave, nome: FASE_KNOCKOUT_NOMES[primeiraFaseChave], confrontos }];
+  await updateDoc(doc(db,'campeonatos',cid), { fasesEliminatorias, fase: primeiraFaseChave });
+  await carregarCampeonatos(); atualizarDash(); abrirCampeonato(cid);
+  toast(`FASE DE GRUPOS CONCLUIDA! ${FASE_KNOCKOUT_NOMES[primeiraFaseChave]} CRIADA!`, 'ok');
+}
+
+async function _avancarFaseElim(cid, faseIdx) {
+  const c = campeonatos.find(x => x.id === cid);
+  if (!c) return;
+  const faseAtual = (c.fasesEliminatorias||[])[faseIdx];
+  if (!faseAtual) return;
+  if (faseAtual.fase === 'final') { await _finalizarTorneio(cid); return; }
+  const vencedores = faseAtual.confrontos.map(cf => {
+    const jog = (c.participantes||[]).find(p => p.jogadorId === cf.vencedor);
+    return jog || { jogadorId: cf.vencedor, nome: cf.vencedor === cf.j1Id ? cf.j1Nome : cf.j2Nome, times: cf.vencedor === cf.j1Id ? cf.j1Times : cf.j2Times };
+  });
+  const currIdx = FASE_KNOCKOUT_SEQ.indexOf(faseAtual.fase);
+  const proximaFaseChave = FASE_KNOCKOUT_SEQ[currIdx + 1];
+  if (!proximaFaseChave) { await _finalizarTorneio(cid); return; }
+  const confrontos = _criarConfrontosKnockoutSequencial(vencedores);
+  const novaFase = { fase: proximaFaseChave, nome: FASE_KNOCKOUT_NOMES[proximaFaseChave], confrontos };
+  const fasesEliminatorias = [...(c.fasesEliminatorias||[]), novaFase];
+  await updateDoc(doc(db,'campeonatos',cid), { fasesEliminatorias, fase: proximaFaseChave });
+  await carregarCampeonatos(); atualizarDash(); abrirCampeonato(cid);
+  toast(`${FASE_KNOCKOUT_NOMES[proximaFaseChave]} CRIADA!`, 'ok');
+}
+
+async function _finalizarTorneio(cid) {
+  await updateDoc(doc(db,'campeonatos',cid), { status: 'finalizado', fase: 'encerrado' });
+  await carregarCampeonatos(); calcularRankingTorneios(); atualizarDash(); abrirCampeonato(cid);
+  toast('TORNEIO FINALIZADO! CAMPEAO DEFINIDO!', 'ok');
+}
+
+window.salvarPartidaKnockout = async (cid, faseIdx, confrontoIdx, btnEl) => {
+  if (_lockBtn(btnEl)) return;
+  try {
+    const c = campeonatos.find(x => x.id === cid);
+    if (!c) return;
+    const fase = (c.fasesEliminatorias||[])[faseIdx];
+    if (!fase) return;
+    const confronto = fase.confrontos[confrontoIdx];
+    if (!confronto) return;
+    if (confronto.vencedor !== null) { toast('ESSE JOGO JA FOI REGISTRADO','erro'); return; }
+    const container = btnEl ? btnEl.closest('.match-card') || btnEl.parentElement : null;
+    const el1 = container ? container.querySelector('[data-tpdc="1"]') : null;
+    const el2 = container ? container.querySelector('[data-tpdc="2"]') : null;
+    const g1v = parseInt(el1?.value); const g2v = parseInt(el2?.value);
+    const g1 = isNaN(g1v) ? 0 : g1v; const g2 = isNaN(g2v) ? 0 : g2v;
+    if (g1 === g2) { toast('EMPATE NAO PERMITIDO EM ELIMINATORIAS! DEFINA UM VENCEDOR.','erro'); _unlockBtn(btnEl); return; }
+    const vencedor = g1 > g2 ? confronto.j1Id : confronto.j2Id;
+    const fasesEliminatorias = (c.fasesEliminatorias||[]).map((f, fi) => {
+      if (fi !== faseIdx) return f;
+      return { ...f, confrontos: f.confrontos.map((cf, ci) => ci !== confrontoIdx ? cf : { ...cf, g1, g2, vencedor }) };
+    });
+    await updateDoc(doc(db,'campeonatos',cid), { fasesEliminatorias });
+    await carregarCampeonatos();
+    const cAtual = campeonatos.find(x => x.id === cid);
+    const faseAtual = (cAtual?.fasesEliminatorias||[])[faseIdx];
+    if (faseAtual && _verificarFaseElimCompleta(faseAtual)) {
+      await _avancarFaseElim(cid, faseIdx);
+    } else {
+      atualizarDash(); abrirCampeonato(cid);
+    }
+  } catch(e) { toast('ERRO AO SALVAR','erro'); } finally { _unlockBtn(btnEl); }
+};
+
+function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar) {
+  const t1 = (cf.j1Times||[])[0];
+  const t2 = (cf.j2Times||[])[0];
+  const tipo1 = selecoes.some(s => s.id === t1?.id) ? 'selecoes' : 'clubes';
+  const tipo2 = selecoes.some(s => s.id === t2?.id) ? 'selecoes' : 'clubes';
+  const nome1 = _nomeJogPorId(cf.j1Id, cf.j1Nome);
+  const nome2 = _nomeJogPorId(cf.j2Id, cf.j2Nome);
+  const temRes = cf.vencedor !== null;
+  const g1r = temRes ? cf.g1 : null;
+  const g2r = temRes ? cf.g2 : null;
+  const vit1 = temRes && cf.vencedor === cf.j1Id;
+  const vit2 = temRes && cf.vencedor === cf.j2Id;
+  const placarArea = temRes
+    ? `<div style="font-size:29px;font-weight:900;letter-spacing:1px;color:var(--yellow);">${g1r}<span style="color:var(--text-muted);font-size:13px;"> × </span>${g2r}</div>`
+    : podeMudar
+      ? `<div style="display:flex;align-items:center;gap:4px;">
+           <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="1" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
+           <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
+           <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="2" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
+         </div>
+         <button onclick="event.stopPropagation();salvarPartidaKnockout('${cid}',${faseIdx},${confrontoIdx},this)" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">FIM</button>`
+      : `<div style="display:flex;align-items:center;gap:4px;opacity:0.4;">
+           <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="1" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;cursor:not-allowed;">
+           <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
+           <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="2" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;cursor:not-allowed;">
+         </div>
+         <button disabled onclick="event.stopPropagation()" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:not-allowed;opacity:0.4;">FIM</button>`;
+  return `<div class="match-card" style="margin-bottom:10px;${vit1?'border-color:rgba(110,231,183,0.4);':vit2?'border-color:rgba(110,231,183,0.4);':''}">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span class="tag tag-purple">TORNEIO</span>
+        <span class="tag tag-yellow">ELIMINATORIA</span>
+      </div>
+      ${temRes ? (vit1 ? `<span class="tag tag-green">VITORIA: ${nome1}</span>` : `<span class="tag tag-green">VITORIA: ${nome2}</span>`) : `<span class="tag tag-cyan">EM ANDAMENTO</span>`}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;${vit1?'opacity:1;':''}${temRes&&!vit1?'opacity:0.45;':''}">
+        ${_htmlCountryRow(t1?.id||'', t1?.nome||'', tipo1)}
+        <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(t1?.id, t1?.nome||'?')}</div>
+        <div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(t1?.id||'', t1?.nome||'', tipo1)}</div>
+        ${nome1 ? `<div style="margin-top:4px;"><div style="font-size:11px;color:#67E8F9;font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.2);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${nome1}</div></div>` : ''}
+        ${vit1 ? `<div style="margin-top:4px;font-size:18px;">🏆</div>` : ''}
+      </div>
+      <div style="text-align:center;min-width:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+        ${placarArea}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;${vit2?'opacity:1;':''}${temRes&&!vit2?'opacity:0.45;':''}">
+        ${_htmlCountryRow(t2?.id||'', t2?.nome||'', tipo2)}
+        <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(t2?.id, t2?.nome||'?')}</div>
+        <div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(t2?.id||'', t2?.nome||'', tipo2)}</div>
+        ${nome2 ? `<div style="margin-top:4px;"><div style="font-size:11px;color:#67E8F9;font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.2);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${nome2}</div></div>` : ''}
+        ${vit2 ? `<div style="margin-top:4px;font-size:18px;">🏆</div>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+window.cardJogoKnockout = cardJogoKnockout;
+
 /** Card de jogo de torneio — estilo idêntico ao cardAmistoso (TO3) */
 function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true, modoDupla=false, timeIndex=0) {
   const tipo = isSel ? 'selecoes' : 'clubes';
@@ -5791,6 +5984,25 @@ window.abrirCampeonato = (id) => {
 
     <p class="sec-title" style="margin-bottom:10px;">GRUPOS</p>
     ${gruposHTML}
+
+    ${(() => {
+      const fases = c.fasesEliminatorias || [];
+      if (!fases.length) return '';
+      const fasesHTML = fases.map((fase, faseIdx) => {
+        const concluida = _verificarFaseElimCompleta(fase);
+        const confrontosHTML = (fase.confrontos||[]).map((cf, ci) =>
+          cardJogoKnockout(cf, c.id, faseIdx, ci, isSel, podeMudar)
+        ).join('');
+        return `<div class="grupo-header aberto" onclick="toggleGrupo(this)" style="margin-bottom:8px;">
+          <span class="grupo-titulo">${fase.nome} <span style="color:var(--text-muted);font-weight:600;">${concluida ? '· CONCLUIDO' : ''}</span></span>
+          <span class="grupo-seta">›</span>
+        </div>
+        <div class="grupo-body" style="margin-bottom:14px;">
+          ${confrontosHTML}
+        </div>`;
+      }).join('');
+      return `<p class="sec-title" style="margin-bottom:10px;margin-top:16px;">FASE ELIMINATORIA</p>${fasesHTML}`;
+    })()}
   `, 'TORNEIOS', 'campeonatos');
   document.getElementById('fullscreen-title').style.color = c.status === 'finalizado' ? '#94A3B8' : '#6EE7B7';
 };
@@ -5833,7 +6045,17 @@ window.salvarPartidaDireta = async (cid, gi, j1Id, j2Id, timeIndex, btnEl) => {
     return {...gr,membros,partidas:[...(gr.partidas||[]),{j1Id:m1.jogadorId,j1Nome:m1.nome,j2Id:m2.jogadorId,j2Nome:m2.nome,g1,g2,timeIndex}]};
   });
   await updateDoc(doc(db,'campeonatos',cid),{grupos});
-  await carregarCampeonatos(); atualizarDash(); abrirCampeonato(cid);
+  await carregarCampeonatos();
+  const cAtual = campeonatos.find(x => x.id === cid);
+  if (cAtual && _verificarFaseGruposCompleta(cAtual) && !(cAtual.fasesEliminatorias?.length)) {
+    if (_temFasesKnockout(cAtual.tipo)) {
+      await _criarPrimeiraFaseElim(cid);
+    } else {
+      await _finalizarTorneio(cid);
+    }
+  } else {
+    atualizarDash(); abrirCampeonato(cid);
+  }
 };
 
 window.reiniciarTorneio = (id) => {
@@ -5857,7 +6079,7 @@ window.confirmarReiniciarTorneio = async (id) => {
     partidas: [],
     membros: g.membros.map(m => ({ ...m, pts: 0, vit: 0, emp: 0, der: 0, gp: 0, gc: 0 }))
   }));
-  await updateDoc(doc(db, 'campeonatos', id), { grupos: gruposReset, status: 'ativo' });
+  await updateDoc(doc(db, 'campeonatos', id), { grupos: gruposReset, status: 'ativo', fase: 'grupos', fasesEliminatorias: [] });
   fecharModal(); await carregarCampeonatos(); atualizarDash();
   abrirCampeonato(id);
 };
