@@ -1822,6 +1822,18 @@ document.addEventListener('focus', (e) => {
   }
 }, true);
 
+// F3: Enter no campo do time 1 avanca para o campo do time 2
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.classList.contains('placar-input')) {
+    const isT1 = e.target.dataset.pdc === '1' || e.target.dataset.tpdc === '1';
+    if (isT1) {
+      const card = e.target.closest('.match-card') || e.target.parentElement;
+      const inp2 = card ? card.querySelector('[data-tpdc="2"],[data-pdc="2"]') : null;
+      if (inp2 && !inp2.disabled) { e.preventDefault(); inp2.focus(); inp2.select(); }
+    }
+  }
+});
+
 getRedirectResult(auth).catch(e => { mostraErro(e.message || 'Erro ao realizar login. Tente novamente.'); });
 
 onAuthStateChanged(auth, async u => {
@@ -2734,7 +2746,14 @@ function carregarAmistosos() {
   });
 }
 
-function cardAmistoso(a, compact=false, readonly=false, noSwipe=false) {
+function _tagVitoriaAmistoso(a) {
+  const g1 = a.resultado.g1, g2 = a.resultado.g2;
+  if (g1 > g2) return `<span class="tag tag-green">VITÓRIA: ${_nomesTime(a.time1).join(', ') || 'T1'}</span>`;
+  if (g2 > g1) return `<span class="tag tag-green">VITÓRIA: ${_nomesTime(a.time2).join(', ') || 'T2'}</span>`;
+  return `<span class="tag tag-yellow">EMPATE</span>`;
+}
+
+function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking=false) {
   const temRes = a.resultado != null;
   const master = temPermissao(); // RG7b: controle de acesso no card
   const diff = temRes ? Math.abs(a.resultado.g1 - a.resultado.g2) : null;
@@ -2778,18 +2797,13 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false) {
   const swipeBg = (master && !noSwipe) ? `<div class="swipe-bg"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg><span class="swipe-bg-label">EXCLUIR</span></div>` : '';
   return `${swipeOuter}${swipeBg}
   <div id="${cardId}" class="match-card" style="${compact?'padding:12px;':''}" ${readonly || a.resultado || !master ? '' : `onclick="editarAmistoso('${a.id}')" style="cursor:pointer;"`}>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${compact?'8':'10'}px;">
+    <div style="display:flex;align-items:center;${isRanking?'':'justify-content:space-between;'} margin-bottom:${compact?'8':'10'}px;">
       <div style="display:flex;align-items:center;gap:6px;">
         <span class="tag tag-purple">AMISTOSO</span>
         <span class="tag tag-gray">${a.tipo === 'selecoes' ? 'SELECOES' : 'CLUBES'}</span>
         ${a.modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
       </div>
-      ${temRes ? (() => {
-        const g1 = a.resultado.g1, g2 = a.resultado.g2;
-        if (g1 > g2) return `<span class="tag tag-green">VITÓRIA: ${_nomesTime(a.time1).join(', ') || 'T1'}</span>`;
-        if (g2 > g1) return `<span class="tag tag-green">VITÓRIA: ${_nomesTime(a.time2).join(', ') || 'T2'}</span>`;
-        return `<span class="tag tag-yellow">EMPATE</span>`;
-      })() : `<span class="tag tag-cyan">EM ANDAMENTO</span>`}
+      ${!isRanking ? (temRes ? _tagVitoriaAmistoso(a) : `<span class="tag tag-cyan">EM ANDAMENTO</span>`) : ''}
     </div>
     ${compact ? `
     <div style="display:flex;align-items:center;gap:8px;">
@@ -2844,6 +2858,10 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false) {
           : ''}
       </div>
     </div>`}
+  ${isRanking && temRes ? (() => {
+    const dataAmi = a.criadoEm?.seconds ? new Date(a.criadoEm.seconds * 1000).toLocaleDateString('pt-BR') : '';
+    return `<div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);">${_tagVitoriaAmistoso(a)}${dataAmi?`<span style="font-size:10px;color:var(--text-muted);">${dataAmi}</span>`:''}</div>`;
+  })() : ''}
   ${!temRes && !compact ? `
   <div style="margin-top:12px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px;">
     <button onclick="event.stopPropagation();compartilharWhatsApp(${JSON.stringify({tipo:a.tipo,modoDupla:a.modoDupla||false,time1:a.time1,time2:a.time2}).replace(/"/g,'&quot;')})" style="width:100%;background:#25D366;border:none;color:#fff;padding:10px;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
@@ -5670,7 +5688,7 @@ window.salvarPartidaKnockout = async (cid, faseIdx, confrontoIdx, btnEl) => {
   } catch(e) { toast('ERRO AO SALVAR','erro'); } finally { _unlockBtn(btnEl); }
 };
 
-function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar) {
+function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar, faseKey) {
   const t1 = (cf.j1Times||[])[0];
   const t2 = (cf.j2Times||[])[0];
   const tipo1 = selecoes.some(s => s.id === t1?.id) ? 'selecoes' : 'clubes';
@@ -5678,30 +5696,48 @@ function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar) {
   const nome1 = _nomeJogPorId(cf.j1Id, cf.j1Nome);
   const nome2 = _nomeJogPorId(cf.j2Id, cf.j2Nome);
   const temRes = cf.vencedor !== null;
+  const isFinal = faseKey === 'final';
   const g1r = temRes ? cf.g1 : null;
   const g2r = temRes ? cf.g2 : null;
   const vit1 = temRes && cf.vencedor === cf.j1Id;
   const vit2 = temRes && cf.vencedor === cf.j2Id;
+  const placarColor = isFinal ? '#FCD34D' : 'var(--yellow)';
+  const btnStyle = isFinal
+    ? 'margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,#B45309,#F59E0B);border:none;color:#fff;border-radius:8px;cursor:pointer;'
+    : 'margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;';
   const placarArea = temRes
-    ? `<div style="font-size:29px;font-weight:900;letter-spacing:1px;color:var(--yellow);">${g1r}<span style="color:var(--text-muted);font-size:13px;"> × </span>${g2r}</div>`
+    ? `<div style="font-size:29px;font-weight:900;letter-spacing:1px;color:${placarColor};">${g1r}<span style="color:var(--text-muted);font-size:13px;"> × </span>${g2r}</div>`
     : podeMudar
       ? `<div style="display:flex;align-items:center;gap:4px;">
            <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="1" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
            <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
            <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="2" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
          </div>
-         <button onclick="event.stopPropagation();salvarPartidaKnockout('${cid}',${faseIdx},${confrontoIdx},this)" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">FIM</button>`
+         <button onclick="event.stopPropagation();salvarPartidaKnockout('${cid}',${faseIdx},${confrontoIdx},this)" class="btn-primary" style="${btnStyle}">FIM</button>`
       : `<div style="display:flex;align-items:center;gap:4px;opacity:0.4;">
            <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="1" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;cursor:not-allowed;">
            <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
            <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="2" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;cursor:not-allowed;">
          </div>
-         <button disabled onclick="event.stopPropagation()" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:not-allowed;opacity:0.4;">FIM</button>`;
-  return `<div class="match-card" style="margin-bottom:10px;${vit1?'border-color:rgba(110,231,183,0.4);':vit2?'border-color:rgba(110,231,183,0.4);':''}">
+         <button disabled onclick="event.stopPropagation()" class="btn-primary" style="${btnStyle}opacity:0.4;cursor:not-allowed;">FIM</button>`;
+  const cardBorder = isFinal
+    ? (temRes ? 'border-color:rgba(252,211,77,0.6);box-shadow:0 0 18px rgba(252,211,77,0.18);' : 'border-color:rgba(252,211,77,0.4);box-shadow:0 0 14px rgba(252,211,77,0.12);')
+    : (vit1 || vit2 ? 'border-color:rgba(110,231,183,0.4);' : '');
+  const finalBanner = isFinal
+    ? `<div style="text-align:center;margin-bottom:10px;padding:6px 0 4px;background:linear-gradient(90deg,rgba(180,83,9,0.18),rgba(245,158,11,0.22),rgba(180,83,9,0.18));border-radius:10px;">
+        <span style="font-size:13px;font-weight:900;letter-spacing:0.12em;color:#FCD34D;text-transform:uppercase;">🏆 GRANDE FINAL 🏆</span>
+       </div>`
+    : '';
+  const tagFase = isFinal
+    ? `<span class="tag" style="background:rgba(245,158,11,0.25);color:#FCD34D;font-weight:900;letter-spacing:0.05em;">⭐ FINAL</span>`
+    : `<span class="tag tag-yellow">ELIMINATORIA</span>`;
+  const winnerEmoji = isFinal ? '👑' : '🏆';
+  return `<div class="match-card" data-match-key="${cid}-ko-${faseIdx}-${confrontoIdx}" style="margin-bottom:10px;${cardBorder}">
+    ${finalBanner}
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <div style="display:flex;align-items:center;gap:6px;">
         <span class="tag tag-purple">TORNEIO</span>
-        <span class="tag tag-yellow">ELIMINATORIA</span>
+        ${tagFase}
       </div>
       ${temRes ? (vit1 ? `<span class="tag tag-green">VITORIA: ${nome1}</span>` : `<span class="tag tag-green">VITORIA: ${nome2}</span>`) : `<span class="tag tag-cyan">EM ANDAMENTO</span>`}
     </div>
@@ -5711,7 +5747,7 @@ function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar) {
         <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(t1?.id, t1?.nome||'?')}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(t1?.id||'', t1?.nome||'', tipo1)}</div>
         ${nome1 ? `<div style="margin-top:4px;"><div style="font-size:11px;color:#67E8F9;font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.2);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${nome1}</div></div>` : ''}
-        ${vit1 ? `<div style="margin-top:4px;font-size:18px;">🏆</div>` : ''}
+        ${vit1 ? `<div style="margin-top:4px;font-size:18px;">${winnerEmoji}</div>` : ''}
       </div>
       <div style="text-align:center;min-width:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
         ${placarArea}
@@ -5721,7 +5757,7 @@ function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar) {
         <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(t2?.id, t2?.nome||'?')}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(t2?.id||'', t2?.nome||'', tipo2)}</div>
         ${nome2 ? `<div style="margin-top:4px;"><div style="font-size:11px;color:#67E8F9;font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.2);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${nome2}</div></div>` : ''}
-        ${vit2 ? `<div style="margin-top:4px;font-size:18px;">🏆</div>` : ''}
+        ${vit2 ? `<div style="margin-top:4px;font-size:18px;">${winnerEmoji}</div>` : ''}
       </div>
     </div>
   </div>`;
@@ -5763,7 +5799,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
           </div>
           <button disabled onclick="event.stopPropagation()" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:not-allowed;opacity:0.4;">FIM</button>`;
 
-  return `<div class="match-card" style="margin-bottom:10px;">
+  return `<div class="match-card" data-match-key="${confKey}" style="margin-bottom:10px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <div style="display:flex;align-items:center;gap:6px;">
         <span class="tag tag-purple">TORNEIO</span>
@@ -5883,6 +5919,15 @@ window.abrirCampeonato = (id) => {
     </div>`;
   }).join('');
 
+  // Preservar placares digitados mas ainda nao salvos
+  const _savedScores = {};
+  document.querySelectorAll('.match-card[data-match-key]').forEach(card => {
+    const key = card.dataset.matchKey;
+    const inp1 = card.querySelector('[data-tpdc="1"],[data-pdc="1"]');
+    const inp2 = card.querySelector('[data-tpdc="2"],[data-pdc="2"]');
+    if (inp1 && !inp1.disabled && inp2 && !inp2.disabled) _savedScores[key] = { v1: inp1.value, v2: inp2.value };
+  });
+
   fullscreen(c.nome.toUpperCase(), `
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
       <div style="flex:1;">
@@ -5997,7 +6042,7 @@ window.abrirCampeonato = (id) => {
       const fasesHTML = fases.map((fase, faseIdx) => {
         const concluida = _verificarFaseElimCompleta(fase);
         const confrontosHTML = (fase.confrontos||[]).map((cf, ci) =>
-          cardJogoKnockout(cf, c.id, faseIdx, ci, isSel, podeMudar)
+          cardJogoKnockout(cf, c.id, faseIdx, ci, isSel, podeMudar, fase.fase)
         ).join('');
         return `<div class="grupo-header aberto" onclick="toggleGrupo(this)" style="margin-bottom:8px;">
           <span class="grupo-titulo">${fase.nome} <span style="color:var(--text-muted);font-weight:600;">${concluida ? '· CONCLUIDO' : ''}</span></span>
@@ -6011,6 +6056,16 @@ window.abrirCampeonato = (id) => {
     })()}
   `, 'TORNEIOS', 'campeonatos');
   document.getElementById('fullscreen-title').style.color = c.status === 'finalizado' ? '#94A3B8' : '#6EE7B7';
+  // Restaurar placares digitados mas ainda nao salvos
+  Object.entries(_savedScores).forEach(([key, vals]) => {
+    const card = document.querySelector(`.match-card[data-match-key="${CSS.escape(key)}"]`);
+    if (card) {
+      const inp1 = card.querySelector('[data-tpdc="1"],[data-pdc="1"]');
+      const inp2 = card.querySelector('[data-tpdc="2"],[data-pdc="2"]');
+      if (inp1) inp1.value = vals.v1;
+      if (inp2) inp2.value = vals.v2;
+    }
+  });
 };
 
 // Salva partida diretamente dos inputs no card (sem modal)
@@ -6271,9 +6326,28 @@ function calcularRankingAmistosos() {
 
 function calcularRankingTorneios() {
   const s = {};
-  jogadores.forEach(j => { s[j.id]={id:j.id,nome:_nomeExibicao(j),fotoUrl:j.fotoUrl||'',vit:0,emp:0,der:0,gp:0,gc:0,pts:0,j:0}; });
-  campeonatos.forEach(c=>(c.grupos||[]).forEach(g=>g.membros.forEach(m=>{if(!s[m.jogadorId])return;s[m.jogadorId].pts+=m.pts;s[m.jogadorId].vit+=m.vit;s[m.jogadorId].emp+=m.emp;s[m.jogadorId].der+=m.der;s[m.jogadorId].gp+=m.gp;s[m.jogadorId].gc+=m.gc;s[m.jogadorId].j+=m.vit+m.emp+m.der;})));
-  return Object.values(s).filter(x=>x.j>0).sort((a,b)=>b.pts!==a.pts?b.pts-a.pts:(b.gp-b.gc)!==(a.gp-a.gc)?(b.gp-b.gc)-(a.gp-a.gc):b.gp-a.gp);
+  jogadores.forEach(j => { s[j.id]={id:j.id,nome:_nomeExibicao(j),fotoUrl:j.fotoUrl||'',titulos:0,vices:0,gp:0,gc:0,j:0}; });
+  campeonatos.forEach(c => {
+    (c.grupos||[]).forEach(g=>g.membros.forEach(m=>{if(!s[m.jogadorId])return;s[m.jogadorId].gp+=m.gp;s[m.jogadorId].gc+=m.gc;s[m.jogadorId].j+=m.vit+m.emp+m.der;}));
+    (c.fasesEliminatorias||[]).forEach(fase=>(fase.confrontos||[]).forEach(cf=>{
+      if(cf.vencedor===null||cf.g1===null||cf.g2===null)return;
+      if(s[cf.j1Id]){s[cf.j1Id].gp+=cf.g1;s[cf.j1Id].gc+=cf.g2;s[cf.j1Id].j++;}
+      if(s[cf.j2Id]){s[cf.j2Id].gp+=cf.g2;s[cf.j2Id].gc+=cf.g1;s[cf.j2Id].j++;}
+    }));
+    if(c.status==='finalizado'){
+      const finalFase=(c.fasesEliminatorias||[]).find(f=>f.fase==='final');
+      if(finalFase){
+        const cf=(finalFase.confrontos||[])[0];
+        if(cf&&cf.vencedor!==null){
+          const campeaoId=cf.vencedor;
+          const viceId=cf.vencedor===cf.j1Id?cf.j2Id:cf.j1Id;
+          if(s[campeaoId])s[campeaoId].titulos++;
+          if(s[viceId])s[viceId].vices++;
+        }
+      }
+    }
+  });
+  return Object.values(s).filter(x=>x.j>0||x.titulos>0||x.vices>0).sort((a,b)=>b.titulos!==a.titulos?b.titulos-a.titulos:b.vices!==a.vices?b.vices-a.vices:(b.gp-b.gc)!==(a.gp-a.gc)?(b.gp-b.gc)-(a.gp-a.gc):b.gp-a.gp);
 }
 
 function renderRankRow(p, i, fromHome) {
@@ -6297,6 +6371,26 @@ function renderRankRow(p, i, fromHome) {
   </div>`;
 }
 
+function renderRankRowTorneio(p, i, fromHome) {
+  const foto = p.fotoUrl ? `<img src="${p.fotoUrl}" style="width:36px;height:36px;border-radius:10px;object-fit:cover;flex-shrink:0;" onerror="this.outerHTML=window.avatarSvg(36)">` : avatarSvg(36);
+  const clickHandler = fromHome
+    ? `irParaRankingComJogador('${p.id}')`
+    : `_setRankJogFiltro('${p.id}')`;
+  return `<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:12px;margin-bottom:8px;cursor:pointer;" onclick="${clickHandler}">
+    <div class="rank-pos" style="color:${i===0?'var(--yellow)':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text-muted)'};font-weight:900;">${i+1}°</div>
+    ${foto}
+    <div style="flex:1;min-width:0;">
+      <div style="font-weight:800;font-size:14px;text-transform:uppercase;">${p.nome}</div>
+    </div>
+    <div style="display:flex;gap:6px;font-size:11px;font-weight:700;color:var(--text-muted);">
+      <span title="TITULOS" style="color:var(--yellow);">🏆${p.titulos}</span>
+      <span title="VICE-CAMPEONATO" style="color:#C0C0C0;">🥈${p.vices}</span>
+      <span title="GOLS FEITOS" style="color:var(--green);">${p.gp}GF</span>
+      <span title="GOLS SOFRIDOS" style="color:var(--red);">${p.gc}GS</span>
+    </div>
+  </div>`;
+}
+
 function renderRankingAmistosos(rank) {
   const html = rank.length===0?'<p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:14px;">NENHUM AMISTOSO FINALIZADO</p>'
     :rank.map((p,i)=>renderRankRow(p,i,false)).join('');
@@ -6308,11 +6402,11 @@ function renderRankingAmistosos(rank) {
 
 function renderRankingTorneios(rank) {
   const html = rank.length===0?'<p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:14px;">NENHUM TORNEIO FINALIZADO</p>'
-    :rank.map((p,i)=>renderRankRow(p,i,false)).join('');
+    :rank.map((p,i)=>renderRankRowTorneio(p,i,false)).join('');
   const el1 = document.getElementById('lista-rank-camp');
   if (el1) el1.innerHTML = html;
   const el2 = document.getElementById('home-rank-camp');
-  if (el2) el2.innerHTML = rank.slice(0,5).length===0?'<p style="color:var(--text-muted);text-align:center;padding:16px 0;font-size:14px;">NENHUM TORNEIO FINALIZADO</p>':rank.slice(0,5).map((p,i)=>renderRankRow(p,i,true)).join('');
+  if (el2) el2.innerHTML = rank.slice(0,5).length===0?'<p style="color:var(--text-muted);text-align:center;padding:16px 0;font-size:14px;">NENHUM TORNEIO FINALIZADO</p>':rank.slice(0,5).map((p,i)=>renderRankRowTorneio(p,i,true)).join('');
 }
 
 async function sincronizarRanking(btn) {
@@ -6733,7 +6827,7 @@ function _renderHistorico() {
     // Para amistosos, usa o cardAmistoso real igual ao de finalizados (não-compact, readonly)
     if (j.tipo === 'AMISTOSO' && j.amiId) {
       const ami = amistosos.find(a => a.id === j.amiId);
-      if (ami) return cardAmistoso(ami, false, true);
+      if (ami) return cardAmistoso(ami, false, true, false, true);
     }
     // Para torneios, usa card igual ao cardJogoTorneio (finalizados) com tags extras do ranking
     const cor = j.res==='V'?'tag-green':j.res==='D'?'tag-red':'tag-gray';
@@ -6747,15 +6841,11 @@ function _renderHistorico() {
     const nome2 = j.advTime || '';
     const nomeAdvTime = j.advTimeNome || j.advTime || '?';
     return `<div class="match-card" style="margin-bottom:10px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;margin-bottom:10px;">
         <div style="display:flex;align-items:center;gap:6px;">
           <span class="tag tag-purple">TORNEIO</span>
           <span class="tag tag-gray">${isSel ? 'SELECOES' : 'CLUBES'}</span>
           ${j.torneio?`<span class="tag tag-yellow" style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${j.torneio.toUpperCase()}</span>`:''}
-        </div>
-        <div style="display:flex;gap:5px;align-items:center;">
-          <span class="tag ${cor}">${corTxt}</span>
-          ${data?`<span style="font-size:10px;color:var(--text-muted);">${data}</span>`:''}
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
@@ -6776,6 +6866,10 @@ function _renderHistorico() {
           <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(j.advTimeId))}</div>
           ${nome2?`<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;"><div style="font-size:13px;color:#67E8F9;font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.2);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${nome2}</div></div>`:''}
         </div>
+      </div>
+      <div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);">
+        <span class="tag ${cor}">${corTxt}</span>
+        ${data?`<span style="font-size:10px;color:var(--text-muted);">${data}</span>`:''}
       </div>
     </div>`;
   }).join('');
