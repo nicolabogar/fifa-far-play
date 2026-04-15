@@ -1081,7 +1081,7 @@ function shieldClube(timeId, nomeTime, size=56) {
 function badgeTimeCompact(timeId, nomeTime, tipo) {
   if (tipo === 'selecoes') {
     const d = SELECAO_PAIS[timeId] || { pais:'', paisNome: nomeTime||'' };
-    return `<div style="width:46px;height:34px;border-radius:7px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.3);">
+    return `<div style="width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.3);">
       ${d.pais ? `<img src="https://flagcdn.com/w80/${d.pais}.png" alt="" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=\\'font-size:18px;\\'>🌍</span>'">` : '<span style="font-size:18px;">🌍</span>'}
     </div>`;
   }
@@ -1111,7 +1111,7 @@ function badgeClube(timeId, nomeTime) {
 function badgeSel(timeId, nomeTime) {
   const d = SELECAO_PAIS[timeId] || { pais:'', paisNome: nomeTime||'' };
   return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-    <div style="width:60px;height:45px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
+    <div style="width:48px;height:55px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
       ${d.pais ? `<img src="https://flagcdn.com/w80/${d.pais}.png" alt="${nomeTime}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:24px;&quot;>🌍</span>'">` : '<span style="font-size:28px;">🌍</span>'}
     </div>
   </div>`;
@@ -7330,7 +7330,7 @@ function _renderTimesLista() {
     let inner;
     if (isSel) {
       const d = SELECAO_PAIS[t.id] || { pais:'', paisNome: t.nome };
-      const flagIcone = `<div style="width:52px;height:39px;border-radius:7px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.pais?`<img src="https://flagcdn.com/w80/${d.pais}.png" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=\\'font-size:22px;\\'>🌍</span>'">`: '<span style="font-size:22px;">🌍</span>'}</div>`;
+      const flagIcone = `<div style="width:57px;height:57px;border-radius:12px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.pais?`<img src="https://flagcdn.com/w80/${d.pais}.png" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=\\'font-size:22px;\\'>🌍</span>'">`: '<span style="font-size:22px;">🌍</span>'}</div>`;
       inner = `<div class="entity-card" style="cursor:pointer;${ativoStyle}" onclick="editarTime('${t.id}')">
           ${flagIcone}
           <div style="flex:1;min-width:0;">
