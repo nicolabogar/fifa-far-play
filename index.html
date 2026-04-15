@@ -657,11 +657,17 @@
           <p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:14px;">NENHUM AMISTOSO FINALIZADO</p>
         </div>
       </div>
-      <div>
+      <div style="margin-bottom:24px;">
         <p class="sec-title" style="margin-bottom:10px;">RANKING TORNEIOS</p>
         <div id="lista-rank-camp">
           <p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:14px;">NENHUM TORNEIO FINALIZADO</p>
         </div>
+      </div>
+      <div id="rank-jogos-sec" style="margin-bottom:24px;">
+        <p class="sec-title" style="margin-bottom:10px;">JOGOS</p>
+        <div id="rank-jogos-filtros" style="margin-bottom:14px;"></div>
+        <div id="rank-jogos-resumo" style="margin-bottom:12px;"></div>
+        <div id="rank-jogos-lista"></div>
       </div>
     </div>
 
@@ -1666,7 +1672,7 @@ function irPara(view) {
     document.getElementById('main').style.paddingBottom = showNav ? '72px' : '';
   }
   if (view === 'times') renderTimesEdit();
-  if (view === 'ranking') { renderRankingAmistosos(calcularRankingAmistosos()); renderRankingTorneios(calcularRankingTorneios()); }
+  if (view === 'ranking') { _rankJogosState.jogadorId = ''; _rankJogosState.filtroRes = 'todos'; renderRankingAmistosos(calcularRankingAmistosos()); renderRankingTorneios(calcularRankingTorneios()); _renderRankJogosFiltros(); _renderRankJogos(); }
 }
 window.irPara = irPara;
 
@@ -6344,9 +6350,12 @@ function calcularRankingTorneios() {
   return Object.values(s).filter(x=>x.j>0||x.titulos>0||x.vices>0).sort((a,b)=>b.titulos!==a.titulos?b.titulos-a.titulos:b.vices!==a.vices?b.vices-a.vices:(b.gp-b.gc)!==(a.gp-a.gc)?(b.gp-b.gc)-(a.gp-a.gc):b.gp-a.gp);
 }
 
-function renderRankRow(p, i) {
+function renderRankRow(p, i, fromHome) {
   const foto = p.fotoUrl ? `<img src="${p.fotoUrl}" style="width:36px;height:36px;border-radius:10px;object-fit:cover;flex-shrink:0;" onerror="this.outerHTML=window.avatarSvg(36)">`  : avatarSvg(36);
-  return `<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:12px;margin-bottom:8px;cursor:pointer;" onclick="abrirHistoricoJogador('${p.id}','${p.nome.replace(/'/g,"\'")}')">
+  const clickHandler = fromHome
+    ? `irParaRankingComJogador('${p.id}')` 
+    : `_setRankJogFiltro('${p.id}')`;
+  return `<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:12px;margin-bottom:8px;cursor:pointer;" onclick="${clickHandler}">
     <div class="rank-pos" style="color:${i===0?'var(--yellow)':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text-muted)'};font-weight:900;">${i+1}°</div>
     ${foto}
     <div style="flex:1;min-width:0;">
@@ -6362,9 +6371,12 @@ function renderRankRow(p, i) {
   </div>`;
 }
 
-function renderRankRowTorneio(p, i) {
+function renderRankRowTorneio(p, i, fromHome) {
   const foto = p.fotoUrl ? `<img src="${p.fotoUrl}" style="width:36px;height:36px;border-radius:10px;object-fit:cover;flex-shrink:0;" onerror="this.outerHTML=window.avatarSvg(36)">` : avatarSvg(36);
-  return `<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:12px;margin-bottom:8px;cursor:pointer;" onclick="abrirHistoricoJogador('${p.id}','${p.nome.replace(/'/g,"\\'")}')">
+  const clickHandler = fromHome
+    ? `irParaRankingComJogador('${p.id}')`
+    : `_setRankJogFiltro('${p.id}')`;
+  return `<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:12px;margin-bottom:8px;cursor:pointer;" onclick="${clickHandler}">
     <div class="rank-pos" style="color:${i===0?'var(--yellow)':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text-muted)'};font-weight:900;">${i+1}°</div>
     ${foto}
     <div style="flex:1;min-width:0;">
@@ -6381,20 +6393,20 @@ function renderRankRowTorneio(p, i) {
 
 function renderRankingAmistosos(rank) {
   const html = rank.length===0?'<p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:14px;">NENHUM AMISTOSO FINALIZADO</p>'
-    :rank.map((p,i)=>renderRankRow(p,i)).join('');
+    :rank.map((p,i)=>renderRankRow(p,i,false)).join('');
   const el1 = document.getElementById('lista-rank-ami');
   if (el1) el1.innerHTML = html;
   const el2 = document.getElementById('home-rank-ami');
-  if (el2) el2.innerHTML = rank.slice(0,5).length===0?'<p style="color:var(--text-muted);text-align:center;padding:16px 0;font-size:14px;">NENHUM AMISTOSO FINALIZADO</p>':rank.slice(0,5).map((p,i)=>renderRankRow(p,i)).join('');
+  if (el2) el2.innerHTML = rank.slice(0,5).length===0?'<p style="color:var(--text-muted);text-align:center;padding:16px 0;font-size:14px;">NENHUM AMISTOSO FINALIZADO</p>':rank.slice(0,5).map((p,i)=>renderRankRow(p,i,true)).join('');
 }
 
 function renderRankingTorneios(rank) {
   const html = rank.length===0?'<p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:14px;">NENHUM TORNEIO FINALIZADO</p>'
-    :rank.map((p,i)=>renderRankRowTorneio(p,i)).join('');
+    :rank.map((p,i)=>renderRankRowTorneio(p,i,false)).join('');
   const el1 = document.getElementById('lista-rank-camp');
   if (el1) el1.innerHTML = html;
   const el2 = document.getElementById('home-rank-camp');
-  if (el2) el2.innerHTML = rank.slice(0,5).length===0?'<p style="color:var(--text-muted);text-align:center;padding:16px 0;font-size:14px;">NENHUM TORNEIO FINALIZADO</p>':rank.slice(0,5).map((p,i)=>renderRankRowTorneio(p,i)).join('');
+  if (el2) el2.innerHTML = rank.slice(0,5).length===0?'<p style="color:var(--text-muted);text-align:center;padding:16px 0;font-size:14px;">NENHUM TORNEIO FINALIZADO</p>':rank.slice(0,5).map((p,i)=>renderRankRowTorneio(p,i,true)).join('');
 }
 
 async function sincronizarRanking(btn) {
@@ -6416,6 +6428,214 @@ async function sincronizarRanking(btn) {
 // ── Estado do histórico ──
 const _histState = { jogadorId:'', nome:'', filtroTipo:'todos', filtroAdv:'', dataIni:'', dataFim:'', ordenacao:'data_desc', pag:0 };
 const _HIST_PAG = 100;
+
+// ── Estado dos jogos no ranking ──
+const _rankJogosState = { jogadorId: '', filtroRes: 'todos' };
+
+// Navegar para ranking com jogador pré-selecionado (vindo da home)
+window.irParaRankingComJogador = (jogadorId) => {
+  irPara('ranking'); // resets state and renders all games
+  _rankJogosState.jogadorId = jogadorId;
+  _rankJogosState.filtroRes = 'todos';
+  _renderRankJogosFiltros();
+  _renderRankJogos();
+  setTimeout(() => {
+    const el = document.getElementById('rank-jogos-sec');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 350);
+};
+
+// Definir filtro de jogador na listagem do ranking
+window._setRankJogFiltro = (jogadorId) => {
+  _rankJogosState.jogadorId = jogadorId;
+  _rankJogosState.filtroRes = 'todos';
+  _renderRankJogosFiltros();
+  _renderRankJogos();
+  setTimeout(() => {
+    const el = document.getElementById('rank-jogos-sec');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+};
+
+// Definir filtro de resultado na listagem do ranking
+window._setRankResFiltro = (res) => {
+  _rankJogosState.filtroRes = res;
+  _renderRankJogosFiltros();
+  _renderRankJogos();
+};
+
+function _renderRankJogosFiltros() {
+  const el = document.getElementById('rank-jogos-filtros');
+  if (!el) return;
+  const { jogadorId, filtroRes } = _rankJogosState;
+  const temJog = !!jogadorId;
+  const selectStyle = 'width:100%;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;margin-bottom:8px;';
+  const jogSelect = `<select onchange="_setRankJogFiltro(this.value)" style="${selectStyle}">
+    <option value="">TODOS OS JOGADORES</option>
+    ${jogadores.map(j => `<option value="${j.id}" ${j.id===jogadorId?'selected':''}>${_nomeExibicao(j).toUpperCase()}</option>`).join('')}
+  </select>`;
+  const resButtons = `<div style="display:flex;flex-wrap:wrap;gap:6px;">
+    <button class="filtro-btn ${filtroRes==='todos'?'ativo':''}" onclick="_setRankResFiltro('todos')">TODOS</button>
+    <button class="filtro-btn ${temJog&&filtroRes==='V'?'ativo':''}" ${!temJog?'disabled style="opacity:0.4;cursor:default;"':''} onclick="${temJog?"_setRankResFiltro('V')":"void(0)"}">VITORIA</button>
+    <button class="filtro-btn ${temJog&&filtroRes==='E'?'ativo':''}" ${!temJog?'disabled style="opacity:0.4;cursor:default;"':''} onclick="${temJog?"_setRankResFiltro('E')":"void(0)"}">EMPATE</button>
+    <button class="filtro-btn ${temJog&&filtroRes==='D'?'ativo':''}" ${!temJog?'disabled style="opacity:0.4;cursor:default;"':''} onclick="${temJog?"_setRankResFiltro('D')":"void(0)"}">DERROTA</button>
+  </div>`;
+  el.innerHTML = jogSelect + resButtons;
+}
+
+function _coletarJogosRanking() {
+  if (_rankJogosState.jogadorId) {
+    return _coletarJogosJogador(_rankJogosState.jogadorId);
+  }
+  // Todos os jogos finalizados de todos os jogadores
+  const jogos = [];
+  amistosos.forEach(a => {
+    if (!a.resultado) return;
+    const ts = a.criadoEm?.seconds ? a.criadoEm.seconds * 1000 : null;
+    jogos.push({ tipo: 'AMISTOSO', amiId: a.id, ts });
+  });
+  campeonatos.forEach(c => (c.grupos||[]).forEach(g => (g.partidas||[]).forEach(p => {
+    if (p.g1 === undefined || p.g1 === null || p.g2 === undefined || p.g2 === null) return;
+    const ts = c.criadoEm?.seconds ? c.criadoEm.seconds * 1000 : null;
+    const isSel = CAMP_META[c.tipo]?.tipo === 'selecoes';
+    const m1 = g.membros.find(mb => mb.jogadorId === p.j1Id);
+    const m2 = g.membros.find(mb => mb.jogadorId === p.j2Id);
+    jogos.push({
+      tipo: 'TORNEIO_GERAL',
+      torneio: c.nome,
+      j1Nome: p.j1Nome, j1Id: p.j1Id, j1Time: m1?.time?.nome||'', j1TimeId: m1?.time?.id||'',
+      j2Nome: p.j2Nome, j2Id: p.j2Id, j2Time: m2?.time?.nome||'', j2TimeId: m2?.time?.id||'',
+      g1: p.g1, g2: p.g2, ts, isSel
+    });
+  })));
+  jogos.sort((a,b) => (b.ts||0)-(a.ts||0));
+  return jogos;
+}
+
+function _renderRankJogos() {
+  const lista = document.getElementById('rank-jogos-lista');
+  const resumoEl = document.getElementById('rank-jogos-resumo');
+  if (!lista) return;
+
+  let jogos = _coletarJogosRanking();
+
+  // Filtro de resultado (apenas com jogador selecionado)
+  if (_rankJogosState.jogadorId && _rankJogosState.filtroRes !== 'todos') {
+    jogos = jogos.filter(j => j.res === _rankJogosState.filtroRes);
+  }
+
+  // Resumo
+  if (resumoEl) {
+    if (_rankJogosState.jogadorId && jogos.length) {
+      const v = jogos.filter(j=>j.res==='V').length;
+      const d = jogos.filter(j=>j.res==='D').length;
+      const e = jogos.filter(j=>j.res==='E').length;
+      const gf = jogos.reduce((s,j)=>s+(j.meuGol||0),0);
+      const gs = jogos.reduce((s,j)=>s+(j.advGol||0),0);
+      resumoEl.innerHTML = `<div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="tag tag-gray">${jogos.length} JOGOS</span>
+        <span class="tag tag-green">${v}V</span>
+        <span class="tag tag-red">${d}D</span>
+        <span class="tag tag-gray">${e}E</span>
+        <span class="tag tag-cyan">${gf}GF · ${gs}GS</span>
+      </div>`;
+    } else if (jogos.length) {
+      resumoEl.innerHTML = `<div style="display:flex;gap:6px;flex-wrap:wrap;"><span class="tag tag-gray">${jogos.length} JOGOS</span></div>`;
+    } else {
+      resumoEl.innerHTML = '';
+    }
+  }
+
+  if (!jogos.length) {
+    lista.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:14px;">NENHUM JOGO ENCONTRADO</p>';
+    return;
+  }
+
+  lista.innerHTML = jogos.map(j => {
+    if (j.tipo === 'AMISTOSO' && j.amiId) {
+      const ami = amistosos.find(a => a.id === j.amiId);
+      if (ami) return cardAmistoso(ami, false, true);
+    }
+    if (j.tipo === 'TORNEIO_GERAL') {
+      const data = j.ts ? new Date(j.ts).toLocaleDateString('pt-BR') : '';
+      const tipo = j.isSel ? 'selecoes' : 'clubes';
+      const icon1 = badgeTimeIcon(j.j1TimeId, j.j1Time, tipo);
+      const icon2 = badgeTimeIcon(j.j2TimeId, j.j2Time, tipo);
+      const empate = j.g1 === j.g2;
+      return `<div class="match-card" style="margin-bottom:10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="tag tag-purple">TORNEIO</span>
+            <span class="tag tag-gray">${j.isSel?'SELECOES':'CLUBES'}</span>
+            ${j.torneio?`<span class="tag tag-yellow" style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${j.torneio.toUpperCase()}</span>`:''}
+          </div>
+          ${data?`<span style="font-size:10px;color:var(--text-muted);">${data}</span>`:''}
+        </div>
+        <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+            ${j.j1Time?`<div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(j.j1TimeId, j.j1Time)}</div>`:''}
+            <div style="display:flex;justify-content:center;margin-bottom:4px;">${icon1}</div>
+            ${j.j1Nome?`<div style="font-size:13px;color:#67E8F9;font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.2);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${j.j1Nome}</div>`:''}
+          </div>
+          <div style="text-align:center;min-width:70px;">
+            <div style="font-size:29px;font-weight:900;letter-spacing:1px;color:${empate?'var(--text-muted)':'var(--yellow)'};">${j.g1}<span style="color:var(--text-muted);font-size:13px;"> × </span>${j.g2}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+            ${j.j2Time?`<div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(j.j2TimeId, j.j2Time)}</div>`:''}
+            <div style="display:flex;justify-content:center;margin-bottom:4px;">${icon2}</div>
+            ${j.j2Nome?`<div style="font-size:13px;color:#67E8F9;font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.2);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${j.j2Nome}</div>`:''}
+          </div>
+        </div>
+      </div>`;
+    }
+    // Jogo de torneio com perspectiva de jogador (vindo de _coletarJogosJogador)
+    if (j.tipo === 'TORNEIO') {
+      const cor = j.res==='V'?'tag-green':j.res==='D'?'tag-red':'tag-gray';
+      const corTxt = j.res==='V'?'VITORIA':j.res==='D'?'DERROTA':'EMPATE';
+      const data = j.ts ? new Date(j.ts).toLocaleDateString('pt-BR') : '';
+      const isSel = j.tipoTime === 'SELECAO';
+      const tipo = isSel ? 'selecoes' : 'clubes';
+      const icon1 = badgeTimeIcon(j.meuTimeId, j.meuTime, tipo);
+      const icon2 = badgeTimeIcon(j.advTimeId, j.advTimeNome, tipo);
+      const nome1 = _nomeJogPorId(j.meuJogadorId, '');
+      const nome2 = j.advTime || '';
+      const nomeAdvTime = j.advTimeNome || j.advTime || '?';
+      return `<div class="match-card" style="margin-bottom:10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="tag tag-purple">TORNEIO</span>
+            <span class="tag tag-gray">${isSel ? 'SELECOES' : 'CLUBES'}</span>
+            ${j.torneio?`<span class="tag tag-yellow" style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${j.torneio.toUpperCase()}</span>`:''}
+          </div>
+          <div style="display:flex;gap:5px;align-items:center;">
+            <span class="tag ${cor}">${corTxt}</span>
+            ${data?`<span style="font-size:10px;color:var(--text-muted);">${data}</span>`:''}
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+            ${_htmlCountryRow(j.meuTimeId, j.meuTime, tipo)}
+            <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(j.meuTimeId, j.meuTime)}</div>
+            <div style="display:flex;justify-content:center;margin-bottom:4px;">${icon1}</div>
+            <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(j.meuTimeId))}</div>
+            ${nome1?`<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;"><div style="font-size:13px;color:#67E8F9;font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.2);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${nome1}</div></div>`:''}
+          </div>
+          <div style="text-align:center;min-width:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+            <div style="font-size:29px;font-weight:900;letter-spacing:1px;color:var(--yellow);">${j.meuGol}<span style="color:var(--text-muted);font-size:13px;"> × </span>${j.advGol}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+            ${_htmlCountryRow(j.advTimeId, j.advTimeNome, tipo)}
+            <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(j.advTimeId, nomeAdvTime)}</div>
+            <div style="display:flex;justify-content:center;margin-bottom:4px;">${icon2}</div>
+            <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(j.advTimeId))}</div>
+            ${nome2?`<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;"><div style="font-size:13px;color:#67E8F9;font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.2);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${nome2}</div></div>`:''}
+          </div>
+        </div>
+      </div>`;
+    }
+    return '';
+  }).join('');
+}
 
 function _coletarJogosJogador(jogadorId) {
   const jogos = [];
