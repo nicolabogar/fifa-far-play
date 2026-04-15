@@ -1429,6 +1429,18 @@ function parRepetido(tipo, id1, id2) {
   return mem.includes(key);
 }
 
+// ─── COOLDOWN PERSISTENTE (times ficam de fora por N sorteios) ────────
+const COOLDOWN_DRAWS = 3; // times nao repetem nos proximos 3 sorteios
+function _cooldownKey(tipo) { return `sorteio_cd_${tipo}`; }
+function _getCooldownList(tipo) {
+  try { return JSON.parse(localStorage.getItem(_cooldownKey(tipo)) || '[]'); } catch { return []; }
+}
+function _addToCooldown(tipo, id1, id2) {
+  const list = _getCooldownList(tipo);
+  const nova = [id1, id2, ...list.filter(id => id !== id1 && id !== id2)];
+  try { localStorage.setItem(_cooldownKey(tipo), JSON.stringify(nova.slice(0, 40))); } catch {}
+}
+
 // ─── HISTÓRICO DE TIPO (clubes/seleções) PARA MODO "AMBOS" ───────────
 const _TIPO_MEM_KEY = 'sorteio_tipo_mem';
 function _lerTipoMem() {
@@ -1457,18 +1469,14 @@ function _escolherTipoAmbos() {
 
 function _parEficValido(e1, e2) {
   const a = e1 || 'Bom', b = e2 || 'Bom';
-  const PARES_OK = [
-    ['Ruim','Ruim'], ['Ruim','Moderado'], ['Moderado','Ruim'],
-    ['Moderado','Moderado'], ['Moderado','Bom'], ['Bom','Moderado'],
-    ['Bom','Bom']
-  ];
-  return PARES_OK.some(([x,y]) => x === a && y === b);
+  return a === b;
 }
 
 /**
  * Sorteia dois times balanceados.
- * - Exclui times usados nos últimos N amistosos (histórico Firestore + sessão atual).
- * - Gera todos os pares válidos (eficiência + discrepância ≤ 50%).
+ * - Usa cooldown persistente (localStorage) para excluir times dos últimos N sorteios.
+ * - Combina cooldown com memória de sessão (sorteios não salvos).
+ * - Gera todos os pares válidos (mesma eficiência + discrepância ≤ 50%).
  * - Prioriza pares NÃO presentes na memória anti-repetição (localStorage).
  * - Usa seleção aleatória ponderada com distribuição uniforme:
  *   times menos usados na sessão têm peso exponencialmente maior (fator principal),
@@ -1478,14 +1486,26 @@ function _parEficValido(e1, e2) {
 function sortearBalanceado(pool, historicoIds = [], tipo = '') {
   // Filtra times inativos
   pool = pool.filter(t => !t.inativo);
-  // Filtra recentemente usados (última metade do pool via Firestore)
-  const janela = Math.max(2, Math.floor(pool.length / 2));
-  const firestoreRecentes = historicoIds.slice(-janela);
-  // Combina histórico Firestore com memória de sessão (sorteios não salvos)
-  const recentesCombinados = new Set([...firestoreRecentes, ..._sessionRecentTeams]);
-  let disp = pool.filter(t => !recentesCombinados.has(t.id));
-  // Fallback 1: sem memória de sessão, só Firestore
-  if (disp.length < 2) disp = pool.filter(t => !firestoreRecentes.includes(t.id));
+
+  // Cooldown: hard-exclude times dos últimos COOLDOWN_DRAWS sorteios
+  // Limita exclusão a no máximo 60% do pool para garantir disponibilidade
+  const cooldownPersist = tipo ? _getCooldownList(tipo) : [];
+  const maxExclude = Math.min(COOLDOWN_DRAWS * 2, Math.floor(pool.length * 0.6));
+  const cooldownIds = new Set([
+    ...cooldownPersist.slice(0, maxExclude),
+    ..._sessionRecentTeams.slice(0, maxExclude)
+  ]);
+  let disp = pool.filter(t => !cooldownIds.has(t.id));
+
+  // Fallback 1: reduz cooldown pela metade
+  if (disp.length < 2) {
+    const halfExclude = Math.max(2, Math.floor(maxExclude / 2));
+    const reducedIds = new Set([
+      ...cooldownPersist.slice(0, halfExclude),
+      ..._sessionRecentTeams.slice(0, halfExclude)
+    ]);
+    disp = pool.filter(t => !reducedIds.has(t.id));
+  }
   // Fallback 2: pool completo
   if (disp.length < 2) disp = [...pool];
 
@@ -1521,10 +1541,10 @@ function sortearBalanceado(pool, historicoIds = [], tipo = '') {
     // Calcula peso combinando frescor dos times (principal) e equilíbrio (secundário)
     const pesos = painel.map(p => {
       // Frescor: times usados menos vezes têm peso exponencialmente maior
-      // 1/(freq+1)^2 para cada time, multiplicados entre si
+      // 1/(freq+1)^3 para cada time, multiplicados entre si (curva mais agressiva)
       const freq1 = _sessionTeamFrequency[p.t1.id] || 0;
       const freq2 = _sessionTeamFrequency[p.t2.id] || 0;
-      const frescor = 1 / ((freq1 + 1) * (freq1 + 1) * (freq2 + 1) * (freq2 + 1));
+      const frescor = 1 / (Math.pow(freq1 + 1, 3) * Math.pow(freq2 + 1, 3));
       // Equilíbrio suave: pct varia de 0 a 0.5, transforma em fator de 0.7 a 1.0
       const equilibrio = 1 - p.pct * 0.6;
       return frescor * equilibrio;
@@ -1562,6 +1582,8 @@ function sortearBalanceado(pool, historicoIds = [], tipo = '') {
     _sessionTeamFrequency[resultado[1].id] = (_sessionTeamFrequency[resultado[1].id] || 0) + 1;
   }
   if (tipo && resultado[0] && resultado[1]) {
+    // Salva cooldown persistente e memória de pares
+    _addToCooldown(tipo, resultado[0].id, resultado[1].id);
     salvarMemoria(tipo, [resultado[0].id, resultado[1].id]);
   }
   return resultado;
@@ -1570,10 +1592,13 @@ function sortearBalanceado(pool, historicoIds = [], tipo = '') {
 /**
  * Para campeonatos: distribui times entre participantes de forma balanceada.
  * Usa draft serpentina: ordena times por força, distribui alternando.
+ * Garante que todos os times distribuídos tenham a mesma eficiência.
  */
 function distribuirTimesBalanceados(participantes, pool, usados = []) {
   // Filtra times inativos
   pool = pool.filter(t => !t.inativo);
+  // Garante mesma eficiência: agrupa por eficiência e escolhe o grupo com mais times
+  pool = _filtrarMesmaEficiencia(pool, participantes.length);
   const n = participantes.length;
   const janela = Math.max(n, Math.floor(pool.length / 2));
   let disp = pool.filter(t => !usados.slice(-janela).includes(t.id));
@@ -1598,6 +1623,8 @@ function distribuirTimesBalanceadosMulti(participantes, pool, usados, qtd) {
   pool = pool.filter(t => !t.inativo);
   const n = participantes.length;
   const total = n * qtd;
+  // Garante mesma eficiência
+  pool = _filtrarMesmaEficiencia(pool, total);
   const janela = Math.max(total, Math.floor(pool.length / 2));
   let disp = pool.filter(t => !usados.slice(-janela).includes(t.id));
   if (disp.length < total) disp = [...pool];
@@ -1613,6 +1640,29 @@ function distribuirTimesBalanceadosMulti(participantes, pool, usados, qtd) {
     }
     return { ...p, times: myTimes, time: myTimes[0] };
   });
+}
+
+// Filtra pool para conter apenas times de uma mesma eficiência.
+// Escolhe aleatoriamente entre os grupos que têm times suficientes (>= minNeeded).
+function _filtrarMesmaEficiencia(pool, minNeeded) {
+  const grupos = {};
+  pool.forEach(t => {
+    const ef = t.eficiencia || 'Bom';
+    if (!grupos[ef]) grupos[ef] = [];
+    grupos[ef].push(t);
+  });
+  const chaves = Object.keys(grupos);
+  // Se só tem uma eficiência, retorna pool original
+  if (chaves.length <= 1) return pool;
+  // Filtra grupos que têm times suficientes
+  const validos = chaves.filter(k => grupos[k].length >= minNeeded);
+  if (validos.length > 0) {
+    // Escolhe aleatoriamente entre grupos válidos
+    return grupos[validos[Math.floor(Math.random() * validos.length)]];
+  }
+  // Fallback: usa o grupo com mais times
+  chaves.sort((a, b) => grupos[b].length - grupos[a].length);
+  return grupos[chaves[0]];
 }
 
 function shuffle(arr) {
@@ -3637,9 +3687,13 @@ window._abrirModalEscolherTimeDupla = (duplaNum) => {
   } else {
     pool = clubes.map(t=>({...t,_tipo:'clubes'}));
   }
+  // Aplica filtro de eficiência
+  pool = filtrarPoolEfic(pool);
   const outraDupla = duplaNum === 1 ? 2 : 1;
   const jaEscolhido = _amiDuplaTimeSel.get(outraDupla)?.timeId;
-  const disponiveis = pool.filter(t => !jaEscolhido || t.id !== jaEscolhido);
+  // Restringe à mesma eficiência da outra dupla (se já escolheu)
+  const outraEfic = _amiDuplaTimeSel.get(outraDupla)?.eficiencia;
+  const disponiveis = pool.filter(t => (!jaEscolhido || t.id !== jaEscolhido) && (!outraEfic || (t.eficiencia || 'Bom') === outraEfic));
   const selAtual = _amiDuplaTimeSel.get(duplaNum);
 
   const renderLista = (q) => {
@@ -3691,9 +3745,13 @@ window._renderModalTimeDuplaLista = (duplaNum, q) => {
   } else {
     pool = clubes.map(t=>({...t,_tipo:'clubes'}));
   }
+  // Aplica filtro de eficiência
+  pool = filtrarPoolEfic(pool);
   const outraDupla = duplaNum === 1 ? 2 : 1;
   const jaEscolhido = _amiDuplaTimeSel.get(outraDupla)?.timeId;
-  const filtrado = pool.filter(t => (!jaEscolhido || t.id !== jaEscolhido) && (!q || t.nome.toLowerCase().includes(q.toLowerCase()))).slice(0, 30);
+  // Restringe à mesma eficiência da outra dupla (se já escolheu)
+  const outraEfic = _amiDuplaTimeSel.get(outraDupla)?.eficiencia;
+  const filtrado = pool.filter(t => (!jaEscolhido || t.id !== jaEscolhido) && (!outraEfic || (t.eficiencia || 'Bom') === outraEfic) && (!q || t.nome.toLowerCase().includes(q.toLowerCase()))).slice(0, 30);
   if (!filtrado.length) return '<div style="padding:12px;color:var(--text-muted);font-size:12px;text-align:center;">NENHUM TIME ENCONTRADO</div>';
   return filtrado.map(t => {
     const isSel = t._tipo === 'selecoes';
@@ -3733,6 +3791,8 @@ window._abrirModalEscolherTime = (jogId, jogNome, obrigatorio = false) => {
   } else {
     pool = clubes.map(t=>({...t,_tipo:'clubes'}));
   }
+  // Aplica filtro de eficiência
+  pool = filtrarPoolEfic(pool);
   const jaEscolhidos = new Set();
   for (const [otherId, sel] of _amiManualSel) {
     if (otherId !== jogId) jaEscolhidos.add(sel.timeId);
@@ -3750,7 +3810,7 @@ window._abrirModalEscolherTime = (jogId, jogNome, obrigatorio = false) => {
       const flagEl = paisCode ? `<img src="https://flagcdn.com/w40/${paisCode}.png" alt="" loading="lazy" style="width:22px;height:16px;object-fit:cover;border-radius:2px;flex-shrink:0;" onerror="this.style.display='none'">` : '';
       const shieldEl = !isSel ? `<div style="width:22px;height:22px;border-radius:5px;background:${_td.fundo};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:${_td.cor};flex-shrink:0;border:1px solid rgba(255,255,255,0.1);">${_td.abrev}</div>` : '';
       const eficEl = t.eficiencia ? eficBadge(t.eficiencia) : '';
-      return `<div onclick="selecionarTimeManualJog('${jogId}','${t.id}','${t.nome.replace(/'/g,"\\'")}',${t.forca},'${t._tipo}')"
+      return `<div onclick="selecionarTimeManualJog('${jogId}','${t.id}','${t.nome.replace(/'/g,"\\'")}',${t.forca},'${t._tipo}','${(t.eficiencia||'Bom').replace(/'/g,"\\'")}')"
         style="padding:9px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);font-weight:600;font-size:12px;display:flex;align-items:center;gap:8px;">
         ${flagEl}${shieldEl}
         <span style="text-transform:uppercase;flex:1;">${t.nome}</span>
@@ -3792,6 +3852,8 @@ window._renderModalTimeLista = (jogId, q) => {
   } else {
     pool = clubes.map(t=>({...t,_tipo:'clubes'}));
   }
+  // Aplica filtro de eficiência
+  pool = filtrarPoolEfic(pool);
   const jaEscolhidos = new Set();
   for (const [otherId, sel] of _amiManualSel) {
     if (otherId !== jogId) jaEscolhidos.add(sel.timeId);
@@ -3805,7 +3867,7 @@ window._renderModalTimeLista = (jogId, q) => {
     const flagEl = paisCode ? `<img src="https://flagcdn.com/w40/${paisCode}.png" alt="" loading="lazy" style="width:22px;height:16px;object-fit:cover;border-radius:2px;flex-shrink:0;" onerror="this.style.display='none'">` : '';
     const shieldEl = !isSel ? `<div style="width:22px;height:22px;border-radius:5px;background:${_td.fundo};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:${_td.cor};flex-shrink:0;border:1px solid rgba(255,255,255,0.1);">${_td.abrev}</div>` : '';
     const eficEl = t.eficiencia ? eficBadge(t.eficiencia) : '';
-    return `<div onclick="selecionarTimeManualJog('${jogId}','${t.id}','${t.nome.replace(/'/g,"\\'")}',${t.forca},'${t._tipo}')"
+    return `<div onclick="selecionarTimeManualJog('${jogId}','${t.id}','${t.nome.replace(/'/g,"\\'")}',${t.forca},'${t._tipo}','${(t.eficiencia||'Bom').replace(/'/g,"\\'")}')"
       style="padding:9px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);font-weight:600;font-size:12px;display:flex;align-items:center;gap:8px;">
       ${flagEl}${shieldEl}
       <span style="text-transform:uppercase;flex:1;">${t.nome}</span>
@@ -3814,7 +3876,7 @@ window._renderModalTimeLista = (jogId, q) => {
   }).join('');
 };
 
-// _amiManualSel: Map de jogadorId -> {timeId, nome, forca, _tipo}
+// _amiManualSel: Map de jogadorId -> {timeId, nome, forca, _tipo, eficiencia}
 const _amiManualSel = new Map();
 
 // _amiDuplaTimeSel: Map de duplaNum (1|2) -> {timeId, nome, forca, _tipo}
@@ -4021,8 +4083,8 @@ window._abrirDropdownManualJog = (jogId) => {
 
 window._filtrarTimesManualJog = (jogId) => { _abrirDropdownManualJog(jogId); };
 
-window.selecionarTimeManualJog = (jogId, timeId, timeNome, forca, tipo) => {
-  _amiManualSel.set(jogId, {timeId, nome: timeNome, forca, _tipo: tipo});
+window.selecionarTimeManualJog = (jogId, timeId, timeNome, forca, tipo, eficiencia) => {
+  _amiManualSel.set(jogId, {timeId, nome: timeNome, forca, _tipo: tipo, eficiencia: eficiencia || 'Bom'});
   window._modalObrigatorio = false;
   fecharModal();
   _renderPlayersPanel();
@@ -5521,6 +5583,8 @@ function distribuirTimesPorDuplas(pares, pool, hist, qtd) {
   pool = pool.filter(t => !t.inativo);
   const nPares = pares.length;
   const total = nPares * qtd;
+  // Garante mesma eficiência
+  pool = _filtrarMesmaEficiencia(pool, total);
   const janela = Math.max(total, Math.floor(pool.length / 2));
   let disp = pool.filter(t => !hist.slice(-janela).includes(t.id));
   if (disp.length < total) disp = [...pool];
