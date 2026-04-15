@@ -1091,8 +1091,8 @@ function shieldClube(timeId, nomeTime, size=56) {
 function badgeTimeCompact(timeId, nomeTime, tipo) {
   if (tipo === 'selecoes') {
     const d = SELECAO_PAIS[timeId] || { pais:'', paisNome: nomeTime||'' };
-    return `<div style="width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.3);">
-      ${d.pais ? `<img src="https://flagcdn.com/w80/${d.pais}.png" alt="" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=\\'font-size:18px;\\'>🌍</span>'">` : '<span style="font-size:18px;">🌍</span>'}
+    return `<div style="width:48px;height:34px;border-radius:8px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.3);">
+      ${d.pais ? `<img src="https://flagcdn.com/w80/${d.pais}.png" alt="" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=\\'font-size:16px;\\'>🌍</span>'">` : '<span style="font-size:16px;">🌍</span>'}
     </div>`;
   }
   const d = _teamDataOuFallback(timeId, nomeTime);
@@ -1121,8 +1121,8 @@ function badgeClube(timeId, nomeTime) {
 function badgeSel(timeId, nomeTime) {
   const d = SELECAO_PAIS[timeId] || { pais:'', paisNome: nomeTime||'' };
   return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-    <div style="width:48px;height:55px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
-      ${d.pais ? `<img src="https://flagcdn.com/w80/${d.pais}.png" alt="${nomeTime}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:24px;&quot;>🌍</span>'">` : '<span style="font-size:28px;">🌍</span>'}
+    <div style="width:52px;height:38px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
+      ${d.pais ? `<img src="https://flagcdn.com/w80/${d.pais}.png" alt="${nomeTime}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:20px;&quot;>🌍</span>'">` : '<span style="font-size:22px;">🌍</span>'}
     </div>
   </div>`;
 }
@@ -6138,7 +6138,7 @@ window.abrirCampeonato = (id) => {
         const playerHeader = jogNome ? `<div style="text-align:center;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:10px;">${jogNome.toUpperCase()}</div>` : '';
         const teamCard = (t) => {
           const tt = selecoes.some(s => s.id === t?.id) ? 'selecoes' : 'clubes';
-          return `<div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:4px;">
+          return `<div style="background:transparent;border:none;border-radius:10px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:4px;">
             ${_htmlCountryRow(t?.id, t?.nome, tt)}
             <div style="font-weight:900;font-size:13px;text-transform:uppercase;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;">${_nomeAbrevTime(t?.id, t?.nome||'?')}</div>
             ${badgeTimeIcon(t?.id, t?.nome, tt)}
@@ -6154,8 +6154,8 @@ window.abrirCampeonato = (id) => {
         }
         return `<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:8px;">
           ${playerHeader}
-          <div style="display:flex;flex-direction:column;gap:6px;">
-            ${times.map(t => teamCard(t)).join('')}
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            ${times.map(t => `<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:8px;">${teamCard(t)}</div>`).join('')}
           </div>
         </div>`;
       };
@@ -7306,13 +7306,31 @@ function cardCampHome(c, modoLista=false) {
   const dataInicio = c.criadoEm?.seconds ? new Date(c.criadoEm.seconds * 1000).toLocaleDateString('pt-BR') : '';
   const dataFimTorneio = c.finalizadoEm?.seconds ? new Date(c.finalizadoEm.seconds * 1000).toLocaleDateString('pt-BR') : '';
 
-  // Tags dos jogadores participantes
-  const tagsJogs = (c.participantes||[]).map(p => {
-    const jog = jogadores.find(x => x.id === p.jogadorId);
-    return `<span class="tag tag-purple" style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap;">
-      ${avatarJogador({fotoUrl: jog?.fotoUrl||''}, 16)}<span style="text-transform:uppercase;">${_nomeJogPorId(p.jogadorId, p.nome)}</span>
-    </span>`;
-  }).join('');
+  // Jogadores com times (como na tela de edição)
+  const jogadoresTimesHtml = (() => {
+    const participantes = c.participantes || [];
+    if (!participantes.length) return '';
+    const playerRow = (p) => {
+      const jog = jogadores.find(x => x.id === p.jogadorId);
+      const jogNome = _nomeJogPorId(p.jogadorId, p.nome);
+      const times = p.times || [p.time].filter(Boolean);
+      const timesNomes = times.map(t => t?.nome || '').filter(Boolean);
+      const primTime = times[0] || p.time;
+      const tipoTime = selecoes.some(s => s.id === primTime?.id) ? 'selecoes' : 'clubes';
+      const bc = badgeTimeCompact(primTime?.id||'', primTime?.nome||'', tipoTime);
+      const timesExtras = times.length > 1 ? `<div style="font-size:9px;color:var(--text-muted);margin-top:2px;">${timesNomes.join(' · ')}</div>` : '';
+      return `<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;">
+        ${avatarJogador({fotoUrl: jog?.fotoUrl||''}, 24)}
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:11px;font-weight:700;color:var(--cyan);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${jogNome}</div>
+          <div style="font-size:10px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${primTime?.nome||'?'}</div>
+          ${timesExtras}
+        </div>
+        <div style="flex-shrink:0;">${bc}</div>
+      </div>`;
+    };
+    return `<div style="display:flex;flex-direction:column;gap:4px;margin-top:8px;">${participantes.map(p => playerRow(p)).join('')}</div>`;
+  })();
 
   // Jogos em andamento (pendentes sem placar) — mostrar até 2
   const jogosPendentes = [];
@@ -7396,9 +7414,9 @@ function cardCampHome(c, modoLista=false) {
     ? `<span class="tag tag-gray">FINALIZADO</span>`
     : `<span class="tag tag-yellow">EM ANDAMENTO</span>`;
 
-  // Datas formatadas
+  // Datas formatadas — em painel separado
   const datasHtml = (dataInicio || dataFimTorneio)
-    ? `<div style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:10px;color:var(--text-muted);">
+    ? `<div style="margin-top:8px;padding:8px 10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:10px;color:var(--text-muted);">
         ${dataInicio ? `<span>📅 INICIO: <strong>${dataInicio}</strong></span>` : ''}
         ${dataFimTorneio ? `<span>🏁 FIM: <strong>${dataFimTorneio}</strong></span>` : ''}
       </div>` : '';
@@ -7425,7 +7443,7 @@ function cardCampHome(c, modoLista=false) {
       </div>
       <span style="font-size:10px;color:var(--text-muted);white-space:nowrap;">${totalParts}/${totalPoss} JOGOS</span>
     </div>` : ''}
-    ${tagsJogs ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;">${tagsJogs}</div>` : ''}
+    ${jogadoresTimesHtml}
     ${campeaoMiniHtml}
     ${!finalizado && jogosHtml ? `<div style="margin-top:8px;" onclick="event.stopPropagation();abrirCampeonato('${c.id}')">${jogosHtml}</div>` : ''}
   </div>`;
