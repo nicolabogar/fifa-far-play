@@ -6168,21 +6168,22 @@ window.salvarPartidaDireta = async (cid, gi, j1Id, j2Id, timeIndex, btnEl, turno
     btnEl = timeIndex;
     timeIndex = 0;
   }
+  if (_lockBtn(btnEl)) return;
   timeIndex = timeIndex ?? 0;
   turno = turno ?? 1;
   const c = campeonatos.find(x=>x.id===cid);
-  if (!c) return;
+  if (!c) { _unlockBtn(btnEl); return; }
   const g = c.grupos[gi];
   const m1 = g.membros.find(m=>m.jogadorId===j1Id);
   const m2 = g.membros.find(m=>m.jogadorId===j2Id);
-  if (!m1||!m2) return;
+  if (!m1||!m2) { _unlockBtn(btnEl); return; }
   // Verificar se já existe partida com esse timeIndex e turno
   const jaJogou = (g.partidas||[]).some(p=>
     ((p.j1Id===m1.jogadorId&&p.j2Id===m2.jogadorId)||(p.j1Id===m2.jogadorId&&p.j2Id===m1.jogadorId))
     && (p.timeIndex??0) === timeIndex
     && (p.turno??1) === turno
   );
-  if (jaJogou) { toast('ESSE JOGO JA FOI REGISTRADO', 'erro'); return; }
+  if (jaJogou) { toast('ESSE JOGO JA FOI REGISTRADO', 'erro'); _unlockBtn(btnEl); return; }
   // Busca inputs relativos ao botão para evitar conflito de IDs duplicados
   const container = btnEl ? btnEl.closest('.match-card') || btnEl.parentElement : null;
   const el1 = container ? container.querySelector('[data-tpdc="1"]') : null;
@@ -6200,13 +6201,16 @@ window.salvarPartidaDireta = async (cid, gi, j1Id, j2Id, timeIndex, btnEl, turno
     });
     return {...gr,membros,partidas:[...(gr.partidas||[]),{j1Id:m1.jogadorId,j1Nome:m1.nome,j2Id:m2.jogadorId,j2Nome:m2.nome,g1,g2,timeIndex,turno}]};
   });
+  try {
   await updateDoc(doc(db,'campeonatos',cid),{grupos});
   await carregarCampeonatos();
-  const cAtual = campeonatos.find(x => x.id === cid);
-  if (cAtual && _verificarFaseGruposCompleta(cAtual) && !(cAtual.fasesEliminatorias?.length)) {
-    if (_temFasesKnockout(cAtual.tipo)) {
+  // Usar dados locais para verificacao de conclusao da fase
+  // (evita dados desatualizados do onSnapshot que pode nao ter disparado ainda)
+  const cLocal = {...c, grupos};
+  if (_verificarFaseGruposCompleta(cLocal) && !(c.fasesEliminatorias?.length)) {
+    if (_temFasesKnockout(c.tipo)) {
       await _criarPrimeiraFaseElim(cid);
-    } else if (_temIdaVolta(cAtual.tipo) && (cAtual.fase || 'grupos') !== 'returno') {
+    } else if (_temIdaVolta(c.tipo) && (c.fase || 'grupos') !== 'returno') {
       await updateDoc(doc(db,'campeonatos',cid), { fase: 'returno' });
       await carregarCampeonatos(); atualizarDash(); abrirCampeonato(cid);
       toast('1° TURNO CONCLUIDO! RETURNO INICIADO!', 'ok');
@@ -6216,6 +6220,7 @@ window.salvarPartidaDireta = async (cid, gi, j1Id, j2Id, timeIndex, btnEl, turno
   } else {
     atualizarDash(); abrirCampeonato(cid);
   }
+  } catch(e) { toast('ERRO AO SALVAR', 'erro'); } finally { _unlockBtn(btnEl); }
 };
 
 window.reiniciarTorneio = (id) => {
@@ -6408,7 +6413,22 @@ window.salvarPartida = async (cid, gi) => {
     return {...g,membros,partidas:[...(g.partidas||[]),{j1Id:m1.jogadorId,j1Nome:m1.nome,j2Id:m2.jogadorId,j2Nome:m2.nome,g1,g2,turno}]};
   });
   await updateDoc(doc(db,'campeonatos',cid),{grupos});
-  fecharModal(); await carregarCampeonatos(); atualizarDash(); abrirCampeonato(cid);
+  fecharModal(); await carregarCampeonatos();
+  // Usar dados locais para verificacao de conclusao da fase
+  const cLocal = {...c, grupos};
+  if (_verificarFaseGruposCompleta(cLocal) && !(c.fasesEliminatorias?.length)) {
+    if (_temFasesKnockout(c.tipo)) {
+      await _criarPrimeiraFaseElim(cid);
+    } else if (_temIdaVolta(c.tipo) && (c.fase || 'grupos') !== 'returno') {
+      await updateDoc(doc(db,'campeonatos',cid), { fase: 'returno' });
+      await carregarCampeonatos(); atualizarDash(); abrirCampeonato(cid);
+      toast('1° TURNO CONCLUIDO! RETURNO INICIADO!', 'ok');
+    } else {
+      await _finalizarTorneio(cid);
+    }
+  } else {
+    atualizarDash(); abrirCampeonato(cid);
+  }
 };
 
 // ─── RANKING ─────────────────────────────────────────────────────────
