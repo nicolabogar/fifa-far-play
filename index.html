@@ -5537,7 +5537,7 @@ function gerarGrupos(partic, tipo) {
   }));
 }
 
-function calcularDisp(g, qtdTimes=1) {
+function calcularDisp(g, qtdTimes=1, turno=1) {
   const disp = [];
   for (let i=0;i<g.membros.length;i++) for (let j=i+1;j<g.membros.length;j++) {
     const m1=g.membros[i],m2=g.membros[j];
@@ -5547,7 +5547,8 @@ function calcularDisp(g, qtdTimes=1) {
       if (!(g.partidas||[]).some(p=>
         ((p.j1Id===m1.jogadorId&&p.j2Id===m2.jogadorId)||(p.j1Id===m2.jogadorId&&p.j2Id===m1.jogadorId))
         && (p.timeIndex??0) === k
-      )) disp.push({m1,m2,timeIndex:k});
+        && (p.turno??1) === turno
+      )) disp.push({m1,m2,timeIndex:k,turno});
     }
   }
   return disp;
@@ -5562,6 +5563,14 @@ function _temFasesKnockout(tipo) {
   return ['champions','libertadores','copa-do-mundo','paulistao'].includes(tipo);
 }
 
+function _temIdaVolta(tipo) {
+  return tipo === 'brasileirao';
+}
+
+function _getCurrentTurno(c) {
+  return _temIdaVolta(c.tipo) && c.fase === 'returno' ? 2 : 1;
+}
+
 function _classificadosPorGrupo(c) {
   const classificados = [];
   (c.grupos||[]).forEach(g => {
@@ -5573,7 +5582,8 @@ function _classificadosPorGrupo(c) {
 
 function _verificarFaseGruposCompleta(c) {
   const qtdTimes = c.qtdTimes || 1;
-  return (c.grupos||[]).length > 0 && (c.grupos||[]).every(g => calcularDisp(g, qtdTimes).length === 0);
+  const turno = _getCurrentTurno(c);
+  return (c.grupos||[]).length > 0 && (c.grupos||[]).every(g => calcularDisp(g, qtdTimes, turno).length === 0);
 }
 
 function _verificarFaseElimCompleta(fase) {
@@ -5765,7 +5775,7 @@ function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar, fase
 window.cardJogoKnockout = cardJogoKnockout;
 
 /** Card de jogo de torneio — estilo idêntico ao cardAmistoso (TO3) */
-function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true, modoDupla=false, timeIndex=0) {
+function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true, modoDupla=false, timeIndex=0, turno=0, temIdaVolta=false) {
   const tipo = isSel ? 'selecoes' : 'clubes';
   const temRes = !!played;
   const g1r = temRes ? (played.j1Id===m1.jogadorId ? played.g1 : played.g2) : null;
@@ -5791,7 +5801,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
             <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="2" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
           </div>
-          <button onclick="event.stopPropagation();salvarPartidaDireta('${cid}',${gi},'${m1.jogadorId}','${m2.jogadorId}',${timeIndex},this)" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">FIM</button>`
+          <button onclick="event.stopPropagation();salvarPartidaDireta('${cid}',${gi},'${m1.jogadorId}','${m2.jogadorId}',${timeIndex},this,${turno})" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;">FIM</button>`
       : `<div style="display:flex;align-items:center;gap:4px;opacity:0.4;">
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="1" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;cursor:not-allowed;">
             <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
@@ -5805,6 +5815,8 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
         <span class="tag tag-purple">TORNEIO</span>
         <span class="tag tag-gray">${isSel ? 'SELECOES' : 'CLUBES'}</span>
         ${modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
+        ${temIdaVolta && turno === 1 ? `<span class="tag tag-green">TURNO</span>` : ''}
+        ${temIdaVolta && turno === 2 ? `<span class="tag tag-yellow">RETURNO</span>` : ''}
       </div>
       ${temRes
         ? (() => {
@@ -5926,29 +5938,48 @@ window.abrirCampeonato = (id) => {
     </div>`;
   };
 
+  const temIdaVolta = _temIdaVolta(c.tipo);
+  const currentTurno = _getCurrentTurno(c);
+
   const gruposHTML = (c.grupos||[]).map((g,gi) => {
     const ord = [...g.membros].sort((a,b)=>b.pts!==a.pts?b.pts-a.pts:(b.gp-b.gc)!==(a.gp-a.gc)?(b.gp-b.gc)-(a.gp-a.gc):b.gp-a.gp);
-    const disp = calcularDisp(g, qtdTimes);
+    const disp = calcularDisp(g, qtdTimes, currentTurno);
     const todosConf = [];
-    for (let i=0;i<g.membros.length;i++) for (let j=i+1;j<g.membros.length;j++) {
-      // Jogadores da mesma dupla nao se enfrentam
-      if (g.membros[i].duplaIndex !== undefined && g.membros[j].duplaIndex !== undefined && g.membros[i].duplaIndex === g.membros[j].duplaIndex) continue;
-      for (let k=0; k<qtdTimes; k++) todosConf.push({m1:g.membros[i],m2:g.membros[j],timeIndex:k});
+    const totalTurnos = temIdaVolta ? 2 : 1;
+    for (let t=1; t<=totalTurnos; t++) {
+      for (let i=0;i<g.membros.length;i++) for (let j=i+1;j<g.membros.length;j++) {
+        // Jogadores da mesma dupla nao se enfrentam
+        if (g.membros[i].duplaIndex !== undefined && g.membros[j].duplaIndex !== undefined && g.membros[i].duplaIndex === g.membros[j].duplaIndex) continue;
+        // No returno (turno 2) inverte mandante/visitante
+        const m1 = t === 2 ? g.membros[j] : g.membros[i];
+        const m2 = t === 2 ? g.membros[i] : g.membros[j];
+        for (let k=0; k<qtdTimes; k++) todosConf.push({m1, m2, timeIndex:k, turno:t});
+      }
     }
     const totalJogos = todosConf.length;
     const jogados = (g.partidas||[]).length;
 
-    const jogosHTML = todosConf.map(({m1,m2,timeIndex}) => {
+    const jogosHTML = todosConf.map(({m1,m2,timeIndex,turno}) => {
       const played = (g.partidas||[]).find(p=>
         ((p.j1Id===m1.jogadorId&&p.j2Id===m2.jogadorId)||(p.j1Id===m2.jogadorId&&p.j2Id===m1.jogadorId))
         && (p.timeIndex??0) === timeIndex
+        && (p.turno??1) === turno
       );
-      const confKey = `${c.id}-${gi}-${m1.jogadorId}-${m2.jogadorId}-${timeIndex}`;
-      return cardJogoTorneio(m1, m2, played||null, confKey, c.id, gi, isSel, podeMudar, c.modoDupla||false, timeIndex);
+      const confKey = `${c.id}-${gi}-${m1.jogadorId}-${m2.jogadorId}-${timeIndex}-t${turno}`;
+      const canPlay = podeMudar && turno <= currentTurno;
+      return cardJogoTorneio(m1, m2, played||null, confKey, c.id, gi, isSel, canPlay, c.modoDupla||false, timeIndex, turno, temIdaVolta);
     }).join('');
 
+    let statusLabel;
+    const isFullyDone = c.status === 'finalizado' || c.fase === 'encerrado';
+    if (disp.length === 0) {
+      statusLabel = (temIdaVolta && !isFullyDone && currentTurno === 1) ? '· AGUARDANDO RETURNO' : '· CONCLUIDO';
+    } else {
+      statusLabel = `· ${jogados}/${totalJogos}`;
+    }
+
     return `<div class="grupo-header aberto" onclick="toggleGrupo(this)" style="margin-bottom:8px;">
-      <span class="grupo-titulo">${g.nome} <span style="color:var(--text-muted);font-weight:600;">${disp.length===0?'· CONCLUIDO':`· ${jogados}/${totalJogos}`}</span></span>
+      <span class="grupo-titulo">${g.nome} <span style="color:var(--text-muted);font-weight:600;">${statusLabel}</span></span>
       <span class="grupo-seta">›</span>
     </div>
     <div class="grupo-body" style="margin-bottom:14px;">
@@ -5996,6 +6027,7 @@ window.abrirCampeonato = (id) => {
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
           <span class="tag tag-purple">${meta.nome.toUpperCase()}</span>
           <span class="tag ${c.status==='finalizado'?'tag-gray':'tag-green'}">${c.status==='finalizado'?'FINALIZADO':'EM ANDAMENTO'}</span>
+          ${temIdaVolta && c.status !== 'finalizado' ? `<span class="tag ${currentTurno === 2 ? 'tag-yellow' : 'tag-green'}">${currentTurno === 2 ? 'RETURNO' : 'TURNO'}</span>` : ''}
           ${c.modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
           ${qtdTimes > 1 ? `<span class="tag tag-yellow">${qtdTimes}X TIMES</span>` : ''}
         </div>
@@ -6130,23 +6162,25 @@ window.abrirCampeonato = (id) => {
 };
 
 // Salva partida diretamente dos inputs no card (sem modal)
-window.salvarPartidaDireta = async (cid, gi, j1Id, j2Id, timeIndex, btnEl) => {
+window.salvarPartidaDireta = async (cid, gi, j1Id, j2Id, timeIndex, btnEl, turno=1) => {
   // Compatibilidade: se timeIndex é um elemento DOM (chamada antiga sem timeIndex), ajustar
   if (timeIndex instanceof HTMLElement) {
     btnEl = timeIndex;
     timeIndex = 0;
   }
   timeIndex = timeIndex ?? 0;
+  turno = turno ?? 1;
   const c = campeonatos.find(x=>x.id===cid);
   if (!c) return;
   const g = c.grupos[gi];
   const m1 = g.membros.find(m=>m.jogadorId===j1Id);
   const m2 = g.membros.find(m=>m.jogadorId===j2Id);
   if (!m1||!m2) return;
-  // Verificar se já existe partida com esse timeIndex
+  // Verificar se já existe partida com esse timeIndex e turno
   const jaJogou = (g.partidas||[]).some(p=>
     ((p.j1Id===m1.jogadorId&&p.j2Id===m2.jogadorId)||(p.j1Id===m2.jogadorId&&p.j2Id===m1.jogadorId))
     && (p.timeIndex??0) === timeIndex
+    && (p.turno??1) === turno
   );
   if (jaJogou) { toast('ESSE JOGO JA FOI REGISTRADO', 'erro'); return; }
   // Busca inputs relativos ao botão para evitar conflito de IDs duplicados
@@ -6164,7 +6198,7 @@ window.salvarPartidaDireta = async (cid, gi, j1Id, j2Id, timeIndex, btnEl) => {
       else if (m.jogadorId===m2.jogadorId) { mm.gp+=g2;mm.gc+=g1;mm.vit+=g2>g1?1:0;mm.emp+=g1===g2?1:0;mm.der+=g2<g1?1:0;mm.pts+=g2>g1?3:g1===g2?1:0; }
       return mm;
     });
-    return {...gr,membros,partidas:[...(gr.partidas||[]),{j1Id:m1.jogadorId,j1Nome:m1.nome,j2Id:m2.jogadorId,j2Nome:m2.nome,g1,g2,timeIndex}]};
+    return {...gr,membros,partidas:[...(gr.partidas||[]),{j1Id:m1.jogadorId,j1Nome:m1.nome,j2Id:m2.jogadorId,j2Nome:m2.nome,g1,g2,timeIndex,turno}]};
   });
   await updateDoc(doc(db,'campeonatos',cid),{grupos});
   await carregarCampeonatos();
@@ -6172,6 +6206,10 @@ window.salvarPartidaDireta = async (cid, gi, j1Id, j2Id, timeIndex, btnEl) => {
   if (cAtual && _verificarFaseGruposCompleta(cAtual) && !(cAtual.fasesEliminatorias?.length)) {
     if (_temFasesKnockout(cAtual.tipo)) {
       await _criarPrimeiraFaseElim(cid);
+    } else if (_temIdaVolta(cAtual.tipo) && (cAtual.fase || 'grupos') !== 'returno') {
+      await updateDoc(doc(db,'campeonatos',cid), { fase: 'returno' });
+      await carregarCampeonatos(); atualizarDash(); abrirCampeonato(cid);
+      toast('1° TURNO CONCLUIDO! RETURNO INICIADO!', 'ok');
     } else {
       await _finalizarTorneio(cid);
     }
@@ -6358,6 +6396,7 @@ window.salvarPartida = async (cid, gi) => {
   const {m1,m2} = _disponiveis[0];
   const g1 = parseInt(document.getElementById('rg1').value)||0;
   const g2 = parseInt(document.getElementById('rg2').value)||0;
+  const turno = _getCurrentTurno(c);
   const grupos = c.grupos.map((g,idx) => {
     if (idx!==gi) return g;
     const membros = g.membros.map(m => {
@@ -6366,7 +6405,7 @@ window.salvarPartida = async (cid, gi) => {
       else if (m.jogadorId===m2.jogadorId) { mm.gp+=g2;mm.gc+=g1;mm.vit+=g2>g1?1:0;mm.emp+=g1===g2?1:0;mm.der+=g2<g1?1:0;mm.pts+=g2>g1?3:g1===g2?1:0; }
       return mm;
     });
-    return {...g,membros,partidas:[...(g.partidas||[]),{j1Id:m1.jogadorId,j1Nome:m1.nome,j2Id:m2.jogadorId,j2Nome:m2.nome,g1,g2}]};
+    return {...g,membros,partidas:[...(g.partidas||[]),{j1Id:m1.jogadorId,j1Nome:m1.nome,j2Id:m2.jogadorId,j2Nome:m2.nome,g1,g2,turno}]};
   });
   await updateDoc(doc(db,'campeonatos',cid),{grupos});
   fecharModal(); await carregarCampeonatos(); atualizarDash(); abrirCampeonato(cid);
@@ -7007,7 +7046,7 @@ function cardCampHome(c, modoLista=false) {
   const meta = CAMP_META[c.tipo] || { nome: c.tipo };
   const qtdTimes = c.qtdTimes || 1;
   const totalParts  = (c.grupos||[]).reduce((s,g)=>s+(g.partidas||[]).length,0);
-  const totalPoss   = (c.grupos||[]).reduce((s,g)=>{const m=g.membros?.length||0; return s+m*(m-1)/2*qtdTimes;},0);
+  const totalPoss   = (c.grupos||[]).reduce((s,g)=>{const m=g.membros?.length||0; return s+m*(m-1)/2*qtdTimes*(_temIdaVolta(c.tipo)?2:1);},0);
   const pct = totalPoss > 0 ? Math.round((totalParts/totalPoss)*100) : 0;
   const isSel = CAMP_META[c.tipo]?.tipo === 'selecoes';
   const finalizado = c.status === 'finalizado';
@@ -7022,6 +7061,8 @@ function cardCampHome(c, modoLista=false) {
 
   // Jogos em andamento (pendentes sem placar) — mostrar até 2
   const jogosPendentes = [];
+  const temIdaVoltaHome = _temIdaVolta(c.tipo);
+  const currentTurnoHome = _getCurrentTurno(c);
   (c.grupos||[]).forEach((g,gi) => {
     for (let i=0;i<g.membros.length;i++) for (let j=i+1;j<g.membros.length;j++) {
       const m1=g.membros[i],m2=g.membros[j];
@@ -7029,14 +7070,15 @@ function cardCampHome(c, modoLista=false) {
         const played = (g.partidas||[]).some(p=>
           ((p.j1Id===m1.jogadorId&&p.j2Id===m2.jogadorId)||(p.j1Id===m2.jogadorId&&p.j2Id===m1.jogadorId))
           && (p.timeIndex??0) === k
+          && (p.turno??1) === currentTurnoHome
         );
-        if (!played) jogosPendentes.push({m1,m2,gi,g,timeIndex:k});
+        if (!played) jogosPendentes.push({m1,m2,gi,g,timeIndex:k,turno:currentTurnoHome});
       }
     }
   });
-  const jogosHtml = jogosPendentes.slice(0,2).map(({m1,m2,gi,g,timeIndex}) => {
-    const confKey = `home-${c.id}-${gi}-${m1.jogadorId}-${m2.jogadorId}-${timeIndex}`;
-    return cardJogoTorneio(m1, m2, null, confKey, c.id, gi, isSel, temPermissao(), c.modoDupla||false, timeIndex);
+  const jogosHtml = jogosPendentes.slice(0,2).map(({m1,m2,gi,g,timeIndex,turno}) => {
+    const confKey = `home-${c.id}-${gi}-${m1.jogadorId}-${m2.jogadorId}-${timeIndex}-t${turno}`;
+    return cardJogoTorneio(m1, m2, null, confKey, c.id, gi, isSel, temPermissao(), c.modoDupla||false, timeIndex, turno, temIdaVoltaHome);
   }).join('');
 
   const idAttr = modoLista ? '' : `id="camp-home-${c.id}" `;
