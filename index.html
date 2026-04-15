@@ -6075,7 +6075,7 @@ window.abrirCampeonato = (id) => {
       : `<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:10px 12px;margin-bottom:16px;display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">⚠️</span><span style="font-size:12px;color:#FCD34D;font-weight:700;">TORNEIO EM ANDAMENTO — NÃO É POSSÍVEL SORTEAR OU ADICIONAR JOGADORES</span></div>`)
     : ''}
     ${podeMudar && naoIniciado ? `<button onclick="reiniciarTorneio('${c.id}')" style="width:100%;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);color:#FCD34D;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px;">REINICIAR TORNEIO</button>` : ''}
-    ${naoIniciado && podeMudar ? `<button onclick="excluirCampeonato('${c.id}')" style="width:100%;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.35);color:#EF4444;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:16px;">EXCLUIR TORNEIO</button>` : ''}
+    ${(naoIniciado || c.status === 'finalizado') && podeMudar ? `<button onclick="excluirCampeonato('${c.id}')" style="width:100%;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.35);color:#EF4444;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:16px;">EXCLUIR TORNEIO</button>` : ''}
 
     <p class="sec-title" style="margin-bottom:10px;">JOGADORES</p>
     ${(() => {
@@ -6257,10 +6257,11 @@ window.confirmarReiniciarTorneio = async (id) => {
 window.excluirCampeonato = (id) => {
   const c = campeonatos.find(x=>x.id===id);
   if (!c) return;
+  const eFinalizado = c.status === 'finalizado';
   modal(`<p class="modal-title">EXCLUIR TORNEIO?</p>
     <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
       <p style="font-weight:700;font-size:13px;color:#FCA5A5;margin-bottom:6px;">ATENÇÃO</p>
-      <p style="color:var(--text-muted);font-size:12px;line-height:1.5;">Excluir <strong style="color:var(--text)">${c.nome}</strong> removerá todos os grupos, jogos e classificação. Esta ação não pode ser desfeita.</p>
+      <p style="color:var(--text-muted);font-size:12px;line-height:1.5;">Excluir <strong style="color:var(--text)">${c.nome}</strong> removerá todos os grupos, jogos e classificação. Esta ação não pode ser desfeita.${eFinalizado ? ' <strong style="color:#FCA5A5;">O RANKING SERA ATUALIZADO.</strong>' : ''}</p>
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);" onclick="confirmarExcluirCamp('${id}')">CONFIRMAR</button>
@@ -6268,7 +6269,10 @@ window.excluirCampeonato = (id) => {
 };
 window.confirmarExcluirCamp = async (id) => {
   await deleteDoc(doc(db,'campeonatos',id));
-  fecharModal(); fecharFullscreen(); await carregarCampeonatos(); atualizarDash();
+  fecharModal(); fecharFullscreen(); await carregarCampeonatos();
+  const rankCamp = calcularRankingTorneios();
+  renderRankingTorneios(rankCamp);
+  atualizarDash();
 };
 
 window._autoSalvarNomeTorneio = async (id, valor) => {
@@ -7145,7 +7149,7 @@ function cardCampHome(c, modoLista=false) {
     ${!finalizado && jogosHtml ? `<div style="margin-top:8px;" onclick="event.stopPropagation();abrirCampeonato('${c.id}')">${jogosHtml}</div>` : ''}
   </div>`;
 
-  return !finalizado && podeMudar ? `<div class="swipe-wrap" data-swipe-id="${c.id}" data-swipe-nome="${c.nome}">
+  return podeMudar ? `<div class="swipe-wrap" data-swipe-id="${c.id}" data-swipe-nome="${c.nome}">
       <div class="swipe-bg">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
         <span class="swipe-bg-label">EXCLUIR</span>
