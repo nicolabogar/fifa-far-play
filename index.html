@@ -445,6 +445,26 @@
 </div>
 
 <!-- ═══════════════════════════════════════════
+     TELA DE APROVACAO PENDENTE
+═══════════════════════════════════════════ -->
+<div id="approval-pending-screen" style="display:none; min-height:100dvh; flex-direction:column; align-items:center; justify-content:center; padding:32px; background:radial-gradient(ellipse at 50% -20%, rgba(139,92,246,0.25) 0%, transparent 65%), var(--bg);">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div style="text-align:center; max-width:320px;" class="anim-fade">
+    <div style="width:72px;height:72px;margin:0 auto 24px;background:rgba(139,92,246,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid rgba(139,92,246,0.35);">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+    </div>
+    <h2 style="font-size:22px;font-weight:900;letter-spacing:-0.5px;margin-bottom:12px;" class="grad">AGUARDANDO APROVACAO</h2>
+    <p style="color:var(--text-muted);font-size:14px;line-height:1.6;margin-bottom:8px;">Seu cadastro foi realizado com sucesso! Um administrador precisa aprovar seu acesso antes que voce possa entrar no app.</p>
+    <p style="color:var(--text-muted);font-size:13px;line-height:1.5;">Entre em contato com o administrador do app para solicitar aprovacao.</p>
+    <button id="btn-sair-pendente" style="margin-top:32px;background:rgba(255,255,255,0.05);color:var(--text-muted);font-weight:700;font-size:14px;padding:12px 24px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);cursor:pointer;width:100%;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.09)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">SAIR DA CONTA</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
      APP PRINCIPAL
 ═══════════════════════════════════════════ -->
 <div id="app" style="display:none; flex-direction:column; height:100dvh; position:relative;">
@@ -785,6 +805,9 @@
 <!-- TOAST -->
 <div id="toast"></div>
 
+<!-- Config do Firebase (gitignored — nunca expõe em repos públicos) -->
+<script src="./firebase-config.js"></script>
+
 <!-- ═══════════════════════════════════════════
      SCRIPT PRINCIPAL
 ═══════════════════════════════════════════ -->
@@ -798,14 +821,11 @@ import { getStorage, ref as storageRef, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 
 // ─── CONFIG ─────────────────────────────────────────────────────────
-const FB = initializeApp({
-  apiKey: "AIzaSyB2FF0TT2ZIEn91DkjhPYqcDABK52Tx2-I",
-  authDomain: "fut-manager-6bd85.firebaseapp.com",
-  projectId: "fut-manager-6bd85",
-  storageBucket: "fut-manager-6bd85.firebasestorage.app",
-  messagingSenderId: "999602703550",
-  appId: "1:999602703550:web:57cbf17b03f30baf02e2ef"
-});
+// Configuração carregada do arquivo firebase-config.js (externo, gitignored)
+if (!window.FIREBASE_CONFIG) {
+  throw new Error('firebase-config.js não encontrado. Copie firebase-config.example.js para firebase-config.js e preencha com os dados do seu projeto Firebase.');
+}
+const FB = initializeApp(window.FIREBASE_CONFIG);
 const db      = getFirestore(FB);
 const auth    = getAuth(FB);
 const storage = getStorage(FB);
@@ -1177,6 +1197,7 @@ function timeFlagInline(timeId, tipo) {
 let usuario    = null;
 let jogadores  = [];
 let _simulandoJogadorId = null; // RG-SIM: id do jogador que o master está simulando (null = visão própria)
+let _pendingApproval = false; // RG-APROV: true quando usuário logado aguarda aprovação do master
 
 // ─── HELPERS DE NOME ────────────────────────────────────────────────
 function _nomeExibicao(j) { return (j && (j.apelido || j.nome)) || ''; }
@@ -1858,6 +1879,7 @@ function mostraErro(msg) {
 
 document.getElementById('btn-login').addEventListener('click', () => fazerLogin(gp, 'btn-login'));
 document.getElementById('btn-sair').addEventListener('click', () => signOut(auth));
+document.getElementById('btn-sair-pendente').addEventListener('click', () => signOut(auth));
 
 // ─── HAMBURGER MENU ──────────────────────────────────────────────────
 window.fecharHamburger = () => { document.getElementById('menu-hamburger-dropdown').style.display = 'none'; };
@@ -1925,17 +1947,18 @@ onAuthStateChanged(auth, async u => {
     localStorage.setItem('ffp_logged_in', '1');
     usuario = u;
     document.getElementById('login-screen').style.display = 'none';
-    const app = document.getElementById('app');
-    app.style.display = 'flex';
-    if (u.photoURL) { document.getElementById('user-foto').src = u.photoURL; document.getElementById('user-foto').style.display = ''; }
-    document.getElementById('ham-user-name').textContent = (u.displayName || u.email || 'USUARIO').toUpperCase();
+    document.getElementById('approval-pending-screen').style.display = 'none';
     try { await carregarTimes(); } catch(e) { console.warn('carregarTimes falhou:', e); }
     await carregarDados();
     await _migrarMasterInicial();
     // RG4: auto-cadastro de jogador no primeiro login
     await _autoCadastrarJogador(u);
-    // RG5: aplicar controle de acesso na UI
-    _aplicarControleAcesso();
+    // RG-APROV: verificar se usuário foi aprovado pelo master antes de exibir o app
+    if (!_verificarAprovacaoUsuario(u)) {
+      _mostrarTelaPendente();
+      return;
+    }
+    _mostrarApp(u);
   } else {
     localStorage.removeItem('ffp_logged_in');
     usuario = null;
@@ -1943,6 +1966,7 @@ onAuthStateChanged(auth, async u => {
     _pararListeners();
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
+    document.getElementById('approval-pending-screen').style.display = 'none';
   }
 });
 
@@ -2013,7 +2037,7 @@ async function _autoCadastrarJogador(u) {
     const celular = await _solicitarCelularNovoCadastro(u);
     const nome = _normalizarNome(u.displayName || u.email.split('@')[0] || '');
     await addDoc(collection(db, 'jogadores'), {
-      nome, email: emailNorm, celular, master: false,
+      nome, email: emailNorm, celular, master: false, aprovado: false,
       fotoUrl: u.photoURL || '', criadoEm: serverTimestamp(), _autoCriado: true
     });
     await carregarJogadores();
@@ -2131,6 +2155,10 @@ function carregarJogadores() {
         renderJogadores();
         // RG-SIM: atualiza a tag de impersonificacao ao recarregar jogadores
         _atualizarBannerSimulacao();
+        // RG-APROV: se usuário estava aguardando aprovação e agora foi aprovado, exibir o app
+        if (usuario && _pendingApproval && _verificarAprovacaoUsuario(usuario)) {
+          _mostrarApp(usuario);
+        }
         resolve();
       },
       err => { console.error('jogadores onSnapshot:', err); resolve(); }
@@ -2181,6 +2209,50 @@ function temPermissao() {
   if (_simulandoJogadorId) return false; // RG-SIM: master simulando outro usuário age como não-master
   return _isMasterReal();
 }
+
+// RG-APROV: verifica se o usuário logado tem aprovação de acesso
+// Masters são sempre aprovados; usuários sem campo 'aprovado' = aprovado (backward compat)
+function _verificarAprovacaoUsuario(u) {
+  if (!u?.email) return false;
+  if (_isMasterReal()) return true;
+  const emailNorm = u.email.toLowerCase();
+  const jog = jogadores.find(j => j.email && j.email.toLowerCase() === emailNorm);
+  if (!jog) return false; // sem registro ainda — aguardar onSnapshot com aprovado:false
+  return jog.aprovado !== false; // undefined ou true = aprovado; false = pendente
+}
+
+// RG-APROV: exibe tela de aprovação pendente e oculta o app
+function _mostrarTelaPendente() {
+  _pendingApproval = true;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('approval-pending-screen').style.display = 'flex';
+}
+
+// RG-APROV: exibe o app após aprovação e configura header
+function _mostrarApp(u) {
+  _pendingApproval = false;
+  document.getElementById('approval-pending-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'none';
+  const app = document.getElementById('app');
+  app.style.display = 'flex';
+  if (u?.photoURL) { document.getElementById('user-foto').src = u.photoURL; document.getElementById('user-foto').style.display = ''; }
+  document.getElementById('ham-user-name').textContent = (u?.displayName || u?.email || 'USUARIO').toUpperCase();
+  // RG5: aplicar controle de acesso na UI
+  _aplicarControleAcesso();
+}
+
+// RG-APROV: master aprova um usuário pendente
+window.aprovarJogador = async (id) => {
+  if (!_isMasterReal()) { toast('SEM PERMISSAO', 'erro'); return; }
+  try {
+    await updateDoc(doc(db, 'jogadores', id), { aprovado: true });
+    toast('USUARIO APROVADO', 'ok');
+  } catch(e) {
+    console.error('aprovarJogador:', e);
+    toast('ERRO AO APROVAR', 'erro');
+  }
+};
 
 // ─── SWIPE-TO-DELETE (iOS style) ──────────────────────────────────────
 function _resetSwipeCard(card) {
@@ -2292,16 +2364,19 @@ function renderJogadores() {
     : null;
   const sorted = [...jogadores].sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' }));
   c.innerHTML = sorted.map(j => {
+    const isPendente = j.aprovado === false && !j.master;
     const cardContent = `
         ${avatarJogador(j, 46)}
         <div style="flex:1;min-width:0;">
-          <div style="display:flex;align-items:center;gap:6px;">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
             <span style="font-weight:700;font-size:15px;text-transform:uppercase;">${_escHtml(j.nome||'')}</span>
             ${j.master ? `<span class="tag tag-yellow">MASTER</span>` : ''}
+            ${isPendente && podeMudar ? `<span class="tag" style="background:rgba(251,191,36,0.15);color:#FBBF24;border:1px solid rgba(251,191,36,0.35);">PENDENTE</span>` : ''}
           </div>
           ${j.apelido ? `<div style="color:var(--cyan);font-size:11px;font-weight:700;margin-top:2px;text-transform:uppercase;">APELIDO: ${_escHtml(j.apelido)}</div>` : ''}
           <div style="color:var(--text-muted);font-size:11px;margin-top:2px;">${j.email||'SEM E-MAIL VINCULADO'}</div>
           ${j.celular ? `<div style="color:var(--text-muted);font-size:11px;margin-top:1px;">${j.celular}</div>` : ''}
+          ${isPendente && podeMudar ? `<button onclick="event.stopPropagation();aprovarJogador('${j.id}')" style="margin-top:8px;background:rgba(34,197,94,0.15);color:#4ADE80;border:1px solid rgba(34,197,94,0.35);font-weight:700;font-size:11px;padding:5px 12px;border-radius:8px;cursor:pointer;text-transform:uppercase;letter-spacing:0.04em;">APROVAR ACESSO</button>` : ''}
         </div>`;
     if (podeMudar) {
       return `
