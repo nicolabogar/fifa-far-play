@@ -813,7 +813,7 @@
 ═══════════════════════════════════════════ -->
 <script type="module">
 import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, serverTimestamp, setDoc, getDoc, onSnapshot }
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, serverTimestamp, setDoc, getDoc, onSnapshot, writeBatch }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, onAuthStateChanged }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
@@ -1950,9 +1950,9 @@ onAuthStateChanged(auth, async u => {
     document.getElementById('approval-pending-screen').style.display = 'none';
     try { await carregarTimes(); } catch(e) { console.warn('carregarTimes falhou:', e); }
     await carregarDados();
-    await _migrarMasterInicial();
-    // RG4: auto-cadastro de jogador no primeiro login
+    // RG4: auto-cadastro de jogador no primeiro login (antes de _migrarMasterInicial para que doc uid exista)
     await _autoCadastrarJogador(u);
+    await _migrarMasterInicial();
     // RG-APROV: verificar se usuário foi aprovado pelo master antes de exibir o app
     if (!_verificarAprovacaoUsuario(u)) {
       _mostrarTelaPendente();
@@ -2021,28 +2021,109 @@ function _normalizarNome(s) { return String(s||'').trim().normalize('NFD').repla
 function _escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // RG4: verifica se usuário tem cadastro como jogador, cria se não existir
+// Usa setDoc com auth.uid como ID do documento para compatibilidade com Firebase Rules
 async function _autoCadastrarJogador(u) {
   if (!u || !u.email) return;
   if (_autoCadastroEmAndamento) return;
   _autoCadastroEmAndamento = true;
   try {
+    const uid = u.uid;
     const emailNorm = u.email.toLowerCase();
-    const jaExiste = jogadores.some(j => j.email && j.email.toLowerCase() === emailNorm);
-    if (jaExiste) return;
+    // 1. Verificar se já existe doc jogadores/{uid}
+    const uidDoc = await getDoc(doc(db, 'jogadores', uid));
+    if (uidDoc.exists()) return;
+    // 2. Verificar se existe doc com mesmo email (pré-criado pelo master com ID aleatório)
+    const existente = jogadores.find(j => j.email && j.email.toLowerCase() === emailNorm);
+    if (existente && existente.id !== uid) {
+      await _migrarJogadorParaUid(existente, uid);
+      return;
+    }
     // Verificar no Firestore (caso jogadores ainda não carregados)
     const snap = await getDocs(collection(db, 'jogadores'));
-    const todos = snap.docs.map(d => d.data());
-    if (todos.some(j => j.email && j.email.toLowerCase() === emailNorm)) return;
-    // Solicitar celular antes de criar o jogador (obrigatório)
+    const docExistente = snap.docs.find(d => {
+      const data = d.data();
+      return data.email && data.email.toLowerCase() === emailNorm;
+    });
+    if (docExistente && docExistente.id !== uid) {
+      await _migrarJogadorParaUid({ id: docExistente.id, ...docExistente.data() }, uid);
+      return;
+    }
+    if (docExistente) return; // já existe com uid correto
+    // 3. Novo jogador: solicitar celular e criar doc com uid como ID
     const celular = await _solicitarCelularNovoCadastro(u);
     const nome = _normalizarNome(u.displayName || u.email.split('@')[0] || '');
-    await addDoc(collection(db, 'jogadores'), {
-      nome, email: emailNorm, celular, master: false, aprovado: false,
+    // Bootstrap master: se nenhum master existe e email é o do owner, já cria como master aprovado
+    const isMasterBootstrap = !getMasters().length && emailNorm === 'nicolabogar@gmail.com';
+    await setDoc(doc(db, 'jogadores', uid), {
+      nome, email: emailNorm, celular,
+      master: isMasterBootstrap, aprovado: isMasterBootstrap,
       fotoUrl: u.photoURL || '', criadoEm: serverTimestamp(), _autoCriado: true
     });
     await carregarJogadores();
   } catch(e) { console.warn('auto-cadastro jogador:', e); }
   finally { _autoCadastroEmAndamento = false; }
+}
+
+// RG4-MIG: migra jogador de ID aleatório (pré-criado pelo master) para jogadores/{uid}
+// Atualiza todas as referências em amistosos e campeonatos
+// Usa duas etapas: 1) cria doc uid-keyed, 2) deleta antigo + atualiza referências
+async function _migrarJogadorParaUid(jogadorAntigo, uid) {
+  const oldId = jogadorAntigo.id;
+  const { id, ...dados } = jogadorAntigo;
+  // Backward compat: aprovado undefined → true (legado, jogador já existia antes das regras)
+  // aprovado:false = pendente (mantém), aprovado:true ou undefined = aprovado
+  let aprovadoFinal = dados.aprovado !== false;
+  // Bootstrap master: se nenhum master e email é o do owner, forçar aprovação
+  if (!getMasters().length && dados.email?.toLowerCase() === 'nicolabogar@gmail.com') aprovadoFinal = true;
+  // Etapa 1: criar doc jogadores/{uid} (regra: create if uid == auth.uid)
+  await setDoc(doc(db, 'jogadores', uid), {
+    ...dados, aprovado: aprovadoFinal, criadoEm: dados.criadoEm || serverTimestamp()
+  });
+  // Etapa 2: deletar doc antigo e atualizar referências (agora jogadores/{uid} existe)
+  const batch = writeBatch(db);
+  batch.delete(doc(db, 'jogadores', oldId));
+  if (aprovadoFinal) {
+    // Atualizar referências em amistosos
+    for (const a of amistosos) {
+      let mudou = false;
+      const update = {};
+      if (a.time1?.jogadoresIds?.includes(oldId)) {
+        update['time1.jogadoresIds'] = a.time1.jogadoresIds.map(x => x === oldId ? uid : x);
+        mudou = true;
+      }
+      if (a.time2?.jogadoresIds?.includes(oldId)) {
+        update['time2.jogadoresIds'] = a.time2.jogadoresIds.map(x => x === oldId ? uid : x);
+        mudou = true;
+      }
+      if (mudou) batch.update(doc(db, 'amistosos', a.id), update);
+    }
+    // Atualizar referências em campeonatos
+    for (const c of campeonatos) {
+      let mudou = false;
+      const parts = (c.participantes || []).map(p => {
+        if (p.jogadorId === oldId) { mudou = true; return { ...p, jogadorId: uid }; }
+        return p;
+      });
+      const grupos = (c.grupos || []).map(g => {
+        const membros = (g.membros || []).map(m => {
+          if (m.jogadorId === oldId) { mudou = true; return { ...m, jogadorId: uid }; }
+          return m;
+        });
+        const partidas = (g.partidas || []).map(p => {
+          let pm = { ...p };
+          if (p.j1Id === oldId) { pm.j1Id = uid; mudou = true; }
+          if (p.j2Id === oldId) { pm.j2Id = uid; mudou = true; }
+          return pm;
+        });
+        return { ...g, membros, partidas };
+      });
+      if (mudou) {
+        batch.update(doc(db, 'campeonatos', c.id), { participantes: parts, grupos });
+      }
+    }
+  }
+  await batch.commit();
+  await carregarJogadores();
 }
 
 // RG4-CEL: exibe modal bloqueante solicitando o celular no primeiro cadastro
@@ -2184,7 +2265,7 @@ async function _migrarMasterInicial() {
   const jogador = jogadores.find(j => j.email && j.email.toLowerCase() === 'nicolabogar@gmail.com');
   if (!jogador) return;
   try {
-    await updateDoc(doc(db, 'jogadores', jogador.id), { master: true });
+    await updateDoc(doc(db, 'jogadores', jogador.id), { master: true, aprovado: true });
   } catch (e) {
     console.warn('_migrarMasterInicial:', e);
   }
@@ -2211,14 +2292,14 @@ function temPermissao() {
 }
 
 // RG-APROV: verifica se o usuário logado tem aprovação de acesso
-// Masters são sempre aprovados; usuários sem campo 'aprovado' = aprovado (backward compat)
+// Masters são sempre aprovados; aprovado deve ser true (consistente com Firebase Rules)
 function _verificarAprovacaoUsuario(u) {
   if (!u?.email) return false;
   if (_isMasterReal()) return true;
   const emailNorm = u.email.toLowerCase();
   const jog = jogadores.find(j => j.email && j.email.toLowerCase() === emailNorm);
-  if (!jog) return false; // sem registro ainda — aguardar onSnapshot com aprovado:false
-  return jog.aprovado !== false; // undefined ou true = aprovado; false = pendente
+  if (!jog) return false; // sem registro ainda — aguardar onSnapshot
+  return jog.aprovado === true; // apenas aprovado:true libera o acesso
 }
 
 // RG-APROV: exibe tela de aprovação pendente e oculta o app
@@ -2230,7 +2311,8 @@ function _mostrarTelaPendente() {
 }
 
 // RG-APROV: exibe o app após aprovação e configura header
-function _mostrarApp(u) {
+async function _mostrarApp(u) {
+  const vinhaDePendente = _pendingApproval;
   _pendingApproval = false;
   document.getElementById('approval-pending-screen').style.display = 'none';
   document.getElementById('login-screen').style.display = 'none';
@@ -2238,6 +2320,16 @@ function _mostrarApp(u) {
   app.style.display = 'flex';
   if (u?.photoURL) { document.getElementById('user-foto').src = u.photoURL; document.getElementById('user-foto').style.display = ''; }
   document.getElementById('ham-user-name').textContent = (u?.displayName || u?.email || 'USUARIO').toUpperCase();
+  // RG-APROV: ao transicionar pendente→aprovado, recarregar listeners que falharam sem permissão
+  if (vinhaDePendente) {
+    if (typeof _unsubAmistosos === 'function')   { _unsubAmistosos();   _unsubAmistosos   = null; }
+    if (typeof _unsubCampeonatos === 'function') { _unsubCampeonatos(); _unsubCampeonatos = null; }
+    try {
+      await carregarTimes();
+      await Promise.all([carregarAmistosos(), carregarCampeonatos()]);
+      atualizarDash();
+    } catch(e) { console.warn('recarregar dados pos-aprovacao:', e); }
+  }
   // RG5: aplicar controle de acesso na UI
   _aplicarControleAcesso();
 }
@@ -2869,7 +2961,8 @@ window.salvarJogador = async () => {
       _croppedBlob = null;
     }
     // permite múltiplos masters: não remove o master atual ao criar novo player com master=true
-    await addDoc(collection(db, 'jogadores'), { nome, apelido, email: email||'', celular, master: isMaster, fotoUrl, criadoEm: serverTimestamp() });
+    // aprovado:true pois o master está criando manualmente (já aprovado)
+    await addDoc(collection(db, 'jogadores'), { nome, apelido, email: email||'', celular, master: isMaster, aprovado: true, fotoUrl, criadoEm: serverTimestamp() });
     fecharFullscreen(); await carregarJogadores(); atualizarDash();
   } catch(e) {
     console.error(e);
