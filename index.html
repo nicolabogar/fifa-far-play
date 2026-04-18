@@ -6148,7 +6148,8 @@ function _criarConfrontosKnockout(classificados) {
     confrontos.push({
       j1Id: j1.jogadorId, j1Nome: j1.nome, j1Times: j1.times || [j1.time].filter(Boolean),
       j2Id: j2.jogadorId, j2Nome: j2.nome, j2Times: j2.times || [j2.time].filter(Boolean),
-      g1: null, g2: null, vencedor: null
+      g1: null, g2: null, vencedor: null,
+      mesmoJogador: j1.jogadorId === j2.jogadorId
     });
   }
   return confrontos;
@@ -6162,7 +6163,8 @@ function _criarConfrontosKnockoutSequencial(vencedores) {
       confrontos.push({
         j1Id: j1.jogadorId, j1Nome: j1.nome, j1Times: j1.times || [j1.time].filter(Boolean),
         j2Id: j2.jogadorId, j2Nome: j2.nome, j2Times: j2.times || [j2.time].filter(Boolean),
-        g1: null, g2: null, vencedor: null
+        g1: null, g2: null, vencedor: null,
+        mesmoJogador: j1.jogadorId === j2.jogadorId
       });
     }
   }
@@ -6174,8 +6176,20 @@ async function _criarPrimeiraFaseElim(cid) {
   if (!c) return;
   const classificados = _classificadosPorGrupo(c);
   if (classificados.length < 2) { await _finalizarTorneio(cid); return; }
-  const n = Math.pow(2, Math.floor(Math.log2(classificados.length)));
-  const selecionados = classificados.slice(0, n);
+  // Quando qtdTimes > 1, expande para uma entrada por time individual no chaveamento
+  let entradas = classificados;
+  if ((c.qtdTimes || 1) > 1) {
+    entradas = classificados.flatMap(p => {
+      const times = p.times || [p.time].filter(Boolean);
+      return times.map(t => ({ ...p, times: [t] }));
+    });
+  }
+  if (entradas.length < 2) { await _finalizarTorneio(cid); return; }
+  // Verifica se só resta um jogador único (todas as entradas são do mesmo jogador)
+  const jogadoresUnicos = [...new Set(entradas.map(e => e.jogadorId))];
+  if (jogadoresUnicos.length === 1) { await _finalizarTorneio(cid, jogadoresUnicos[0]); return; }
+  const n = Math.pow(2, Math.floor(Math.log2(entradas.length)));
+  const selecionados = entradas.slice(0, n);
   const primeiraFaseChave = n <= 2 ? 'final' : n <= 4 ? 'semifinal' : n <= 8 ? 'quartas' : 'oitavas';
   const confrontos = _criarConfrontosKnockout(selecionados);
   const fasesEliminatorias = [{ fase: primeiraFaseChave, nome: FASE_KNOCKOUT_NOMES[primeiraFaseChave], confrontos }];
@@ -6191,9 +6205,17 @@ async function _avancarFaseElim(cid, faseIdx) {
   if (!faseAtual) return;
   if (faseAtual.fase === 'final') { await _finalizarTorneio(cid); return; }
   const vencedores = faseAtual.confrontos.map(cf => {
+    // Para jogos do mesmo jogador, usa vencedorTimes (time escolhido) se disponível
+    const winnerTimes = cf.vencedorTimes || (cf.vencedor === cf.j1Id ? cf.j1Times : cf.j2Times);
     const jog = (c.participantes||[]).find(p => p.jogadorId === cf.vencedor);
-    return jog || { jogadorId: cf.vencedor, nome: cf.vencedor === cf.j1Id ? cf.j1Nome : cf.j2Nome, times: cf.vencedor === cf.j1Id ? cf.j1Times : cf.j2Times };
+    return jog ? { ...jog, times: winnerTimes } : { jogadorId: cf.vencedor, nome: cf.vencedor === cf.j1Id ? cf.j1Nome : cf.j2Nome, times: winnerTimes };
   });
+  // Se só restar um jogador único entre os vencedores, ele é campeão por walkover
+  const jogadoresRestantes = [...new Set(vencedores.map(v => v.jogadorId))];
+  if (jogadoresRestantes.length === 1) {
+    await _finalizarTorneio(cid, jogadoresRestantes[0]);
+    return;
+  }
   const currIdx = FASE_KNOCKOUT_SEQ.indexOf(faseAtual.fase);
   const proximaFaseChave = FASE_KNOCKOUT_SEQ[currIdx + 1];
   if (!proximaFaseChave) { await _finalizarTorneio(cid); return; }
@@ -6205,8 +6227,10 @@ async function _avancarFaseElim(cid, faseIdx) {
   toast(`${FASE_KNOCKOUT_NOMES[proximaFaseChave]} CRIADA!`, 'ok');
 }
 
-async function _finalizarTorneio(cid) {
-  await updateDoc(doc(db,'campeonatos',cid), { status: 'finalizado', fase: 'encerrado', finalizadoEm: serverTimestamp() });
+async function _finalizarTorneio(cid, campeaoId = null) {
+  const update = { status: 'finalizado', fase: 'encerrado', finalizadoEm: serverTimestamp() };
+  if (campeaoId) update.campeaoPorDefault = campeaoId;
+  await updateDoc(doc(db,'campeonatos',cid), update);
   await carregarCampeonatos(); calcularRankingTorneios(); atualizarDash(); abrirCampeonato(cid);
   toast('TORNEIO FINALIZADO! CAMPEAO DEFINIDO!', 'ok');
 }
@@ -6220,6 +6244,7 @@ window.salvarPartidaKnockout = async (cid, faseIdx, confrontoIdx, btnEl) => {
     if (!fase) return;
     const confronto = fase.confrontos[confrontoIdx];
     if (!confronto) return;
+    if (confronto.mesmoJogador) { toast('USE OS BOTOES DE ESCOLHA PARA JOGOS DO MESMO JOGADOR','erro'); _unlockBtn(btnEl); return; }
     if (confronto.vencedor !== null) { toast('ESSE JOGO JA FOI REGISTRADO','erro'); return; }
     const container = btnEl ? btnEl.closest('.match-card') || btnEl.parentElement : null;
     const el1 = container ? container.querySelector('[data-tpdc="1"]') : null;
@@ -6244,6 +6269,36 @@ window.salvarPartidaKnockout = async (cid, faseIdx, confrontoIdx, btnEl) => {
   } catch(e) { toast('ERRO AO SALVAR','erro'); } finally { _unlockBtn(btnEl); }
 };
 
+window.escolherTimeKnockout = async (cid, faseIdx, confrontoIdx, lado, btnEl) => {
+  if (_lockBtn(btnEl)) return;
+  try {
+    const c = campeonatos.find(x => x.id === cid);
+    if (!c) return;
+    const fase = (c.fasesEliminatorias||[])[faseIdx];
+    if (!fase) return;
+    const confronto = fase.confrontos[confrontoIdx];
+    if (!confronto || !confronto.mesmoJogador) return;
+    if (confronto.vencedor !== null) { toast('JA FOI DEFINIDO','erro'); return; }
+    // Determina o vencedor com base no lado escolhido
+    const vencedor = lado === 'j1' ? confronto.j1Id : confronto.j2Id;
+    // Usa as times do lado escolhido para preservar qual time avança
+    const vencedorTimes = lado === 'j1' ? confronto.j1Times : confronto.j2Times;
+    const fasesEliminatorias = (c.fasesEliminatorias||[]).map((f, fi) => {
+      if (fi !== faseIdx) return f;
+      return { ...f, confrontos: f.confrontos.map((cf, ci) => ci !== confrontoIdx ? cf : { ...cf, vencedor, vencedorTimes, g1: null, g2: null }) };
+    });
+    await updateDoc(doc(db,'campeonatos',cid), { fasesEliminatorias });
+    await carregarCampeonatos();
+    const cAtual = campeonatos.find(x => x.id === cid);
+    const faseAtual = (cAtual?.fasesEliminatorias||[])[faseIdx];
+    if (faseAtual && _verificarFaseElimCompleta(faseAtual)) {
+      await _avancarFaseElim(cid, faseIdx);
+    } else {
+      atualizarDash(); abrirCampeonato(cid);
+    }
+  } catch(e) { toast('ERRO AO SALVAR','erro'); } finally { _unlockBtn(btnEl); }
+};
+
 function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar, faseKey) {
   const t1 = (cf.j1Times||[])[0];
   const t2 = (cf.j2Times||[])[0];
@@ -6253,35 +6308,64 @@ function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar, fase
   const nome2 = _nomeJogPorId(cf.j2Id, cf.j2Nome);
   const temRes = cf.vencedor !== null;
   const isFinal = faseKey === 'final';
-  const g1r = temRes ? cf.g1 : null;
-  const g2r = temRes ? cf.g2 : null;
+  const isMesmoJogador = !!cf.mesmoJogador;
+  const g1r = temRes && !isMesmoJogador ? cf.g1 : null;
+  const g2r = temRes && !isMesmoJogador ? cf.g2 : null;
   const vit1 = temRes && cf.vencedor === cf.j1Id;
   const vit2 = temRes && cf.vencedor === cf.j2Id;
   const placarColor = isFinal ? '#FCD34D' : 'var(--yellow)';
   const btnStyle = isFinal
     ? 'margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,#B45309,#F59E0B);border:none;color:#fff;border-radius:8px;cursor:pointer;'
     : 'margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));border:none;color:#fff;border-radius:8px;cursor:pointer;';
-  const placarArea = temRes
-    ? `<div style="font-size:29px;font-weight:900;letter-spacing:1px;color:${placarColor};">${g1r}<span style="color:var(--text-muted);font-size:13px;"> × </span>${g2r}</div>`
-    : podeMudar
-      ? `<div style="display:flex;align-items:center;gap:4px;">
+  const escolhaStyle = 'padding:7px 10px;font-size:11px;font-weight:800;background:linear-gradient(135deg,rgba(139,92,246,0.4),rgba(6,182,212,0.4));border:1px solid rgba(139,92,246,0.5);color:#C4B5FD;border-radius:8px;cursor:pointer;width:100%;margin-top:4px;letter-spacing:0.04em;';
+  let placarArea;
+  if (temRes && isMesmoJogador) {
+    // Jogo do mesmo jogador já resolvido: mostra qual time foi escolhido
+    const timeEscolhido = cf.vencedor === cf.j1Id ? t1 : t2;
+    const nomeEscolhido = timeEscolhido?.nome || '?';
+    placarArea = `<div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div style="font-size:9px;font-weight:800;color:rgba(196,181,253,0.6);text-transform:uppercase;letter-spacing:0.06em;">ESCOLHIDO</div>
+      <div style="font-size:13px;font-weight:900;color:#C4B5FD;text-transform:uppercase;">${_nomeAbrevTime(timeEscolhido?.id, nomeEscolhido)}</div>
+    </div>`;
+  } else if (temRes) {
+    placarArea = `<div style="font-size:29px;font-weight:900;letter-spacing:1px;color:${placarColor};">${g1r}<span style="color:var(--text-muted);font-size:13px;"> × </span>${g2r}</div>`;
+  } else if (isMesmoJogador && podeMudar) {
+    placarArea = `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;min-width:70px;">
+      <div style="font-size:9px;font-weight:800;color:rgba(196,181,253,0.7);text-transform:uppercase;letter-spacing:0.06em;">MESMO JOGADOR</div>
+      <button onclick="event.stopPropagation();escolherTimeKnockout('${cid}',${faseIdx},${confrontoIdx},'j1',this)" style="${escolhaStyle}">ESCOLHER ←</button>
+      <div style="font-size:10px;color:var(--text-muted);font-weight:700;">OU</div>
+      <button onclick="event.stopPropagation();escolherTimeKnockout('${cid}',${faseIdx},${confrontoIdx},'j2',this)" style="${escolhaStyle}">→ ESCOLHER</button>
+    </div>`;
+  } else if (isMesmoJogador) {
+    placarArea = `<div style="text-align:center;opacity:0.4;font-size:10px;font-weight:800;color:#C4B5FD;text-transform:uppercase;">MESMO JOGADOR</div>`;
+  } else if (podeMudar) {
+    placarArea = `<div style="display:flex;align-items:center;gap:4px;">
            <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="1" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
            <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
            <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="2" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
          </div>
-         <button onclick="event.stopPropagation();salvarPartidaKnockout('${cid}',${faseIdx},${confrontoIdx},this)" class="btn-primary" style="${btnStyle}">FIM</button>`
-      : `<div style="display:flex;align-items:center;gap:4px;opacity:0.4;">
+         <button onclick="event.stopPropagation();salvarPartidaKnockout('${cid}',${faseIdx},${confrontoIdx},this)" class="btn-primary" style="${btnStyle}">FIM</button>`;
+  } else {
+    placarArea = `<div style="display:flex;align-items:center;gap:4px;opacity:0.4;">
            <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="1" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;cursor:not-allowed;">
            <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
            <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="2" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;cursor:not-allowed;">
          </div>
          <button disabled onclick="event.stopPropagation()" class="btn-primary" style="${btnStyle}opacity:0.4;cursor:not-allowed;">FIM</button>`;
-  const cardBorder = isFinal
-    ? (temRes ? 'border-color:rgba(252,211,77,0.6);box-shadow:0 0 18px rgba(252,211,77,0.18);' : 'border-color:rgba(252,211,77,0.4);box-shadow:0 0 14px rgba(252,211,77,0.12);')
-    : (vit1 || vit2 ? 'border-color:rgba(110,231,183,0.4);' : '');
+  }
+  const cardBorder = isMesmoJogador
+    ? (temRes ? 'border-color:rgba(139,92,246,0.4);' : 'border-color:rgba(139,92,246,0.35);box-shadow:0 0 10px rgba(139,92,246,0.12);')
+    : isFinal
+      ? (temRes ? 'border-color:rgba(252,211,77,0.6);box-shadow:0 0 18px rgba(252,211,77,0.18);' : 'border-color:rgba(252,211,77,0.4);box-shadow:0 0 14px rgba(252,211,77,0.12);')
+      : (vit1 || vit2 ? 'border-color:rgba(110,231,183,0.4);' : '');
   const finalBanner = isFinal
     ? `<div style="text-align:center;margin-bottom:10px;padding:6px 0 4px;background:linear-gradient(90deg,rgba(180,83,9,0.18),rgba(245,158,11,0.22),rgba(180,83,9,0.18));border-radius:10px;">
         <span style="font-size:13px;font-weight:900;letter-spacing:0.12em;color:#FCD34D;text-transform:uppercase;">🏆 GRANDE FINAL 🏆</span>
+       </div>`
+    : '';
+  const mesmoJogadorBanner = isMesmoJogador
+    ? `<div style="text-align:center;margin-bottom:10px;padding:5px 0 4px;background:rgba(139,92,246,0.15);border-radius:10px;">
+        <span style="font-size:11px;font-weight:900;letter-spacing:0.08em;color:#C4B5FD;text-transform:uppercase;">⚔️ TIMES DO MESMO JOGADOR</span>
        </div>`
     : '';
   const tagFase = isFinal
@@ -6291,14 +6375,23 @@ function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar, fase
   const master = temPermissao();
   const t1nom = (t1?.nome||'').replace(/'/g,"\\'");
   const t2nom = (t2?.nome||'').replace(/'/g,"\\'");
-  const lpKo1 = (!temRes && master)
+  const lpKo1 = (!temRes && master && !isMesmoJogador)
     ? `<div style="display:flex;justify-content:center;margin-bottom:4px;cursor:pointer;user-select:none;-webkit-touch-callout:none;" title="Segure para editar o time" onpointerdown="_lpTornStart('${cid}','${t1?.id||''}','${t1nom}','${tipo1}')" onpointerup="_lpTornEnd()" onpointercancel="_lpTornEnd()" oncontextmenu="return false;" onclick="if(window._lpTornTriggered){window._lpTornTriggered=false;event.stopPropagation();}">${badgeTimeIcon(t1?.id||'', t1?.nome||'', tipo1)}</div>`
     : `<div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(t1?.id||'', t1?.nome||'', tipo1)}</div>`;
-  const lpKo2 = (!temRes && master)
+  const lpKo2 = (!temRes && master && !isMesmoJogador)
     ? `<div style="display:flex;justify-content:center;margin-bottom:4px;cursor:pointer;user-select:none;-webkit-touch-callout:none;" title="Segure para editar o time" onpointerdown="_lpTornStart('${cid}','${t2?.id||''}','${t2nom}','${tipo2}')" onpointerup="_lpTornEnd()" onpointercancel="_lpTornEnd()" oncontextmenu="return false;" onclick="if(window._lpTornTriggered){window._lpTornTriggered=false;event.stopPropagation();}">${badgeTimeIcon(t2?.id||'', t2?.nome||'', tipo2)}</div>`
     : `<div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(t2?.id||'', t2?.nome||'', tipo2)}</div>`;
+  const resultRow = temRes
+    ? `<div style="display:flex;justify-content:center;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);">
+        ${isMesmoJogador
+          ? `<span class="tag" style="background:rgba(139,92,246,0.2);color:#C4B5FD;font-weight:800;">AVANCA: ${vit1 ? nome1 : nome2}</span>`
+          : (vit1 ? `<span class="tag tag-green">VITORIA: ${nome1}</span>` : `<span class="tag tag-green">VITORIA: ${nome2}</span>`)
+        }
+       </div>`
+    : '';
   return `<div class="match-card" data-match-key="${cid}-ko-${faseIdx}-${confrontoIdx}" style="margin-bottom:10px;${cardBorder}">
     ${finalBanner}
+    ${mesmoJogadorBanner}
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <div style="display:flex;align-items:center;gap:6px;">
         <span class="tag tag-purple">TORNEIO</span>
@@ -6325,7 +6418,7 @@ function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar, fase
         ${vit2 ? `<div style="margin-top:4px;font-size:18px;">${winnerEmoji}</div>` : ''}
       </div>
     </div>
-    ${temRes ? `<div style="display:flex;justify-content:center;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);">${vit1 ? `<span class="tag tag-green">VITORIA: ${nome1}</span>` : `<span class="tag tag-green">VITORIA: ${nome2}</span>`}</div>` : ''}
+    ${resultRow}
   </div>`;
 }
 window.cardJogoKnockout = cardJogoKnockout;
@@ -6416,13 +6509,19 @@ window.cardJogoTorneio = cardJogoTorneio;
 function _cardCampeao(c) {
   if (c.status !== 'finalizado') return '';
 
-  // Detecta campeao: fase final do knockout ou lider geral no round-robin
+  // Detecta campeao: fase final do knockout, campeaoPorDefault (walkover), ou lider no round-robin
   let campeaoId = null;
+  let campeaoWalkover = false;
   const finalFase = (c.fasesEliminatorias||[]).find(f => f.fase === 'final');
   if (finalFase) {
     const cf = (finalFase.confrontos||[])[0];
     if (cf && cf.vencedor !== null) campeaoId = cf.vencedor;
-  } else {
+  }
+  if (!campeaoId && c.campeaoPorDefault) {
+    campeaoId = c.campeaoPorDefault;
+    campeaoWalkover = true;
+  }
+  if (!campeaoId) {
     const todos = [];
     (c.grupos||[]).forEach(g => g.membros.forEach(m => todos.push(m)));
     if (todos.length) {
@@ -6459,6 +6558,7 @@ function _cardCampeao(c) {
   };
 
   const titulo = isDupla ? 'DUPLA CAMPEA' : 'CAMPEAO';
+  const subtituloWalkover = campeaoWalkover ? `<div style="font-size:10px;font-weight:700;color:rgba(252,211,77,0.55);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;">ADVERSARIOS ELIMINADOS</div>` : '';
   const membrosHtml = membrosCard.map(renderMembro).join(
     `<div style="font-size:22px;color:rgba(252,211,77,0.6);font-weight:900;align-self:center;">×</div>`
   );
@@ -6478,7 +6578,8 @@ function _cardCampeao(c) {
   <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at center top,rgba(252,211,77,0.12),transparent 70%);pointer-events:none;"></div>
   <div style="position:relative;z-index:1;">
     <div style="font-size:46px;margin-bottom:6px;line-height:1;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.3));">🏆</div>
-    <div style="font-size:12px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:0.18em;margin-bottom:16px;text-shadow:0 0 12px rgba(252,211,77,0.3);">${titulo}</div>
+    <div style="font-size:12px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:0.18em;margin-bottom:6px;text-shadow:0 0 12px rgba(252,211,77,0.3);">${titulo}</div>
+    ${subtituloWalkover}
     <div style="display:flex;gap:14px;justify-content:center;align-items:flex-start;margin-bottom:14px;">${membrosHtml}</div>
     ${timesDosCampeoes.length ? `
     <div style="border-top:1px solid rgba(252,211,77,0.2);padding-top:14px;margin-top:4px;">
@@ -7088,6 +7189,7 @@ function calcularRankingTorneios(jogIds, torneioNomes, dataIni, dataFim, modoJog
     (c.grupos||[]).forEach(g=>g.membros.forEach(m=>{if(!s[m.jogadorId])return;s[m.jogadorId].gp+=m.gp;s[m.jogadorId].gc+=m.gc;s[m.jogadorId].j+=m.vit+m.emp+m.der;}));
     (c.fasesEliminatorias||[]).forEach(fase=>(fase.confrontos||[]).forEach(cf=>{
       if(cf.vencedor===null||cf.g1===null||cf.g2===null)return;
+      if(cf.mesmoJogador)return; // jogo entre times do mesmo jogador nao conta no ranking
       if(s[cf.j1Id]){s[cf.j1Id].gp+=cf.g1;s[cf.j1Id].gc+=cf.g2;s[cf.j1Id].j++;}
       if(s[cf.j2Id]){s[cf.j2Id].gp+=cf.g2;s[cf.j2Id].gc+=cf.g1;s[cf.j2Id].j++;}
     }));
@@ -7099,8 +7201,10 @@ function calcularRankingTorneios(jogIds, torneioNomes, dataIni, dataFim, modoJog
           const campeaoId=cf.vencedor;
           const viceId=cf.vencedor===cf.j1Id?cf.j2Id:cf.j1Id;
           if(s[campeaoId])s[campeaoId].titulos++;
-          if(s[viceId])s[viceId].vices++;
+          if(s[viceId]&&!cf.mesmoJogador)s[viceId].vices++;
         }
+      } else if(c.campeaoPorDefault){
+        if(s[c.campeaoPorDefault])s[c.campeaoPorDefault].titulos++;
       }
     }
   });
