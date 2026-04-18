@@ -3309,6 +3309,10 @@ function _renderPlayersPanel() {
     </div>`;
   }
 
+  // Atualizar visibilidade da tag de limpar jogadores
+  const tagLimpar = document.getElementById('tag-limpar-jogadores');
+  if (tagLimpar) tagLimpar.style.display = allPlayers.length > 0 ? '' : 'none';
+
   // Desabilitar combo quando cheio
   const maxPerTime = _maxJogsPerTime();
   const maxTotal = maxPerTime * 2;
@@ -3351,8 +3355,7 @@ window.selecionarJogJC = (id, nome) => {
   // resetar sorteio ao mudar jogadores
   const box = document.getElementById('ami-sorteio');
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
-  const btnSalvar = document.getElementById('btn-ami-salvar');
-  if (btnSalvar) btnSalvar.style.display = 'none';
+  _syncBtnSalvar();
 };
 
 window.removerJogJC = (id, timeNum) => {
@@ -3372,8 +3375,7 @@ window.removerJogJC = (id, timeNum) => {
   }
   const box = document.getElementById('ami-sorteio');
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
-  const btnSalvar = document.getElementById('btn-ami-salvar');
-  if (btnSalvar) btnSalvar.style.display = 'none';
+  _syncBtnSalvar();
 };
 
 window.limparJogadoresJC = () => {
@@ -3391,10 +3393,16 @@ window.limparJogadoresJC = () => {
   }
   const box = document.getElementById('ami-sorteio');
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
-  const btnSalvar = document.getElementById('btn-ami-salvar');
-  if (btnSalvar) btnSalvar.style.display = 'none';
+  _syncBtnSalvar();
   _renderManualTimesSection();
 };
+
+function _syncBtnSalvar() {
+  const sorteioAuto = document.getElementById('ami-sorteio-auto')?.checked !== false;
+  const btnSalvar = document.getElementById('btn-ami-salvar');
+  if (!btnSalvar) return;
+  btnSalvar.style.display = !sorteioAuto ? '' : 'none';
+}
 
 function _htmlNovoAmistoso() {
   return `
@@ -3469,15 +3477,14 @@ function _htmlNovoAmistoso() {
     <div id="jc-players-panel" style="margin-bottom:8px;"></div>
     <div id="ami-manual-times-section" style="display:none;margin-bottom:16px;"></div>
     <div id="ami-dupla-result-panel" style="display:none;margin-bottom:8px;"></div>
-    <div style="display:flex;justify-content:center;margin-bottom:12px;">
-      <button onclick="limparJogadoresJC()" class="btn-ghost" style="font-size:13px;padding:10px 24px;width:100%;">LIMPAR JOGADORES</button>
+    <div id="tag-limpar-jogadores" style="display:none;margin-bottom:12px;">
+      <span onclick="limparJogadoresJC()" style="cursor:pointer;color:#EF4444;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:4px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:20px;padding:5px 12px;">× LIMPAR JOGADORES</span>
     </div>
     </div>
     <div id="ami-sorteio" style="display:none;margin-bottom:16px;"></div>
     <div style="margin-top:12px;">
-      <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <div id="ami-btn-sortear-row" style="display:flex;gap:8px;margin-bottom:8px;">
         <button id="btn-ami-proximo" class="btn-primary" style="background:linear-gradient(135deg,#0284C7,#06B6D4);flex:1;" onclick="sortearAmistoso()">SORTEAR</button>
-        <button id="btn-ami-proximo2" class="btn-primary" style="background:linear-gradient(135deg,#15803D,#22C55E);flex:1;" onclick="sortearAmistoso()">SORTEAR</button>
       </div>
       <div style="display:flex;gap:8px;">
         <button id="btn-ami-excluir" class="btn-primary" style="display:none;flex:1;background:linear-gradient(135deg,#EF4444,#DC2626);border-color:transparent;" onclick="">EXCLUIR</button>
@@ -3617,8 +3624,7 @@ window.toggleTipoAmi = tipo => {
   // resetar sorteio ao mudar tipo
   const box = document.getElementById('ami-sorteio');
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
-  const btnSalvar = document.getElementById('btn-ami-salvar');
-  if (btnSalvar) btnSalvar.style.display = 'none';
+  _syncBtnSalvar();
   _sessionRecentTeams = []; // reseta memória de sessão ao mudar tipo
   _sessionTeamFrequency = {}; // reseta frequência de times ao mudar tipo
 };
@@ -3658,8 +3664,7 @@ window.toggleModoDupla = (ativo) => {
   // Resetar sorteio ao mudar modo
   const box = document.getElementById('ami-sorteio');
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
-  const btnSalvar = document.getElementById('btn-ami-salvar');
-  if (btnSalvar) btnSalvar.style.display = 'none';
+  _syncBtnSalvar();
 };
 
 window.sortearDupla = () => {
@@ -3685,8 +3690,7 @@ window.sortearDupla = () => {
   // Resetar sorteio de times ao trocar duplas
   const sorteioBox = document.getElementById('ami-sorteio');
   if (sorteioBox) { sorteioBox.style.display = 'none'; sorteioBox.innerHTML = ''; }
-  const btnSalvar = document.getElementById('btn-ami-salvar');
-  if (btnSalvar) btnSalvar.style.display = 'none';
+  _syncBtnSalvar();
   _renderPlayersPanel();
   _renderDuplasResultPanel();
 };
@@ -3751,8 +3755,7 @@ window.toggleSortearDuplaAuto = (ativo) => {
   }
   const box = document.getElementById('ami-sorteio');
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
-  const btnSalvar = document.getElementById('btn-ami-salvar');
-  if (btnSalvar) btnSalvar.style.display = 'none';
+  _syncBtnSalvar();
 };
 
 function _renderDuplaPanel(duplaNum) {
@@ -3824,8 +3827,7 @@ window.selecionarJogDupla = (id, nome, duplaNum) => {
   _renderDuplaPanel(2);
   const box = document.getElementById('ami-sorteio');
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
-  const btnSalvar = document.getElementById('btn-ami-salvar');
-  if (btnSalvar) btnSalvar.style.display = 'none';
+  _syncBtnSalvar();
 };
 
 window.removerJogDupla = (id, duplaNum) => {
@@ -3838,8 +3840,7 @@ window.removerJogDupla = (id, duplaNum) => {
   _renderDuplaPanel(2);
   const box = document.getElementById('ami-sorteio');
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
-  const btnSalvar = document.getElementById('btn-ami-salvar');
-  if (btnSalvar) btnSalvar.style.display = 'none';
+  _syncBtnSalvar();
 };
 
 window.toggleInfoAmi = (id) => {
@@ -3854,12 +3855,9 @@ window.toggleSorteioAuto = (ativo) => {
   _renderDuplaPanel(2);
   const box = document.getElementById('ami-sorteio');
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
-  const btnSalvar = document.getElementById('btn-ami-salvar');
-  if (btnSalvar) btnSalvar.style.display = 'none';
-  const btnProximo = document.getElementById('btn-ami-proximo');
-  if (btnProximo) btnProximo.textContent = ativo ? 'SORTEAR' : 'CONFIRMAR TIMES';
-  const btnProximo2 = document.getElementById('btn-ami-proximo2');
-  if (btnProximo2) btnProximo2.textContent = ativo ? 'SORTEAR' : 'CONFIRMAR TIMES';
+  _syncBtnSalvar();
+  const btnSortearRow = document.getElementById('ami-btn-sortear-row');
+  if (btnSortearRow) btnSortearRow.style.display = ativo ? '' : 'none';
   _renderManualTimesSection();
 };
 
@@ -3961,8 +3959,7 @@ window.selecionarTimeManualInline = (jogId, timeId, timeNome, forca, tipo, efici
   _renderManualTimesSection();
   const box = document.getElementById('ami-sorteio');
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
-  const btnSalvar = document.getElementById('btn-ami-salvar');
-  if (btnSalvar) btnSalvar.style.display = 'none';
+  _syncBtnSalvar();
 };
 
 window.limparTimeManualInline = (jogId) => {
@@ -3970,8 +3967,7 @@ window.limparTimeManualInline = (jogId) => {
   _renderManualTimesSection();
   const box = document.getElementById('ami-sorteio');
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
-  const btnSalvar = document.getElementById('btn-ami-salvar');
-  if (btnSalvar) btnSalvar.style.display = 'none';
+  _syncBtnSalvar();
 };
 
 // Modal de escolha de time para DUPLA (modo manual dupla + manual times)
@@ -4074,8 +4070,7 @@ window.selecionarTimeManualDupla = (duplaNum, timeId, timeNome, forca, tipo, efi
   _renderDuplaPanel(2);
   const box = document.getElementById('ami-sorteio');
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
-  const btnSalvar = document.getElementById('btn-ami-salvar');
-  if (btnSalvar) btnSalvar.style.display = 'none';
+  _syncBtnSalvar();
 };
 
 // Modal de escolha de time para modo manual
@@ -4323,8 +4318,7 @@ window.toggleDistAuto = (ativo) => {
   }
   const sorteioBox = document.getElementById('ami-sorteio');
   if (sorteioBox) { sorteioBox.style.display = 'none'; sorteioBox.innerHTML = ''; }
-  const btnSalvar = document.getElementById('btn-ami-salvar');
-  if (btnSalvar) btnSalvar.style.display = 'none';
+  _syncBtnSalvar();
 };
 
 window._adicionarJogDist = (timeNum, jogId) => {
@@ -4333,8 +4327,7 @@ window._adicionarJogDist = (timeNum, jogId) => {
   (timeNum === 1 ? _amiDistSel.t1 : _amiDistSel.t2).set(jogId, jogNome);
   const sorteioBox = document.getElementById('ami-sorteio');
   if (sorteioBox) { sorteioBox.style.display = 'none'; sorteioBox.innerHTML = ''; }
-  const btnSalvar = document.getElementById('btn-ami-salvar');
-  if (btnSalvar) btnSalvar.style.display = 'none';
+  _syncBtnSalvar();
   _renderDistManual();
 };
 
@@ -4342,8 +4335,7 @@ window._removerJogDist = (timeNum, jogId) => {
   (timeNum === 1 ? _amiDistSel.t1 : _amiDistSel.t2).delete(jogId);
   const sorteioBox = document.getElementById('ami-sorteio');
   if (sorteioBox) { sorteioBox.style.display = 'none'; sorteioBox.innerHTML = ''; }
-  const btnSalvar = document.getElementById('btn-ami-salvar');
-  if (btnSalvar) btnSalvar.style.display = 'none';
+  _syncBtnSalvar();
   _renderDistManual();
 };
 
@@ -4766,6 +4758,17 @@ function _unlockBtn(el) {
 }
 
 window.salvarAmistoso = async () => {
+  const sorteioAuto = document.getElementById('ami-sorteio-auto')?.checked !== false;
+  // Em modo manual, construir _sorteioAmi a partir da selecao atual
+  if (!sorteioAuto) {
+    _sorteioAmi = null;
+    const box = document.getElementById('ami-sorteio');
+    const prevVis = box ? box.style.visibility : '';
+    if (box) box.style.visibility = 'hidden';
+    sortearAmistoso();
+    if (box) { box.style.visibility = prevVis; box.style.display = 'none'; box.innerHTML = ''; }
+    if (!_sorteioAmi) return;
+  }
   const btn = document.getElementById('btn-ami-salvar');
   if (_lockBtn(btn)) return;
   if (!_sorteioAmi) { _unlockBtn(btn); return; }
