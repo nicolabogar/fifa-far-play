@@ -3301,19 +3301,16 @@ function _renderPlayersPanel() {
     container.innerHTML = '';
   } else {
     const tags = allPlayers.map(([id, nome]) => {
-      return `<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.35);border-radius:20px;padding:5px 10px;font-size:12px;font-weight:700;color:#67E8F9;margin:2px;">
+      return `<div style="display:inline-flex;align-items:center;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.35);border-radius:20px;padding:5px 10px;font-size:12px;font-weight:700;color:#67E8F9;margin:2px;">
         ${_nomeTag(nome)}
-        <span onclick="removerJogJC('${id}',0)" style="cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;margin-left:4px;">×</span>
+        <span onclick="removerJogJC('${id}',0)" style="cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;margin-left:auto;padding-left:6px;">×</span>
       </div>`;
     }).join('');
+    const tagLimpar = `<span onclick="limparJogadoresJC()" style="cursor:pointer;color:#EF4444;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:4px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:20px;padding:5px 12px;margin:2px;">LIMPAR JOGADORES ×</span>`;
     container.innerHTML = `<div style="background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:10px;margin-bottom:4px;">
-      <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;min-height:28px;">${tags}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;min-height:28px;">${tags}${tagLimpar}</div>
     </div>`;
   }
-
-  // Atualizar visibilidade da tag de limpar jogadores
-  const tagLimpar = document.getElementById('tag-limpar-jogadores');
-  if (tagLimpar) tagLimpar.style.display = allPlayers.length > 0 ? '' : 'none';
 
   // Desabilitar combo quando cheio
   const maxPerTime = _maxJogsPerTime();
@@ -3479,9 +3476,6 @@ function _htmlNovoAmistoso() {
     <div id="jc-players-panel" style="margin-bottom:8px;"></div>
     <div id="ami-manual-times-section" style="display:none;margin-bottom:16px;"></div>
     <div id="ami-dupla-result-panel" style="display:none;margin-bottom:8px;"></div>
-    <div id="tag-limpar-jogadores" style="display:none;margin-bottom:12px;">
-      <span onclick="limparJogadoresJC()" style="cursor:pointer;color:#EF4444;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:4px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:20px;padding:5px 12px;">× LIMPAR JOGADORES</span>
-    </div>
     </div>
     <div id="ami-sorteio" style="display:none;margin-bottom:16px;"></div>
     <div style="margin-top:12px;">
