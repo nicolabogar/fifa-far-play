@@ -1,0 +1,11 @@
+# FIFA FAR PLAY - Prompts de Features v29
+# FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
+# O agente deve marcar o hash do commit ao concluir cada item.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v29.txt e um novo é criado.
+
+## MELHORIAS ##
+
+- [x] Filtros no ranking: filtro por tipo (TODOS/AMISTOSOS/TORNEIOS), multi-select de jogadores (chips clicaveis), filtro por torneio especifico (dropdown), filtro de resultado (VITORIA/EMPATE/DERROTA) apenas com 1 jogador selecionado; rankings e secao de jogos atualizam conforme filtros (hash: b0a133f)
+- [x] Seguranca do banco: mover config Firebase para arquivo externo firebase-config.js (gitignored), criar firebase-config.example.js como template, atualizar .gitignore (hash: 543c27f)
+- [x] Aprovacao de novos usuarios: novo usuario cadastrado fica com aprovado=false, master precisa aprovar antes do login ser liberado; tela de aguardando aprovacao com botao sair; aprovacao em tempo real via onSnapshot; botao APROVAR ACESSO visivel para master na lista de jogadores (hash: 543c27f)
+

@@ -167,15 +167,32 @@
     /* Suprime o '×' para botoes de selecao unica (radio-style) como tipo e resultado */
     .filtro-radio.ativo::after { content:'' !important; }
     /* Multi-select dropdowns do ranking */
-    .rank-mdrop-wrap { margin-bottom:8px; }
-    .rank-mdrop-header { display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;text-transform:uppercase;user-select:none;transition:border-radius 0.15s; }
+    .rank-mdrop-wrap { margin-bottom:10px; }
+    .rank-filter-label { font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;margin-top:12px;padding-left:2px; }
+    .rank-filter-label:first-child { margin-top:0; }
+    .rank-filter-panel { background:rgba(255,255,255,0.02);border:1px solid var(--card-border);border-radius:14px;padding:10px;margin-bottom:10px; }
+    .rank-mdrop-header { display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;text-transform:uppercase;user-select:none;transition:border-radius 0.15s; }
     .rank-mdrop-header.open { border-radius:10px 10px 0 0; }
     .rank-mdrop-arrow { font-size:10px;transition:transform 0.2s;flex-shrink:0;margin-left:8px;line-height:1; }
     .rank-mdrop-arrow.open { transform:rotate(180deg); }
     .rank-mdrop-list { background:var(--card);border:1px solid var(--card-border);border-top:none;border-radius:0 0 10px 10px;overflow:hidden; }
-    .rank-mdrop-item { display:flex;align-items:center;gap:8px;padding:8px 12px;font-size:12px;font-weight:700;text-transform:uppercase;cursor:pointer;color:var(--text);transition:background 0.1s; }
+    .rank-mdrop-item { display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:13px;font-weight:700;text-transform:uppercase;cursor:pointer;color:var(--text);transition:background 0.1s; }
     .rank-mdrop-item:hover { background:rgba(255,255,255,0.05); }
-    .rank-mdrop-item input[type=checkbox] { accent-color:#8B5CF6;width:15px;height:15px;flex-shrink:0;cursor:pointer;pointer-events:none; }
+    .rank-mdrop-item input[type=checkbox] { accent-color:#8B5CF6;width:16px;height:16px;flex-shrink:0;cursor:pointer;pointer-events:none; }
+    .rank-mdrop-item-foto { width:30px;height:30px;border-radius:8px;object-fit:cover;flex-shrink:0; }
+    /* Confrontation table */
+    .rank-confr-table { width:100%;border-collapse:collapse;font-size:12px; }
+    .rank-confr-table th { background:rgba(255,255,255,0.04);color:var(--text-muted);font-weight:700;text-transform:uppercase;padding:8px 10px;text-align:left;border-bottom:1px solid var(--card-border);font-size:11px; }
+    .rank-confr-table th:not(:first-child) { text-align:center; }
+    .rank-confr-table td { padding:9px 10px;border-bottom:1px solid rgba(255,255,255,0.04);font-weight:700;vertical-align:middle; }
+    .rank-confr-table td:not(:first-child) { text-align:center; }
+    .rank-confr-table tr:last-child td { border-bottom:none; }
+    .rank-confr-table tr:hover td { background:rgba(255,255,255,0.03); }
+    /* Date inputs */
+    .rank-date-row { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px; }
+    .rank-date-input { background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:10px;color:var(--text);font-size:12px;font-weight:700;padding:9px 12px;width:100%;box-sizing:border-box;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none; }
+    .rank-date-input:disabled { opacity:0.35;cursor:not-allowed; }
+    .rank-date-input::-webkit-calendar-picker-indicator { filter:invert(0.7); }
     /* ── Paginação ── */
     .pag-row { display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px; }
     .pag-btn { padding:6px 14px;border-radius:10px;border:1px solid var(--card-border);background:rgba(255,255,255,0.05);color:var(--text-muted);font-size:12px;font-weight:700;cursor:pointer; }
@@ -602,7 +619,7 @@
       </div>
 
       <!-- Ranking Amistosos -->
-      <div style="margin-bottom:24px;">
+      <div id="home-rank-ami-sec" style="margin-bottom:24px;">
         <div class="grupo-header aberto" id="home-acc-header-rank-ami" onclick="toggleHomeSection(this,'rank-ami')">
           <span class="grupo-titulo">RANKING AMISTOSOS</span>
           <span class="grupo-seta">›</span>
@@ -615,7 +632,7 @@
       </div>
 
       <!-- Ranking Torneios -->
-      <div style="margin-bottom:24px;">
+      <div id="home-rank-camp-sec" style="margin-bottom:24px;">
         <div class="grupo-header aberto" id="home-acc-header-rank-camp" onclick="toggleHomeSection(this,'rank-camp')">
           <span class="grupo-titulo">RANKING TORNEIOS</span>
           <span class="grupo-seta">›</span>
@@ -706,6 +723,12 @@
       <div id="rank-jogos-sec" style="margin-bottom:24px;">
         <p class="sec-title" style="margin-bottom:10px;">JOGOS</p>
         <div id="rank-jogos-resumo" style="margin-bottom:12px;"></div>
+        <div id="rank-confrontos-sec" style="display:none;margin-bottom:16px;">
+          <p style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">CONFRONTOS DIRETOS</p>
+          <div style="overflow-x:auto;">
+            <table class="rank-confr-table" id="rank-confrontos-table"></table>
+          </div>
+        </div>
         <div id="rank-jogos-lista"></div>
       </div>
     </div>
@@ -1771,7 +1794,7 @@ function irPara(view) {
     document.getElementById('main').style.paddingBottom = showNav ? '72px' : '';
   }
   if (view === 'times') renderTimesEdit();
-  if (view === 'ranking') { _rankState.jogadoresIds = []; _rankState.tiposAtivos = []; _rankState.torneioNomes = []; _rankState.filtrosRes = []; _renderRankFiltros(); _renderRankTudo(); }
+  if (view === 'ranking') { _rankState.jogadoresIds = []; _rankState.tiposAtivos = []; _rankState.torneioNomes = []; _rankState.filtrosRes = []; _rankState.dataIni = ''; _rankState.dataFim = ''; _renderRankFiltros(); _renderRankTudo(); }
 }
 window.irPara = irPara;
 
@@ -6822,31 +6845,58 @@ window.salvarPartida = async (cid, gi) => {
 };
 
 // ─── RANKING ─────────────────────────────────────────────────────────
-function calcularRankingAmistosos(jogIds) {
+function calcularRankingAmistosos(jogIds, dataIni, dataFim) {
   const ids = jogIds || [];
+  const dIni = dataIni ? new Date(dataIni).getTime() : null;
+  const dFim = dataFim ? new Date(dataFim + 'T23:59:59').getTime() : null;
   const s = {};
   jogadores.forEach(j => {
     if (ids.length && !ids.includes(j.id)) return;
-    s[j.id]={id:j.id,nome:_nomeExibicao(j),fotoUrl:j.fotoUrl||'',vit:0,emp:0,der:0,gp:0,gc:0,pts:0,j:0};
+    s[j.id]={id:j.id,nome:_nomeExibicao(j),fotoUrl:j.fotoUrl||'',vit:0,emp:0,der:0,gp:0,gc:0,pts:0,j:0,titulos:0};
+  });
+  // Incluir titulos de torneios
+  campeonatos.forEach(c => {
+    if (c.status==='finalizado') {
+      const finalFase=(c.fasesEliminatorias||[]).find(f=>f.fase==='final');
+      if (finalFase) {
+        const cf=(finalFase.confrontos||[])[0];
+        if (cf&&cf.vencedor!==null&&s[cf.vencedor]) s[cf.vencedor].titulos++;
+      }
+    }
   });
   amistosos.forEach(a => {
     if (!a.resultado) return;
+    if (dIni || dFim) {
+      const ts = a.criadoEm?.seconds ? a.criadoEm.seconds * 1000 : null;
+      if (dIni && (!ts || ts < dIni)) return;
+      if (dFim && (!ts || ts > dFim)) return;
+    }
     const {g1,g2}=a.resultado;
     const add=(ids,gf,gc)=>ids?.forEach(id=>{if(!s[id])return;s[id].gp+=gf;s[id].gc+=gc;s[id].j++;s[id].vit+=gf>gc?1:0;s[id].emp+=gf===gc?1:0;s[id].der+=gf<gc?1:0;s[id].pts+=gf>gc?3:gf===gc?1:0;});
     add(a.time1?.jogadoresIds,g1,g2); add(a.time2?.jogadoresIds,g2,g1);
   });
-  return Object.values(s).filter(x=>x.j>0).sort((a,b)=>b.pts!==a.pts?b.pts-a.pts:(b.gp-b.gc)!==(a.gp-a.gc)?(b.gp-b.gc)-(a.gp-a.gc):b.gp-a.gp);
+  return Object.values(s).filter(x=>x.j>0||x.titulos>0).sort((a,b)=>b.pts!==a.pts?b.pts-a.pts:(b.gp-b.gc)!==(a.gp-a.gc)?(b.gp-b.gc)-(a.gp-a.gc):b.gp-a.gp);
 }
 
-function calcularRankingTorneios(jogIds, torneioNomes) {
+function calcularRankingTorneios(jogIds, torneioNomes, dataIni, dataFim) {
   const ids = jogIds || [];
   const tnomes = Array.isArray(torneioNomes) ? torneioNomes : (torneioNomes ? [torneioNomes] : []);
+  const dIni = dataIni ? new Date(dataIni).getTime() : null;
+  const dFim = dataFim ? new Date(dataFim + 'T23:59:59').getTime() : null;
   const s = {};
   jogadores.forEach(j => {
     if (ids.length && !ids.includes(j.id)) return;
     s[j.id]={id:j.id,nome:_nomeExibicao(j),fotoUrl:j.fotoUrl||'',titulos:0,vices:0,gp:0,gc:0,j:0};
   });
-  const camps = tnomes.length ? campeonatos.filter(c=>tnomes.includes(c.nome)) : campeonatos;
+  let camps = tnomes.length ? campeonatos.filter(c=>tnomes.includes(c.nome)) : campeonatos;
+  if (dIni || dFim) {
+    camps = camps.filter(c => {
+      const ts = c.criadoEm?.seconds ? c.criadoEm.seconds * 1000 : null;
+      if (dIni && (!ts || ts < dIni)) return false;
+      if (dFim && (!ts || ts > dFim)) return false;
+      return true;
+    });
+  }
   camps.forEach(c => {
     (c.grupos||[]).forEach(g=>g.membros.forEach(m=>{if(!s[m.jogadorId])return;s[m.jogadorId].gp+=m.gp;s[m.jogadorId].gc+=m.gc;s[m.jogadorId].j+=m.vit+m.emp+m.der;}));
     (c.fasesEliminatorias||[]).forEach(fase=>(fase.confrontos||[]).forEach(cf=>{
@@ -6875,6 +6925,7 @@ function renderRankRow(p, i, fromHome) {
   const clickHandler = fromHome
     ? `irParaRankingComJogador('${p.id}')` 
     : `_setRankJogFiltro('${p.id}')`;
+  const titulosHtml = (p.titulos||0) > 0 ? `<span title="TITULOS TORNEIOS" style="color:var(--yellow);">🏆${p.titulos}</span>` : '';
   return `<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:12px;margin-bottom:8px;cursor:pointer;" onclick="${clickHandler}">
     <div class="rank-pos" style="color:${i===0?'var(--yellow)':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text-muted)'};font-weight:900;">${i+1}°</div>
     ${foto}
@@ -6882,6 +6933,7 @@ function renderRankRow(p, i, fromHome) {
       <div style="font-weight:800;font-size:14px;text-transform:uppercase;">${p.nome}</div>
     </div>
     <div style="display:flex;gap:6px;font-size:11px;font-weight:700;color:var(--text-muted);">
+      ${titulosHtml}
       <span title="VITORIAS">${p.vit}V</span>
       <span title="DERROTAS">${p.der}D</span>
       <span title="EMPATES">${p.emp}E</span>
@@ -6921,12 +6973,17 @@ function renderRankingAmistosos(rank) {
 }
 
 function renderRankingTorneios(rank) {
+  const temTorneios = (campeonatos||[]).some(c => c.status === 'finalizado');
   const html = rank.length===0?'<p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:14px;">NENHUM TORNEIO FINALIZADO</p>'
     :rank.map((p,i)=>renderRankRowTorneio(p,i,false)).join('');
   const el1 = document.getElementById('lista-rank-camp');
   if (el1) el1.innerHTML = html;
+  const campSec = document.getElementById('rank-camp-sec');
+  if (campSec) campSec.style.display = temTorneios ? '' : 'none';
   const el2 = document.getElementById('home-rank-camp');
   if (el2) el2.innerHTML = rank.slice(0,5).length===0?'<p style="color:var(--text-muted);text-align:center;padding:16px 0;font-size:14px;">NENHUM TORNEIO FINALIZADO</p>':rank.slice(0,5).map((p,i)=>renderRankRowTorneio(p,i,true)).join('');
+  const homeSec = document.getElementById('home-rank-camp-sec');
+  if (homeSec) homeSec.style.display = temTorneios ? '' : 'none';
 }
 
 async function sincronizarRanking(btn) {
@@ -6950,7 +7007,7 @@ const _histState = { jogadorId:'', nome:'', filtroTipo:'todos', filtroAdv:'', da
 const _HIST_PAG = 100;
 
 // ── Estado dos filtros do ranking ──
-const _rankState = { jogadoresIds: [], tiposAtivos: [], torneioNomes: [], filtrosRes: [] };
+const _rankState = { jogadoresIds: [], tiposAtivos: [], torneioNomes: [], filtrosRes: [], dataIni: '', dataFim: '' };
 
 // Navegar para ranking com jogador pré-selecionado (vindo da home)
 window.irParaRankingComJogador = (jogadorId) => {
@@ -7027,11 +7084,49 @@ window._rankToggleRes = (res) => {
   _renderRankJogos();
 };
 
+window._rankSelectAllJog = (allSelected) => {
+  if (allSelected) {
+    _rankState.jogadoresIds = [];
+  } else {
+    _rankState.jogadoresIds = jogadores.map(j => j.id);
+  }
+  _rankState.filtrosRes = [];
+  _renderRankFiltros();
+  _renderRankTudo();
+};
+
+window._rankLimparFiltros = () => {
+  _rankState.jogadoresIds = [];
+  _rankState.tiposAtivos = [];
+  _rankState.torneioNomes = [];
+  _rankState.filtrosRes = [];
+  _rankState.dataIni = '';
+  _rankState.dataFim = '';
+  _renderRankFiltros();
+  _renderRankTudo();
+};
+
+window._rankSetData = (tipo, val) => {
+  const hoje = new Date().toISOString().split('T')[0];
+  if (val > hoje) return;
+  if (tipo === 'ini') {
+    _rankState.dataIni = val;
+    if (_rankState.dataFim && _rankState.dataFim < val) _rankState.dataFim = '';
+    if (!val) _rankState.dataFim = '';
+  } else {
+    if (!_rankState.dataIni) return;
+    _rankState.dataFim = val;
+  }
+  _renderRankFiltros();
+  _renderRankTudo();
+};
+
 function _renderRankFiltros() {
   const el = document.getElementById('rank-filtros');
   if (!el) return;
-  const { jogadoresIds, tiposAtivos, torneioNomes, filtrosRes } = _rankState;
+  const { jogadoresIds, tiposAtivos, torneioNomes, filtrosRes, dataIni, dataFim } = _rankState;
   const exatoUm = jogadoresIds.length === 1;
+  const temFiltros = jogadoresIds.length > 0 || tiposAtivos.length > 0 || torneioNomes.length > 0 || filtrosRes.length > 0 || dataIni || dataFim;
 
   // Helper: verifica se um dropdown está aberto (preserva estado entre re-renders)
   const isOpen = (id) => {
@@ -7040,40 +7135,52 @@ function _renderRankFiltros() {
   };
 
   // Helper: constrói um dropdown multi-select colapsável
-  const buildDrop = (id, bgStyle, borderStyle, colorStyle, labelDefault, items, selectedArr, onToggleFn) => {
+  const buildDrop = (id, bgStyle, borderStyle, colorStyle, labelDefault, items, selectedArr, onToggleFn, withSelectAll) => {
     const selSet = new Set(selectedArr);
     const selLabels = items.filter(i => selSet.has(i.value)).map(i => i.label);
     const label = selLabels.length ? selLabels.join(', ') : labelDefault;
     const open = isOpen(id);
-    const itemsHtml = items.map(i => `
-      <label class="rank-mdrop-item" onclick="${onToggleFn}('${i.value.replace(/'/g,"\\'")}')">
+    const allSelected = items.length > 0 && items.every(i => selSet.has(i.value));
+    const selectAllHtml = withSelectAll ? `
+      <label class="rank-mdrop-item" style="border-bottom:1px solid rgba(255,255,255,0.06);" onclick="_rankSelectAllJog(${allSelected})">
+        <input type="checkbox" ${allSelected?'checked':''} style="accent-color:#10B981;">
+        <span style="color:#6EE7B7;">SELECIONAR TODOS</span>
+      </label>` : '';
+    const itemsHtml = items.map(i => {
+      const fotoHtml = i.fotoUrl
+        ? `<img src="${i.fotoUrl}" class="rank-mdrop-item-foto" onerror="this.outerHTML=window.avatarSvg(30)">`
+        : avatarSvg(30);
+      return `<label class="rank-mdrop-item" onclick="${onToggleFn}('${i.value.replace(/'/g,"\\'")}')">
         <input type="checkbox" ${selSet.has(i.value)?'checked':''}>
+        ${i.hasFoto !== false ? fotoHtml : ''}
         <span>${i.label}</span>
-      </label>`).join('');
+      </label>`;
+    }).join('');
     return `<div class="rank-mdrop-wrap">
       <div id="rank-mdrop-header-${id}" class="rank-mdrop-header${open?' open':''}" style="${bgStyle}${borderStyle}${colorStyle}" onclick="_rankDropToggle('${id}')">
         <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${label}</span>
         <span class="rank-mdrop-arrow${open?' open':''}">▾</span>
       </div>
       <div id="rank-mdrop-list-${id}" class="rank-mdrop-list" style="display:${open?'block':'none'};">
+        ${selectAllHtml}
         ${itemsHtml}
       </div>
     </div>`;
   };
 
-  // Dropdown: Tipo
+  // Painel 1: Tipo + Torneio
   const tipoDrop = buildDrop(
     'tipo',
     'background-color:rgba(139,92,246,0.1);',
     'border:1px solid rgba(139,92,246,0.35);',
     'color:#A78BFA;',
     'TODOS OS TIPOS',
-    [{value:'AMISTOSO',label:'AMISTOSOS'},{value:'TORNEIO',label:'TORNEIOS'}],
+    [{value:'AMISTOSO',label:'AMISTOSOS',hasFoto:false},{value:'TORNEIO',label:'TORNEIOS',hasFoto:false}],
     tiposAtivos,
-    '_rankToggleTipo'
+    '_rankToggleTipo',
+    false
   );
 
-  // Dropdown: Torneio (visível quando TORNEIO está ativo ou nenhum tipo selecionado)
   const showTorneioFilter = tiposAtivos.length === 0 || tiposAtivos.includes('TORNEIO');
   const torneios = showTorneioFilter
     ? [...new Set((campeonatos||[]).map(c=>c.nome).filter(Boolean))].sort()
@@ -7084,60 +7191,103 @@ function _renderRankFiltros() {
     'border:1px solid rgba(6,182,212,0.35);',
     'color:#67E8F9;',
     'TODOS OS TORNEIOS',
-    torneios.map(t=>({value:t,label:t.toUpperCase()})),
+    torneios.map(t=>({value:t,label:t.toUpperCase(),hasFoto:false})),
     torneioNomes,
-    '_rankToggleTorneio'
+    '_rankToggleTorneio',
+    false
   ) : '';
 
-  // Dropdown: Jogadores
+  // Painel 2: Jogadores (com fotos + select all)
   const jogDrop = jogadores.length ? buildDrop(
     'jogador',
     'background-color:rgba(16,185,129,0.1);',
     'border:1px solid rgba(16,185,129,0.35);',
     'color:#6EE7B7;',
     'TODOS OS JOGADORES',
-    jogadores.map(j=>({value:j.id,label:_nomeExibicao(j).toUpperCase()})),
+    jogadores.map(j=>({value:j.id,label:_nomeExibicao(j).toUpperCase(),fotoUrl:j.fotoUrl||''})),
     jogadoresIds,
-    '_rankToggleJog'
+    '_rankToggleJog',
+    true
   ) : '';
 
-  // Dropdown: Resultado (só com exatamente 1 jogador)
+  // Painel 3: Resultado (só com 1 jogador)
   const resDrop = exatoUm ? buildDrop(
     'resultado',
     'background-color:rgba(245,158,11,0.1);',
     'border:1px solid rgba(245,158,11,0.35);',
     'color:#FCD34D;',
     'TODOS OS RESULTADOS',
-    [{value:'V',label:'VITORIA'},{value:'E',label:'EMPATE'},{value:'D',label:'DERROTA'}],
+    [{value:'V',label:'VITORIA',hasFoto:false},{value:'E',label:'EMPATE',hasFoto:false},{value:'D',label:'DERROTA',hasFoto:false}],
     filtrosRes,
-    '_rankToggleRes'
+    '_rankToggleRes',
+    false
   ) : '';
 
-  el.innerHTML = tipoDrop + torneioDrop + jogDrop + resDrop;
+  // Painel 4: Data
+  const hoje = new Date().toISOString().split('T')[0];
+  const dataPainel = `<div class="rank-filter-label">FILTRO POR PERIODO</div>
+    <div class="rank-filter-panel">
+      <div class="rank-date-row">
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:5px;">DATA INICIO</div>
+          <input type="date" class="rank-date-input" id="rank-data-ini" value="${dataIni}" max="${hoje}"
+            oninput="_rankSetData('ini', this.value)"
+            style="border-color:rgba(139,92,246,0.35);color:${dataIni?'#A78BFA':'var(--text-muted)'};">
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:5px;">DATA FIM</div>
+          <input type="date" class="rank-date-input" id="rank-data-fim" value="${dataFim}" max="${hoje}" ${!dataIni?'disabled':''} min="${dataIni||''}"
+            oninput="_rankSetData('fim', this.value)"
+            style="border-color:rgba(6,182,212,0.35);color:${dataFim?'#67E8F9':'var(--text-muted)'};">
+        </div>
+      </div>
+    </div>`;
+
+  // Botão limpar filtros
+  const limparBtn = temFiltros
+    ? `<button onclick="_rankLimparFiltros()" style="width:100%;padding:9px 14px;border-radius:10px;border:1px solid rgba(239,68,68,0.35);background:rgba(239,68,68,0.08);color:#FCA5A5;font-size:12px;font-weight:700;cursor:pointer;text-transform:uppercase;margin-top:4px;">✕ LIMPAR FILTROS</button>`
+    : '';
+
+  el.innerHTML = `
+    <div class="rank-filter-panel">
+      <div class="rank-filter-label" style="margin-top:0;">TIPO DE JOGO</div>
+      ${tipoDrop}
+      ${torneioDrop ? `<div class="rank-filter-label">TORNEIO</div>${torneioDrop}` : ''}
+    </div>
+    <div class="rank-filter-panel">
+      <div class="rank-filter-label" style="margin-top:0;">JOGADORES</div>
+      ${jogDrop}
+      ${resDrop ? `<div class="rank-filter-label">RESULTADO</div>${resDrop}` : ''}
+    </div>
+    ${dataPainel}
+    ${limparBtn}
+  `;
 }
 
 // Atualiza visibilidade das seções e re-renderiza tudo conforme filtros
 function _renderRankTudo() {
-  const { tiposAtivos, jogadoresIds, torneioNomes } = _rankState;
+  const { tiposAtivos, jogadoresIds, torneioNomes, dataIni, dataFim } = _rankState;
   const amiSec = document.getElementById('rank-ami-sec');
   const campSec = document.getElementById('rank-camp-sec');
   const showAmi = tiposAtivos.length === 0 || tiposAtivos.includes('AMISTOSO');
   const showCamp = tiposAtivos.length === 0 || tiposAtivos.includes('TORNEIO');
   if (amiSec) amiSec.style.display = showAmi ? '' : 'none';
-  if (campSec) campSec.style.display = showCamp ? '' : 'none';
-  if (showAmi) renderRankingAmistosos(calcularRankingAmistosos(jogadoresIds));
-  if (showCamp) renderRankingTorneios(calcularRankingTorneios(jogadoresIds, torneioNomes));
+  if (!showCamp && campSec) campSec.style.display = 'none';
+  if (showAmi) renderRankingAmistosos(calcularRankingAmistosos(jogadoresIds, dataIni, dataFim));
+  if (showCamp) renderRankingTorneios(calcularRankingTorneios(jogadoresIds, torneioNomes, dataIni, dataFim));
   _renderRankJogos();
 }
 
 function _coletarJogosRanking() {
-  const { jogadoresIds, tiposAtivos, torneioNomes } = _rankState;
+  const { jogadoresIds, tiposAtivos, torneioNomes, dataIni, dataFim } = _rankState;
+  const dIni = dataIni ? new Date(dataIni).getTime() : null;
+  const dFim = dataFim ? new Date(dataFim + 'T23:59:59').getTime() : null;
   const showAmi = tiposAtivos.length === 0 || tiposAtivos.includes('AMISTOSO');
   const showCamp = tiposAtivos.length === 0 || tiposAtivos.includes('TORNEIO');
 
   // Com exatamente 1 jogador: usa vista de perspectiva individual
   if (jogadoresIds.length === 1) {
-    let jogos = _coletarJogosJogador(jogadoresIds[0]);
+    let jogos = _coletarJogosJogador(jogadoresIds[0], dataIni, dataFim);
     if (tiposAtivos.length > 0) jogos = jogos.filter(j => tiposAtivos.includes(j.tipo));
     if (torneioNomes.length > 0) jogos = jogos.filter(j => torneioNomes.includes(j.torneio));
     return jogos;
@@ -7153,6 +7303,8 @@ function _coletarJogosRanking() {
         if (!jogadoresIds.some(id => allIds.includes(id))) return;
       }
       const ts = a.criadoEm?.seconds ? a.criadoEm.seconds * 1000 : null;
+      if (dIni && (!ts || ts < dIni)) return;
+      if (dFim && (!ts || ts > dFim)) return;
       jogos.push({ tipo: 'AMISTOSO', amiId: a.id, ts });
     });
   }
@@ -7160,10 +7312,12 @@ function _coletarJogosRanking() {
   if (showCamp) {
     campeonatos.forEach(c => {
       if (torneioNomes.length > 0 && !torneioNomes.includes(c.nome)) return;
+      const ts = c.criadoEm?.seconds ? c.criadoEm.seconds * 1000 : null;
+      if (dIni && (!ts || ts < dIni)) return;
+      if (dFim && (!ts || ts > dFim)) return;
       (c.grupos||[]).forEach(g => (g.partidas||[]).forEach(p => {
         if (p.g1 === undefined || p.g1 === null || p.g2 === undefined || p.g2 === null) return;
         if (jogadoresIds.length > 0 && !jogadoresIds.some(id => id === p.j1Id || id === p.j2Id)) return;
-        const ts = c.criadoEm?.seconds ? c.criadoEm.seconds * 1000 : null;
         const isSel = CAMP_META[c.tipo]?.tipo === 'selecoes';
         const m1 = g.membros.find(mb => mb.jogadorId === p.j1Id);
         const m2 = g.membros.find(mb => mb.jogadorId === p.j2Id);
@@ -7185,6 +7339,8 @@ function _coletarJogosRanking() {
 function _renderRankJogos() {
   const lista = document.getElementById('rank-jogos-lista');
   const resumoEl = document.getElementById('rank-jogos-resumo');
+  const confrontosSec = document.getElementById('rank-confrontos-sec');
+  const confrontosTable = document.getElementById('rank-confrontos-table');
   if (!lista) return;
 
   let jogos = _coletarJogosRanking();
@@ -7194,9 +7350,75 @@ function _renderRankJogos() {
     jogos = jogos.filter(j => _rankState.filtrosRes.includes(j.res));
   }
 
+  // Tabela de confrontos (apenas com 1 jogador sem filtro de resultado)
+  const exatoUm = _rankState.jogadoresIds.length === 1;
+  if (confrontosSec && confrontosTable) {
+    if (exatoUm) {
+      const jogosParaConfrontos = _rankState.filtrosRes.length === 0
+        ? _coletarJogosJogador(_rankState.jogadoresIds[0], _rankState.dataIni, _rankState.dataFim)
+        : jogos;
+      const advStats = {};
+      jogosParaConfrontos.forEach(j => {
+        const advIds = j.advJogadoresIds || [];
+        const advNomes = j.advJogadores || [];
+        const chave = advIds.length ? advIds[0] : (advNomes[0]||'?');
+        if (!advStats[chave]) {
+          const jAdv = advIds.length ? jogadores.find(jj=>jj.id===advIds[0]) : null;
+          advStats[chave] = {
+            nome: jAdv ? _nomeExibicao(jAdv) : (advNomes[0]||'?'),
+            fotoUrl: jAdv?.fotoUrl||'',
+            id: advIds[0]||'',
+            j:0, v:0, e:0, d:0, gf:0, gs:0
+          };
+        }
+        advStats[chave].j++;
+        advStats[chave].v += j.res==='V'?1:0;
+        advStats[chave].e += j.res==='E'?1:0;
+        advStats[chave].d += j.res==='D'?1:0;
+        advStats[chave].gf += j.meuGol||0;
+        advStats[chave].gs += j.advGol||0;
+      });
+      const linhas = Object.values(advStats).sort((a,b)=>b.v-a.v||(b.gf-b.gs)-(a.gf-a.gs));
+      if (linhas.length) {
+        const tituloFiltros = _rankState.filtrosRes.length === 0 ? '' : `<p style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">(baseado nos jogos filtrados)</p>`;
+        confrontosSec.style.display = '';
+        confrontosTable.innerHTML = `<thead><tr>
+          <th>ADVERSARIO</th>
+          <th>J</th>
+          <th style="color:var(--green);">V</th>
+          <th>E</th>
+          <th style="color:var(--red);">D</th>
+          <th style="color:var(--green);">GF</th>
+          <th style="color:var(--red);">GS</th>
+          <th>SG</th>
+        </tr></thead><tbody>${linhas.map(r=>{
+          const foto = r.fotoUrl
+            ? `<img src="${r.fotoUrl}" class="rank-mdrop-item-foto" style="width:28px;height:28px;" onerror="this.outerHTML=window.avatarSvg(28)">`
+            : avatarSvg(28);
+          const sg = r.gf - r.gs;
+          const sgColor = sg > 0 ? 'color:var(--green);' : sg < 0 ? 'color:var(--red);' : '';
+          return `<tr>
+            <td><div style="display:flex;align-items:center;gap:8px;">${foto}<span style="text-transform:uppercase;">${r.nome}</span></div></td>
+            <td>${r.j}</td>
+            <td style="color:var(--green);">${r.v}</td>
+            <td>${r.e}</td>
+            <td style="color:var(--red);">${r.d}</td>
+            <td style="color:var(--green);">${r.gf}</td>
+            <td style="color:var(--red);">${r.gs}</td>
+            <td style="${sgColor}font-weight:800;">${sg>0?'+':''}${sg}</td>
+          </tr>`;
+        }).join('')}</tbody>`;
+      } else {
+        confrontosSec.style.display = 'none';
+      }
+    } else {
+      confrontosSec.style.display = 'none';
+    }
+  }
+
   // Resumo
   if (resumoEl) {
-    if (_rankState.jogadoresIds.length === 1 && jogos.length) {
+    if (exatoUm && jogos.length) {
       const v = jogos.filter(j=>j.res==='V').length;
       const d = jogos.filter(j=>j.res==='D').length;
       const e = jogos.filter(j=>j.res==='E').length;
@@ -7312,51 +7534,62 @@ function _renderRankJogos() {
   }).join('');
 }
 
-function _coletarJogosJogador(jogadorId) {
+function _coletarJogosJogador(jogadorId, dataIni, dataFim) {
+  const dIni = dataIni ? new Date(dataIni).getTime() : null;
+  const dFim = dataFim ? new Date(dataFim + 'T23:59:59').getTime() : null;
   const jogos = [];
   amistosos.forEach(a => {
     if (!a.resultado) return;
     const isT1 = (a.time1?.jogadoresIds||[]).includes(jogadorId);
     const isT2 = (a.time2?.jogadoresIds||[]).includes(jogadorId);
     if (!isT1 && !isT2) return;
+    const ts = a.criadoEm?.seconds ? a.criadoEm.seconds * 1000 : null;
+    if (dIni && (!ts || ts < dIni)) return;
+    if (dFim && (!ts || ts > dFim)) return;
     const meuGol = isT1 ? a.resultado.g1 : a.resultado.g2;
     const advGol = isT1 ? a.resultado.g2 : a.resultado.g1;
     const res = meuGol > advGol ? 'V' : meuGol < advGol ? 'D' : 'E';
-    const ts = a.criadoEm?.seconds ? a.criadoEm.seconds * 1000 : null;
     const advJogadores = isT1 ? _nomesTime(a.time2) : _nomesTime(a.time1);
+    const advJogadoresIds = isT1 ? (a.time2?.jogadoresIds||[]) : (a.time1?.jogadoresIds||[]);
     jogos.push({
       tipo:'AMISTOSO', tipoTime: a.tipo==='selecoes'?'SELECAO':'CLUBE',
       meuTime: isT1?a.time1?.nome:a.time2?.nome,
       advTime: isT1?a.time2?.nome:a.time1?.nome,
       advJogadores,
+      advJogadoresIds,
       meuGol, advGol, res, ts, torneio: null, amiId: a.id
     });
   });
-  campeonatos.forEach(c => (c.grupos||[]).forEach(g => (g.partidas||[]).forEach(p => {
-    const m = g.membros.find(mb => mb.jogadorId === jogadorId);
-    if (!m) return;
-    const isJ1 = p.j1Id === jogadorId;
-    const isJ2 = p.j2Id === jogadorId;
-    if (!isJ1 && !isJ2) return;
-    const meuGol = isJ1 ? p.g1 : p.g2;
-    const advGol = isJ1 ? p.g2 : p.g1;
-    const res = meuGol > advGol ? 'V' : meuGol < advGol ? 'D' : 'E';
+  campeonatos.forEach(c => {
     const ts = c.criadoEm?.seconds ? c.criadoEm.seconds * 1000 : null;
-    const advNome = isJ1 ? p.j2Nome : p.j1Nome;
-    const advJogadorId = isJ1 ? p.j2Id : p.j1Id;
-    const mAdv = g.membros.find(mb => mb.jogadorId === advJogadorId);
-    jogos.push({
-      tipo:'TORNEIO', tipoTime: CAMP_META[c.tipo]?.tipo==='selecoes'?'SELECAO':'CLUBE',
-      meuTime: m.time?.nome||'?',
-      meuTimeId: m.time?.id||'',
-      meuJogadorId: jogadorId,
-      advTime: advNome,
-      advTimeNome: mAdv?.time?.nome||'',
-      advTimeId: mAdv?.time?.id||'',
-      advJogadores: advNome ? [advNome] : [],
-      meuGol, advGol, res, ts, torneio: c.nome
-    });
-  })));
+    if (dIni && (!ts || ts < dIni)) return;
+    if (dFim && (!ts || ts > dFim)) return;
+    (c.grupos||[]).forEach(g => (g.partidas||[]).forEach(p => {
+      const m = g.membros.find(mb => mb.jogadorId === jogadorId);
+      if (!m) return;
+      const isJ1 = p.j1Id === jogadorId;
+      const isJ2 = p.j2Id === jogadorId;
+      if (!isJ1 && !isJ2) return;
+      const meuGol = isJ1 ? p.g1 : p.g2;
+      const advGol = isJ1 ? p.g2 : p.g1;
+      const res = meuGol > advGol ? 'V' : meuGol < advGol ? 'D' : 'E';
+      const advNome = isJ1 ? p.j2Nome : p.j1Nome;
+      const advJogadorId = isJ1 ? p.j2Id : p.j1Id;
+      const mAdv = g.membros.find(mb => mb.jogadorId === advJogadorId);
+      jogos.push({
+        tipo:'TORNEIO', tipoTime: CAMP_META[c.tipo]?.tipo==='selecoes'?'SELECAO':'CLUBE',
+        meuTime: m.time?.nome||'?',
+        meuTimeId: m.time?.id||'',
+        meuJogadorId: jogadorId,
+        advTime: advNome,
+        advTimeNome: mAdv?.time?.nome||'',
+        advTimeId: mAdv?.time?.id||'',
+        advJogadores: advNome ? [advNome] : [],
+        advJogadoresIds: advJogadorId ? [advJogadorId] : [],
+        meuGol, advGol, res, ts, torneio: c.nome
+      });
+    }));
+  });
   return jogos;
 }
 
