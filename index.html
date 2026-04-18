@@ -3070,9 +3070,11 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
   const swipeBg = (master && !noSwipe) ? `<div class="swipe-bg"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg><span class="swipe-bg-label">EXCLUIR</span></div>` : '';
   return `${swipeOuter}${swipeBg}
   <div id="${cardId}" class="match-card" style="${compact?'padding:12px;':''}" ${readonly || a.resultado || !master ? '' : `onclick="editarAmistoso('${a.id}')" style="cursor:pointer;"`}>
+    <div style="text-align:center;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);border-radius:12px;padding:6px 12px;margin-bottom:10px;">
+      <span style="font-size:15px;font-weight:800;color:#6EE7B7;letter-spacing:0.05em;text-transform:uppercase;">AMISTOSO</span>
+    </div>
     <div style="display:flex;align-items:center;${isRanking?'':'justify-content:space-between;'} margin-bottom:${compact?'8':'10'}px;">
       <div style="display:flex;align-items:center;gap:6px;">
-        <span class="tag tag-purple">AMISTOSO</span>
         <span class="tag tag-gray">${a.tipo === 'selecoes' ? 'SELECOES' : 'CLUBES'}</span>
         ${a.modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
       </div>
@@ -6298,10 +6300,13 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
     ? `<div style="display:flex;justify-content:center;margin-bottom:4px;cursor:pointer;user-select:none;-webkit-touch-callout:none;" title="Segure para editar o time" onpointerdown="_lpTornStart('${cid}','${t2?.id||''}','${t2nom}','${tipo2}')" onpointerup="_lpTornEnd()" onpointercancel="_lpTornEnd()" oncontextmenu="return false;" onclick="if(window._lpTornTriggered){window._lpTornTriggered=false;event.stopPropagation();}">${badgeTimeIcon(t2?.id||'', t2?.nome||'', tipo2)}</div>`
     : `<div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(t2?.id||'', t2?.nome||'', tipo2)}</div>`;
 
+  const nomecamp = ((campeonatos.find(c2 => c2.id === cid)?.nome) || 'TORNEIO').toUpperCase();
   return `<div class="match-card" data-match-key="${confKey}" style="margin-bottom:10px;">
+    <div style="text-align:center;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.35);border-radius:12px;padding:6px 12px;margin-bottom:10px;">
+      <span style="font-size:15px;font-weight:800;color:#FCD34D;letter-spacing:0.05em;text-transform:uppercase;">${nomecamp}</span>
+    </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <div style="display:flex;align-items:center;gap:6px;">
-        <span class="tag tag-purple">TORNEIO</span>
         <span class="tag tag-gray">${isSel ? 'SELECOES' : 'CLUBES'}</span>
         ${modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
         ${temIdaVolta && turno === 1 ? `<span class="tag tag-green">TURNO</span>` : ''}
