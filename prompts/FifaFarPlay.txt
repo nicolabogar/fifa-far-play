@@ -5,12 +5,12 @@
 
 ## MELHORIAS ##
 
-- [ ] Item 1: Melhorar estilo dos filtros do ranking: adicionar labels de secao acima de cada dropdown, deixar os paineis mais proeminentes e organizados
-- [ ] Item 2: No dropdown de jogadores do ranking, incluir foto do jogador ao lado esquerdo (igual ao ranking da home), aumentar tamanho do texto, e adicionar opcao SELECIONAR TODOS no topo
-- [ ] Item 3: Quando filtrar exatamente 1 jogador no ranking, apresentar tabela de confrontos diretos mostrando todos os adversarios com total de vitorias, derrotas, empates, gols feitos e sofridos contra cada um
-- [ ] Item 4: Filtros do ranking ja atualizam em tempo real ao clicar (confirmar e garantir comportamento consistente)
-- [ ] Item 5: Adicionar botao LIMPAR FILTROS no ranking que reseta todos os filtros e volta ao ranking geral
-- [ ] Item 6: Incluir no ranking de amistosos o total de titulos de torneios que o jogador foi campeao (icone de trofeu com contagem)
-- [ ] Item 7: Ocultar painel de ranking de torneios na home e na pagina de ranking quando nao existir nenhum torneio finalizado
-- [ ] Item 8: Adicionar filtro por data inicio e data fim no ranking; filtro fica limpo por padrao; so filtra quando usuario preencher; nao permitir data fim maior que hoje; nao permitir data inicio maior que hoje; nao permitir data fim sem data inicio preenchida
+- [x] Item 1: Melhorar estilo dos filtros do ranking: adicionar labels de secao acima de cada dropdown, deixar os paineis mais proeminentes e organizados (hash: 6c0e795)
+- [x] Item 2: No dropdown de jogadores do ranking, incluir foto do jogador ao lado esquerdo (igual ao ranking da home), aumentar tamanho do texto, e adicionar opcao SELECIONAR TODOS no topo (hash: 6c0e795)
+- [x] Item 3: Quando filtrar exatamente 1 jogador no ranking, apresentar tabela de confrontos diretos mostrando todos os adversarios com total de vitorias, derrotas, empates, gols feitos e sofridos contra cada um (hash: 6c0e795)
+- [x] Item 4: Filtros do ranking ja atualizam em tempo real ao clicar (confirmar e garantir comportamento consistente) (hash: 6c0e795)
+- [x] Item 5: Adicionar botao LIMPAR FILTROS no ranking que reseta todos os filtros e volta ao ranking geral (hash: 6c0e795)
+- [x] Item 6: Incluir no ranking de amistosos o total de titulos de torneios que o jogador foi campeao (icone de trofeu com contagem) (hash: 6c0e795)
+- [x] Item 7: Ocultar painel de ranking de torneios na home e na pagina de ranking quando nao existir nenhum torneio finalizado (hash: 6c0e795)
+- [x] Item 8: Adicionar filtro por data inicio e data fim no ranking; filtro fica limpo por padrao; so filtra quando usuario preencher; nao permitir data fim maior que hoje; nao permitir data inicio maior que hoje; nao permitir data fim sem data inicio preenchida (hash: 6c0e795)
 
