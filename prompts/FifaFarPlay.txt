@@ -6,4 +6,6 @@
 ## MELHORIAS ##
 
 - [x] Incluir o botão de enviar para o whatsapp nos cards de jogos em andamento dos torneios em andamento (hash: e9765e1)
+- [x] No torneio em andamento colocar as tags e bares de progressão dentro de um painel (hash: 51c6243)
+- [x] Tirar o comportamento de arrastar os cards em andamento de torneio e de amistoso para a esquerda e ter a opção de exclusão, deixar sempre o card estático e também tirar o estilo de pontar a borda que existe quando arrasta o card para a esquerda (hash: 51c6243)
 
