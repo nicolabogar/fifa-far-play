@@ -3212,7 +3212,7 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
     </div>`}
   ${temRes ? (() => {
     const dataAmi = a.criadoEm?.seconds ? new Date(a.criadoEm.seconds * 1000).toLocaleDateString('pt-BR') : '';
-    return `<div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);">${_tagVitoriaAmistoso(a)}${dataAmi?`<span style="font-size:10px;color:var(--text-muted);">${dataAmi}</span>`:''}</div>`;
+    return `<div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);">${_tagVitoriaAmistoso(a)}${dataAmi?`<span class="tag tag-gray">${dataAmi}</span>`:''}</div>`;
   })() : ''}
   ${!temRes && !compact ? `
   <div style="margin-top:12px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px;">
@@ -3579,16 +3579,16 @@ function _htmlNovoAmistoso() {
     <div id="ami-manual-times-section" style="display:none;margin-bottom:16px;"></div>
     <div id="ami-dupla-result-panel" style="display:none;margin-bottom:8px;"></div>
     </div>
+    <div id="ami-btn-sortear-row" style="display:flex;gap:8px;margin-bottom:8px;">
+      <button id="btn-ami-proximo" class="btn-primary" style="background:linear-gradient(135deg,#D97706,#B45309);border-color:transparent;color:#fff;flex:1;" onclick="sortearAmistoso()">SORTEAR</button>
+    </div>
     <div id="ami-sorteio" style="display:none;margin-bottom:16px;"></div>
     <div style="margin-top:12px;">
-      <div id="ami-btn-sortear-row" style="display:flex;gap:8px;margin-bottom:8px;">
-        <button id="btn-ami-proximo" class="btn-primary" style="background:linear-gradient(135deg,#D97706,#B45309);border-color:transparent;color:#fff;flex:1;" onclick="sortearAmistoso()">SORTEAR</button>
-      </div>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
         <button id="btn-ami-excluir" class="btn-primary" style="display:none;flex:1;background:linear-gradient(135deg,#EF4444,#DC2626);border-color:transparent;" onclick="">EXCLUIR</button>
-        <button class="btn-primary" onclick="fecharFullscreen()" style="flex:1;background:linear-gradient(135deg,#DC2626,#B91C1C);border-color:transparent;color:#fff;">CANCELAR</button>
         <button id="btn-ami-salvar" style="display:none;flex:1;background:linear-gradient(135deg,#059669,#047857);border-color:transparent;color:#fff;" class="btn-primary" onclick="salvarAmistoso()">SALVAR</button>
       </div>
+      <button class="btn-primary" onclick="fecharFullscreen()" style="width:100%;background:#111827;border-color:transparent;color:#fff;">CANCELAR</button>
     </div>`;
 }
 
@@ -6586,7 +6586,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
         ${nome2 ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;">${_htmlJogadorPill(m2.jogadorId, nome2, 20, pillBg2T)}</div>` : ''}
       </div>
     </div>
-    ${temRes ? `<div style="display:flex;justify-content:center;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);">${g1r > g2r ? `<span class="tag tag-green">VITÓRIA: ${nome1}</span>` : g2r > g1r ? `<span class="tag tag-green">VITÓRIA: ${nome2}</span>` : `<span class="tag tag-yellow">EMPATE</span>`}</div>` : ''}
+    ${temRes ? `<div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);">${g1r > g2r ? `<span class="tag tag-green">VITÓRIA: ${nome1}</span>` : g2r > g1r ? `<span class="tag tag-green">VITÓRIA: ${nome2}</span>` : `<span class="tag tag-yellow">EMPATE</span>`}${played?.jogoEm ? `<span class="tag tag-gray">${new Date(played.jogoEm).toLocaleDateString('pt-BR')}</span>` : ''}</div>` : ''}
     ${!temRes ? `<div style="margin-top:12px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px;"><button onclick="event.stopPropagation();compartilharWhatsAppTorneio('${t1?.id||''}','${t1nom}','${nome1Esc}','${t2?.id||''}','${t2nom}','${nome2Esc}','${tipo1}','${tipo2}')" style="width:100%;background:#25D366;border:none;color:#fff;padding:10px;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>COMPARTILHAR NO WHATSAPP</button></div>` : ''}
   </div>`;
 }
@@ -6796,7 +6796,7 @@ window.abrirCampeonato = (id) => {
   });
 
   fullscreen(c.nome.toUpperCase(), `
-    ${_dataInicioFS ? `<label style="display:block;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">INICIO</label><p style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:16px;">${_dataInicioFS}</p>` : ''}
+    ${_dataInicioFS ? `<div style="background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:12px 14px;margin-bottom:16px;"><label style="display:block;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">INICIO</label><p style="font-size:14px;font-weight:700;color:var(--text);margin:0;">${_dataInicioFS}</p></div>` : ''}
 
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
       <div style="flex:1;">
@@ -6972,7 +6972,7 @@ window.salvarPartidaDireta = async (cid, gi, j1Id, j2Id, timeIndex, btnEl, turno
       else if (m.jogadorId===m2.jogadorId) { mm.gp+=g2;mm.gc+=g1;mm.vit+=g2>g1?1:0;mm.emp+=g1===g2?1:0;mm.der+=g2<g1?1:0;mm.pts+=g2>g1?3:g1===g2?1:0; }
       return mm;
     });
-    return {...gr,membros,partidas:[...(gr.partidas||[]),{j1Id:m1.jogadorId,j1Nome:m1.nome,j2Id:m2.jogadorId,j2Nome:m2.nome,g1,g2,timeIndex,turno}]};
+    return {...gr,membros,partidas:[...(gr.partidas||[]),{j1Id:m1.jogadorId,j1Nome:m1.nome,j2Id:m2.jogadorId,j2Nome:m2.nome,g1,g2,timeIndex,turno,jogoEm:Date.now()}]};
   });
   try {
   await updateDoc(doc(db,'campeonatos',cid),{grupos});
