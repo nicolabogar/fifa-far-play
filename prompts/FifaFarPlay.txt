@@ -6,6 +6,8 @@
 ## MELHORIAS ##
 
 - [x] Incluir o botão de enviar para o whatsapp nos cards de jogos em andamento dos torneios em andamento (hash: e9765e1)
+- [x] No torneio em andamento colocar as tags e bares de progressão dentro de um painel (hash: 51c6243)
+- [x] Tirar o comportamento de arrastar os cards em andamento de torneio e de amistoso para a esquerda e ter a opção de exclusão, deixar sempre o card estático e também tirar o estilo de pontar a borda que existe quando arrasta o card para a esquerda (hash: 51c6243)
 - [x] Na tela de edição de torneio o texto início deve estar fora do painel e deve ficar fora como uma label para a data de início do torneio (hash: db9dc82)
 - [x] A label de participantes e de jogos registrados devem ser inclusos como tag, e todas as tags que tiver na tela de edição deve também ter no card de torneio em andamento da home (hash: db9dc82)
 - [x] Na página de edição do torneio também deve ser removido a label de explicativo do título oficial do torneio e deixar apenas a label (hash: db9dc82)
