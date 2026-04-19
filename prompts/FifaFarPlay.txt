@@ -5,5 +5,5 @@
 
 ## MELHORIAS ##
 
-- [ ] [Descreva aqui a próxima melhoria desejada]
+- [x] Incluir o botão de enviar para o whatsapp nos cards de jogos em andamento dos torneios em andamento (hash: e9765e1)
 
