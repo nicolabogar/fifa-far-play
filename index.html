@@ -3084,6 +3084,8 @@ function _iconExcluirCard(onclick) {
 
 function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking=false) {
   const temRes = a.resultado != null;
+  const _criadoEmMs = a.criadoEm?.toMillis?.() ?? (a.criadoEm?.seconds ? a.criadoEm.seconds * 1000 : null);
+  const criadoEmFmt = _criadoEmMs ? new Date(_criadoEmMs).toLocaleDateString('pt-BR') : '';
   const master = temPermissao(); // RG7b: controle de acesso no card
   const diff = temRes ? Math.abs(a.resultado.g1 - a.resultado.g2) : null;
   const b1 = compact ? badgeTimeCompact(a.time1?.timeId, a.time1?.nome, a.tipo) : badgeTime(a.time1?.timeId, a.time1?.nome, a.tipo);
@@ -3126,7 +3128,7 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
   const swipeBg = (master && !noSwipe) ? `<div class="swipe-bg"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg><span class="swipe-bg-label">EXCLUIR</span></div>` : '';
   return `${swipeOuter}${swipeBg}
   <div id="${cardId}" class="match-card" style="${compact?'padding:12px;':''}overflow:hidden;" ${readonly || a.resultado || !master ? '' : `onclick="editarAmistoso('${a.id}')" style="cursor:pointer;"`}>
-    ${!temRes && !compact ? `<div style="margin:-14px -14px 10px -14px;padding:10px 14px;background:rgba(16,185,129,0.2);border-bottom:2px solid rgba(16,185,129,0.5);border-radius:18px 18px 0 0;display:flex;align-items:center;justify-content:center;position:relative;"><span style="font-size:16px;font-weight:900;color:#6EE7B7;letter-spacing:0.05em;">AMISTOSO</span>${master && !noSwipe ? _iconExcluirCard(`event.stopPropagation();confirmarExcluirAmistoso('${a.id}')`) : ''}</div>` : `<div style="text-align:center;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);border-radius:12px;padding:6px 12px;margin-bottom:10px;"><span style="font-size:15px;font-weight:800;color:#6EE7B7;letter-spacing:0.05em;text-transform:uppercase;">AMISTOSO</span></div>`}
+    ${!temRes && !compact ? `<div style="margin:-14px -14px 0 -14px;padding:10px 14px 8px;background:rgba(16,185,129,0.2);border-bottom:2px solid rgba(16,185,129,0.5);border-radius:18px 18px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">${master && !noSwipe ? _iconExcluirCard(`event.stopPropagation();confirmarExcluirAmistoso('${a.id}')`) : ''}<span style="font-size:16px;font-weight:900;color:#6EE7B7;letter-spacing:0.05em;">AMISTOSO</span>${criadoEmFmt ? `<span style="font-size:11px;color:rgba(110,231,183,0.7);font-weight:600;margin-top:2px;">${criadoEmFmt}</span>` : ''}</div><div style="margin-bottom:10px;"></div>` : `<div style="text-align:center;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);border-radius:12px;padding:6px 12px;margin-bottom:10px;"><span style="font-size:15px;font-weight:800;color:#6EE7B7;letter-spacing:0.05em;text-transform:uppercase;">AMISTOSO</span></div>`}
     <div style="display:flex;align-items:center;${isRanking?'':'justify-content:space-between;'} margin-bottom:${compact?'8':'10'}px;">
       <div style="display:flex;align-items:center;gap:6px;">
         <span class="tag tag-gray">${a.tipo === 'selecoes' ? 'SELECOES' : 'CLUBES'}</span>
