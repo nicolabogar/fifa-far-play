@@ -8173,25 +8173,45 @@ function cardCampHome(c, modoLista=false) {
       const jog = jogadores.find(x => x.id === p.jogadorId);
       const jogNome = _nomeJogPorId(p.jogadorId, p.nome);
       const times = (p.times?.length ? p.times : [p.time]).filter(Boolean);
-      const timesHtml = times.map(t => {
-        const tipoTime = selecoes.some(s => s.id === t.id) ? 'selecoes' : 'clubes';
-        return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;min-width:44px;">
-          ${_htmlCountryRow(t.id||'', t.nome||'', tipoTime)}
-          <div style="font-size:9px;font-weight:800;color:var(--text);text-transform:uppercase;text-align:center;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_nomeAbrevTime(t.id, t.nome||'?')}</div>
-          ${badgeTimeIcon(t.id||'', t.nome||'', tipoTime)}
-          ${eficBadge(eficienciaAtual(t.id))}
-        </div>`;
-      }).join('');
-      return `<div style="display:flex;flex-direction:column;gap:4px;padding:6px 8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;">
-        <div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-bottom:4px;">
-          ${avatarJogador({fotoUrl: jog?.fotoUrl||''}, 22)}
-          <div style="font-size:10px;font-weight:700;color:var(--cyan);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${jogNome}</div>
+      const playerHeader = jogNome ? `<div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-bottom:6px;">
+          ${avatarJogador({fotoUrl: jog?.fotoUrl||''}, 24)}
+          <div style="font-size:12px;font-weight:700;color:var(--cyan);text-transform:uppercase;">${jogNome.toUpperCase()}</div>
         </div>
-        <div style="border-top:1px solid rgba(255,255,255,0.1);margin:0 -4px 4px -4px;"></div>
-        <div style="display:flex;gap:8px;overflow-x:auto;justify-content:center;">${timesHtml}</div>
+        <div style="border-top:1px solid rgba(255,255,255,0.1);margin:0 -4px 10px -4px;"></div>` : '';
+      const teamCard = (t) => {
+        const tt = selecoes.some(s => s.id === t?.id) ? 'selecoes' : 'clubes';
+        return `<div style="background:transparent;border:none;border-radius:10px;padding:6px;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:60px;">
+          ${_htmlCountryRow(t?.id||'', t?.nome||'', tt)}
+          <div style="font-weight:900;font-size:11px;text-transform:uppercase;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70px;">${_nomeAbrevTime(t?.id, t?.nome||'?')}</div>
+          ${badgeTimeIcon(t?.id||'', t?.nome||'', tt)}
+          ${eficBadge(eficienciaAtual(t?.id))}
+        </div>`;
+      };
+      return `<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:8px;">
+        ${playerHeader}
+        <div style="display:flex;gap:8px;overflow-x:auto;justify-content:center;">${times.map(t => teamCard(t)).join('')}</div>
       </div>`;
     };
-    return `<div style="display:flex;flex-direction:column;gap:4px;margin-top:8px;">${participantes.map(p => playerRow(p)).join('')}</div>`;
+    if (c.modoDupla) {
+      const grupos_dupla = {};
+      participantes.forEach((p, i) => {
+        const di = p.duplaIndex !== undefined ? p.duplaIndex : Math.floor(i / 2);
+        if (!grupos_dupla[di]) grupos_dupla[di] = [];
+        grupos_dupla[di].push(p);
+      });
+      return `<div style="margin-top:8px;">${Object.entries(grupos_dupla).map(([di, pares]) =>
+        `<div style="margin-bottom:10px;">
+          <div class="grupo-header aberto" onclick="toggleGrupo(this)" style="margin-bottom:6px;">
+            <span class="grupo-titulo">DUPLA ${parseInt(di)+1}</span>
+            <span class="grupo-seta">›</span>
+          </div>
+          <div class="grupo-body" style="padding:0 2px;">
+            ${pares.map(p => playerRow(p)).join('')}
+          </div>
+        </div>`
+      ).join('')}</div>`;
+    }
+    return `<div style="margin-bottom:14px;margin-top:8px;">${participantes.map(p => playerRow(p)).join('')}</div>`;
   })();
 
   // Jogos em andamento (pendentes sem placar) — mostrar até 2
