@@ -3658,6 +3658,29 @@ function compartilharWhatsApp(sorteio) {
 }
 window.compartilharWhatsApp = compartilharWhatsApp;
 
+function compartilharWhatsAppTorneio(t1id, t1nome, nome1, t2id, t2nome, nome2, tipo1, tipo2) {
+  const pool1 = tipo1 === 'selecoes' ? selecoes : clubes;
+  const pool2 = tipo2 === 'selecoes' ? selecoes : clubes;
+  const td1 = pool1.find(x => x.id === t1id) || {};
+  const td2 = pool2.find(x => x.id === t2id) || {};
+  const icone1 = tipo1 === 'selecoes' ? (td1.bandeira||'') : `${td1.logo||'⚽'} ${td1.bandeira||''}`;
+  const icone2 = tipo2 === 'selecoes' ? (td2.bandeira||'') : `${td2.logo||'⚽'} ${td2.bandeira||''}`;
+  const efic1 = eficienciaAtual(t1id);
+  const efic2 = eficienciaAtual(t2id);
+  const texto =
+    `⚽ *FIFA FAR PLAY — Jogo do Torneio!*\n\n` +
+    `${icone1} *${t1nome}*\n` +
+    `👤 ${nome1}\n` +
+    `💪 Eficiência: ${efic1}\n\n` +
+    `⚔️  *VS*  ⚔️\n\n` +
+    `${icone2} *${t2nome}*\n` +
+    `👤 ${nome2}\n` +
+    `💪 Eficiência: ${efic2}\n\n` +
+    `📱 _FIFA FAR PLAY App_`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+}
+window.compartilharWhatsAppTorneio = compartilharWhatsAppTorneio;
+
 // _amiTiposSel: set com 'clubes' e/ou 'selecoes'
 const _amiTiposSel = new Set(['clubes', 'selecoes']);
 
@@ -6470,6 +6493,8 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
 
   const t1nom = (t1?.nome||'').replace(/'/g,"\\'");
   const t2nom = (t2?.nome||'').replace(/'/g,"\\'");
+  const nome1Esc = nome1.replace(/'/g,"\\'");
+  const nome2Esc = nome2.replace(/'/g,"\\'");
   const master = temPermissao();
   const lpIcon1 = (!temRes && master)
     ? `<div style="display:flex;justify-content:center;margin-bottom:4px;cursor:pointer;user-select:none;-webkit-touch-callout:none;" title="Segure para editar o time" onpointerdown="_lpTornStart('${cid}','${t1?.id||''}','${t1nom}','${tipo1}')" onpointerup="_lpTornEnd()" onpointercancel="_lpTornEnd()" oncontextmenu="return false;" onclick="if(window._lpTornTriggered){window._lpTornTriggered=false;event.stopPropagation();}">${badgeTimeIcon(t1?.id||'', t1?.nome||'', tipo1)}</div>`
@@ -6508,6 +6533,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
       </div>
     </div>
     ${temRes ? `<div style="display:flex;justify-content:center;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);">${g1r > g2r ? `<span class="tag tag-green">VITÓRIA: ${nome1}</span>` : g2r > g1r ? `<span class="tag tag-green">VITÓRIA: ${nome2}</span>` : `<span class="tag tag-yellow">EMPATE</span>`}</div>` : ''}
+    ${!temRes ? `<div style="margin-top:12px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px;"><button onclick="event.stopPropagation();compartilharWhatsAppTorneio('${t1?.id||''}','${t1nom}','${nome1Esc}','${t2?.id||''}','${t2nom}','${nome2Esc}','${tipo1}','${tipo2}')" style="width:100%;background:#25D366;border:none;color:#fff;padding:10px;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>COMPARTILHAR NO WHATSAPP</button></div>` : ''}
   </div>`;
 }
 window.cardJogoTorneio = cardJogoTorneio;
