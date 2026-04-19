@@ -3119,11 +3119,12 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
         </div>
         <button disabled onclick="event.stopPropagation()" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:var(--green);border:none;color:#fff;border-radius:8px;cursor:not-allowed;opacity:0.4;">FIM</button>`;
   const cardId = `ami-card-${a.id}`;
-  const swipeOuter = (master && !noSwipe)
+  const useSwipe = (master && !noSwipe && temRes);
+  const swipeOuter = useSwipe
     ? `<div class="swipe-wrap" data-swipe-id="${a.id}" data-swipe-nome="Amistoso">`
     : `<div id="${cardId}" style="margin-bottom:10px;">`;
   const swipeClose = `</div>`;
-  const swipeBg = (master && !noSwipe) ? `<div class="swipe-bg"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg><span class="swipe-bg-label">EXCLUIR</span></div>` : '';
+  const swipeBg = useSwipe ? `<div class="swipe-bg"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg><span class="swipe-bg-label">EXCLUIR</span></div>` : '';
   return `${swipeOuter}${swipeBg}
   <div id="${cardId}" class="match-card" style="${compact?'padding:12px;':''}overflow:hidden;" ${readonly || a.resultado || !master ? '' : `onclick="editarAmistoso('${a.id}')" style="cursor:pointer;"`}>
     ${!temRes && !compact ? `<div style="margin:-14px -14px 10px -14px;padding:10px 14px;background:rgba(16,185,129,0.2);border-bottom:2px solid rgba(16,185,129,0.5);border-radius:18px 18px 0 0;display:flex;align-items:center;justify-content:center;position:relative;"><span style="font-size:16px;font-weight:900;color:#6EE7B7;letter-spacing:0.05em;">AMISTOSO</span>${master && !noSwipe ? _iconExcluirCard(`event.stopPropagation();confirmarExcluirAmistoso('${a.id}')`) : ''}</div>` : `<div style="text-align:center;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);border-radius:12px;padding:6px 12px;margin-bottom:10px;"><span style="font-size:15px;font-weight:800;color:#6EE7B7;letter-spacing:0.05em;text-transform:uppercase;">AMISTOSO</span></div>`}
@@ -8356,29 +8357,40 @@ function cardCampHome(c, modoLista=false) {
       </div>
       ${!finalizado && podeMudar ? _iconExcluirCard(`event.stopPropagation();excluirCampeonato('${c.id}')`) : ''}
     </div>
-    <div style="display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
-      <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;">
-        <span class="tag tag-purple">TORNEIO</span>
-        ${statusTag}
-        <span class="tag tag-gray">${isSel?'SELECOES':'CLUBES'}</span>
-        <span class="tag tag-cyan">${(meta.nome||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase()}</span>
-        ${c.modoDupla ? `<span class="tag tag-cyan">DUPLA</span><span class="tag tag-cyan">CASA</span>` : ''}
-        <span class="tag tag-gray">${c.participantes?.length||0} JOGADORES</span>
-      </div>
-    </div>
-    ${datasHtml}
-    ${!finalizado ? `<div style="margin-top:6px;display:flex;align-items:center;gap:6px;">
-      <div style="flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;">
-        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--yellow),var(--green));border-radius:2px;"></div>
-      </div>
-      <span style="font-size:10px;color:var(--text-muted);white-space:nowrap;">${totalParts}/${totalPoss} JOGOS</span>
-    </div>` : ''}
+    ${!finalizado
+      ? `<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:10px 12px;margin-bottom:8px;">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;margin-bottom:8px;">
+            <span class="tag tag-purple">TORNEIO</span>
+            ${statusTag}
+            <span class="tag tag-gray">${isSel?'SELECOES':'CLUBES'}</span>
+            <span class="tag tag-cyan">${(meta.nome||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase()}</span>
+            ${c.modoDupla ? `<span class="tag tag-cyan">DUPLA</span><span class="tag tag-cyan">CASA</span>` : ''}
+            <span class="tag tag-gray">${c.participantes?.length||0} JOGADORES</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;">
+              <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--yellow),var(--green));border-radius:2px;"></div>
+            </div>
+            <span style="font-size:10px;color:var(--text-muted);white-space:nowrap;">${totalParts}/${totalPoss} JOGOS</span>
+          </div>
+        </div>`
+      : `<div style="display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;">
+            <span class="tag tag-purple">TORNEIO</span>
+            ${statusTag}
+            <span class="tag tag-gray">${isSel?'SELECOES':'CLUBES'}</span>
+            <span class="tag tag-cyan">${(meta.nome||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase()}</span>
+            ${c.modoDupla ? `<span class="tag tag-cyan">DUPLA</span><span class="tag tag-cyan">CASA</span>` : ''}
+            <span class="tag tag-gray">${c.participantes?.length||0} JOGADORES</span>
+          </div>
+        </div>
+        ${datasHtml}`}
     ${jogadoresTimesHtml}
     ${campeaoMiniHtml}
     ${!finalizado && jogosHtml ? `<div style="margin-top:8px;" onclick="event.stopPropagation();abrirCampeonato('${c.id}')">${jogosHtml}</div>` : ''}
   </div>`;
 
-  return podeMudar ? `<div class="swipe-wrap" data-swipe-id="${c.id}" data-swipe-nome="${c.nome}">
+  return (podeMudar && finalizado) ? `<div class="swipe-wrap" data-swipe-id="${c.id}" data-swipe-nome="${c.nome}">
       <div class="swipe-bg">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
         <span class="swipe-bg-label">EXCLUIR</span>
