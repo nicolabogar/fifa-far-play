@@ -1,0 +1,11 @@
+# FIFA FAR PLAY - Prompts de Features v32
+# FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
+# O agente deve marcar o hash do commit ao concluir cada item.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v32.txt e um novo é criado.
+
+## MELHORIAS ##
+
+- [x] Tag EM ANDAMENTO dos cards de torneio e amistoso deve estar na cor verde (hash: e3b5d40)
+- [x] Botão dos cards em andamento de torneio e amistoso deve estar na cor verde (hash: e3b5d40)
+- [x] Ao digitar o placar, o card acompanha a abertura do teclado e fica posicionado logo acima do teclado (hash: e3b5d40)
+
