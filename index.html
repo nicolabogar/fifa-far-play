@@ -3808,7 +3808,7 @@ window.toggleTipoAmi = tipo => {
 
 window.toggleModoDupla = (ativo) => {
   const label = document.getElementById('label-dupla');
-  if (label) label.style.borderColor = ativo ? 'var(--cyan)' : '';
+  if (label) label.style.borderColor = '';
   const limiteBox = document.getElementById('ami-limite-box');
   if (limiteBox) limiteBox.style.display = ativo ? '' : 'none';
   const sortearDuplaBox = document.getElementById('ami-sortear-dupla-box');
@@ -5148,7 +5148,7 @@ window.editarAmistoso = (id) => {
     if (duplaCb && a.modoDupla) {
       duplaCb.checked = true;
       const label = document.getElementById('label-dupla');
-      if (label) label.style.borderColor = 'var(--cyan)';
+      if (label) label.style.borderColor = '';
       const limiteBox = document.getElementById('ami-limite-box');
       if (limiteBox) limiteBox.style.display = '';
       const sortearDuplaBox = document.getElementById('ami-sortear-dupla-box');
@@ -5301,7 +5301,7 @@ window._criarNovoJogoMesmosParams = () => {
       duplaCb.checked = true;
       // nao chamar toggleModoDupla aqui pois ja limparia os jogadores pre-carregados
       const label = document.getElementById('label-dupla');
-      if (label) label.style.borderColor = 'var(--cyan)';
+      if (label) label.style.borderColor = '';
       const limiteBox = document.getElementById('ami-limite-box');
       if (limiteBox) limiteBox.style.display = '';
       const sortearDuplaBox = document.getElementById('ami-sortear-dupla-box');
