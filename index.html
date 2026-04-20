@@ -3127,7 +3127,7 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
     : `<div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(a.time2?.timeId, a.time2?.nome, a.tipo)}</div>`;
   // RG7b: não-master vê placar desabilitado; master vê inputs de edição
   const placarDireto = temRes
-    ? `<div style="font-size:29px;font-weight:900;letter-spacing:1px;color:var(--yellow);">${a.resultado.g1}<span style="color:var(--text-muted);font-size:13px;"> × </span>${a.resultado.g2}</div>`
+    ? `<div class="grad" style="font-size:29px;font-weight:900;letter-spacing:1px;">${a.resultado.g1}<span style="font-size:13px;"> × </span>${a.resultado.g2}</div>`
     : master
       ? `<div style="display:flex;align-items:center;gap:4px;">
           <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-pdc="1" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
@@ -3163,13 +3163,13 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
     ${compact ? `
     <div style="display:flex;align-items:center;gap:8px;">
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-width:0;">
-        <div style="font-weight:800;font-size:13px;line-height:1.2;text-transform:uppercase;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_nomeAbrevTime(a.time1?.timeId, a.time1?.nome || '?')}</div>
+        <div class="grad" style="font-weight:800;font-size:13px;line-height:1.2;text-transform:uppercase;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_nomeAbrevTime(a.time1?.timeId, a.time1?.nome || '?')}</div>
         ${b1}
         ${_nomesTime(a.time1).length ? _htmlJogadoresTime(a.time1, a._playerColors || null, 'var(--cyan)', pillBg1, true) : ''}
       </div>
       <div style="flex-shrink:0;text-align:center;">
         ${temRes
-          ? `<div style="font-size:22px;font-weight:900;letter-spacing:0.5px;color:var(--yellow);">${a.resultado.g1}<span style="color:var(--text-muted);font-size:12px;"> × </span>${a.resultado.g2}</div>`
+          ? `<div class="grad" style="font-size:22px;font-weight:900;letter-spacing:0.5px;">${a.resultado.g1}<span style="font-size:12px;"> × </span>${a.resultado.g2}</div>`
           : master
             ? `<div style="display:flex;align-items:center;gap:3px;">
                 <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-pdc="1" class="placar-input" onclick="event.stopPropagation()" style="width:32px;text-align:center;font-size:16px;font-weight:900;padding:4px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:6px;color:var(--text);-moz-appearance:textfield;">
@@ -3185,7 +3185,7 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
               </div>`}
       </div>
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-width:0;">
-        <div style="font-weight:800;font-size:13px;line-height:1.2;text-transform:uppercase;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_nomeAbrevTime(a.time2?.timeId, a.time2?.nome || '?')}</div>
+        <div class="grad" style="font-weight:800;font-size:13px;line-height:1.2;text-transform:uppercase;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_nomeAbrevTime(a.time2?.timeId, a.time2?.nome || '?')}</div>
         ${b2}
         ${_nomesTime(a.time2).length ? _htmlJogadoresTime(a.time2, a._playerColors || null, a.modoDupla ? 'var(--yellow)' : 'var(--cyan)', pillBg2, true) : ''}
       </div>
@@ -3193,7 +3193,7 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
     <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
         ${_htmlCountryRow(a.time1?.timeId, a.time1?.nome, a.tipo)}
-        <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(a.time1?.timeId, a.time1?.nome || '?')}</div>
+        <div class="grad" style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(a.time1?.timeId, a.time1?.nome || '?')}</div>
         ${lpIcon1}
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(a.time1?.timeId))}</div>
         ${_nomesTime(a.time1).length
@@ -3205,7 +3205,7 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
         ${_htmlCountryRow(a.time2?.timeId, a.time2?.nome, a.tipo)}
-        <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(a.time2?.timeId, a.time2?.nome || '?')}</div>
+        <div class="grad" style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(a.time2?.timeId, a.time2?.nome || '?')}</div>
         ${lpIcon2}
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(a.time2?.timeId))}</div>
         ${_nomesTime(a.time2).length
@@ -4946,13 +4946,13 @@ window.abrirPlacar = id => {
   modal(`<p class="modal-title">REGISTRAR PLACAR</p>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
       <div style="flex:1;text-align:center;">
-        <div style="font-weight:800;font-size:15px;margin-bottom:8px;text-transform:uppercase;">${a.time1?.nome}</div>
+        <div style="font-weight:800;font-size:15px;margin-bottom:8px;text-transform:uppercase;" class="grad">${a.time1?.nome}</div>
         ${eficBadge(eficienciaAtual(a.time1?.timeId))}
         <input id="pg1" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" class="input placar-input" style="text-align:center;font-size:52px;font-weight:900;padding:14px;margin-top:10px;letter-spacing:-1px;">
       </div>
       <div style="color:var(--text-muted);font-size:36px;font-weight:900;flex-shrink:0;">×</div>
       <div style="flex:1;text-align:center;">
-        <div style="font-weight:800;font-size:15px;margin-bottom:8px;text-transform:uppercase;">${a.time2?.nome}</div>
+        <div style="font-weight:800;font-size:15px;margin-bottom:8px;text-transform:uppercase;" class="grad">${a.time2?.nome}</div>
         ${eficBadge(eficienciaAtual(a.time2?.timeId))}
         <input id="pg2" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" class="input placar-input" style="text-align:center;font-size:52px;font-weight:900;padding:14px;margin-top:10px;letter-spacing:-1px;">
       </div>
@@ -4993,7 +4993,7 @@ window.verAmistoso = (id) => {
       <div style="display:flex;align-items:flex-start;justify-content:space-around;gap:8px;background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:16px;padding:16px;">
         <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
           ${_htmlCountryRow(a.time1?.timeId, a.time1?.nome, a.tipo)}
-          <div style="font-weight:800;font-size:14px;text-transform:uppercase;">${_nomeAbrevTime(a.time1?.timeId, a.time1?.nome||'?')}</div>
+          <div class="grad" style="font-weight:800;font-size:14px;text-transform:uppercase;">${_nomeAbrevTime(a.time1?.timeId, a.time1?.nome||'?')}</div>
           <div style="display:flex;justify-content:center;margin-bottom:4px;">${icon1}</div>
           <div style="margin-top:4px;">${eficBadge(eficienciaAtual(a.time1?.timeId))}</div>
           <div style="font-size:11px;color:var(--cyan);margin-top:4px;">${_nomesTime(a.time1).join(', ')}</div>
@@ -5001,7 +5001,7 @@ window.verAmistoso = (id) => {
         <div style="font-size:18px;font-weight:900;color:var(--text-muted);flex-shrink:0;align-self:center;">VS</div>
         <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
           ${_htmlCountryRow(a.time2?.timeId, a.time2?.nome, a.tipo)}
-          <div style="font-weight:800;font-size:14px;text-transform:uppercase;">${_nomeAbrevTime(a.time2?.timeId, a.time2?.nome||'?')}</div>
+          <div class="grad" style="font-weight:800;font-size:14px;text-transform:uppercase;">${_nomeAbrevTime(a.time2?.timeId, a.time2?.nome||'?')}</div>
           <div style="display:flex;justify-content:center;margin-bottom:4px;">${icon2}</div>
           <div style="margin-top:4px;">${eficBadge(eficienciaAtual(a.time2?.timeId))}</div>
           <div style="font-size:11px;color:${a.modoDupla ? 'var(--yellow)' : 'var(--cyan)'};margin-top:4px;">${_nomesTime(a.time2).join(', ')}</div>
@@ -5043,7 +5043,7 @@ window.editarAmistoso = (id) => {
           <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
             <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
               ${_htmlCountryRow(a.time1?.timeId, a.time1?.nome, a.tipo)}
-              <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(a.time1?.timeId, a.time1?.nome||'?')}</div>
+              <div class="grad" style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(a.time1?.timeId, a.time1?.nome||'?')}</div>
               <div style="display:flex;justify-content:center;margin-bottom:4px;">${icon1}</div>
               <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(a.time1?.timeId))}</div>
               ${_nomesTime(a.time1).length ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;">${_nomesTime(a.time1).map(n=>`<div style="font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;background:rgba(6,182,212,0.08);border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>` : ''}
@@ -5059,7 +5059,7 @@ window.editarAmistoso = (id) => {
             </div>
             <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
               ${_htmlCountryRow(a.time2?.timeId, a.time2?.nome, a.tipo)}
-              <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(a.time2?.timeId, a.time2?.nome||'?')}</div>
+              <div class="grad" style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(a.time2?.timeId, a.time2?.nome||'?')}</div>
               <div style="display:flex;justify-content:center;margin-bottom:4px;">${icon2}</div>
               <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(a.time2?.timeId))}</div>
               ${_nomesTime(a.time2).length ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:2px;">${_nomesTime(a.time2).map(n=>`<div style="font-size:11px;color:${a.modoDupla ? 'var(--yellow)' : 'var(--cyan)'};font-weight:700;text-transform:uppercase;background:${a.modoDupla ? 'rgba(245,158,11,0.08)' : 'rgba(6,182,212,0.08)'};border-radius:6px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${n}</div>`).join('')}</div>` : ''}
@@ -6448,7 +6448,7 @@ function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar, fase
       <div style="font-size:13px;font-weight:900;color:#C4B5FD;text-transform:uppercase;">${_nomeAbrevTime(timeEscolhido?.id, nomeEscolhido)}</div>
     </div>`;
   } else if (temRes) {
-    placarArea = `<div style="font-size:29px;font-weight:900;letter-spacing:1px;color:${placarColor};">${g1r}<span style="color:var(--text-muted);font-size:13px;"> × </span>${g2r}</div>`;
+    placarArea = `<div class="grad" style="font-size:29px;font-weight:900;letter-spacing:1px;">${g1r}<span style="font-size:13px;"> × </span>${g2r}</div>`;
   } else if (isMesmoJogador && podeMudar) {
     placarArea = `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;min-width:70px;">
       <div style="font-size:9px;font-weight:800;color:rgba(196,181,253,0.7);text-transform:uppercase;letter-spacing:0.06em;">MESMO JOGADOR</div>
@@ -6522,7 +6522,7 @@ function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar, fase
     <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;${vit1?'opacity:1;':''}${temRes&&!vit1?'opacity:0.45;':''}">
         ${_htmlCountryRow(t1?.id||'', t1?.nome||'', tipo1)}
-        <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(t1?.id, t1?.nome||'?')}</div>
+        <div class="grad" style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(t1?.id, t1?.nome||'?')}</div>
         ${lpKo1}
         ${nome1 ? `<div style="margin-top:4px;">${_htmlJogadorPill(cf.j1Id, nome1, 20, temRes ? (vit1 ? 'rgba(16,185,129,0.35)' : 'rgba(239,68,68,0.3)') : 'rgba(245,158,11,0.3)')}</div>` : ''}
         ${vit1 ? `<div style="margin-top:4px;font-size:18px;">${winnerEmoji}</div>` : ''}
@@ -6532,7 +6532,7 @@ function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar, fase
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;${vit2?'opacity:1;':''}${temRes&&!vit2?'opacity:0.45;':''}">
         ${_htmlCountryRow(t2?.id||'', t2?.nome||'', tipo2)}
-        <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(t2?.id, t2?.nome||'?')}</div>
+        <div class="grad" style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(t2?.id, t2?.nome||'?')}</div>
         ${lpKo2}
         ${nome2 ? `<div style="margin-top:4px;">${_htmlJogadorPill(cf.j2Id, nome2, 20, temRes ? (vit2 ? 'rgba(16,185,129,0.35)' : 'rgba(239,68,68,0.3)') : 'rgba(245,158,11,0.3)')}</div>` : ''}
         ${vit2 ? `<div style="margin-top:4px;font-size:18px;">${winnerEmoji}</div>` : ''}
@@ -6574,7 +6574,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
   const nome2 = _nomeJogPorId(m2.jogadorId, m2.nome);
 
   const placarArea = temRes
-    ? `<div style="font-size:29px;font-weight:900;letter-spacing:1px;color:var(--yellow);">${g1r}<span style="color:var(--text-muted);font-size:13px;"> × </span>${g2r}</div>`
+    ? `<div class="grad" style="font-size:29px;font-weight:900;letter-spacing:1px;">${g1r}<span style="font-size:13px;"> × </span>${g2r}</div>`
     : podeMudar
       ? `<div style="display:flex;align-items:center;gap:4px;">
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="1" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
@@ -6618,7 +6618,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
     <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
         ${_htmlCountryRow(t1?.id||'', t1?.nome||'', tipo1)}
-        <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(t1?.id, t1?.nome||'?')}</div>
+        <div class="grad" style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(t1?.id, t1?.nome||'?')}</div>
         ${lpIcon1}
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(t1?.id))}</div>
         ${nome1 ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;">${_htmlJogadorPill(m1.jogadorId, nome1, 20, pillBg1T)}</div>` : ''}
@@ -6628,7 +6628,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
         ${_htmlCountryRow(t2?.id||'', t2?.nome||'', tipo2)}
-        <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(t2?.id, t2?.nome||'?')}</div>
+        <div class="grad" style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(t2?.id, t2?.nome||'?')}</div>
         ${lpIcon2}
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(t2?.id))}</div>
         ${nome2 ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;">${_htmlJogadorPill(m2.jogadorId, nome2, 20, pillBg2T)}</div>` : ''}
@@ -7202,7 +7202,7 @@ window.regPartida = (cid, gi, j1Id, j2Id) => {
     <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:24px;">
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
         ${_htmlCountryRow(m1.time?.id||'', m1.time?.nome||'', tipo1)}
-        <div style="font-weight:800;font-size:14px;text-transform:uppercase;">${_nomeAbrevTime(m1.time?.id, m1.time?.nome||'?')}</div>
+        <div class="grad" style="font-weight:800;font-size:14px;text-transform:uppercase;">${_nomeAbrevTime(m1.time?.id, m1.time?.nome||'?')}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${icon1}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(m1.time?.id))}</div>
         <div style="font-size:11px;color:var(--cyan);font-weight:700;">${_nomeJogPorId(m1.jogadorId, m1.nome)}</div>
@@ -7211,7 +7211,7 @@ window.regPartida = (cid, gi, j1Id, j2Id) => {
       <div style="color:var(--text-muted);font-size:32px;font-weight:900;padding-top:80px;flex-shrink:0;">×</div>
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
         ${_htmlCountryRow(m2.time?.id||'', m2.time?.nome||'', tipo2)}
-        <div style="font-weight:800;font-size:14px;text-transform:uppercase;">${_nomeAbrevTime(m2.time?.id, m2.time?.nome||'?')}</div>
+        <div class="grad" style="font-weight:800;font-size:14px;text-transform:uppercase;">${_nomeAbrevTime(m2.time?.id, m2.time?.nome||'?')}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${icon2}</div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(m2.time?.id))}</div>
         <div style="font-size:11px;color:var(--cyan);font-weight:700;">${_nomeJogPorId(m2.jogadorId, m2.nome)}</div>
@@ -7896,17 +7896,17 @@ function _renderRankJogos() {
         <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
           <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
             ${_htmlCountryRow(j.j1TimeId, j.j1Time, tipo)}
-            ${j.j1Time?`<div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(j.j1TimeId, j.j1Time)}</div>`:''}
+            ${j.j1Time?`<div class="grad" style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(j.j1TimeId, j.j1Time)}</div>`:''}
             <div style="display:flex;justify-content:center;margin-bottom:4px;">${icon1}</div>
             <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(j.j1TimeId))}</div>
             ${j.j1Nome?`<div style="margin-top:2px;">${_htmlJogadorPill(j.j1Id, j.j1Nome, 20)}</div>`:''}
           </div>
           <div style="text-align:center;min-width:70px;">
-            <div style="font-size:29px;font-weight:900;letter-spacing:1px;color:${empate?'var(--text-muted)':'var(--yellow)'};">${j.g1}<span style="color:var(--text-muted);font-size:13px;"> × </span>${j.g2}</div>
+            <div class="grad" style="font-size:29px;font-weight:900;letter-spacing:1px;">${j.g1}<span style="font-size:13px;"> × </span>${j.g2}</div>
           </div>
           <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
             ${_htmlCountryRow(j.j2TimeId, j.j2Time, tipo)}
-            ${j.j2Time?`<div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(j.j2TimeId, j.j2Time)}</div>`:''}
+            ${j.j2Time?`<div class="grad" style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(j.j2TimeId, j.j2Time)}</div>`:''}
             <div style="display:flex;justify-content:center;margin-bottom:4px;">${icon2}</div>
             <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(j.j2TimeId))}</div>
             ${j.j2Nome?`<div style="margin-top:2px;">${_htmlJogadorPill(j.j2Id, j.j2Nome, 20)}</div>`:''}
@@ -7939,17 +7939,17 @@ function _renderRankJogos() {
         <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
           <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
             ${_htmlCountryRow(j.meuTimeId, j.meuTime, tipo)}
-            <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(j.meuTimeId, j.meuTime)}</div>
+            <div class="grad" style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(j.meuTimeId, j.meuTime)}</div>
             <div style="display:flex;justify-content:center;margin-bottom:4px;">${icon1}</div>
             <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(j.meuTimeId))}</div>
             ${nome1?`<div style="margin-top:4px;">${_htmlJogadorPill(j.meuJogadorId, nome1, 20)}</div>`:''}
           </div>
           <div style="text-align:center;min-width:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-            <div style="font-size:29px;font-weight:900;letter-spacing:1px;color:var(--yellow);">${j.meuGol}<span style="color:var(--text-muted);font-size:13px;"> × </span>${j.advGol}</div>
+            <div class="grad" style="font-size:29px;font-weight:900;letter-spacing:1px;">${j.meuGol}<span style="font-size:13px;"> × </span>${j.advGol}</div>
           </div>
           <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
             ${_htmlCountryRow(j.advTimeId, j.advTimeNome, tipo)}
-            <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(j.advTimeId, nomeAdvTime)}</div>
+            <div class="grad" style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(j.advTimeId, nomeAdvTime)}</div>
             <div style="display:flex;justify-content:center;margin-bottom:4px;">${icon2}</div>
             <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(j.advTimeId))}</div>
             ${nome2?`<div style="margin-top:4px;">${_htmlJogadorPill((j.advJogadoresIds||[])[0]||null, nome2, 20)}</div>`:''}
@@ -8188,17 +8188,17 @@ function _renderHistorico() {
       <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
         <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
           ${_htmlCountryRow(j.meuTimeId, j.meuTime, tipo)}
-          <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(j.meuTimeId, j.meuTime)}</div>
+          <div class="grad" style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(j.meuTimeId, j.meuTime)}</div>
           <div style="display:flex;justify-content:center;margin-bottom:4px;">${icon1}</div>
           <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(j.meuTimeId))}</div>
           ${nome1?`<div style="margin-top:4px;">${_htmlJogadorPill(j.meuJogadorId, nome1, 20)}</div>`:''}
         </div>
         <div style="text-align:center;min-width:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-          <div style="font-size:29px;font-weight:900;letter-spacing:1px;color:var(--yellow);">${j.meuGol}<span style="color:var(--text-muted);font-size:13px;"> × </span>${j.advGol}</div>
+          <div class="grad" style="font-size:29px;font-weight:900;letter-spacing:1px;">${j.meuGol}<span style="font-size:13px;"> × </span>${j.advGol}</div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
           ${_htmlCountryRow(j.advTimeId, j.advTimeNome, tipo)}
-          <div style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(j.advTimeId, nomeAdvTime)}</div>
+          <div class="grad" style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(j.advTimeId, nomeAdvTime)}</div>
           <div style="display:flex;justify-content:center;margin-bottom:4px;">${icon2}</div>
           <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(j.advTimeId))}</div>
           ${nome2?`<div style="margin-top:4px;">${_htmlJogadorPill((j.advJogadoresIds||[])[0]||null, nome2, 20)}</div>`:''}
