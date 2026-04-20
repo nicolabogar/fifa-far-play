@@ -139,7 +139,7 @@
     .placar-input:focus { outline: none; border-color: var(--purple); box-shadow: 0 0 0 2px rgba(139,92,246,0.3); }
 
     /* Tags / badges */
-    .tag { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px !important; font-weight: 700; letter-spacing: 0.02em; }
+    .tag { display: inline-flex; align-items: center; justify-content: center; padding: 3px 10px; border-radius: 20px; font-size: 11px !important; font-weight: 700; letter-spacing: 0.02em; }
     .tag-purple { background: rgba(139,92,246,0.2); color: #A78BFA; }
     .tag-cyan { background: rgba(6,182,212,0.2); color: #67E8F9; }
     .tag-green { background: rgba(16,185,129,0.2); color: #6EE7B7; }
@@ -3536,15 +3536,15 @@ function _syncBtnSalvar() {
 
 function _htmlNovoAmistoso() {
   return `
-    <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">PARAMETROS</label>
+    <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">TIMES:</label>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
-      <div class="tipo-btn sel" id="tp-clubes" onclick="toggleTipoAmi('clubes')"><span style="font-size:12px;font-weight:700;">CLUBES</span></div>
-      <div class="tipo-btn sel" id="tp-selecoes" onclick="toggleTipoAmi('selecoes')"><span style="font-size:12px;font-weight:700;">SELECOES</span></div>
+      <div class="tipo-btn sel" id="tp-clubes" onclick="toggleTipoAmi('clubes')"><span class="grad" style="font-size:12px;font-weight:700;">CLUBES</span></div>
+      <div class="tipo-btn sel" id="tp-selecoes" onclick="toggleTipoAmi('selecoes')"><span class="grad" style="font-size:12px;font-weight:700;">SELECOES</span></div>
     </div>
     <label class="check-row" style="margin-bottom:4px;" id="label-dupla">
       <input type="checkbox" id="ami-dupla" onchange="toggleModoDupla(this.checked)">
       <div style="display:flex;align-items:center;justify-content:space-between;flex:1;">
-        <div style="font-size:13px;font-weight:700;">DUPLA</div>
+        <div style="font-size:13px;font-weight:700;"><span class="grad">DUPLA</span></div>
         <span onclick="event.preventDefault();event.stopPropagation();toggleInfoAmi('info-ami-dupla')" title="Mostrar informacao" style="cursor:pointer;color:var(--text-muted);font-size:11px;font-weight:800;background:rgba(255,255,255,0.1);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.2);">?</span>
       </div>
     </label>
@@ -3553,7 +3553,7 @@ function _htmlNovoAmistoso() {
       <label class="check-row" style="margin-bottom:4px;" id="label-sortear-dup-auto">
         <input type="checkbox" id="ami-sortear-dup-auto" onchange="toggleSortearDuplaAuto(this.checked)">
         <div style="display:flex;align-items:center;justify-content:space-between;flex:1;">
-          <div style="font-size:13px;font-weight:700;">SORTEAR DUPLA</div>
+          <div style="font-size:13px;font-weight:700;"><span class="grad">SORTEAR DUPLA</span></div>
           <span onclick="event.preventDefault();event.stopPropagation();toggleInfoAmi('info-ami-sortear-dup')" title="Mostrar informacao" style="cursor:pointer;color:var(--text-muted);font-size:11px;font-weight:800;background:rgba(255,255,255,0.1);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.2);">?</span>
         </div>
       </label>
@@ -3582,7 +3582,7 @@ function _htmlNovoAmistoso() {
     <label class="check-row" style="margin-bottom:4px;" id="label-sorteio-auto">
       <input type="checkbox" id="ami-sorteio-auto" checked onchange="toggleSorteioAuto(this.checked)">
       <div style="display:flex;align-items:center;justify-content:space-between;flex:1;">
-        <div style="font-size:13px;font-weight:700;">SORTEAR TIMES</div>
+        <div style="font-size:13px;font-weight:700;"><span class="grad">SORTEAR TIMES</span></div>
         <span onclick="event.preventDefault();event.stopPropagation();toggleInfoAmi('info-ami-sorteio-auto')" title="Mostrar informacao" style="cursor:pointer;color:var(--text-muted);font-size:11px;font-weight:800;background:rgba(255,255,255,0.1);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.2);">?</span>
       </div>
     </label>
@@ -3933,8 +3933,8 @@ function _renderDuplaPanel(duplaNum) {
   if (modoManualTimes && map.size === 2) {
     const sel = _amiDuplaTimeSel.get(duplaNum);
     timeSelHtml = `<div style="margin-top:8px;">
-      <button onclick="_abrirModalEscolherTimeDupla(${duplaNum})" style="width:100%;background:${sel ? 'rgba(6,182,212,0.15)' : 'rgba(255,255,255,0.05)'};border:1px solid ${sel ? 'rgba(6,182,212,0.5)' : 'var(--card-border)'};border-radius:8px;padding:8px 12px;color:${sel ? '#67E8F9' : 'var(--text-muted)'};font-size:12px;font-weight:700;cursor:pointer;text-transform:uppercase;text-align:left;">
-        ${sel ? sel.nome.toUpperCase() : '+ ESCOLHER TIME'}
+      <button onclick="_abrirModalEscolherTimeDupla(${duplaNum})" style="width:100%;background:${sel ? 'rgba(6,182,212,0.15)' : 'rgba(255,255,255,0.05)'};border:1px solid ${sel ? 'rgba(6,182,212,0.5)' : 'var(--card-border)'};border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;text-transform:uppercase;text-align:left;">
+        <span class="grad">${sel ? sel.nome.toUpperCase() : '+ ESCOLHER TIME'}</span>
       </button>
     </div>`;
   }
@@ -4902,7 +4902,7 @@ function _lockBtn(el) {
   if (el.dataset._locked) return true;
   el.dataset._locked = '1';
   el.disabled = true;
-  el.dataset._origText = el.textContent;
+  el.dataset._origHtml = el.innerHTML;
   el.innerHTML = '<span class="btn-spinner"></span>';
   return false;
 }
@@ -4910,7 +4910,7 @@ function _unlockBtn(el) {
   if (!el) return;
   delete el.dataset._locked;
   el.disabled = false;
-  el.textContent = el.dataset._origText || 'SALVAR';
+  el.innerHTML = el.dataset._origHtml || '<span class="grad">SALVAR</span>';
 }
 
 window.salvarAmistoso = async () => {
