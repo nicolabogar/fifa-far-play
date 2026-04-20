@@ -3159,15 +3159,13 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
   return `${swipeOuter}${swipeBg}
   <div id="${cardId}" class="match-card" style="${compact?'padding:12px;':''}overflow:hidden;" ${readonly || a.resultado || !master ? '' : `onclick="editarAmistoso('${a.id}')" style="cursor:pointer;"`}>
     ${!temRes && !compact ? `<div style="margin:-14px -14px 0 -14px;padding:10px 14px 8px;background:transparent;border-bottom:1px solid var(--card-border);border-radius:18px 18px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">${master && !noSwipe ? _iconExcluirCard(`event.stopPropagation();confirmarExcluirAmistoso('${a.id}')`) : ''}<span style="font-size:16px;font-weight:900;color:#6EE7B7;letter-spacing:0.05em;">AMISTOSO</span>${criadoEmFmt ? `<span style="font-size:11px;color:rgba(110,231,183,0.7);font-weight:600;margin-top:2px;">${criadoEmFmt}</span>` : ''}</div><div style="margin-bottom:10px;"></div>` : `<div style="text-align:center;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);border-radius:12px;padding:6px 12px;margin-bottom:10px;"><span style="font-size:15px;font-weight:800;color:#6EE7B7;letter-spacing:0.05em;text-transform:uppercase;">AMISTOSO</span></div>`}
-    ${!temRes && !compact ? `<div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+    ${!temRes && !compact ? `<div style="display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:6px;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:10px;">
       <span class="tag tag-gray">${a.tipo === 'selecoes' ? 'SELECOES' : 'CLUBES'}</span>
       ${a.modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
       <span class="tag tag-green">EM ANDAMENTO</span>
-    </div>` : `<div style="display:flex;align-items:center;${isRanking?'':'justify-content:space-between;'} margin-bottom:${compact?'8':'10'}px;">
-      <div style="display:flex;align-items:center;gap:6px;">
-        <span class="tag tag-gray">${a.tipo === 'selecoes' ? 'SELECOES' : 'CLUBES'}</span>
-        ${a.modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
-      </div>
+    </div>` : `<div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:${compact?'8':'10'}px;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:${compact?'8':'10'}px;">
+      <span class="tag tag-gray">${a.tipo === 'selecoes' ? 'SELECOES' : 'CLUBES'}</span>
+      ${a.modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
       ${!isRanking && !temRes ? `<span class="tag tag-green">EM ANDAMENTO</span>` : ''}
     </div>`}
     ${compact ? `
@@ -6613,19 +6611,17 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
 
   return `<div class="match-card" data-match-key="${confKey}" style="margin-bottom:10px;">
     ${!temRes ? `<div style="margin:-14px -14px 0 -14px;padding:10px 14px 8px;background:transparent;border-bottom:1px solid var(--card-border);border-radius:18px 18px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;"><span style="font-size:16px;font-weight:900;color:#FCD34D;letter-spacing:0.05em;">TORNEIO</span></div><div style="margin-bottom:10px;"></div>` : `<div style="text-align:center;background:rgba(100,116,139,0.15);border:1px solid rgba(100,116,139,0.35);border-radius:12px;padding:6px 12px;margin-bottom:10px;"><span style="font-size:15px;font-weight:800;color:#94A3B8;letter-spacing:0.05em;text-transform:uppercase;">TORNEIO</span></div>`}
-    ${!temRes ? `<div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+    ${!temRes ? `<div style="display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:6px;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:10px;">
       <span class="tag tag-gray">${isSel ? 'SELECOES' : 'CLUBES'}</span>
       ${modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
       ${temIdaVolta && turno === 1 ? `<span class="tag tag-green">TURNO</span>` : ''}
       ${temIdaVolta && turno === 2 ? `<span class="tag tag-yellow">RETURNO</span>` : ''}
       <span class="tag tag-green">EM ANDAMENTO</span>
-    </div>` : `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-      <div style="display:flex;align-items:center;gap:6px;">
-        <span class="tag tag-gray">${isSel ? 'SELECOES' : 'CLUBES'}</span>
-        ${modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
-        ${temIdaVolta && turno === 1 ? `<span class="tag tag-green">TURNO</span>` : ''}
-        ${temIdaVolta && turno === 2 ? `<span class="tag tag-yellow">RETURNO</span>` : ''}
-      </div>
+    </div>` : `<div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:10px;">
+      <span class="tag tag-gray">${isSel ? 'SELECOES' : 'CLUBES'}</span>
+      ${modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
+      ${temIdaVolta && turno === 1 ? `<span class="tag tag-green">TURNO</span>` : ''}
+      ${temIdaVolta && turno === 2 ? `<span class="tag tag-yellow">RETURNO</span>` : ''}
     </div>`}
     <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
@@ -8192,12 +8188,10 @@ function _renderHistorico() {
     const nome2 = j.advTime || '';
     const nomeAdvTime = j.advTimeNome || j.advTime || '?';
     return `<div class="match-card" style="margin-bottom:10px;">
-      <div style="display:flex;align-items:center;margin-bottom:10px;">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span class="tag tag-purple">TORNEIO</span>
-          <span class="tag tag-gray">${isSel ? 'SELECOES' : 'CLUBES'}</span>
-          ${j.torneio?`<span class="tag tag-yellow" style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${j.torneio.toUpperCase()}</span>`:''}
-        </div>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:10px;">
+        <span class="tag tag-purple">TORNEIO</span>
+        <span class="tag tag-gray">${isSel ? 'SELECOES' : 'CLUBES'}</span>
+        ${j.torneio?`<span class="tag tag-yellow" style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${j.torneio.toUpperCase()}</span>`:''}
       </div>
       <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
         <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
