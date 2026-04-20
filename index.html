@@ -3570,7 +3570,7 @@ function _htmlNovoAmistoso() {
     </div>
     <div id="ami-dupla-manual-box" style="display:none;margin-bottom:8px;">
       <label style="display:block;font-size:12px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">DUPLA 1</label>
-      <div style="position:relative;margin-bottom:6px;">
+      <div style="position:relative;margin-bottom:12px;">
         <input id="jc-search-d1" type="text" class="input" placeholder="BUSCAR JOGADOR..." autocomplete="off"
           oninput="filtrarJogsDupla(1)" onfocus="this.value='';filtrarJogsDupla(1)"
           onblur="setTimeout(()=>{const d=document.getElementById('jc-dropdown-d1');if(d)d.style.display='none';},200)"
@@ -3579,7 +3579,7 @@ function _htmlNovoAmistoso() {
       </div>
       <div id="jc-panel-d1" style="margin-bottom:12px;"></div>
       <label style="display:block;font-size:12px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">DUPLA 2</label>
-      <div style="position:relative;margin-bottom:6px;">
+      <div style="position:relative;margin-bottom:12px;">
         <input id="jc-search-d2" type="text" class="input" placeholder="BUSCAR JOGADOR..." autocomplete="off"
           oninput="filtrarJogsDupla(2)" onfocus="this.value='';filtrarJogsDupla(2)"
           onblur="setTimeout(()=>{const d=document.getElementById('jc-dropdown-d2');if(d)d.style.display='none';},200)"
@@ -3607,7 +3607,7 @@ function _htmlNovoAmistoso() {
     <div id="ami-efic-filtro-box" class="efic-panel" style="margin-bottom:16px;">${htmlEficFiltro('ami-efic-filtro', false)}</div>
     <div id="ami-jogadores-auto-section">
     <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">JOGADORES</label>
-    <div style="position:relative;margin-bottom:8px;">
+    <div style="position:relative;margin-bottom:12px;">
       <input id="jc-search" type="text" class="input" placeholder="BUSCAR JOGADOR..." autocomplete="off"
         oninput="filtrarJogsJC()" onfocus="this.value='';filtrarJogsJC()"
         onblur="setTimeout(()=>{const d=document.getElementById('jc-dropdown');if(d)d.style.display='none';},200)"
