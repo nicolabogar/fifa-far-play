@@ -579,8 +579,8 @@
     <!-- ── HOME ── -->
     <div id="view-home" class="view active">
       <!-- Botao + CRIAR com dropdown -->
-      <div id="wrap-btn-criar-home" style="padding:16px 0 0;margin-bottom:16px;">
-        <button id="btn-criar-home" onclick="toggleCriarMenu()" class="btn-primary" style="width:100%;font-size:16px;padding:14px 18px;text-transform:uppercase;font-weight:800;background:var(--card);border:none;"><span class="grad">+ CRIAR</span></button>
+      <div id="wrap-btn-criar-home" style="margin-bottom:16px;">
+        <button id="btn-criar-home" onclick="toggleCriarMenu()" class="btn-primary" style="width:100%;font-size:16px;padding:14px 18px;text-transform:uppercase;font-weight:800;background:linear-gradient(var(--card),var(--card)) padding-box,linear-gradient(135deg,var(--purple),var(--cyan)) border-box;border:2px solid transparent;"><span class="grad">+ CRIAR</span></button>
       </div>
       <div id="criar-menu-dropdown" style="display:none;margin:0 -16px 24px;background:var(--bg2);border-top:1px solid var(--card-border);border-bottom:1px solid var(--card-border);box-shadow:0 8px 32px rgba(0,0,0,0.5);">
         <button class="criar-opt" onclick="abrirCriarJogador();fecharCriarMenu()">
@@ -8453,19 +8453,18 @@ function cardCampHome(c, modoLista=false) {
       </div>
       ${!finalizado && podeMudar ? _iconExcluirCard(`event.stopPropagation();excluirCampeonato('${c.id}')`) : ''}
     </div>
-    <div style="display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
+    ${finalizado ? `<div style="display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
       <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;">
         <span class="tag tag-purple">TORNEIO</span>
         ${statusTag}
         <span class="tag tag-cyan">${(meta.nome||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase()}</span>
-        ${temIdaVoltaHome && !finalizado ? `<span class="tag ${currentTurnoHome === 2 ? 'tag-yellow' : 'tag-green'}">${currentTurnoHome === 2 ? 'RETURNO' : 'TURNO'}</span>` : ''}
         ${c.modoDupla ? `<span class="tag tag-cyan">DUPLA</span><span class="tag tag-cyan">CASA</span>` : ''}
         ${qtdTimes > 1 ? `<span class="tag tag-yellow">${qtdTimes}X TIMES</span>` : ''}
         <span class="tag tag-gray">${isSel?'SELECOES':'CLUBES'}</span>
         <span class="tag tag-gray">${c.participantes?.length||0} PARTICIPANTES</span>
         <span class="tag tag-gray">${totalParts} JOGOS REGISTRADOS</span>
       </div>
-    </div>
+    </div>` : ''}
     ${datasHtml}
     ${!finalizado ? `<div style="margin-top:6px;display:flex;align-items:center;gap:6px;">
       <div style="flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;">
@@ -8473,7 +8472,7 @@ function cardCampHome(c, modoLista=false) {
       </div>
       <span style="font-size:10px;color:var(--text-muted);white-space:nowrap;">${totalParts}/${totalPoss} JOGOS</span>
     </div>` : ''}
-    ${jogadoresTimesHtml}
+    ${finalizado ? jogadoresTimesHtml : ''}
     ${campeaoMiniHtml}
     ${!finalizado && jogosHtml ? `<div style="margin-top:8px;" onclick="event.stopPropagation();abrirCampeonato('${c.id}')">${jogosHtml}</div>` : ''}
   </div>`;
