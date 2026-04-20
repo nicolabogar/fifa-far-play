@@ -6796,23 +6796,20 @@ window.abrirCampeonato = (id) => {
   });
 
   fullscreen(c.nome.toUpperCase(), `
-    ${_dataInicioFS ? `<div style="background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:12px 14px;margin-bottom:16px;"><label style="display:block;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">INICIO</label><p style="font-size:14px;font-weight:700;color:var(--text);margin:0;">${_dataInicioFS}</p></div>` : ''}
-
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-      <div style="flex:1;">
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
-          <span class="tag tag-purple">${meta.nome.toUpperCase()}</span>
-          <span class="tag ${c.status==='finalizado'?'tag-gray':'tag-green'}">${c.status==='finalizado'?'FINALIZADO':'EM ANDAMENTO'}</span>
-          ${temIdaVolta && c.status !== 'finalizado' ? `<span class="tag ${currentTurno === 2 ? 'tag-yellow' : 'tag-green'}">${currentTurno === 2 ? 'RETURNO' : 'TURNO'}</span>` : ''}
-          ${c.modoDupla ? `<span class="tag tag-cyan">DUPLA</span><span class="tag tag-cyan">CASA</span>` : ''}
-          ${qtdTimes > 1 ? `<span class="tag tag-yellow">${qtdTimes}X TIMES</span>` : ''}
-          <span class="tag tag-gray">${isSel?'SELECOES':'CLUBES'}</span>
-          <span class="tag tag-gray">${c.participantes?.length||0} PARTICIPANTES</span>
-          <span class="tag tag-gray">${totalJogosReg} JOGOS REGISTRADOS</span>
-        </div>
-        ${_dataFimFS ? `<div style="margin-top:4px;font-size:11px;color:var(--text-muted);"><span>🏁 FIM: <strong>${_dataFimFS}</strong></span></div>` : ''}
-      </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:16px;">
+      <span class="tag tag-purple">${meta.nome.toUpperCase()}</span>
+      <span class="tag ${c.status==='finalizado'?'tag-gray':'tag-green'}">${c.status==='finalizado'?'FINALIZADO':'EM ANDAMENTO'}</span>
+      ${temIdaVolta && c.status !== 'finalizado' ? `<span class="tag ${currentTurno === 2 ? 'tag-yellow' : 'tag-green'}">${currentTurno === 2 ? 'RETURNO' : 'TURNO'}</span>` : ''}
+      ${c.modoDupla ? `<span class="tag tag-cyan">DUPLA</span><span class="tag tag-cyan">CASA</span>` : ''}
+      ${qtdTimes > 1 ? `<span class="tag tag-yellow">${qtdTimes}X TIMES</span>` : ''}
+      <span class="tag tag-gray">${isSel?'SELECOES':'CLUBES'}</span>
+      <span class="tag tag-gray">${c.participantes?.length||0} PARTICIPANTES</span>
+      <span class="tag tag-gray">${totalJogosReg} JOGOS REGISTRADOS</span>
     </div>
+
+    ${_dataInicioFS ? `<label style="display:block;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">DATA INICIO</label><div style="background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:12px 14px;margin-bottom:16px;"><p style="font-size:14px;font-weight:700;color:var(--text);margin:0;">${_dataInicioFS}</p></div>` : ''}
+
+    ${_dataFimFS ? `<div style="font-size:11px;color:var(--text-muted);margin-bottom:16px;"><span>🏁 FIM: <strong>${_dataFimFS}</strong></span></div>` : ''}
 
     ${_cardCampeao(c)}
 
