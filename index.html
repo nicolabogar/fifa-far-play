@@ -504,23 +504,8 @@
         <polygon points="20,42 32,38 44,46 40,60 26,58" fill="#333"/>
       </svg>
     </button>
-    <!-- Title centered with gradient soccer ball icon -->
-    <div style="position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:7px;pointer-events:none;">
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="22" height="22" style="flex-shrink:0;">
-        <defs>
-          <linearGradient id="hdr-ball-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#8B5CF6"/>
-            <stop offset="100%" stop-color="#06B6D4"/>
-          </linearGradient>
-        </defs>
-        <circle cx="50" cy="50" r="46" fill="url(#hdr-ball-grad)" stroke="rgba(139,92,246,0.5)" stroke-width="3"/>
-        <polygon points="50,18 62,30 58,45 42,45 38,30" fill="rgba(0,0,0,0.28)"/>
-        <polygon points="80,36 74,50 60,54 52,42 62,30" fill="rgba(0,0,0,0.28)"/>
-        <polygon points="74,68 60,66 52,54 58,42 72,46" fill="rgba(0,0,0,0.28)"/>
-        <polygon points="50,80 40,68 44,54 56,54 62,68" fill="rgba(0,0,0,0.28)"/>
-        <polygon points="26,68 28,54 42,50 50,62 42,74" fill="rgba(0,0,0,0.28)"/>
-        <polygon points="20,42 32,38 44,46 40,60 26,58" fill="rgba(0,0,0,0.28)"/>
-      </svg>
+    <!-- Title centered -->
+    <div style="position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;pointer-events:none;">
       <span style="font-weight:900;font-size:18px;letter-spacing:-0.5px;cursor:pointer;pointer-events:auto;" class="grad" onclick="irParaHome()">FIFA FAR PLAY</span>
     </div>
     <!-- RG-SIM: tag de impersonificacao no header — visivel apenas quando simulando -->
@@ -594,7 +579,7 @@
     <div id="view-home" class="view active">
       <!-- Botao + CRIAR com dropdown -->
       <div id="wrap-btn-criar-home" style="padding:16px 0 0;margin-bottom:16px;">
-        <button id="btn-criar-home" onclick="toggleCriarMenu()" class="btn-primary" style="width:100%;font-size:14px;padding:10px 18px;text-transform:uppercase;font-weight:700;background:#000;border:none;"><span class="grad">+ CRIAR</span></button>
+        <button id="btn-criar-home" onclick="toggleCriarMenu()" class="btn-primary" style="width:100%;font-size:16px;padding:10px 18px;text-transform:uppercase;font-weight:800;background:var(--bg);border:none;"><span class="grad">+ CRIAR</span></button>
       </div>
       <div id="criar-menu-dropdown" style="display:none;margin:0 -16px 24px;background:var(--bg2);border-top:1px solid var(--card-border);border-bottom:1px solid var(--card-border);box-shadow:0 8px 32px rgba(0,0,0,0.5);">
         <button class="criar-opt" onclick="abrirCriarJogador();fecharCriarMenu()">
@@ -3585,7 +3570,7 @@ function _htmlNovoAmistoso() {
     </div>
     <div id="ami-dupla-manual-box" style="display:none;margin-bottom:8px;">
       <label style="display:block;font-size:12px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">DUPLA 1</label>
-      <div style="position:relative;margin-bottom:6px;">
+      <div style="position:relative;margin-bottom:12px;">
         <input id="jc-search-d1" type="text" class="input" placeholder="BUSCAR JOGADOR..." autocomplete="off"
           oninput="filtrarJogsDupla(1)" onfocus="this.value='';filtrarJogsDupla(1)"
           onblur="setTimeout(()=>{const d=document.getElementById('jc-dropdown-d1');if(d)d.style.display='none';},200)"
@@ -3594,7 +3579,7 @@ function _htmlNovoAmistoso() {
       </div>
       <div id="jc-panel-d1" style="margin-bottom:12px;"></div>
       <label style="display:block;font-size:12px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">DUPLA 2</label>
-      <div style="position:relative;margin-bottom:6px;">
+      <div style="position:relative;margin-bottom:12px;">
         <input id="jc-search-d2" type="text" class="input" placeholder="BUSCAR JOGADOR..." autocomplete="off"
           oninput="filtrarJogsDupla(2)" onfocus="this.value='';filtrarJogsDupla(2)"
           onblur="setTimeout(()=>{const d=document.getElementById('jc-dropdown-d2');if(d)d.style.display='none';},200)"
@@ -3622,7 +3607,7 @@ function _htmlNovoAmistoso() {
     <div id="ami-efic-filtro-box" class="efic-panel" style="margin-bottom:16px;">${htmlEficFiltro('ami-efic-filtro', false)}</div>
     <div id="ami-jogadores-auto-section">
     <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">JOGADORES</label>
-    <div style="position:relative;margin-bottom:8px;">
+    <div style="position:relative;margin-bottom:12px;">
       <input id="jc-search" type="text" class="input" placeholder="BUSCAR JOGADOR..." autocomplete="off"
         oninput="filtrarJogsJC()" onfocus="this.value='';filtrarJogsJC()"
         onblur="setTimeout(()=>{const d=document.getElementById('jc-dropdown');if(d)d.style.display='none';},200)"
@@ -3807,8 +3792,6 @@ window.toggleTipoAmi = tipo => {
 };
 
 window.toggleModoDupla = (ativo) => {
-  const label = document.getElementById('label-dupla');
-  if (label) label.style.borderColor = '';
   const limiteBox = document.getElementById('ami-limite-box');
   if (limiteBox) limiteBox.style.display = ativo ? '' : 'none';
   const sortearDuplaBox = document.getElementById('ami-sortear-dupla-box');
