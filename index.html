@@ -490,27 +490,43 @@
 
   <!-- HEADER -->
   <header id="header">
-    <div style="display:flex; align-items:center; gap:10px; min-width:0; flex:1;">
-      <button id="btn-hamburger" title="Menu" style="background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(6,182,212,0.15));border:1px solid rgba(139,92,246,0.35);color:var(--text);border-radius:12px;padding:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(139,92,246,0.2);transition:all 0.15s;flex-shrink:0;">
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
-          <circle cx="50" cy="50" r="46" fill="white" stroke="#555" stroke-width="4"/>
-          <polygon points="50,18 62,30 58,45 42,45 38,30" fill="#333"/>
-          <polygon points="80,36 74,50 60,54 52,42 62,30" fill="#333"/>
-          <polygon points="74,68 60,66 52,54 58,42 72,46" fill="#333"/>
-          <polygon points="50,80 40,68 44,54 56,54 62,68" fill="#333"/>
-          <polygon points="26,68 28,54 42,50 50,62 42,74" fill="#333"/>
-          <polygon points="20,42 32,38 44,46 40,60 26,58" fill="#333"/>
-        </svg>
+    <button id="btn-hamburger" title="Menu" style="background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(6,182,212,0.15));border:1px solid rgba(139,92,246,0.35);color:var(--text);border-radius:12px;padding:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(139,92,246,0.2);transition:all 0.15s;flex-shrink:0;">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
+        <circle cx="50" cy="50" r="46" fill="white" stroke="#555" stroke-width="4"/>
+        <polygon points="50,18 62,30 58,45 42,45 38,30" fill="#333"/>
+        <polygon points="80,36 74,50 60,54 52,42 62,30" fill="#333"/>
+        <polygon points="74,68 60,66 52,54 58,42 72,46" fill="#333"/>
+        <polygon points="50,80 40,68 44,54 56,54 62,68" fill="#333"/>
+        <polygon points="26,68 28,54 42,50 50,62 42,74" fill="#333"/>
+        <polygon points="20,42 32,38 44,46 40,60 26,58" fill="#333"/>
+      </svg>
+    </button>
+    <!-- Title centered with gradient soccer ball icon -->
+    <div style="position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:7px;pointer-events:none;">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="22" height="22" style="flex-shrink:0;">
+        <defs>
+          <linearGradient id="hdr-ball-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#8B5CF6"/>
+            <stop offset="100%" stop-color="#06B6D4"/>
+          </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="46" fill="url(#hdr-ball-grad)" stroke="rgba(139,92,246,0.5)" stroke-width="3"/>
+        <polygon points="50,18 62,30 58,45 42,45 38,30" fill="rgba(0,0,0,0.28)"/>
+        <polygon points="80,36 74,50 60,54 52,42 62,30" fill="rgba(0,0,0,0.28)"/>
+        <polygon points="74,68 60,66 52,54 58,42 72,46" fill="rgba(0,0,0,0.28)"/>
+        <polygon points="50,80 40,68 44,54 56,54 62,68" fill="rgba(0,0,0,0.28)"/>
+        <polygon points="26,68 28,54 42,50 50,62 42,74" fill="rgba(0,0,0,0.28)"/>
+        <polygon points="20,42 32,38 44,46 40,60 26,58" fill="rgba(0,0,0,0.28)"/>
+      </svg>
+      <span style="font-weight:900;font-size:18px;letter-spacing:-0.5px;cursor:pointer;pointer-events:auto;" class="grad" onclick="irParaHome()">FIFA FAR PLAY</span>
+    </div>
+    <!-- RG-SIM: tag de impersonificacao no header — visivel apenas quando simulando -->
+    <div id="header-sim-tag" style="display:none;align-items:center;gap:6px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4);border-radius:8px;padding:3px 8px 3px 6px;margin-left:auto;flex-shrink:0;">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FCD34D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span id="header-sim-nome" style="font-size:10px;font-weight:800;color:#FCD34D;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap;"></span>
+      <button onclick="simularUsuario('')" style="background:none;border:none;color:#FCD34D;cursor:pointer;padding:0;display:flex;align-items:center;flex-shrink:0;" title="REMOVER IMPERSONIFICACAO">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
-      <span style="font-weight:900; font-size:18px; letter-spacing:-0.5px; cursor:pointer;flex-shrink:0;" class="grad" onclick="irParaHome()">FIFA FAR PLAY</span>
-      <!-- RG-SIM: tag de impersonificacao no header — visivel apenas quando simulando -->
-      <div id="header-sim-tag" style="display:none;align-items:center;gap:6px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4);border-radius:8px;padding:3px 8px 3px 6px;margin-left:auto;flex-shrink:0;">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FCD34D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        <span id="header-sim-nome" style="font-size:10px;font-weight:800;color:#FCD34D;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap;"></span>
-        <button onclick="simularUsuario('')" style="background:none;border:none;color:#FCD34D;cursor:pointer;padding:0;display:flex;align-items:center;flex-shrink:0;" title="REMOVER IMPERSONIFICACAO">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
     </div>
     <div id="menu-hamburger-dropdown" style="display:none;position:fixed;top:60px;left:12px;right:12px;background:rgba(12,12,28,0.98);border:1px solid rgba(139,92,246,0.25);border-radius:20px;z-index:500;box-shadow:0 16px 48px rgba(0,0,0,0.7),0 0 0 1px rgba(139,92,246,0.1);overflow:hidden;backdrop-filter:blur(24px);">
       <div id="ham-user-info" style="padding:16px 18px 14px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(6,182,212,0.06));">
