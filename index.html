@@ -160,10 +160,10 @@
     /* ── Filtros dropdown temáticos ── */
     .filtro-drop { width:100%;border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;text-transform:uppercase;margin-bottom:8px;background-size:18px;background-repeat:no-repeat;background-position:right 10px center; }
     .filtro-drop option { background:#1E1E35;color:#F1F5F9; }
-    .filtro-drop-purple { background-color:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.35);color:#A78BFA;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B5CF6' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
-    .filtro-drop-cyan { background-color:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.35);color:#67E8F9;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2306B6D4' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
-    .filtro-drop-green { background-color:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.35);color:#6EE7B7;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2310B981' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
-    .filtro-drop-yellow { background-color:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);color:#FCD34D;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23F59E0B' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
+    .filtro-drop-purple { background-color:var(--bg);border:1px solid rgba(139,92,246,0.35);color:#A78BFA;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B5CF6' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
+    .filtro-drop-cyan { background-color:var(--bg);border:1px solid rgba(6,182,212,0.35);color:#67E8F9;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2306B6D4' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
+    .filtro-drop-green { background-color:var(--bg);border:1px solid rgba(16,185,129,0.35);color:#6EE7B7;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2310B981' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
+    .filtro-drop-yellow { background-color:var(--bg);border:1px solid rgba(245,158,11,0.35);color:#FCD34D;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23F59E0B' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
     /* Suprime o '×' para botoes de selecao unica (radio-style) como tipo e resultado */
     .filtro-radio.ativo::after { content:'' !important; }
     /* Multi-select dropdowns do ranking */
@@ -3150,13 +3150,17 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
   return `${swipeOuter}${swipeBg}
   <div id="${cardId}" class="match-card" style="${compact?'padding:12px;':''}overflow:hidden;" ${readonly || a.resultado || !master ? '' : `onclick="editarAmistoso('${a.id}')" style="cursor:pointer;"`}>
     ${!temRes && !compact ? `<div style="margin:-14px -14px 0 -14px;padding:10px 14px 8px;background:transparent;border-bottom:1px solid var(--card-border);border-radius:18px 18px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">${master && !noSwipe ? _iconExcluirCard(`event.stopPropagation();confirmarExcluirAmistoso('${a.id}')`) : ''}<span style="font-size:16px;font-weight:900;color:#6EE7B7;letter-spacing:0.05em;">AMISTOSO</span>${criadoEmFmt ? `<span style="font-size:11px;color:rgba(110,231,183,0.7);font-weight:600;margin-top:2px;">${criadoEmFmt}</span>` : ''}</div><div style="margin-bottom:10px;"></div>` : `<div style="text-align:center;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);border-radius:12px;padding:6px 12px;margin-bottom:10px;"><span style="font-size:15px;font-weight:800;color:#6EE7B7;letter-spacing:0.05em;text-transform:uppercase;">AMISTOSO</span></div>`}
-    <div style="display:flex;align-items:center;${isRanking?'':'justify-content:space-between;'} margin-bottom:${compact?'8':'10'}px;">
+    ${!temRes && !compact ? `<div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+      <span class="tag tag-gray">${a.tipo === 'selecoes' ? 'SELECOES' : 'CLUBES'}</span>
+      ${a.modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
+      <span class="tag tag-green">EM ANDAMENTO</span>
+    </div>` : `<div style="display:flex;align-items:center;${isRanking?'':'justify-content:space-between;'} margin-bottom:${compact?'8':'10'}px;">
       <div style="display:flex;align-items:center;gap:6px;">
         <span class="tag tag-gray">${a.tipo === 'selecoes' ? 'SELECOES' : 'CLUBES'}</span>
         ${a.modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
       </div>
       ${!isRanking && !temRes ? `<span class="tag tag-green">EM ANDAMENTO</span>` : ''}
-    </div>
+    </div>`}
     ${compact ? `
     <div style="display:flex;align-items:center;gap:8px;">
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-width:0;">
@@ -3216,8 +3220,8 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
   })() : ''}
   ${!temRes && !compact ? `
   <div style="margin-top:12px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px;">
-    <button onclick="event.stopPropagation();compartilharWhatsApp(${JSON.stringify({tipo:a.tipo,modoDupla:a.modoDupla||false,time1:a.time1,time2:a.time2}).replace(/"/g,'&quot;')})" style="width:100%;background:#25D366;border:none;color:#fff;padding:10px;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    <button onclick="event.stopPropagation();compartilharWhatsApp(${JSON.stringify({tipo:a.tipo,modoDupla:a.modoDupla||false,time1:a.time1,time2:a.time2}).replace(/"/g,'&quot;')})" style="width:100%;background:var(--bg);border:2px solid var(--green);color:var(--green);padding:10px;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
       COMPARTILHAR NO WHATSAPP
     </button>
   </div>` : ''}
@@ -3270,17 +3274,45 @@ function renderAmistosos() {
   }
 
   const abertos = amistosos.filter(a => !a.resultado);
+  const finalizados = amistosos.filter(a => a.resultado != null);
 
-  if (!abertos.length) {
-    c.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:48px 0;font-size:14px;">NENHUM AMISTOSO EM ANDAMENTO</p>';
-    return;
+  let html = '';
+
+  if (abertos.length) {
+    html += abertos.map(a => cardAmistoso(a)).join('');
+  } else {
+    html += '<p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:14px;">NENHUM AMISTOSO EM ANDAMENTO</p>';
   }
 
-  c.innerHTML = abertos.map(a => cardAmistoso(a)).join('');
+  if (finalizados.length) {
+    const jogOpts = jogadores.map(j => `<option value="${j.id}" ${_amiState.filtroJog === j.id ? 'selected' : ''}>${_nomeExibicao(j).toUpperCase()}</option>`).join('');
+    html += `<div class="grupo-header" onclick="toggleGrupo(this)" style="margin-top:12px;">
+      <span class="grupo-titulo">FINALIZADOS <span style="color:var(--text-muted);font-weight:600;">(${finalizados.length})</span></span>
+      <span class="grupo-seta">›</span>
+    </div>
+    <div class="grupo-body fechado">
+      <div id="ami-filtros">
+        <div class="filtro-row">
+          <button class="filtro-btn ${_amiState.filtroTipo==='todos'?'ativo':''}" onclick="_filtrarAmi('todos')">TODOS</button>
+          <button class="filtro-btn ${_amiState.filtroTipo==='clubes'?'ativo':''}" onclick="_filtrarAmi('clubes')">CLUBES</button>
+          <button class="filtro-btn ${_amiState.filtroTipo==='selecoes'?'ativo':''}" onclick="_filtrarAmi('selecoes')">SELECOES</button>
+        </div>
+        ${jogadores.length ? `<select class="filtro-drop filtro-drop-green" onchange="_filtrarAmiJog(this.value)">
+          <option value="">TODOS OS JOGADORES</option>
+          ${jogOpts}
+        </select>` : ''}
+      </div>
+      <div id="ami-fin-lista"></div>
+      <div class="pag-row" id="ami-fin-pag"></div>
+    </div>`;
+  }
+
+  c.innerHTML = html;
 
   if (temPermissao()) {
     initSwipe(c, 'amistoso');
   }
+  _renderFinalizadosAmi();
 }
 
 window.toggleGrupo = (header) => {
@@ -6537,13 +6569,13 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
             <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="2" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;">
           </div>
-          <button onclick="event.stopPropagation();salvarPartidaDireta('${cid}',${gi},'${m1.jogadorId}','${m2.jogadorId}',${timeIndex},this,${turno})" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:var(--green);border:none;color:#fff;border-radius:8px;cursor:pointer;">FIM</button>`
+          <button onclick="event.stopPropagation();salvarPartidaDireta('${cid}',${gi},'${m1.jogadorId}','${m2.jogadorId}',${timeIndex},this,${turno})" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:transparent;border:1px solid var(--green);color:var(--green);border-radius:8px;cursor:pointer;">FIM</button>`
       : `<div style="display:flex;align-items:center;gap:4px;opacity:0.4;">
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="1" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;cursor:not-allowed;">
             <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="2" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--text);-moz-appearance:textfield;cursor:not-allowed;">
           </div>
-          <button disabled onclick="event.stopPropagation()" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:var(--green);border:none;color:#fff;border-radius:8px;cursor:not-allowed;opacity:0.4;">FIM</button>`;
+          <button disabled onclick="event.stopPropagation()" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:transparent;border:1px solid var(--green);color:var(--green);border-radius:8px;cursor:not-allowed;opacity:0.4;">FIM</button>`;
 
   const t1nom = (t1?.nome||'').replace(/'/g,"\\'");
   const t2nom = (t2?.nome||'').replace(/'/g,"\\'");
@@ -6558,15 +6590,21 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
     : `<div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(t2?.id||'', t2?.nome||'', tipo2)}</div>`;
 
   return `<div class="match-card" data-match-key="${confKey}" style="margin-bottom:10px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+    ${!temRes ? `<div style="margin:-14px -14px 0 -14px;padding:10px 14px 8px;background:transparent;border-bottom:1px solid var(--card-border);border-radius:18px 18px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;"><span style="font-size:16px;font-weight:900;color:#FCD34D;letter-spacing:0.05em;">TORNEIO</span></div><div style="margin-bottom:10px;"></div>` : `<div style="text-align:center;background:rgba(100,116,139,0.15);border:1px solid rgba(100,116,139,0.35);border-radius:12px;padding:6px 12px;margin-bottom:10px;"><span style="font-size:15px;font-weight:800;color:#94A3B8;letter-spacing:0.05em;text-transform:uppercase;">TORNEIO</span></div>`}
+    ${!temRes ? `<div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+      <span class="tag tag-gray">${isSel ? 'SELECOES' : 'CLUBES'}</span>
+      ${modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
+      ${temIdaVolta && turno === 1 ? `<span class="tag tag-green">TURNO</span>` : ''}
+      ${temIdaVolta && turno === 2 ? `<span class="tag tag-yellow">RETURNO</span>` : ''}
+      <span class="tag tag-green">EM ANDAMENTO</span>
+    </div>` : `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <div style="display:flex;align-items:center;gap:6px;">
         <span class="tag tag-gray">${isSel ? 'SELECOES' : 'CLUBES'}</span>
         ${modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
         ${temIdaVolta && turno === 1 ? `<span class="tag tag-green">TURNO</span>` : ''}
         ${temIdaVolta && turno === 2 ? `<span class="tag tag-yellow">RETURNO</span>` : ''}
       </div>
-      ${!temRes ? `<span class="tag tag-green">EM ANDAMENTO</span>` : ''}
-    </div>
+    </div>`}
     <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
         ${_htmlCountryRow(t1?.id||'', t1?.nome||'', tipo1)}
@@ -6587,7 +6625,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
       </div>
     </div>
     ${temRes ? `<div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);">${g1r > g2r ? `<span class="tag tag-green">VITÓRIA: ${nome1}</span>` : g2r > g1r ? `<span class="tag tag-green">VITÓRIA: ${nome2}</span>` : `<span class="tag tag-yellow">EMPATE</span>`}${played?.jogoEm ? `<span class="tag tag-gray">${new Date(played.jogoEm).toLocaleDateString('pt-BR')}</span>` : ''}</div>` : ''}
-    ${!temRes ? `<div style="margin-top:12px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px;"><button onclick="event.stopPropagation();compartilharWhatsAppTorneio('${t1?.id||''}','${t1nom}','${nome1Esc}','${t2?.id||''}','${t2nom}','${nome2Esc}','${tipo1}','${tipo2}')" style="width:100%;background:#25D366;border:none;color:#fff;padding:10px;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>COMPARTILHAR NO WHATSAPP</button></div>` : ''}
+    ${!temRes ? `<div style="margin-top:12px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px;"><button onclick="event.stopPropagation();compartilharWhatsAppTorneio('${t1?.id||''}','${t1nom}','${nome1Esc}','${t2?.id||''}','${t2nom}','${nome2Esc}','${tipo1}','${tipo2}')" style="width:100%;background:var(--bg);border:2px solid var(--green);color:var(--green);padding:10px;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>COMPARTILHAR NO WHATSAPP</button></div>` : ''}
   </div>`;
 }
 window.cardJogoTorneio = cardJogoTorneio;
@@ -7566,7 +7604,7 @@ function _renderRankFiltros() {
   // Tipo de jogo
   const tipoDrop = buildDrop(
     'tipo',
-    'background-color:rgba(139,92,246,0.1);',
+    'background-color:var(--bg);',
     'border:1px solid rgba(139,92,246,0.35);',
     'color:#A78BFA;',
     'TODOS OS TIPOS',
@@ -7581,7 +7619,7 @@ function _renderRankFiltros() {
     : [];
   const torneioDrop = torneios.length ? buildDrop(
     'torneio',
-    'background-color:rgba(6,182,212,0.1);',
+    'background-color:var(--bg);',
     'border:1px solid rgba(6,182,212,0.35);',
     'color:#67E8F9;',
     'TODOS OS TORNEIOS',
@@ -7593,7 +7631,7 @@ function _renderRankFiltros() {
   // Resultado (só com 1 jogador)
   const resDrop = exatoUm ? buildDrop(
     'resultado',
-    'background-color:rgba(245,158,11,0.1);',
+    'background-color:var(--bg);',
     'border:1px solid rgba(245,158,11,0.35);',
     'color:#FCD34D;',
     'TODOS OS RESULTADOS',
@@ -8386,7 +8424,7 @@ function cardCampHome(c, modoLista=false) {
 
   const podeMudar = temPermissao();
   const cardHtml = `<div ${idAttr}class="match-card" style="margin-bottom:${modoLista?'0':'10px'};padding:12px;cursor:pointer;overflow:hidden;" onclick="abrirCampeonato('${c.id}')">
-    <div style="margin:-12px -12px 10px -12px;padding:14px 16px;background:${finalizado?'rgba(148,163,184,0.07)':'rgba(252,211,77,0.14)'};border-bottom:2px solid ${finalizado?'rgba(148,163,184,0.2)':'rgba(252,211,77,0.5)'};border-radius:18px 18px 0 0;display:flex;align-items:center;justify-content:center;position:relative;">
+    <div style="margin:-12px -12px 10px -12px;padding:10px 16px 8px;background:transparent;border-bottom:1px solid var(--card-border);border-radius:18px 18px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">
       <div style="display:flex;flex-direction:column;align-items:center;text-align:center;max-width:calc(100% - 40px);">
         <div style="font-weight:900;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:${finalizado?'#94A3B8':'#FBBF24'};letter-spacing:0.05em;">${c.nome.toUpperCase()}</div>
         ${!finalizado && dataInicio ? `<div style="font-size:11px;font-weight:600;color:rgba(251,191,36,0.7);margin-top:2px;">${dataInicio}</div>` : ''}
