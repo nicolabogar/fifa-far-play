@@ -7707,14 +7707,45 @@ function _renderRankFiltros() {
       const advNomes = j.advJogadores || [];
       const numAdv = Math.max(advIds.length, advNomes.length);
       for (let i = 0; i < numAdv; i++) {
-        const id = advIds[i] || '';
+        let id = advIds[i] || '';
+        const advNome = advNomes[i] || '';
+        const advNomeUpper = advNome.toUpperCase();
+        // Resolve IDs antigos/migrados pelo nome armazenado (igual ao confrontos table)
+        if (id) {
+          const jKnown = jogadores.find(jj => jj.id === id);
+          if (!jKnown && advNomeUpper) {
+            const jByName = jogadores.find(jj =>
+              _nomeExibicao(jj).toUpperCase() === advNomeUpper ||
+              jj.nome.toUpperCase() === advNomeUpper ||
+              _nomeTag(_nomeExibicao(jj)).toUpperCase() === advNomeUpper ||
+              _nomeTag(jj.nome).toUpperCase() === advNomeUpper
+            );
+            if (jByName) id = jByName.id;
+          }
+        }
+        if (!id && advNomeUpper) {
+          const found = jogadores.find(jj =>
+            _nomeExibicao(jj).toUpperCase() === advNomeUpper ||
+            jj.nome.toUpperCase() === advNomeUpper ||
+            _nomeTag(_nomeExibicao(jj)).toUpperCase() === advNomeUpper ||
+            _nomeTag(jj.nome).toUpperCase() === advNomeUpper
+          );
+          if (found) id = found.id;
+        }
         if (id && !advMap[id]) {
           const jAdv = jogadores.find(jj => jj.id === id);
-          advMap[id] = { id, nome: jAdv ? _nomeExibicao(jAdv) : (advNomes[i] || id) };
+          advMap[id] = { id, nome: jAdv ? _nomeExibicao(jAdv) : (advNome || id) };
         }
       }
     });
-    const advList = Object.values(advMap).sort((a, b) => a.nome.localeCompare(b.nome));
+    // Deduplicar por nome normalizado (segurança extra contra IDs duplicados com mesmo nome)
+    const seenNomes = new Set();
+    const advList = Object.values(advMap).sort((a, b) => a.nome.localeCompare(b.nome)).filter(a => {
+      const key = a.nome.toUpperCase().trim();
+      if (seenNomes.has(key)) return false;
+      seenNomes.add(key);
+      return true;
+    });
     if (advList.length) {
       advDrop = `<div class="rank-filter-label">ADVERSARIO</div><select class="filtro-drop filtro-drop-orange" onchange="_rankSetAdversario(this.value)">
         <option value="">TODOS OS ADVERSARIOS</option>
@@ -8203,7 +8234,48 @@ window.abrirHistoricoJogador = (jogadorId, nome) => {
   _histState.pag = 0;
 
   const allJogos = _coletarJogosJogador(jogadorId);
-  const advs = [...new Set(allJogos.flatMap(j => j.advJogadores||[]).filter(Boolean))].sort();
+  // Construir lista de adversários deduplicada por ID (com resolução de IDs antigos pelo nome)
+  const _advHistMap = {};
+  allJogos.forEach(j => {
+    const advIds = j.advJogadoresIds || [];
+    const advNomes = j.advJogadores || [];
+    const numAdv = Math.max(advIds.length, advNomes.length);
+    for (let i = 0; i < numAdv; i++) {
+      let id = advIds[i] || '';
+      const advNome = advNomes[i] || '';
+      const advNomeUpper = advNome.toUpperCase();
+      if (id) {
+        const jKnown = jogadores.find(jj => jj.id === id);
+        if (!jKnown && advNomeUpper) {
+          const jByName = jogadores.find(jj =>
+            _nomeExibicao(jj).toUpperCase() === advNomeUpper ||
+            jj.nome.toUpperCase() === advNomeUpper ||
+            _nomeTag(_nomeExibicao(jj)).toUpperCase() === advNomeUpper ||
+            _nomeTag(jj.nome).toUpperCase() === advNomeUpper
+          );
+          if (jByName) id = jByName.id;
+        }
+      }
+      if (!id && advNomeUpper) {
+        const found = jogadores.find(jj =>
+          _nomeExibicao(jj).toUpperCase() === advNomeUpper ||
+          jj.nome.toUpperCase() === advNomeUpper ||
+          _nomeTag(_nomeExibicao(jj)).toUpperCase() === advNomeUpper ||
+          _nomeTag(jj.nome).toUpperCase() === advNomeUpper
+        );
+        if (found) id = found.id;
+      }
+      const chave = id || advNomeUpper || '';
+      if (chave && !_advHistMap[chave]) {
+        const jAdv = id ? jogadores.find(jj => jj.id === id) : null;
+        _advHistMap[chave] = { displayName: jAdv ? _nomeExibicao(jAdv) : (advNome || id), id };
+      }
+    }
+  });
+  const advs = Object.values(_advHistMap).map(a => a.displayName).filter(Boolean).sort((a, b) => a.localeCompare(b));
+  // Deduplicar por nome canônico (segurança extra)
+  const _advSeenHist = new Set();
+  const advsDedup = advs.filter(n => { const k = n.toUpperCase().trim(); return _advSeenHist.has(k) ? false : (_advSeenHist.add(k), true); });
 
   fullscreen(`${nome.toUpperCase()}`, `
     <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
@@ -8216,7 +8288,7 @@ window.abrirHistoricoJogador = (jogadorId, nome) => {
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center;">
       <select id="hf-adv" onchange="_hFiltro('adv',this.value)" style="flex:1;min-width:120px;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;">
         <option value="">ADVERSARIO: TODOS</option>
-        ${advs.map(a => `<option value="${a}">${a.toUpperCase()}</option>`).join('')}
+        ${advsDedup.map(a => `<option value="${a}">${a.toUpperCase()}</option>`).join('')}
       </select>
       <select id="hf-ord" onchange="_hFiltro('ord',this.value)" style="flex:1;min-width:120px;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;">
         <option value="data_desc">DATA: RECENTE</option>
@@ -8288,7 +8360,18 @@ function _renderHistorico() {
   else if (_histState.filtroTipo === 'CLUBE' || _histState.filtroTipo === 'SELECAO')
     jogos = jogos.filter(j => j.tipoTime === _histState.filtroTipo);
 
-  if (_histState.filtroAdv) jogos = jogos.filter(j => (j.advJogadores||[]).includes(_histState.filtroAdv));
+  if (_histState.filtroAdv) {
+    const filtroAdvUp = _histState.filtroAdv.toUpperCase().trim();
+    jogos = jogos.filter(j => {
+      // Verificar por nome armazenado
+      if ((j.advJogadores||[]).some(n => n.toUpperCase().trim() === filtroAdvUp)) return true;
+      // Verificar por nome de exibição atual (resolve IDs para nome canônico)
+      return (j.advJogadoresIds||[]).some(id => {
+        const jAdv = id ? jogadores.find(jj => jj.id === id) : null;
+        return jAdv && _nomeExibicao(jAdv).toUpperCase().trim() === filtroAdvUp;
+      });
+    });
+  }
   if (_histState.dataIni) { const d = new Date(_histState.dataIni).getTime(); jogos = jogos.filter(j => j.ts && j.ts >= d); }
   if (_histState.dataFim) { const d = new Date(_histState.dataFim).getTime() + 86399999; jogos = jogos.filter(j => j.ts && j.ts <= d); }
 
