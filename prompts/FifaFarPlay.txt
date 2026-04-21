@@ -5,5 +5,11 @@
 
 ## MELHORIAS ##
 
-- [ ] [Descreva aqui a próxima melhoria desejada]
+- [ ] Na página de torneios os labels do componente deve seguir todo o mesmo padrão de cor e tamanho, todos devem estar igual o label de jogadores.
+- [ ] Remover as tags da página de edição de torneio.
+- [ ] Na página de amistoso renomear a label TIMES: para TIME.
+- [ ] Colocar um pequeno espaçamento abaixo dos componentes de dropdown.
+- [ ] Colocar uma quebra a cima do card do jogo amistoso na página de amistoso.
+- [ ] Remover a label que indica os times do jogador dentro da tabela.
+- [ ] No card de times dos jogadores o texto do nome do jogador cada um deve ter uma cor, e essa cor deve refletir nos cards em andamento e finalizados e também essa aplicação deve ser alocada na página da home no card de torneio em andamento.
 

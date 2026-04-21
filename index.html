@@ -162,7 +162,7 @@
     .filtro-btn.ativo { border-color:var(--purple);background:rgba(139,92,246,0.15);color:#A78BFA; }
     .filtro-btn.ativo::after { content:' ×'; font-size:13px; font-weight:900; opacity:0.8; }
     /* ── Filtros dropdown temáticos ── */
-    .filtro-drop { width:100%;border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;text-transform:uppercase;margin-bottom:8px;background-size:18px;background-repeat:no-repeat;background-position:right 10px center; }
+    .filtro-drop { width:100%;border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;text-transform:uppercase;margin-bottom:12px;background-size:18px;background-repeat:no-repeat;background-position:right 10px center; }
     .filtro-drop option { background:#1E1E35;color:#F1F5F9; }
     .filtro-drop-purple { background-color:var(--bg);border:1px solid rgba(139,92,246,0.35);color:#A78BFA;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B5CF6' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
     .filtro-drop-cyan { background-color:var(--bg);border:1px solid rgba(6,182,212,0.35);color:#67E8F9;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2306B6D4' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
@@ -393,7 +393,7 @@
     .efic-tag.selecionado::after { content:' ×'; font-size:13px; font-weight:900; opacity:0.8; }
 
     /* Multi-select dropdown */
-    .ms-drop { position:relative; margin-bottom:14px; }
+    .ms-drop { position:relative; margin-bottom:16px; }
     .ms-trigger {
       width:100%; display:flex; align-items:center; justify-content:space-between;
       padding:10px 14px; border-radius:12px; border:1px solid var(--card-border);
@@ -1249,12 +1249,12 @@ function _htmlJogadoresTime(time, playerColors, defaultColor, defaultBg, compact
   if (!ids.length && !nomes.length) return '';
   if (compact) {
     const parts = ids.length
-      ? ids.map((pid, i) => _htmlJogadorPill(pid, _nomeTag(nomes[i] || _nomeJogPorId(pid, '')), 16, defaultBg || null))
+      ? ids.map((pid, i) => _htmlJogadorPill(pid, _nomeTag(nomes[i] || _nomeJogPorId(pid, '')), 16, pid ? _jogadorBg(pid, playerColors) : (defaultBg || null)))
       : nomes.map(n => _htmlJogadorPill(null, _nomeTag(n), 16, defaultBg || null));
     return `<div style="display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap;">${parts.join('')}</div>`;
   }
   const items = ids.length
-    ? ids.map((pid, i) => _htmlJogadorPill(pid, _nomeTag(nomes[i] || _nomeJogPorId(pid, '')), 20, defaultBg || null))
+    ? ids.map((pid, i) => _htmlJogadorPill(pid, _nomeTag(nomes[i] || _nomeJogPorId(pid, '')), 20, pid ? _jogadorBg(pid, playerColors) : (defaultBg || null)))
     : nomes.map(n => _htmlJogadorPill(null, _nomeTag(n), 20, defaultBg || null));
   return `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:4px;">${items.join('')}</div>`;
 }
@@ -2337,6 +2337,8 @@ function _htmlJogadorPill(id, nome, size, bg) {
     else if (bg.includes('239,68,68')) textColor = '#FCA5A5';
     else if (bg.includes('6,182,212')) textColor = '#67E8F9';
     else if (bg.includes('139,92,246')) textColor = '#C4B5FD';
+    else if (bg.includes('34,197,94')) textColor = '#86EFAC';
+    else if (bg.includes('236,72,153')) textColor = '#F9A8D4';
     const wrapStyle = `display:inline-flex;align-items:center;gap:4px;max-width:100%;background:${bg};border-radius:20px;padding:2px 8px 2px 3px;`;
     return `<div style="${wrapStyle}">${imgHtml}<span style="font-size:11px;color:${textColor};font-weight:700;text-transform:uppercase;letter-spacing:0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${nome}</span></div>`;
   }
@@ -3278,6 +3280,7 @@ function renderAmistosos() {
   let html = '';
 
   if (abertos.length) {
+    html += `<div style="border-top:1px solid var(--card-border);margin-bottom:12px;"></div>`;
     html += abertos.map(a => cardAmistoso(a)).join('');
   } else {
     html += '<p style="color:var(--text-muted);text-align:center;padding:24px 0;font-size:14px;">NENHUM AMISTOSO EM ANDAMENTO</p>';
@@ -3405,6 +3408,38 @@ function _assignPlayerTagColor(id) {
     _playerTagColorIdx.set(id, _playerTagNextIdx % _PLAYER_TAG_PALETTE.length);
     _playerTagNextIdx++;
   }
+}
+
+/** Retorna o índice da paleta para um jogador de forma determinística por ID. */
+function _jogadorPaletteIdx(playerId) {
+  if (!playerId) return 0;
+  let h = 0;
+  for (let i = 0; i < playerId.length; i++) h = (h * 31 + playerId.charCodeAt(i)) >>> 0;
+  return h % _PLAYER_TAG_PALETTE.length;
+}
+/** Retorna a cor de texto da paleta para um jogador. */
+function _jogadorColor(playerId, playerColors) {
+  let idx;
+  if (playerColors && playerColors[playerId] !== undefined) {
+    idx = playerColors[playerId] % _PLAYER_TAG_PALETTE.length;
+  } else if (_playerTagColorIdx.has(playerId)) {
+    idx = _playerTagColorIdx.get(playerId) % _PLAYER_TAG_PALETTE.length;
+  } else {
+    idx = _jogadorPaletteIdx(playerId);
+  }
+  return _PLAYER_TAG_PALETTE[idx].color;
+}
+/** Retorna o bg da paleta para um jogador. */
+function _jogadorBg(playerId, playerColors) {
+  let idx;
+  if (playerColors && playerColors[playerId] !== undefined) {
+    idx = playerColors[playerId] % _PLAYER_TAG_PALETTE.length;
+  } else if (_playerTagColorIdx.has(playerId)) {
+    idx = _playerTagColorIdx.get(playerId) % _PLAYER_TAG_PALETTE.length;
+  } else {
+    idx = _jogadorPaletteIdx(playerId);
+  }
+  return _PLAYER_TAG_PALETTE[idx].bg;
 }
 
 function _syncJcMaps() {
@@ -3539,7 +3574,7 @@ function _syncBtnSalvar() {
 
 function _htmlNovoAmistoso() {
   return `
-    <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">TIMES:</label>
+    <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">TIME</label>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
       <div class="tipo-btn sel" id="tp-clubes" onclick="toggleTipoAmi('clubes')"><span class="grad" style="font-size:12px;font-weight:700;">CLUBES</span></div>
       <div class="tipo-btn sel" id="tp-selecoes" onclick="toggleTipoAmi('selecoes')"><span class="grad" style="font-size:12px;font-weight:700;">SELECOES</span></div>
@@ -5564,7 +5599,7 @@ function abrirModalCriarCamp(secao, secaoView) {
   fullscreen('NOVO', `
     <div style="display:flex;flex-direction:column;gap:14px;">
       <div>
-        <label style="display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;" class="grad">NOME DO TORNEIO</label>
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">NOME DO TORNEIO</label>
         <span style="display:block;font-size:11px;color:var(--text-muted);margin-bottom:6px;">TITULO OFICIAL QUE IDENTIFICARA O TORNEIO</span>
         <input class="input" id="cn" placeholder="NOME DO TORNEIO" autocomplete="off" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
       </div>
@@ -6530,7 +6565,7 @@ function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar, fase
         ${_htmlCountryRow(t1?.id||'', t1?.nome||'', tipo1)}
         <div class="grad" style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(t1?.id, t1?.nome||'?')}</div>
         ${lpKo1}
-        ${nome1 ? `<div style="margin-top:4px;">${_htmlJogadorPill(cf.j1Id, nome1, 20, temRes ? (vit1 ? 'rgba(16,185,129,0.35)' : 'rgba(239,68,68,0.3)') : 'rgba(245,158,11,0.3)')}</div>` : ''}
+        ${nome1 ? `<div style="margin-top:4px;">${_htmlJogadorPill(cf.j1Id, nome1, 20, _jogadorBg(cf.j1Id))}</div>` : ''}
         ${vit1 ? `<div style="margin-top:4px;font-size:18px;">${winnerEmoji}</div>` : ''}
       </div>
       <div style="text-align:center;min-width:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
@@ -6540,7 +6575,7 @@ function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar, fase
         ${_htmlCountryRow(t2?.id||'', t2?.nome||'', tipo2)}
         <div class="grad" style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(t2?.id, t2?.nome||'?')}</div>
         ${lpKo2}
-        ${nome2 ? `<div style="margin-top:4px;">${_htmlJogadorPill(cf.j2Id, nome2, 20, temRes ? (vit2 ? 'rgba(16,185,129,0.35)' : 'rgba(239,68,68,0.3)') : 'rgba(245,158,11,0.3)')}</div>` : ''}
+        ${nome2 ? `<div style="margin-top:4px;">${_htmlJogadorPill(cf.j2Id, nome2, 20, _jogadorBg(cf.j2Id))}</div>` : ''}
         ${vit2 ? `<div style="margin-top:4px;font-size:18px;">${winnerEmoji}</div>` : ''}
       </div>
     </div>
@@ -6627,7 +6662,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
         <div class="grad" style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(t1?.id, t1?.nome||'?')}</div>
         ${lpIcon1}
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(t1?.id))}</div>
-        ${nome1 ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;">${_htmlJogadorPill(m1.jogadorId, nome1, 20, pillBg1T)}</div>` : ''}
+        ${nome1 ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;">${_htmlJogadorPill(m1.jogadorId, nome1, 20, _jogadorBg(m1.jogadorId))}</div>` : ''}
       </div>
       <div style="text-align:center;min-width:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
         ${placarArea}
@@ -6637,7 +6672,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
         <div class="grad" style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(t2?.id, t2?.nome||'?')}</div>
         ${lpIcon2}
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(t2?.id))}</div>
-        ${nome2 ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;">${_htmlJogadorPill(m2.jogadorId, nome2, 20, pillBg2T)}</div>` : ''}
+        ${nome2 ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;">${_htmlJogadorPill(m2.jogadorId, nome2, 20, _jogadorBg(m2.jogadorId))}</div>` : ''}
       </div>
     </div>
     ${temRes ? `<div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);">${g1r > g2r ? `<span class="tag tag-green">VITÓRIA: ${nome1}</span>` : g2r > g1r ? `<span class="tag tag-green">VITÓRIA: ${nome2}</span>` : `<span class="tag tag-yellow">EMPATE</span>`}${played?.jogoEm ? `<span class="tag tag-gray">${new Date(played.jogoEm).toLocaleDateString('pt-BR')}</span>` : ''}</div>` : ''}
@@ -6757,7 +6792,7 @@ window.abrirCampeonato = (id) => {
       <div class="grad" style="font-size:13px;font-weight:800;line-height:1.2;">${primTime?.nome||'?'}</div>
       ${timesExtras}
       <div style="margin-top:3px;">${eficBadge(eficienciaAtual(primTime?.id))}</div>
-      <div style="font-size:11px;color:#67E8F9;margin-top:3px;font-weight:700;">${_nomeJogPorId(m.jogadorId, m.nome)}</div>
+      <div style="font-size:11px;color:${_jogadorColor(m.jogadorId)};margin-top:3px;font-weight:700;">${_nomeJogPorId(m.jogadorId, m.nome)}</div>
     </div>`;
   };
 
@@ -6819,13 +6854,10 @@ window.abrirCampeonato = (id) => {
           <td style="text-align:center;padding:6px 4px;">SG</td><td style="text-align:center;padding:6px 8px;font-weight:800;">PTS</td>
         </tr>
         ${ord.map((m,i)=>{
-          const times = m.times || [m.time].filter(Boolean);
-          const timesStr = times.length > 1 ? times.map(t=>t?.nome||'').filter(Boolean).join(', ') : (m.time?.nome||'?');
           return `<tr style="border-top:1px solid rgba(255,255,255,0.04);color:${i<2?'var(--cyan)':'var(--text)'}">
           <td style="padding:6px 8px;font-weight:800;color:${i===0?'var(--yellow)':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text-muted)'};">${i+1}°</td>
           <td style="padding:6px 4px;">
             <div style="font-weight:700;font-size:11px;">${_nomeJogPorId(m.jogadorId, m.nome)}</div>
-            <div class="grad" style="font-size:9px;">${timesStr}</div>
           </td>
           <td style="text-align:center;padding:6px 4px;">${m.vit+m.emp+m.der}</td>
           <td style="text-align:center;padding:6px 4px;">${m.vit}</td>
@@ -6850,26 +6882,15 @@ window.abrirCampeonato = (id) => {
   });
 
   fullscreen(c.nome.toUpperCase(), `
-    <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:16px;">
-      <span class="tag tag-purple">${meta.nome.toUpperCase()}</span>
-      <span class="tag ${c.status==='finalizado'?'tag-gray':'tag-green'}">${c.status==='finalizado'?'FINALIZADO':'EM ANDAMENTO'}</span>
-      ${temIdaVolta && c.status !== 'finalizado' ? `<span class="tag ${currentTurno === 2 ? 'tag-yellow' : 'tag-green'}">${currentTurno === 2 ? 'RETURNO' : 'TURNO'}</span>` : ''}
-      ${c.modoDupla ? `<span class="tag tag-cyan">DUPLA</span><span class="tag tag-cyan">CASA</span>` : ''}
-      ${qtdTimes > 1 ? `<span class="tag tag-yellow">${qtdTimes}X TIMES</span>` : ''}
-      <span class="tag tag-gray">${isSel?'SELECOES':'CLUBES'}</span>
-      <span class="tag tag-purple">${c.participantes?.length||0} PARTICIPANTES</span>
-      <span class="tag tag-yellow">${totalJogosReg} JOGOS REGISTRADOS</span>
-    </div>
-
     ${_dataInicioFS ? `<label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;" class="grad">DATA INICIO</label><div style="background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:12px 14px;margin-bottom:16px;"><p class="grad" style="font-size:14px;font-weight:700;margin:0;">${_dataInicioFS}</p></div>` : ''}
 
     ${_dataFimFS ? `<div style="font-size:11px;color:var(--text-muted);margin-bottom:16px;"><span>🏁 FIM: <strong>${_dataFimFS}</strong></span></div>` : ''}
 
     ${_cardCampeao(c)}
 
-    ${podeMudar ? `<label style="display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;" class="grad">NOME DO TORNEIO</label><input id="torneio-nome-inline-${c.id}" class="input" value="${c.nome.toUpperCase().replace(/"/g,'&quot;')}" style="text-transform:uppercase;margin-bottom:8px;width:100%;box-sizing:border-box;color:var(--purple);font-weight:700;" autocomplete="off" oninput="this.value=this.value.toUpperCase()" onblur="_autoSalvarNomeTorneio('${c.id}',this.value)">` : ''}
+    ${podeMudar ? `<label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">NOME DO TORNEIO</label><input id="torneio-nome-inline-${c.id}" class="input" value="${c.nome.toUpperCase().replace(/"/g,'&quot;')}" style="text-transform:uppercase;margin-bottom:8px;width:100%;box-sizing:border-box;color:var(--purple);font-weight:700;" autocomplete="off" oninput="this.value=this.value.toUpperCase()" onblur="_autoSalvarNomeTorneio('${c.id}',this.value)">` : ''}
     ${podeMudar ? `
-      <label style="display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;" class="grad">FORMATO</label>
+      <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">FORMATO</label>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
         ${Object.entries(CAMP_META).map(([k,v]) => {
           const isSelected = k === c.tipo;
@@ -6910,7 +6931,7 @@ window.abrirCampeonato = (id) => {
         const times = p.times || [p.time].filter(Boolean);
         const playerHeader = jogNome ? `<div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-bottom:6px;">
           ${avatarJogador({fotoUrl: jog?.fotoUrl||''}, 24)}
-          <div style="font-size:12px;font-weight:700;color:var(--cyan);text-transform:uppercase;">${jogNome.toUpperCase()}</div>
+          <div style="font-size:12px;font-weight:700;color:${_jogadorColor(p.jogadorId)};text-transform:uppercase;">${jogNome.toUpperCase()}</div>
         </div>
         <div style="border-top:1px solid rgba(255,255,255,0.1);margin:0 -4px 10px -4px;"></div>` : '';
         const teamCard = (t) => {
@@ -8307,7 +8328,7 @@ function cardCampHome(c, modoLista=false) {
       const times = (p.times?.length ? p.times : [p.time]).filter(Boolean);
       const playerHeader = jogNome ? `<div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-bottom:6px;">
           ${avatarJogador({fotoUrl: jog?.fotoUrl||''}, 24)}
-          <div style="font-size:12px;font-weight:700;color:var(--cyan);text-transform:uppercase;">${jogNome.toUpperCase()}</div>
+          <div style="font-size:12px;font-weight:700;color:${_jogadorColor(p.jogadorId)};text-transform:uppercase;">${jogNome.toUpperCase()}</div>
         </div>
         <div style="border-top:1px solid rgba(255,255,255,0.1);margin:0 -4px 10px -4px;"></div>` : '';
       const teamCard = (t) => {
