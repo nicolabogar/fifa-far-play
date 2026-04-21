@@ -79,6 +79,8 @@
 
     /* Gradient text */
     .grad { background: linear-gradient(135deg, var(--purple), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    /* Placeholder color for new-team form inputs (inactive/empty state) */
+    #nt-clube-nome::placeholder, #nt-clube-nomeAbrev::placeholder, #nt-busca::placeholder { -webkit-text-fill-color: rgba(139,92,246,0.5); color: rgba(139,92,246,0.5); }
 
     /* Gradient border glow */
     .glow-border { box-shadow: 0 0 0 1px var(--purple), 0 0 20px rgba(139,92,246,0.2); }
@@ -120,6 +122,8 @@
     }
     .input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(139,92,246,0.15); }
     .input::placeholder { color: var(--text-muted); }
+    /* Gradient text for inputs (typed value) in new-team form — placed after .input for specificity */
+    .input.input-grad { background: linear-gradient(135deg, var(--purple), var(--cyan)), rgba(255,255,255,0.05); -webkit-background-clip: text, padding-box; background-clip: text, padding-box; -webkit-text-fill-color: transparent; }
 
     select.input option { background: #1E1E35; color: var(--text); }
 
@@ -663,9 +667,7 @@
         <span class="breadcrumb-item" onclick="irParaHome()"><span class="grad">HOME</span></span>
         <span class="breadcrumb-sep">›</span>
         <span class="breadcrumb-item active"><span class="grad">JOGADORES</span></span>
-      </div>
-      <div style="display:flex; align-items:center; justify-content:flex-end; padding:0 0 16px;">
-        <button class="btn-primary" id="btn-add-jog" style="width:auto;padding:10px 18px;font-size:14px;background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;"><span class="grad">+ CRIAR</span></button>
+        <button class="btn-primary" id="btn-add-jog" style="width:auto;padding:10px 18px;font-size:14px;margin-left:auto;background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;"><span class="grad">+ CRIAR</span></button>
       </div>
       <div id="lista-jog">
         <div style="background:rgba(139,92,246,0.08);border:1px dashed rgba(139,92,246,0.3);border-radius:18px;padding:32px 20px;text-align:center;">
@@ -681,11 +683,9 @@
         <span class="breadcrumb-item" onclick="irParaHome()"><span class="grad">HOME</span></span>
         <span class="breadcrumb-sep">›</span>
         <span class="breadcrumb-item active"><span class="grad">AMISTOSOS</span></span>
+        <button class="btn-primary" id="btn-criar-ami" style="width:auto;padding:10px 18px;font-size:14px;margin-left:auto;">+ CRIAR</button>
       </div>
-      <div style="display:flex; align-items:center; justify-content:space-between; padding:0 0 20px;">
-        <h2 style="font-size:22px; font-weight:900;" class="grad">AMISTOSOS</h2>
-        <button class="btn-primary" id="btn-criar-ami" style="width:auto;padding:10px 18px;font-size:14px;">+ CRIAR</button>
-      </div>
+      <h2 style="font-size:22px; font-weight:900; padding:0 0 20px;" class="grad">AMISTOSOS</h2>
       <div id="lista-ami">
         <p style="color:var(--text-muted); text-align:center; padding:48px 0; font-size:14px;">NENHUM AMISTOSO REGISTRADO</p>
       </div>
@@ -697,11 +697,9 @@
         <span class="breadcrumb-item" onclick="irParaHome()"><span class="grad">HOME</span></span>
         <span class="breadcrumb-sep">›</span>
         <span class="breadcrumb-item active"><span class="grad">TORNEIOS</span></span>
+        <button id="btn-criar-camp" class="btn-primary" style="width:auto;padding:10px 18px;font-size:14px;margin-left:auto;">+ CRIAR</button>
       </div>
-      <div style="display:flex; align-items:center; justify-content:space-between; padding:0 0 16px;">
-        <h2 style="font-size:22px; font-weight:900;" class="grad">TORNEIOS</h2>
-        <button id="btn-criar-camp" class="btn-primary" style="width:auto;padding:10px 18px;font-size:14px;">+ CRIAR</button>
-      </div>
+      <h2 style="font-size:22px; font-weight:900; padding:0 0 16px;" class="grad">TORNEIOS</h2>
       <div id="lista-camp">
         <p style="color:var(--text-muted); text-align:center; padding:48px 0; font-size:14px;">NENHUM TORNEIO CRIADO</p>
       </div>
@@ -746,10 +744,7 @@
         <span class="breadcrumb-item" onclick="irParaHome()"><span class="grad">HOME</span></span>
         <span class="breadcrumb-sep">›</span>
         <span class="breadcrumb-item active"><span class="grad">TIMES</span></span>
-      </div>
-      <div style="display:flex; align-items:center; justify-content:space-between; padding:0 0 16px;">
-        <h2 style="font-size:22px; font-weight:900;" class="grad">TIMES</h2>
-        <button class="btn-primary" id="btn-add-time" style="width:auto;padding:10px 18px;font-size:14px;background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;"><span class="grad">+ CRIAR</span></button>
+        <button class="btn-primary" id="btn-add-time" style="width:auto;padding:10px 18px;font-size:14px;background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;margin-left:auto;"><span class="grad">+ CRIAR</span></button>
       </div>
 
       <!-- Tabs -->
@@ -1430,7 +1425,7 @@ function htmlMsDropPaisTimes(paises) {
   const label = _msTriggerLabel('ms-pais-times');
   return `<div class="ms-drop" id="ms-pais-times">
     <button class="ms-trigger" onclick="_toggleMsDrop(event,'ms-pais-times')" type="button">
-      <span class="ms-trigger-label">${label}</span>
+      <span class="ms-trigger-label grad" style="font-weight:900;letter-spacing:-0.5px;">${label}</span>
       <span class="ms-trigger-arrow">▼</span>
     </button>
     <div class="ms-panel">
@@ -1439,7 +1434,7 @@ function htmlMsDropPaisTimes(paises) {
         return `<div class="ms-opt${checked?' checked':''}" data-val="${window._escSQ(p.nome)}" onclick="togglePaisFiltroTimes(event,'${window._escSQ(p.nome)}')">
           <div class="ms-opt-check">${checked?'✓':''}</div>
           ${p.code ? `<img src="https://flagcdn.com/w40/${p.code}.png" style="width:22px;height:16px;object-fit:cover;border-radius:3px;" loading="lazy">` : ''}
-          <span style="text-transform:uppercase;font-size:12px;">${p.nome}</span>
+          <span class="grad" style="text-transform:uppercase;font-size:12px;font-weight:900;letter-spacing:-0.5px;">${p.nome}</span>
         </div>`;
       }).join('')}
     </div>
@@ -9047,7 +9042,7 @@ function abrirModalAddTime(tipoInicial) {
           <label style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;" class="grad">PAÍS</label>
           <input type="hidden" id="nt-clube-pais" value="">
           <div id="nt-clube-pais-display" class="input" style="cursor:pointer;display:flex;align-items:center;gap:8px;min-height:42px;" onclick="_ntTogglePaisDropdown()">
-            <span style="color:var(--text-muted);font-size:14px;" id="nt-clube-pais-label">Selecione o país...</span>
+            <span style="font-size:14px;" class="grad" id="nt-clube-pais-label">Selecione o país...</span>
           </div>
           <div id="nt-clube-pais-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;background:var(--card-bg,#1a1a2e);border:1px solid var(--card-border);border-radius:12px;margin-top:4px;max-height:240px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.5);">
             <div style="padding:8px;border-bottom:1px solid var(--card-border);">
@@ -9058,11 +9053,11 @@ function abrirModalAddTime(tipoInicial) {
         </div>
         <div>
           <label style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;" class="grad">NOME DO CLUBE</label>
-          <input class="input" id="nt-clube-nome" placeholder="Nome do clube..." autocomplete="off" oninput="_ntClubePreview()" style="text-transform:uppercase;">
+          <input class="input input-grad" id="nt-clube-nome" placeholder="Nome do clube..." autocomplete="off" oninput="_ntClubePreview()" style="text-transform:uppercase;">
         </div>
         <div>
           <label style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;" class="grad">NOME ABREVIADO (OPCIONAL)</label>
-          <input class="input" id="nt-clube-nomeAbrev" placeholder="Ex: MAN. UTD" autocomplete="off" style="text-transform:uppercase;">
+          <input class="input input-grad" id="nt-clube-nomeAbrev" placeholder="Ex: MAN. UTD" autocomplete="off" style="text-transform:uppercase;">
         </div>
         <div>
           <label style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;" class="grad">BRASÃO (OPCIONAL)</label>
@@ -9093,7 +9088,7 @@ function abrirModalAddTime(tipoInicial) {
 
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
           <button id="btn-salvar-time" class="btn-primary" onclick="salvarNovoTime()" disabled style="opacity:0.4;background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;"><span class="grad">CRIAR</span></button>
-          <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
+          <button class="btn-primary" style="background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;" onclick="fecharFullscreen()"><span class="grad">CANCELAR</span></button>
         </div>
       </div>
 
@@ -9101,7 +9096,7 @@ function abrirModalAddTime(tipoInicial) {
       <div id="nt-selecao-section" style="display:${tipoInicial==='selecao'?'flex':'none'};flex-direction:column;gap:14px;">
         <div>
           <label style="display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;" class="grad">BUSCAR SELEÇÃO</label>
-          <input class="input" id="nt-busca" placeholder="Buscar país..." autocomplete="off" oninput="filtrarListaAddTime()">
+          <input class="input input-grad" id="nt-busca" placeholder="Buscar país..." autocomplete="off" oninput="filtrarListaAddTime()">
         </div>
         <div id="nt-lista" style="max-height:280px;overflow-y:auto;border-radius:12px;border:1px solid var(--card-border);background:rgba(0,0,0,0.2);padding:8px;"></div>
 
@@ -9121,7 +9116,7 @@ function abrirModalAddTime(tipoInicial) {
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
           <button id="btn-salvar-time-sel" class="btn-primary" onclick="salvarNovoTimeSel()" disabled style="opacity:0.4;background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;"><span class="grad">CRIAR</span></button>
-          <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
+          <button class="btn-primary" style="background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;" onclick="fecharFullscreen()"><span class="grad">CANCELAR</span></button>
         </div>
       </div>
     </div>`);
