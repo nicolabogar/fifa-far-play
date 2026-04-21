@@ -7489,6 +7489,7 @@ function renderRankRow(p, i, fromHome) {
     </div>
     <div style="display:flex;gap:6px;font-size:11px;font-weight:700;color:var(--text-muted);">
       ${titulosHtml}
+      <span title="TOTAL DE JOGOS">${p.j}J</span>
       <span title="VITORIAS">${p.vit}V</span>
       <span title="DERROTAS">${p.der}D</span>
       <span title="EMPATES">${p.emp}E</span>
@@ -7512,6 +7513,7 @@ function renderRankRowTorneio(p, i, fromHome) {
     <div style="display:flex;gap:6px;font-size:11px;font-weight:700;color:var(--text-muted);">
       <span title="TITULOS" style="color:var(--yellow);">🏆${p.titulos}</span>
       <span title="VICE-CAMPEONATO" style="color:#C0C0C0;">🥈${p.vices}</span>
+      <span title="TOTAL DE JOGOS">${p.j}J</span>
       <span title="GOLS FEITOS" style="color:var(--green);">${p.gp}GF</span>
       <span title="GOLS SOFRIDOS" style="color:var(--red);">${p.gc}GS</span>
     </div>
