@@ -708,9 +708,8 @@
         <span class="breadcrumb-sep">›</span>
         <span class="breadcrumb-item active"><span class="grad">RANKING</span></span>
       </div>
-      <div style="display:flex; align-items:center; justify-content:space-between; padding:0 0 16px;">
-        <h2 style="font-size:22px; font-weight:900;" class="grad">RANKING</h2>
-        <button id="btn-sync-ranking" onclick="sincronizarRanking(this)" style="width:auto; padding:10px 18px; font-size:13px; background:#111; border:1px solid rgba(255,255,255,0.15); color:#fff; border-radius:12px; cursor:pointer; font-weight:700; letter-spacing:0.04em;">SINCRONIZAR</button>
+      <div style="display:flex; align-items:center; justify-content:flex-end; padding:0 0 16px;">
+        <button id="btn-sync-ranking" onclick="sincronizarRanking(this)" class="btn-primary" style="width:auto; padding:10px 18px; font-size:14px;"><span class="grad">SINCRONIZAR</span></button>
       </div>
       <div id="rank-filtros" style="margin-bottom:20px;"></div>
       <div id="rank-ami-sec" style="margin-bottom:24px;">
@@ -1823,6 +1822,7 @@ function irPara(view) {
   }
   if (view === 'times') renderTimesEdit();
   if (view === 'ranking') { _rankState.jogadoresIds = []; _rankState.tiposAtivos = []; _rankState.torneioNomes = []; _rankState.filtrosRes = []; _rankState.dataIni = ''; _rankState.dataFim = ''; _rankState.modoJogo = 'todos'; _renderRankFiltros(); _renderRankTudo(); }
+  if (view === 'home') { atualizarDash(); }
 }
 window.irPara = irPara;
 
@@ -3115,6 +3115,16 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
   } else {
     pillBg1 = pillBg2 = 'rgba(245,158,11,0.3)';
   }
+  // Em modo dupla, todos os jogadores do mesmo time devem ter a mesma cor na tag
+  let _playerColorsForCard = a._playerColors || null;
+  if (a.modoDupla && _playerColorsForCard) {
+    const t1Ids = a.time1?.jogadoresIds || [];
+    const t2Ids = a.time2?.jogadoresIds || [];
+    const duplaColors = {..._playerColorsForCard};
+    if (t1Ids.length > 0) { const team1ColorIdx = duplaColors[t1Ids[0]] ?? 0; t1Ids.forEach(pid => { duplaColors[pid] = team1ColorIdx; }); }
+    if (t2Ids.length > 0) { const team2ColorIdx = duplaColors[t2Ids[0]] ?? 1; t2Ids.forEach(pid => { duplaColors[pid] = team2ColorIdx; }); }
+    _playerColorsForCard = duplaColors;
+  }
   const t1nom = (a.time1?.nome||'').replace(/'/g,"\\'");
   const t2nom = (a.time2?.nome||'').replace(/'/g,"\\'");
   const lpBadge1 = (!temRes && master && !compact)
@@ -3162,7 +3172,7 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
   const secaoVencedorAmi = _winnerPlayersAmi.length ? _htmlSecaoVencedor(_winnerPlayersAmi, a._playerColors || null) : '';
   return `${swipeOuter}${swipeBg}
   <div id="${cardId}" class="match-card" style="${compact?'padding:12px;':''}overflow:hidden;" ${readonly || a.resultado || !master ? '' : `onclick="editarAmistoso('${a.id}')" style="cursor:pointer;"`}>
-    ${!temRes && !compact ? `<div style="margin:-14px -14px 0 -14px;padding:10px 14px 8px;background:transparent;border-bottom:1px solid var(--card-border);border-radius:18px 18px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">${master && !noSwipe ? _iconExcluirCard(`event.stopPropagation();confirmarExcluirAmistoso('${a.id}')`) : ''}<span style="font-size:16px;font-weight:900;color:#6EE7B7;letter-spacing:0.05em;">AMISTOSO</span>${criadoEmFmt ? `<span style="font-size:11px;color:rgba(110,231,183,0.7);font-weight:600;margin-top:2px;">${criadoEmFmt}</span>` : ''}</div><div style="margin-bottom:10px;"></div>` : `<div style="text-align:center;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);border-radius:12px;padding:6px 12px;margin-bottom:10px;"><span style="font-size:15px;font-weight:800;color:#6EE7B7;letter-spacing:0.05em;text-transform:uppercase;">AMISTOSO</span></div>`}
+    ${!temRes && !compact ? `<div style="margin:-14px -14px 0 -14px;padding:10px 14px 8px;background:transparent;border-bottom:1px solid var(--card-border);border-radius:18px 18px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">${master && !noSwipe ? _iconExcluirCard(`event.stopPropagation();confirmarExcluirAmistoso('${a.id}')`) : ''}<span style="font-size:16px;font-weight:900;color:#6EE7B7;letter-spacing:0.05em;">AMISTOSO</span>${criadoEmFmt ? `<span style="font-size:11px;color:rgba(110,231,183,0.7);font-weight:600;margin-top:2px;">${criadoEmFmt}</span>` : ''}</div><div style="margin-bottom:10px;"></div>` : (isRanking && temRes ? `<div style="margin:-14px -14px 0 -14px;padding:10px 14px 8px;background:transparent;border-bottom:1px solid var(--card-border);border-radius:18px 18px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;"><span style="font-size:16px;font-weight:900;color:#6EE7B7;letter-spacing:0.05em;">AMISTOSO</span></div><div style="margin-bottom:10px;"></div>` : `<div style="text-align:center;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);border-radius:12px;padding:6px 12px;margin-bottom:10px;"><span style="font-size:15px;font-weight:800;color:#6EE7B7;letter-spacing:0.05em;text-transform:uppercase;">AMISTOSO</span></div>`)}
     ${!temRes && !compact ? `<div style="display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:6px;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:10px;">
       <span class="tag tag-gray">${a.tipo === 'selecoes' ? 'SELECOES' : 'CLUBES'}</span>
       ${a.modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
@@ -3173,13 +3183,14 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
       ${!isRanking && !temRes ? `<span class="tag tag-green">EM ANDAMENTO</span>` : ''}
       ${temRes && a.resultado.g1 === a.resultado.g2 ? '<span class="tag tag-yellow">EMPATE</span>' : ''}
       ${temRes ? `<span class="tag tag-red">FINALIZADO</span>` : ''}
+      ${temRes && criadoEmFmt ? `<span class="tag tag-gray" style="margin-left:auto;">${criadoEmFmt}</span>` : ''}
     </div>`}
     ${compact ? `
     <div style="display:flex;align-items:center;gap:8px;">
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-width:0;">
         <div class="grad" style="font-weight:800;font-size:13px;line-height:1.2;text-transform:uppercase;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_nomeAbrevTime(a.time1?.timeId, a.time1?.nome || '?')}</div>
         ${b1}
-        ${_nomesTime(a.time1).length ? _htmlJogadoresTime(a.time1, a._playerColors || null, 'var(--cyan)', pillBg1, true) : ''}
+        ${_nomesTime(a.time1).length ? _htmlJogadoresTime(a.time1, _playerColorsForCard, 'var(--cyan)', pillBg1, true) : ''}
       </div>
       <div style="flex-shrink:0;text-align:center;">
         ${temRes
@@ -3201,7 +3212,7 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-width:0;">
         <div class="grad" style="font-weight:800;font-size:13px;line-height:1.2;text-transform:uppercase;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_nomeAbrevTime(a.time2?.timeId, a.time2?.nome || '?')}</div>
         ${b2}
-        ${_nomesTime(a.time2).length ? _htmlJogadoresTime(a.time2, a._playerColors || null, a.modoDupla ? 'var(--yellow)' : 'var(--cyan)', pillBg2, true) : ''}
+        ${_nomesTime(a.time2).length ? _htmlJogadoresTime(a.time2, _playerColorsForCard, a.modoDupla ? 'var(--yellow)' : 'var(--cyan)', pillBg2, true) : ''}
       </div>
     </div>` : `
     <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
@@ -3211,7 +3222,7 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
         ${lpIcon1}
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(a.time1?.timeId))}</div>
         ${_nomesTime(a.time1).length
-          ? _htmlJogadoresTime(a.time1, a._playerColors || null, 'var(--cyan)', pillBg1, false)
+          ? _htmlJogadoresTime(a.time1, _playerColorsForCard, 'var(--cyan)', pillBg1, false)
           : ''}
       </div>
       <div style="text-align:center;min-width:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
@@ -3223,14 +3234,10 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
         ${lpIcon2}
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(a.time2?.timeId))}</div>
         ${_nomesTime(a.time2).length
-          ? _htmlJogadoresTime(a.time2, a._playerColors || null, a.modoDupla ? 'var(--yellow)' : 'var(--cyan)', pillBg2, false)
+          ? _htmlJogadoresTime(a.time2, _playerColorsForCard, a.modoDupla ? 'var(--yellow)' : 'var(--cyan)', pillBg2, false)
           : ''}
       </div>
     </div>`}
-  ${temRes ? (() => {
-    const dataAmi = a.criadoEm?.seconds ? new Date(a.criadoEm.seconds * 1000).toLocaleDateString('pt-BR') : '';
-    return dataAmi ? `<div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);"><span class="tag tag-gray">${dataAmi}</span></div>` : '';
-  })() : ''}
   ${secaoVencedorAmi}
   ${!temRes && !compact ? `
   <div style="margin-top:12px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px;">
@@ -6690,6 +6697,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
       ${temIdaVolta && turno === 2 ? `<span class="tag tag-yellow">RETURNO</span>` : ''}
       ${g1r === g2r ? `<span class="tag tag-yellow">EMPATE</span>` : ''}
       <span class="tag tag-red">FINALIZADO</span>
+      ${played?.jogoEm ? `<span class="tag tag-gray" style="margin-left:auto;">${new Date(played.jogoEm).toLocaleDateString('pt-BR')}</span>` : ''}
     </div>`}
     <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
@@ -6710,7 +6718,6 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
         ${nome2 ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;">${_htmlJogadorPill(m2.jogadorId, nome2, 20, _jogadorBg(m2.jogadorId))}</div>` : ''}
       </div>
     </div>
-    ${temRes && played?.jogoEm ? `<div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);"><span class="tag tag-gray">${new Date(played.jogoEm).toLocaleDateString('pt-BR')}</span></div>` : ''}
     ${secaoVencedorTorn}
     ${!temRes ? `<div style="margin-top:12px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px;"><button onclick="event.stopPropagation();compartilharWhatsAppTorneio('${t1?.id||''}','${t1nom}','${nome1Esc}','${t2?.id||''}','${t2nom}','${nome2Esc}','${tipo1}','${tipo2}')" style="width:100%;background:var(--card);border:none;color:var(--green);padding:10px;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>COMPARTILHAR NO WHATSAPP</button></div>` : ''}
   </div>`;
@@ -7548,6 +7555,27 @@ window._rankToggleTipo = (tipo) => {
   _renderRankTudo();
 };
 
+// Handlers para selects nativos (single-value) do ranking
+window._rankToggleTipoSelect = (tipo) => {
+  _rankState.tiposAtivos = tipo ? [tipo] : [];
+  if (!_rankState.tiposAtivos.includes('TORNEIO')) _rankState.torneioNomes = [];
+  _rankState.filtrosRes = [];
+  _renderRankFiltros();
+  _renderRankTudo();
+};
+
+window._rankToggleTorneioSelect = (nome) => {
+  _rankState.torneioNomes = nome ? [nome] : [];
+  _renderRankFiltros();
+  _renderRankTudo();
+};
+
+window._rankToggleResSelect = (res) => {
+  _rankState.filtrosRes = res ? [res] : [];
+  _renderRankFiltros();
+  _renderRankJogos();
+};
+
 window._rankSetJog = (jogId) => {
   _rankState.jogadoresIds = jogId ? [jogId] : [];
   _rankState.filtrosRes = [];
@@ -7632,35 +7660,6 @@ function _renderRankFiltros() {
   const exatoUm = jogadoresIds.length === 1;
   const temFiltros = jogadoresIds.length > 0 || tiposAtivos.length > 0 || torneioNomes.length > 0 || filtrosRes.length > 0 || dataIni || dataFim || modoJogo !== 'todos';
 
-  // Helper: verifica se um dropdown está aberto (preserva estado entre re-renders)
-  const isOpen = (id) => {
-    const list = document.getElementById('rank-mdrop-list-' + id);
-    return list ? list.style.display !== 'none' : false;
-  };
-
-  // Helper: constrói um dropdown multi-select colapsável
-  const buildDrop = (id, bgStyle, borderStyle, colorStyle, labelDefault, items, selectedArr, onToggleFn) => {
-    const selSet = new Set(selectedArr);
-    const selLabels = items.filter(i => selSet.has(i.value)).map(i => i.label);
-    const label = selLabels.length ? selLabels.join(', ') : labelDefault;
-    const open = isOpen(id);
-    const itemsHtml = items.map(i => {
-      return `<label class="rank-mdrop-item" onclick="event.preventDefault();${onToggleFn}('${i.value.replace(/'/g,"\\'")}')">
-        <input type="checkbox" ${selSet.has(i.value)?'checked':''}>
-        <span>${i.label}</span>
-      </label>`;
-    }).join('');
-    return `<div class="rank-mdrop-wrap">
-      <div id="rank-mdrop-header-${id}" class="rank-mdrop-header${open?' open':''}" style="${bgStyle}${borderStyle}${colorStyle}" onclick="_rankDropToggle('${id}')">
-        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${label}</span>
-        <span class="rank-mdrop-arrow${open?' open':''}">▾</span>
-      </div>
-      <div id="rank-mdrop-list-${id}" class="rank-mdrop-list" style="display:${open?'block':'none'};">
-        ${itemsHtml}
-      </div>
-    </div>`;
-  };
-
   // Jogador: single select
   const jogSelectOpts = jogadores.map(j => {
     const sel = jogadoresIds.includes(j.id) ? 'selected' : '';
@@ -7677,44 +7676,29 @@ function _renderRankFiltros() {
     ${modoOpts.map(m => `<button onclick="_rankSetModoJogo('${m.value}')" style="padding:7px 16px;border-radius:10px;border:1px solid ${modoJogo===m.value?'rgba(6,182,212,0.6)':'var(--card-border)'};background:${modoJogo===m.value?'rgba(6,182,212,0.15)':'rgba(255,255,255,0.03)'};color:${modoJogo===m.value?'#67E8F9':'var(--text-muted)'};font-size:13px;font-weight:700;cursor:pointer;text-transform:uppercase;">${m.label}</button>`).join('')}
   </div>`;
 
-  // Tipo de jogo
-  const tipoDrop = buildDrop(
-    'tipo',
-    'background-color:var(--bg);',
-    'border:1px solid rgba(139,92,246,0.35);',
-    'color:#A78BFA;',
-    'TODOS OS TIPOS',
-    [{value:'AMISTOSO',label:'AMISTOSOS',hasFoto:false},{value:'TORNEIO',label:'TORNEIOS',hasFoto:false}],
-    tiposAtivos,
-    '_rankToggleTipo'
-  );
+  // Tipo de jogo: select nativo
+  const tipoOpts = [{value:'',label:'TODOS OS TIPOS'},{value:'AMISTOSO',label:'AMISTOSOS'},{value:'TORNEIO',label:'TORNEIOS'}];
+  const tipoSelVal = tiposAtivos.length === 1 ? tiposAtivos[0] : '';
+  const tipoDrop = `<select class="filtro-drop filtro-drop-purple" onchange="_rankToggleTipoSelect(this.value)">
+    ${tipoOpts.map(o => `<option value="${o.value}" ${tipoSelVal===o.value?'selected':''}>${o.label}</option>`).join('')}
+  </select>`;
 
   const showTorneioFilter = tiposAtivos.length === 0 || tiposAtivos.includes('TORNEIO');
   const torneios = showTorneioFilter
     ? [...new Set((campeonatos||[]).map(c=>c.nome).filter(Boolean))].sort()
     : [];
-  const torneioDrop = torneios.length ? buildDrop(
-    'torneio',
-    'background-color:var(--bg);',
-    'border:1px solid rgba(6,182,212,0.35);',
-    'color:#67E8F9;',
-    'TODOS OS TORNEIOS',
-    torneios.map(t=>({value:t,label:t.toUpperCase(),hasFoto:false})),
-    torneioNomes,
-    '_rankToggleTorneio'
-  ) : '';
+  const torneioSelVal = torneioNomes.length === 1 ? torneioNomes[0] : '';
+  const torneioDrop = torneios.length ? `<select class="filtro-drop filtro-drop-cyan" onchange="_rankToggleTorneioSelect(this.value)">
+    <option value="">TODOS OS TORNEIOS</option>
+    ${torneios.map(t=>`<option value="${t}" ${torneioSelVal===t?'selected':''}>${t.toUpperCase()}</option>`).join('')}
+  </select>` : '';
 
   // Resultado (só com 1 jogador)
-  const resDrop = exatoUm ? buildDrop(
-    'resultado',
-    'background-color:var(--bg);',
-    'border:1px solid rgba(245,158,11,0.35);',
-    'color:#FCD34D;',
-    'TODOS OS RESULTADOS',
-    [{value:'V',label:'VITORIA',hasFoto:false},{value:'E',label:'EMPATE',hasFoto:false},{value:'D',label:'DERROTA',hasFoto:false}],
-    filtrosRes,
-    '_rankToggleRes'
-  ) : '';
+  const resOpts = [{value:'',label:'TODOS OS RESULTADOS'},{value:'V',label:'VITORIA'},{value:'E',label:'EMPATE'},{value:'D',label:'DERROTA'}];
+  const resSelVal = filtrosRes.length === 1 ? filtrosRes[0] : '';
+  const resDrop = exatoUm ? `<select class="filtro-drop filtro-drop-yellow" onchange="_rankToggleResSelect(this.value)">
+    ${resOpts.map(o => `<option value="${o.value}" ${resSelVal===o.value?'selected':''}>${o.label}</option>`).join('')}
+  </select>` : '';
 
   // Período
   const hoje = new Date().toISOString().split('T')[0];
@@ -7735,15 +7719,15 @@ function _renderRankFiltros() {
 
   // Botão limpar filtros (dentro do painel)
   const limparBtn = temFiltros
-    ? `<button onclick="_rankLimparFiltros()" style="width:100%;padding:10px 16px;border-radius:14px;border:1px solid rgba(239,68,68,0.35);background:rgba(239,68,68,0.08);color:#FCA5A5;font-size:13px;font-weight:700;cursor:pointer;text-transform:uppercase;margin-top:12px;">LIMPAR FILTROS X</button>`
+    ? `<button onclick="_rankLimparFiltros()" class="btn-primary" style="width:100%;margin-top:12px;font-size:14px;background:var(--card);border:1px solid var(--card-border);border-radius:18px;"><span class="grad">LIMPAR FILTROS</span></button>`
     : '';
 
   el.innerHTML = `
     <div class="rank-filter-panel">
       <div class="rank-filter-label" style="margin-top:0;">FILTROS</div>
-      ${jogSelect ? `<div class="rank-filter-label">JOGADOR</div>${jogSelect}` : ''}
       <div class="rank-filter-label">MODO DE JOGO</div>
       ${modoHtml}
+      ${jogSelect ? `<div class="rank-filter-label">JOGADOR</div>${jogSelect}` : ''}
       <div class="rank-filter-label">TIPO DE JOGO</div>
       ${tipoDrop}
       ${torneioDrop ? `<div class="rank-filter-label">TORNEIO</div>${torneioDrop}` : ''}
@@ -8248,10 +8232,12 @@ function _renderHistorico() {
     const nome2 = j.advTime || '';
     const nomeAdvTime = j.advTimeNome || j.advTime || '?';
     return `<div class="match-card" style="margin-bottom:10px;">
+      ${j.torneio ? `<div style="margin:-14px -14px 0 -14px;padding:10px 14px 8px;background:transparent;border-bottom:1px solid var(--card-border);border-radius:18px 18px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;"><span style="font-size:16px;font-weight:900;color:#FCD34D;letter-spacing:0.05em;">${j.torneio.toUpperCase()}</span></div><div style="margin-bottom:10px;"></div>` : ''}
       <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:10px;">
         <span class="tag tag-purple">TORNEIO</span>
         <span class="tag tag-gray">${isSel ? 'SELECOES' : 'CLUBES'}</span>
-        ${j.torneio?`<span class="tag tag-yellow" style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${j.torneio.toUpperCase()}</span>`:''}
+        <span class="tag ${cor}">${corTxt}</span>
+        ${data?`<span class="tag tag-gray" style="margin-left:auto;">${data}</span>`:''}
       </div>
       <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
         <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
@@ -8271,10 +8257,6 @@ function _renderHistorico() {
           <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(j.advTimeId))}</div>
           ${nome2?`<div style="margin-top:4px;">${_htmlJogadorPill((j.advJogadoresIds||[])[0]||null, nome2, 20)}</div>`:''}
         </div>
-      </div>
-      <div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);">
-        <span class="tag ${cor}">${corTxt}</span>
-        ${data?`<span style="font-size:10px;color:var(--text-muted);">${data}</span>`:''}
       </div>
     </div>`;
   }).join('');
