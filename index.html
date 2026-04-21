@@ -198,11 +198,14 @@
     .rank-confr-table tr:last-child td { border-bottom:none; }
     .rank-confr-table tr:hover td { background:rgba(255,255,255,0.03); }
     /* Date inputs */
-    .rank-date-row { display:flex;flex-direction:column;gap:8px;margin-top:8px; }
-    .rank-date-row > div { width:100%; }
-    .rank-date-input { background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:10px;color:var(--text);font-size:14px;font-weight:700;padding:10px 12px;width:100%;box-sizing:border-box;cursor:pointer;outline:none;min-height:44px; }
+    .rank-date-row { display:flex;flex-direction:column;gap:8px;margin-top:8px;width:100%;box-sizing:border-box; }
+    .rank-date-row > div { width:100%;box-sizing:border-box; }
+    .rank-date-field { display:flex;align-items:center;gap:6px;width:100%;box-sizing:border-box; }
+    .rank-date-input { background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:10px;color:var(--text);font-size:14px;font-weight:700;padding:10px 12px;flex:1;min-width:0;box-sizing:border-box;cursor:pointer;outline:none;min-height:44px; }
     .rank-date-input:disabled { opacity:0.35;cursor:not-allowed; }
     .rank-date-input::-webkit-calendar-picker-indicator { filter:invert(0.7); }
+    .rank-date-clear { background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:10px;color:var(--text-muted);font-size:18px;font-weight:700;cursor:pointer;padding:0 10px;min-height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;line-height:1; }
+    .rank-date-clear:hover { background:rgba(255,255,255,0.12);color:var(--text); }
     /* ── Paginação ── */
     .pag-row { display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px; }
     .pag-btn { padding:6px 14px;border-radius:10px;border:1px solid var(--card-border);background:rgba(255,255,255,0.05);color:var(--text-muted);font-size:12px;font-weight:700;cursor:pointer; }
@@ -7755,15 +7758,21 @@ function _renderRankFiltros() {
   const dataHtml = `<div class="rank-date-row">
     <div>
       <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:5px;">DATA INICIO</div>
-      <input type="date" class="rank-date-input" id="rank-data-ini" value="${dataIni}" max="${hoje}"
-        oninput="_rankSetData('ini', this.value)"
-        style="border-color:rgba(139,92,246,0.35);color:${dataIni?'#A78BFA':'var(--text-muted)'};">
+      <div class="rank-date-field">
+        <input type="date" class="rank-date-input" id="rank-data-ini" value="${dataIni}" max="${hoje}"
+          oninput="_rankSetData('ini', this.value)"
+          style="border-color:rgba(139,92,246,0.35);color:${dataIni?'#A78BFA':'var(--text-muted)'};">
+        ${dataIni ? `<button class="rank-date-clear" onclick="_rankSetData('ini', '')">×</button>` : ''}
+      </div>
     </div>
     <div>
       <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:5px;">DATA FIM</div>
-      <input type="date" class="rank-date-input" id="rank-data-fim" value="${dataFim}" max="${hoje}" ${!dataIni?'disabled':''} min="${dataIni||''}"
-        oninput="_rankSetData('fim', this.value)"
-        style="border-color:rgba(6,182,212,0.35);color:${dataFim?'#67E8F9':'var(--text-muted)'};">
+      <div class="rank-date-field">
+        <input type="date" class="rank-date-input" id="rank-data-fim" value="${dataFim}" max="${hoje}" ${!dataIni?'disabled':''} min="${dataIni||''}"
+          oninput="_rankSetData('fim', this.value)"
+          style="border-color:rgba(6,182,212,0.35);color:${dataFim?'#67E8F9':'var(--text-muted)'};">
+        ${dataFim ? `<button class="rank-date-clear" onclick="_rankSetData('fim', '')">×</button>` : ''}
+      </div>
     </div>
   </div>`;
 
