@@ -3428,6 +3428,8 @@ function _renderPlayersPanel() {
 
   if (!allPlayers.length) {
     container.innerHTML = '';
+    const btnLimparRow = document.getElementById('ami-btn-limpar-row');
+    if (btnLimparRow) btnLimparRow.style.display = 'none';
   } else {
     const tags = allPlayers.map(([id, nome]) => {
       const cidx = (_playerTagColorIdx.get(id) ?? 0) % _PLAYER_TAG_PALETTE.length;
@@ -3440,6 +3442,8 @@ function _renderPlayersPanel() {
     container.innerHTML = `<div style="background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:10px;margin-bottom:4px;">
       <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;min-height:28px;">${tags}</div>
     </div>`;
+    const btnLimparRow = document.getElementById('ami-btn-limpar-row');
+    if (btnLimparRow) btnLimparRow.style.display = '';
   }
 
   // Desabilitar combo quando cheio
