@@ -7352,7 +7352,7 @@ window.salvarPartida = async (cid, gi) => {
 };
 
 // ─── RANKING ─────────────────────────────────────────────────────────
-function calcularRankingAmistosos(jogIds, dataIni, dataFim, modoJogo) {
+function calcularRankingAmistosos(jogIds, dataIni, dataFim, modoJogo, adversarioId) {
   const ids = jogIds || [];
   const dIni = dataIni ? new Date(dataIni).getTime() : null;
   const dFim = dataFim ? new Date(dataFim + 'T23:59:59').getTime() : null;
@@ -7361,16 +7361,18 @@ function calcularRankingAmistosos(jogIds, dataIni, dataFim, modoJogo) {
     if (ids.length && !ids.includes(j.id)) return;
     s[j.id]={id:j.id,nome:_nomeExibicao(j),fotoUrl:j.fotoUrl||'',vit:0,emp:0,der:0,gp:0,gc:0,pts:0,j:0,titulos:0};
   });
-  // Incluir titulos de torneios
-  campeonatos.forEach(c => {
-    if (c.status==='finalizado') {
-      const finalFase=(c.fasesEliminatorias||[]).find(f=>f.fase==='final');
-      if (finalFase) {
-        const cf=(finalFase.confrontos||[])[0];
-        if (cf&&cf.vencedor!==null&&s[cf.vencedor]) s[cf.vencedor].titulos++;
+  // Incluir titulos de torneios (apenas quando não há filtro de adversário)
+  if (!adversarioId || ids.length !== 1) {
+    campeonatos.forEach(c => {
+      if (c.status==='finalizado') {
+        const finalFase=(c.fasesEliminatorias||[]).find(f=>f.fase==='final');
+        if (finalFase) {
+          const cf=(finalFase.confrontos||[])[0];
+          if (cf&&cf.vencedor!==null&&s[cf.vencedor]) s[cf.vencedor].titulos++;
+        }
       }
-    }
-  });
+    });
+  }
   amistosos.forEach(a => {
     if (!a.resultado) return;
     if (modoJogo === 'dupla' && !a.modoDupla) return;
@@ -7380,6 +7382,14 @@ function calcularRankingAmistosos(jogIds, dataIni, dataFim, modoJogo) {
       if (dIni && (!ts || ts < dIni)) return;
       if (dFim && (!ts || ts > dFim)) return;
     }
+    // Filtro de adversário: só conta jogos em que o jogador selecionado enfrenta o adversário
+    if (adversarioId && ids.length === 1) {
+      const t1Ids = _resolveTimeIds(a.time1);
+      const t2Ids = _resolveTimeIds(a.time2);
+      const jogIsT1 = t1Ids.includes(ids[0]);
+      const jogIsT2 = t2Ids.includes(ids[0]);
+      if (!(jogIsT1 && t2Ids.includes(adversarioId)) && !(jogIsT2 && t1Ids.includes(adversarioId))) return;
+    }
     const {g1,g2}=a.resultado;
     const add=(ids,gf,gc)=>ids?.forEach(id=>{if(!s[id])return;s[id].gp+=gf;s[id].gc+=gc;s[id].j++;s[id].vit+=gf>gc?1:0;s[id].emp+=gf===gc?1:0;s[id].der+=gf<gc?1:0;s[id].pts+=gf>gc?3:gf===gc?1:0;});
     add(_resolveTimeIds(a.time1),g1,g2); add(_resolveTimeIds(a.time2),g2,g1);
@@ -7387,7 +7397,7 @@ function calcularRankingAmistosos(jogIds, dataIni, dataFim, modoJogo) {
   return Object.values(s).filter(x=>x.j>0||x.titulos>0).sort((a,b)=>b.pts!==a.pts?b.pts-a.pts:(b.gp-b.gc)!==(a.gp-a.gc)?(b.gp-b.gc)-(a.gp-a.gc):b.gp-a.gp);
 }
 
-function calcularRankingTorneios(jogIds, torneioNomes, dataIni, dataFim, modoJogo) {
+function calcularRankingTorneios(jogIds, torneioNomes, dataIni, dataFim, modoJogo, adversarioId) {
   const ids = jogIds || [];
   const tnomes = Array.isArray(torneioNomes) ? torneioNomes : (torneioNomes ? [torneioNomes] : []);
   const dIni = dataIni ? new Date(dataIni).getTime() : null;
@@ -7408,26 +7418,57 @@ function calcularRankingTorneios(jogIds, torneioNomes, dataIni, dataFim, modoJog
       return true;
     });
   }
+  const advAtivo = adversarioId && ids.length === 1;
   camps.forEach(c => {
-    (c.grupos||[]).forEach(g=>g.membros.forEach(m=>{if(!s[m.jogadorId])return;s[m.jogadorId].gp+=m.gp;s[m.jogadorId].gc+=m.gc;s[m.jogadorId].j+=m.vit+m.emp+m.der;}));
-    (c.fasesEliminatorias||[]).forEach(fase=>(fase.confrontos||[]).forEach(cf=>{
-      if(cf.vencedor===null||cf.g1===null||cf.g2===null)return;
-      if(cf.mesmoJogador)return; // jogo entre times do mesmo jogador nao conta no ranking
-      if(s[cf.j1Id]){s[cf.j1Id].gp+=cf.g1;s[cf.j1Id].gc+=cf.g2;s[cf.j1Id].j++;}
-      if(s[cf.j2Id]){s[cf.j2Id].gp+=cf.g2;s[cf.j2Id].gc+=cf.g1;s[cf.j2Id].j++;}
-    }));
-    if(c.status==='finalizado'){
-      const finalFase=(c.fasesEliminatorias||[]).find(f=>f.fase==='final');
-      if(finalFase){
-        const cf=(finalFase.confrontos||[])[0];
-        if(cf&&cf.vencedor!==null){
-          const campeaoId=cf.vencedor;
-          const viceId=cf.vencedor===cf.j1Id?cf.j2Id:cf.j1Id;
-          if(s[campeaoId])s[campeaoId].titulos++;
-          if(s[viceId]&&!cf.mesmoJogador)s[viceId].vices++;
+    if (advAtivo) {
+      // Quando há filtro de adversário, contabiliza apenas as partidas do jogador selecionado contra o adversário
+      const jogId = ids[0];
+      (c.grupos||[]).forEach(g => {
+        (g.partidas||[]).forEach(p => {
+          if (p.g1 === undefined || p.g1 === null || p.g2 === undefined || p.g2 === null) return;
+          const isJ1 = p.j1Id === jogId;
+          const isJ2 = p.j2Id === jogId;
+          if (!isJ1 && !isJ2) return;
+          const oppId = isJ1 ? p.j2Id : p.j1Id;
+          if (oppId !== adversarioId) return;
+          const meuGol = isJ1 ? p.g1 : p.g2;
+          const advGol = isJ1 ? p.g2 : p.g1;
+          if (s[jogId]) { s[jogId].gp += meuGol; s[jogId].gc += advGol; s[jogId].j++; }
+        });
+      });
+      (c.fasesEliminatorias||[]).forEach(fase=>(fase.confrontos||[]).forEach(cf=>{
+        if(cf.vencedor===null||cf.g1===null||cf.g2===null)return;
+        if(cf.mesmoJogador)return;
+        const isJ1 = cf.j1Id === jogId;
+        const isJ2 = cf.j2Id === jogId;
+        if (!isJ1 && !isJ2) return;
+        const oppId = isJ1 ? cf.j2Id : cf.j1Id;
+        if (oppId !== adversarioId) return;
+        const meuGol = isJ1 ? cf.g1 : cf.g2;
+        const advGol = isJ1 ? cf.g2 : cf.g1;
+        if (s[jogId]) { s[jogId].gp += meuGol; s[jogId].gc += advGol; s[jogId].j++; }
+      }));
+    } else {
+      (c.grupos||[]).forEach(g=>g.membros.forEach(m=>{if(!s[m.jogadorId])return;s[m.jogadorId].gp+=m.gp;s[m.jogadorId].gc+=m.gc;s[m.jogadorId].j+=m.vit+m.emp+m.der;}));
+      (c.fasesEliminatorias||[]).forEach(fase=>(fase.confrontos||[]).forEach(cf=>{
+        if(cf.vencedor===null||cf.g1===null||cf.g2===null)return;
+        if(cf.mesmoJogador)return; // jogo entre times do mesmo jogador nao conta no ranking
+        if(s[cf.j1Id]){s[cf.j1Id].gp+=cf.g1;s[cf.j1Id].gc+=cf.g2;s[cf.j1Id].j++;}
+        if(s[cf.j2Id]){s[cf.j2Id].gp+=cf.g2;s[cf.j2Id].gc+=cf.g1;s[cf.j2Id].j++;}
+      }));
+      if(c.status==='finalizado'){
+        const finalFase=(c.fasesEliminatorias||[]).find(f=>f.fase==='final');
+        if(finalFase){
+          const cf=(finalFase.confrontos||[])[0];
+          if(cf&&cf.vencedor!==null){
+            const campeaoId=cf.vencedor;
+            const viceId=cf.vencedor===cf.j1Id?cf.j2Id:cf.j1Id;
+            if(s[campeaoId])s[campeaoId].titulos++;
+            if(s[viceId]&&!cf.mesmoJogador)s[viceId].vices++;
+          }
+        } else if(c.campeaoPorDefault){
+          if(s[c.campeaoPorDefault])s[c.campeaoPorDefault].titulos++;
         }
-      } else if(c.campeaoPorDefault){
-        if(s[c.campeaoPorDefault])s[c.campeaoPorDefault].titulos++;
       }
     }
   });
@@ -7606,7 +7647,7 @@ window._rankSetAdversario = (advId) => {
   _rankState.adversarioId = advId || '';
   _rankState.filtrosRes = [];
   _renderRankFiltros();
-  _renderRankJogos();
+  _renderRankTudo();
 };
 
 window._rankSetModoJogo = (modo) => {
@@ -7829,15 +7870,15 @@ function _renderRankFiltros() {
 
 // Atualiza visibilidade das seções e re-renderiza tudo conforme filtros
 function _renderRankTudo() {
-  const { tiposAtivos, jogadoresIds, torneioNomes, dataIni, dataFim, modoJogo } = _rankState;
+  const { tiposAtivos, jogadoresIds, torneioNomes, dataIni, dataFim, modoJogo, adversarioId } = _rankState;
   const amiSec = document.getElementById('rank-ami-sec');
   const campSec = document.getElementById('rank-camp-sec');
   const showAmi = tiposAtivos.length === 0 || tiposAtivos.includes('AMISTOSO');
   const showCamp = tiposAtivos.length === 0 || tiposAtivos.includes('TORNEIO');
   if (amiSec) amiSec.style.display = showAmi ? '' : 'none';
   if (!showCamp && campSec) campSec.style.display = 'none';
-  if (showAmi) renderRankingAmistosos(calcularRankingAmistosos(jogadoresIds, dataIni, dataFim, modoJogo));
-  if (showCamp) renderRankingTorneios(calcularRankingTorneios(jogadoresIds, torneioNomes, dataIni, dataFim, modoJogo));
+  if (showAmi) renderRankingAmistosos(calcularRankingAmistosos(jogadoresIds, dataIni, dataFim, modoJogo, adversarioId));
+  if (showCamp) renderRankingTorneios(calcularRankingTorneios(jogadoresIds, torneioNomes, dataIni, dataFim, modoJogo, adversarioId));
   _renderRankJogos();
 }
 
