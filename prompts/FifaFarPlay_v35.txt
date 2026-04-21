@@ -1,0 +1,17 @@
+# FIFA FAR PLAY - Prompts de Features v35
+# FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
+# O agente deve marcar o hash do commit ao concluir cada item.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v35.txt e um novo é criado.
+
+## MELHORIAS ##
+
+- [x] Item 1: Cores iguais para dupla nos cards de amistoso e torneio - quando modoDupla, todos os jogadores do mesmo time devem ter a mesma cor na tag (hash: 86fd4c4)
+- [x] Item 2: Para cards de jogos finalizados mover a data do jogo para junto das tags no lado direito do card (remover seção separada no rodapé) (hash: 86fd4c4)
+- [x] Item 3: Cards de torneio do ranking - remover tag de nome de torneio e colocar como menu (header) do card igual exibido na home (hash: 86fd4c4)
+- [x] Item 4: Na página do ranking nos cards de amistoso adicionar quebra de linha entre o título AMISTOSO e as tags (hash: 86fd4c4)
+- [x] Item 5: Na página de ranking remover o título h2 RANKING (hash: 86fd4c4)
+- [x] Item 6: Na página de ranking o botão sincronizar deve ter o mesmo estilo de cor e tamanho do botão criar da home (btn-primary com span grad) (hash: 86fd4c4)
+- [x] Item 7: Na página do ranking os filtros de modo de jogo devem ficar acima do componente de filtrar jogadores (hash: 86fd4c4)
+- [x] Item 8: Na página de ranking todos os dropdowns devem seguir o mesmo padrão das telas de amistoso e torneios (filtro-drop com select nativo) (hash: 86fd4c4)
+- [x] Item 9: Na página de ranking o botão de limpar filtros deve ter o X removido do texto e aplicado estilo igual ao botão criar da home (btn-primary com span grad) (hash: 86fd4c4)
+- [x] Item 10: Quando voltar para home após ver ranking de um jogador, o ranking da home deve ser sempre reconsultado do zero (chamar atualizarDash ao navegar para home) (hash: 86fd4c4)

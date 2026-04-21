@@ -2324,10 +2324,6 @@ window.avatarSvg = avatarSvg;
 
 function _htmlJogadorPill(id, nome, size, bg) {
   size = size || 20;
-  const fotoUrl = id ? (jogadores.find(x => x.id === id)?.fotoUrl || '') : '';
-  const imgHtml = fotoUrl
-    ? `<img src="${fotoUrl}" style="width:${size}px;height:${size}px;border-radius:${Math.round(size*0.3)}px;object-fit:cover;flex-shrink:0;" onerror="this.outerHTML=window.avatarSvg(${size})">`
-    : avatarSvg(size);
   if (bg) {
     let textColor = '#FCD34D';
     if (bg.includes('16,185,129')) textColor = '#6EE7B7';
@@ -2336,11 +2332,9 @@ function _htmlJogadorPill(id, nome, size, bg) {
     else if (bg.includes('139,92,246')) textColor = '#C4B5FD';
     else if (bg.includes('34,197,94')) textColor = '#86EFAC';
     else if (bg.includes('236,72,153')) textColor = '#F9A8D4';
-    const wrapStyle = `display:inline-flex;align-items:center;gap:4px;max-width:100%;`;
-    return `<div style="${wrapStyle}">${imgHtml}<span style="font-size:11px;color:${textColor};font-weight:700;text-transform:uppercase;letter-spacing:0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${nome}</span></div>`;
+    return `<span style="display:inline-block;font-size:11px;color:${textColor};font-weight:700;text-transform:uppercase;letter-spacing:0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${nome}</span>`;
   }
-  const wrapStyle = `display:inline-flex;align-items:center;gap:4px;max-width:100%;`;
-  return `<div style="${wrapStyle}">${imgHtml}<span class="grad" style="font-size:11px;font-weight:700;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${nome}</span></div>`;
+  return `<span class="grad" style="display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${nome}</span>`;
 }
 
 function getMaster() { return jogadores.find(j => j.master); }
@@ -3167,7 +3161,7 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
   const secaoVencedorAmi = _winnerPlayersAmi.length ? _htmlSecaoVencedor(_winnerPlayersAmi, a._playerColors || null) : '';
   return `${swipeOuter}${swipeBg}
   <div id="${cardId}" class="match-card" style="${compact?'padding:12px;':''}overflow:hidden;" ${readonly || a.resultado || !master ? '' : `onclick="editarAmistoso('${a.id}')" style="cursor:pointer;"`}>
-    ${!temRes && !compact ? `<div style="margin:-14px -14px 0 -14px;padding:10px 14px 8px;background:transparent;border-bottom:1px solid var(--card-border);border-radius:18px 18px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">${master && !noSwipe ? _iconExcluirCard(`event.stopPropagation();confirmarExcluirAmistoso('${a.id}')`) : ''}<span style="font-size:16px;font-weight:900;color:#6EE7B7;letter-spacing:0.05em;">AMISTOSO</span>${criadoEmFmt ? `<span style="font-size:11px;color:rgba(110,231,183,0.7);font-weight:600;margin-top:2px;">${criadoEmFmt}</span>` : ''}</div><div style="margin-bottom:10px;"></div>` : (isRanking && temRes ? `<div style="margin:-14px -14px 0 -14px;padding:10px 14px 8px;background:transparent;border-bottom:1px solid var(--card-border);border-radius:18px 18px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;"><span style="font-size:16px;font-weight:900;color:#6EE7B7;letter-spacing:0.05em;">AMISTOSO</span></div><div style="margin-bottom:10px;"></div>` : `<div style="text-align:center;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);border-radius:12px;padding:6px 12px;margin-bottom:10px;"><span style="font-size:15px;font-weight:800;color:#6EE7B7;letter-spacing:0.05em;text-transform:uppercase;">AMISTOSO</span></div>`)}
+    ${!temRes && !compact ? `<div style="margin:-14px -14px 0 -14px;padding:10px 14px 8px;background:transparent;border-bottom:1px solid var(--card-border);border-radius:18px 18px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">${master && !noSwipe ? _iconExcluirCard(`event.stopPropagation();confirmarExcluirAmistoso('${a.id}')`) : ''}<span style="font-size:16px;font-weight:900;color:#6EE7B7;letter-spacing:0.05em;">AMISTOSO</span>${criadoEmFmt ? `<span style="font-size:11px;color:rgba(110,231,183,0.7);font-weight:600;margin-top:2px;">${criadoEmFmt}</span>` : ''}</div><div style="margin-bottom:10px;"></div>` : (temRes && !compact ? `<div style="margin:-14px -14px 0 -14px;padding:10px 14px 8px;background:transparent;border-bottom:1px solid var(--card-border);border-radius:18px 18px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;"><span style="font-size:16px;font-weight:900;color:#6EE7B7;letter-spacing:0.05em;">AMISTOSO</span></div><div style="margin-bottom:10px;"></div>` : `<div style="text-align:center;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);border-radius:12px;padding:6px 12px;margin-bottom:10px;"><span style="font-size:15px;font-weight:800;color:#6EE7B7;letter-spacing:0.05em;text-transform:uppercase;">AMISTOSO</span></div>`)}
     ${!temRes && !compact ? `<div style="display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:6px;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:10px;">
       <span class="tag tag-gray">${a.tipo === 'selecoes' ? 'SELECOES' : 'CLUBES'}</span>
       ${a.modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
@@ -6677,6 +6671,14 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
     ? `<div style="display:flex;justify-content:center;margin-bottom:4px;cursor:pointer;user-select:none;-webkit-touch-callout:none;" title="Segure para editar o time" onpointerdown="_lpTornStart('${cid}','${t2?.id||''}','${t2nom}','${tipo2}')" onpointerup="_lpTornEnd()" onpointercancel="_lpTornEnd()" oncontextmenu="return false;" onclick="if(window._lpTornTriggered){window._lpTornTriggered=false;event.stopPropagation();}">${badgeTimeIcon(t2?.id||'', t2?.nome||'', tipo2)}</div>`
     : `<div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(t2?.id||'', t2?.nome||'', tipo2)}</div>`;
 
+  // Em modo dupla, jogadores da mesma dupla devem ter a mesma cor na tag (por duplaIndex)
+  const bg1 = modoDupla && m1.duplaIndex !== undefined
+    ? _PLAYER_TAG_PALETTE[m1.duplaIndex % _PLAYER_TAG_PALETTE.length].bg
+    : _jogadorBg(m1.jogadorId);
+  const bg2 = modoDupla && m2.duplaIndex !== undefined
+    ? _PLAYER_TAG_PALETTE[m2.duplaIndex % _PLAYER_TAG_PALETTE.length].bg
+    : _jogadorBg(m2.jogadorId);
+
   return `<div class="match-card" data-match-key="${confKey}" style="margin-bottom:10px;">
     ${!temRes ? `<div style="margin:-14px -14px 0 -14px;padding:10px 14px 8px;background:transparent;border-bottom:1px solid var(--card-border);border-radius:18px 18px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;"><span style="font-size:16px;font-weight:900;color:#FCD34D;letter-spacing:0.05em;">TORNEIO</span></div><div style="margin-bottom:10px;"></div>` : `<div style="text-align:center;background:rgba(100,116,139,0.15);border:1px solid rgba(100,116,139,0.35);border-radius:12px;padding:6px 12px;margin-bottom:10px;"><span style="font-size:15px;font-weight:800;color:#94A3B8;letter-spacing:0.05em;text-transform:uppercase;">TORNEIO</span></div>`}
     ${!temRes ? `<div style="display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:6px;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:10px;">
@@ -6700,7 +6702,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
         <div class="grad" style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(t1?.id, t1?.nome||'?')}</div>
         ${lpIcon1}
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(t1?.id))}</div>
-        ${nome1 ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;">${_htmlJogadorPill(m1.jogadorId, nome1, 20, _jogadorBg(m1.jogadorId))}</div>` : ''}
+        ${nome1 ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;">${_htmlJogadorPill(m1.jogadorId, nome1, 20, bg1)}</div>` : ''}
       </div>
       <div style="text-align:center;min-width:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
         ${placarArea}
@@ -6710,7 +6712,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
         <div class="grad" style="font-weight:900;font-size:16px;line-height:1.2;text-transform:uppercase;">${_nomeAbrevTime(t2?.id, t2?.nome||'?')}</div>
         ${lpIcon2}
         <div style="display:flex;justify-content:center;margin-bottom:4px;">${eficBadge(eficienciaAtual(t2?.id))}</div>
-        ${nome2 ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;">${_htmlJogadorPill(m2.jogadorId, nome2, 20, _jogadorBg(m2.jogadorId))}</div>` : ''}
+        ${nome2 ? `<div style="margin-top:4px;display:flex;flex-direction:column;align-items:center;">${_htmlJogadorPill(m2.jogadorId, nome2, 20, bg2)}</div>` : ''}
       </div>
     </div>
     ${secaoVencedorTorn}
@@ -7421,7 +7423,7 @@ function renderRankRow(p, i, fromHome) {
     <div class="rank-pos" style="color:${i===0?'var(--yellow)':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text-muted)'};font-weight:900;">${i+1}°</div>
     ${foto}
     <div style="flex:1;min-width:0;">
-      <div style="font-weight:800;font-size:14px;text-transform:uppercase;">${p.nome}</div>
+      <div class="grad" style="font-weight:800;font-size:14px;text-transform:uppercase;">${p.nome}</div>
     </div>
     <div style="display:flex;gap:6px;font-size:11px;font-weight:700;color:var(--text-muted);">
       ${titulosHtml}
@@ -7443,7 +7445,7 @@ function renderRankRowTorneio(p, i, fromHome) {
     <div class="rank-pos" style="color:${i===0?'var(--yellow)':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text-muted)'};font-weight:900;">${i+1}°</div>
     ${foto}
     <div style="flex:1;min-width:0;">
-      <div style="font-weight:800;font-size:14px;text-transform:uppercase;">${p.nome}</div>
+      <div class="grad" style="font-weight:800;font-size:14px;text-transform:uppercase;">${p.nome}</div>
     </div>
     <div style="display:flex;gap:6px;font-size:11px;font-weight:700;color:var(--text-muted);">
       <span title="TITULOS" style="color:var(--yellow);">🏆${p.titulos}</span>
@@ -7718,19 +7720,16 @@ function _renderRankFiltros() {
     : '';
 
   el.innerHTML = `
-    <div class="rank-filter-panel">
-      <div class="rank-filter-label" style="margin-top:0;">FILTROS</div>
-      <div class="rank-filter-label">MODO DE JOGO</div>
-      ${modoHtml}
-      ${jogSelect ? `<div class="rank-filter-label">JOGADOR</div>${jogSelect}` : ''}
-      <div class="rank-filter-label">TIPO DE JOGO</div>
-      ${tipoDrop}
-      ${torneioDrop ? `<div class="rank-filter-label">TORNEIO</div>${torneioDrop}` : ''}
-      ${exatoUm ? `<div class="rank-filter-label">RESULTADO</div>${resDrop}` : ''}
-      <div class="rank-filter-label">PERIODO</div>
-      ${dataHtml}
-      ${limparBtn}
-    </div>
+    <div class="rank-filter-label" style="margin-top:0;">MODO DE JOGO</div>
+    ${modoHtml}
+    ${jogSelect ? `<div class="rank-filter-label">JOGADOR</div>${jogSelect}` : ''}
+    <div class="rank-filter-label">TIPO DE JOGO</div>
+    ${tipoDrop}
+    ${torneioDrop ? `<div class="rank-filter-label">TORNEIO</div>${torneioDrop}` : ''}
+    ${exatoUm ? `<div class="rank-filter-label">RESULTADO</div>${resDrop}` : ''}
+    <div class="rank-filter-label">PERIODO</div>
+    ${dataHtml}
+    ${limparBtn}
   `;
 }
 
@@ -8501,7 +8500,7 @@ function cardCampHome(c, modoLista=false) {
   const cardHtml = `<div ${idAttr}class="match-card" style="margin-bottom:${modoLista?'0':'10px'};padding:12px;cursor:pointer;overflow:hidden;" onclick="abrirCampeonato('${c.id}')">
     <div style="margin:-12px -12px 10px -12px;padding:10px 16px 8px;background:transparent;border-bottom:1px solid var(--card-border);border-radius:18px 18px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">
       <div style="display:flex;flex-direction:column;align-items:center;text-align:center;max-width:calc(100% - 40px);">
-        <div class="${finalizado?'':'grad'}" style="font-weight:900;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${finalizado?'color:#94A3B8;':''}letter-spacing:0.05em;">${c.nome.toUpperCase()}</div>
+        <div class="grad" style="font-weight:900;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:0.05em;">${c.nome.toUpperCase()}</div>
         ${!finalizado && dataInicio ? `<div class="grad" style="font-size:11px;font-weight:600;margin-top:2px;">${dataInicio}</div>` : ''}
       </div>
       ${!finalizado && podeMudar ? _iconExcluirCard(`event.stopPropagation();excluirCampeonato('${c.id}')`) : ''}
