@@ -2339,7 +2339,7 @@ function _htmlJogadorPill(id, nome, size, bg) {
     else if (bg.includes('139,92,246')) textColor = '#C4B5FD';
     else if (bg.includes('34,197,94')) textColor = '#86EFAC';
     else if (bg.includes('236,72,153')) textColor = '#F9A8D4';
-    const wrapStyle = `display:inline-flex;align-items:center;gap:4px;max-width:100%;background:${bg};border-radius:20px;padding:2px 8px 2px 3px;`;
+    const wrapStyle = `display:inline-flex;align-items:center;gap:4px;max-width:100%;`;
     return `<div style="${wrapStyle}">${imgHtml}<span style="font-size:11px;color:${textColor};font-weight:700;text-transform:uppercase;letter-spacing:0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${nome}</span></div>`;
   }
   const wrapStyle = `display:inline-flex;align-items:center;gap:4px;max-width:100%;`;
