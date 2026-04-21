@@ -2777,7 +2777,7 @@ window.editarJogador = (id) => {
       </div>` : ''}
       ${isMasterUser ? `<button class="btn-ghost" onclick="abrirModalMesclarLegado('${id}')" style="margin-top:6px;border-color:rgba(245,158,11,0.4);color:rgba(245,158,11,0.9);">VINCULAR JOGADOR LEGADO</button>` : ''}
       <button class="btn-primary" id="btn-salvar-edit" onclick="salvarEdicaoJogador('${id}')" style="margin-top:10px;background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;"><span class="grad">SALVAR</span></button>
-      <button class="btn-primary" onclick="fecharFullscreen()" style="margin-top:8px;background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;"><span class="grad">CANCELAR</span></button>
+      <button class="btn-ghost" onclick="fecharFullscreen()" style="margin-top:8px;background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;"><span class="grad">CANCELAR</span></button>
     </div>`);
   setTimeout(() => document.getElementById('i-nome-edit')?.focus(), 100);
 };
@@ -2903,7 +2903,7 @@ document.getElementById('btn-add-jog').addEventListener('click', () => {
         </div>
       </label>` : ''}
       <button class="btn-primary" id="btn-salvar-jog" onclick="salvarJogador()" style="margin-top:10px;background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;"><span class="grad">SALVAR</span></button>
-      <button class="btn-primary" onclick="fecharFullscreen();irParaHome()" style="margin-top:8px;background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;"><span class="grad">CANCELAR</span></button>
+      <button class="btn-ghost" onclick="fecharFullscreen();irParaHome()" style="margin-top:8px;background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;"><span class="grad">CANCELAR</span></button>
     </div>`, null);
   setTimeout(() => document.getElementById('i-nome')?.focus(), 100);
 });
