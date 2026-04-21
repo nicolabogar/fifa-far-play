@@ -170,6 +170,7 @@
     .filtro-drop-cyan { background-color:var(--bg);border:1px solid rgba(6,182,212,0.35);color:#67E8F9;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2306B6D4' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
     .filtro-drop-green { background-color:var(--bg);border:1px solid rgba(16,185,129,0.35);color:#6EE7B7;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2310B981' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
     .filtro-drop-yellow { background-color:var(--bg);border:1px solid rgba(245,158,11,0.35);color:#FCD34D;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23F59E0B' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
+    .filtro-drop-orange { background-color:var(--bg);border:1px solid rgba(249,115,22,0.35);color:#FB923C;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23F97316' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); }
     /* Suprime o '×' para botoes de selecao unica (radio-style) como tipo e resultado */
     .filtro-radio.ativo::after { content:'' !important; }
     /* Multi-select dropdowns do ranking */
@@ -197,8 +198,8 @@
     .rank-confr-table tr:last-child td { border-bottom:none; }
     .rank-confr-table tr:hover td { background:rgba(255,255,255,0.03); }
     /* Date inputs */
-    .rank-date-row { display:flex;gap:8px;margin-top:8px; }
-    .rank-date-row > div { flex:1;min-width:80px; }
+    .rank-date-row { display:flex;flex-direction:column;gap:8px;margin-top:8px; }
+    .rank-date-row > div { width:100%; }
     .rank-date-input { background:rgba(255,255,255,0.04);border:1px solid var(--card-border);border-radius:10px;color:var(--text);font-size:14px;font-weight:700;padding:10px 12px;width:100%;box-sizing:border-box;cursor:pointer;outline:none;min-height:44px; }
     .rank-date-input:disabled { opacity:0.35;cursor:not-allowed; }
     .rank-date-input::-webkit-calendar-picker-indicator { filter:invert(0.7); }
@@ -1235,6 +1236,23 @@ function _nomesTime(time) {
   return nomes.map(n => _nomeTag(n));
 }
 
+/** Resolve lista de IDs de jogadores de um time, com fallback por nome para jogos antigos */
+function _resolveTimeIds(time) {
+  if (time?.jogadoresIds?.length) return time.jogadoresIds;
+  if (!time?.jogadores?.length) return [];
+  return time.jogadores.map(nome => {
+    const nomeUp = (nome || '').trim().toUpperCase();
+    if (!nomeUp) return null;
+    const found = jogadores.find(j =>
+      _nomeExibicao(j).toUpperCase() === nomeUp ||
+      j.nome.toUpperCase() === nomeUp ||
+      _nomeTag(_nomeExibicao(j)).toUpperCase() === nomeUp ||
+      _nomeTag(j.nome).toUpperCase() === nomeUp
+    );
+    return found?.id || null;
+  }).filter(Boolean);
+}
+
 /** Retorna HTML dos nomes dos jogadores de um time, com suporte a cores individuais via _playerColors.
  * @param {object} time - objeto time (time1 ou time2) com jogadoresIds/jogadores
  * @param {object|null} playerColors - mapa playerId→paletteIndex, ou null para cor padrão
@@ -1819,7 +1837,7 @@ function irPara(view) {
     document.getElementById('main').style.paddingBottom = showNav ? '72px' : '';
   }
   if (view === 'times') renderTimesEdit();
-  if (view === 'ranking') { _rankState.jogadoresIds = []; _rankState.tiposAtivos = []; _rankState.torneioNomes = []; _rankState.filtrosRes = []; _rankState.dataIni = ''; _rankState.dataFim = ''; _rankState.modoJogo = 'todos'; _renderRankFiltros(); _renderRankTudo(); }
+  if (view === 'ranking') { _rankState.jogadoresIds = []; _rankState.tiposAtivos = []; _rankState.torneioNomes = []; _rankState.filtrosRes = []; _rankState.dataIni = ''; _rankState.dataFim = ''; _rankState.modoJogo = 'todos'; _rankState.adversarioId = ''; _renderRankFiltros(); _renderRankTudo(); }
   if (view === 'home') { atualizarDash(); }
 }
 window.irPara = irPara;
@@ -7361,7 +7379,7 @@ function calcularRankingAmistosos(jogIds, dataIni, dataFim, modoJogo) {
     }
     const {g1,g2}=a.resultado;
     const add=(ids,gf,gc)=>ids?.forEach(id=>{if(!s[id])return;s[id].gp+=gf;s[id].gc+=gc;s[id].j++;s[id].vit+=gf>gc?1:0;s[id].emp+=gf===gc?1:0;s[id].der+=gf<gc?1:0;s[id].pts+=gf>gc?3:gf===gc?1:0;});
-    add(a.time1?.jogadoresIds,g1,g2); add(a.time2?.jogadoresIds,g2,g1);
+    add(_resolveTimeIds(a.time1),g1,g2); add(_resolveTimeIds(a.time2),g2,g1);
   });
   return Object.values(s).filter(x=>x.j>0||x.titulos>0).sort((a,b)=>b.pts!==a.pts?b.pts-a.pts:(b.gp-b.gc)!==(a.gp-a.gc)?(b.gp-b.gc)-(a.gp-a.gc):b.gp-a.gp);
 }
@@ -7500,7 +7518,7 @@ const _histState = { jogadorId:'', nome:'', filtroTipo:'todos', filtroAdv:'', da
 const _HIST_PAG = 100;
 
 // ── Estado dos filtros do ranking ──
-const _rankState = { jogadoresIds: [], tiposAtivos: [], torneioNomes: [], filtrosRes: [], dataIni: '', dataFim: '', modoJogo: 'todos' };
+const _rankState = { jogadoresIds: [], tiposAtivos: [], torneioNomes: [], filtrosRes: [], dataIni: '', dataFim: '', modoJogo: 'todos', adversarioId: '' };
 
 // Navegar para ranking com jogador pré-selecionado (vindo da home)
 window.irParaRankingComJogador = (jogadorId) => {
@@ -7576,8 +7594,16 @@ window._rankToggleResSelect = (res) => {
 window._rankSetJog = (jogId) => {
   _rankState.jogadoresIds = jogId ? [jogId] : [];
   _rankState.filtrosRes = [];
+  _rankState.adversarioId = '';
   _renderRankFiltros();
   _renderRankTudo();
+};
+
+window._rankSetAdversario = (advId) => {
+  _rankState.adversarioId = advId || '';
+  _rankState.filtrosRes = [];
+  _renderRankFiltros();
+  _renderRankJogos();
 };
 
 window._rankSetModoJogo = (modo) => {
@@ -7631,6 +7657,7 @@ window._rankLimparFiltros = () => {
   _rankState.dataIni = '';
   _rankState.dataFim = '';
   _rankState.modoJogo = 'todos';
+  _rankState.adversarioId = '';
   _renderRankFiltros();
   _renderRankTudo();
 };
@@ -7653,9 +7680,9 @@ window._rankSetData = (tipo, val) => {
 function _renderRankFiltros() {
   const el = document.getElementById('rank-filtros');
   if (!el) return;
-  const { jogadoresIds, tiposAtivos, torneioNomes, filtrosRes, dataIni, dataFim, modoJogo } = _rankState;
+  const { jogadoresIds, tiposAtivos, torneioNomes, filtrosRes, dataIni, dataFim, modoJogo, adversarioId } = _rankState;
   const exatoUm = jogadoresIds.length === 1;
-  const temFiltros = jogadoresIds.length > 0 || tiposAtivos.length > 0 || torneioNomes.length > 0 || filtrosRes.length > 0 || dataIni || dataFim || modoJogo !== 'todos';
+  const temFiltros = jogadoresIds.length > 0 || tiposAtivos.length > 0 || torneioNomes.length > 0 || filtrosRes.length > 0 || dataIni || dataFim || modoJogo !== 'todos' || !!adversarioId;
 
   // Jogador: single select
   const jogSelectOpts = jogadores.map(j => {
@@ -7666,6 +7693,32 @@ function _renderRankFiltros() {
     <option value="">TODOS OS JOGADORES</option>
     ${jogSelectOpts}
   </select>` : '';
+
+  // Adversário: single select (só com 1 jogador selecionado)
+  let advDrop = '';
+  if (exatoUm) {
+    const allGames = _coletarJogosJogador(jogadoresIds[0], null, null);
+    const advMap = {};
+    allGames.forEach(j => {
+      const advIds = j.advJogadoresIds || [];
+      const advNomes = j.advJogadores || [];
+      const numAdv = Math.max(advIds.length, advNomes.length);
+      for (let i = 0; i < numAdv; i++) {
+        const id = advIds[i] || '';
+        if (id && !advMap[id]) {
+          const jAdv = jogadores.find(jj => jj.id === id);
+          advMap[id] = { id, nome: jAdv ? _nomeExibicao(jAdv) : (advNomes[i] || id) };
+        }
+      }
+    });
+    const advList = Object.values(advMap).sort((a, b) => a.nome.localeCompare(b.nome));
+    if (advList.length) {
+      advDrop = `<div class="rank-filter-label">ADVERSARIO</div><select class="filtro-drop filtro-drop-orange" onchange="_rankSetAdversario(this.value)">
+        <option value="">TODOS OS ADVERSARIOS</option>
+        ${advList.map(a => `<option value="${a.id}" ${adversarioId===a.id?'selected':''}>${a.nome.toUpperCase()}</option>`).join('')}
+      </select>`;
+    }
+  }
 
   // Modo de jogo: TODOS / X1 / DUPLA
   const modoOpts = [{value:'todos',label:'TODOS'},{value:'x1',label:'X1'},{value:'dupla',label:'DUPLA'}];
@@ -7723,6 +7776,7 @@ function _renderRankFiltros() {
     <div class="rank-filter-label" style="margin-top:0;">MODO DE JOGO</div>
     ${modoHtml}
     ${jogSelect ? `<div class="rank-filter-label">JOGADOR</div>${jogSelect}` : ''}
+    ${advDrop}
     <div class="rank-filter-label">TIPO DE JOGO</div>
     ${tipoDrop}
     ${torneioDrop ? `<div class="rank-filter-label">TORNEIO</div>${torneioDrop}` : ''}
@@ -7748,7 +7802,7 @@ function _renderRankTudo() {
 }
 
 function _coletarJogosRanking() {
-  const { jogadoresIds, tiposAtivos, torneioNomes, dataIni, dataFim, modoJogo } = _rankState;
+  const { jogadoresIds, tiposAtivos, torneioNomes, dataIni, dataFim, modoJogo, adversarioId } = _rankState;
   const dIni = dataIni ? new Date(dataIni).getTime() : null;
   const dFim = dataFim ? new Date(dataFim + 'T23:59:59').getTime() : null;
   const showAmi = tiposAtivos.length === 0 || tiposAtivos.includes('AMISTOSO');
@@ -7761,6 +7815,7 @@ function _coletarJogosRanking() {
     if (torneioNomes.length > 0) jogos = jogos.filter(j => torneioNomes.includes(j.torneio));
     if (modoJogo === 'dupla') jogos = jogos.filter(j => j.isDupla);
     if (modoJogo === 'x1') jogos = jogos.filter(j => !j.isDupla);
+    if (adversarioId) jogos = jogos.filter(j => (j.advJogadoresIds||[]).includes(adversarioId));
     return jogos;
   }
 
@@ -7772,7 +7827,7 @@ function _coletarJogosRanking() {
       if (modoJogo === 'dupla' && !a.modoDupla) return;
       if (modoJogo === 'x1' && a.modoDupla) return;
       if (jogadoresIds.length > 0) {
-        const allIds = [...(a.time1?.jogadoresIds||[]), ...(a.time2?.jogadoresIds||[])];
+        const allIds = [..._resolveTimeIds(a.time1), ..._resolveTimeIds(a.time2)];
         if (!jogadoresIds.some(id => allIds.includes(id))) return;
       }
       const ts = a.criadoEm?.seconds ? a.criadoEm.seconds * 1000 : null;
@@ -7829,9 +7884,11 @@ function _renderRankJogos() {
   const exatoUm = _rankState.jogadoresIds.length === 1;
   if (confrontosSec && confrontosTable) {
     if (exatoUm) {
-      const jogosParaConfrontos = _rankState.filtrosRes.length === 0
-        ? _coletarJogosJogador(_rankState.jogadoresIds[0], _rankState.dataIni, _rankState.dataFim)
-        : jogos;
+      const jogosParaConfrontos = _rankState.adversarioId
+        ? jogos
+        : (_rankState.filtrosRes.length === 0
+            ? _coletarJogosJogador(_rankState.jogadoresIds[0], _rankState.dataIni, _rankState.dataFim)
+            : jogos);
       const advStats = {};
       jogosParaConfrontos.forEach(j => {
         const advIds = j.advJogadoresIds || [];
@@ -7844,12 +7901,30 @@ function _renderRankJogos() {
           let advId = advIds[i] || '';
           const advNome = advNomes[i] || '';
           const advNomeUpper = advNome.toUpperCase();
+          // Normalize ID: if stored ID is no longer in jogadores (old ID), try to resolve by name
+          if (advId) {
+            const jKnown = jogadores.find(jj => jj.id === advId);
+            if (!jKnown && advNomeUpper) {
+              const jByName = jogadores.find(jj =>
+                _nomeExibicao(jj).toUpperCase() === advNomeUpper ||
+                jj.nome.toUpperCase() === advNomeUpper ||
+                _nomeTag(_nomeExibicao(jj)).toUpperCase() === advNomeUpper ||
+                _nomeTag(jj.nome).toUpperCase() === advNomeUpper
+              );
+              if (jByName) advId = jByName.id;
+            }
+          }
           // If no ID, try to resolve from jogadores by name for proper grouping
-          if (!advId && advNome) {
-            const found = jogadores.find(jj => _nomeExibicao(jj).toUpperCase() === advNomeUpper || jj.nome.toUpperCase() === advNomeUpper);
+          if (!advId && advNomeUpper) {
+            const found = jogadores.find(jj =>
+              _nomeExibicao(jj).toUpperCase() === advNomeUpper ||
+              jj.nome.toUpperCase() === advNomeUpper ||
+              _nomeTag(_nomeExibicao(jj)).toUpperCase() === advNomeUpper ||
+              _nomeTag(jj.nome).toUpperCase() === advNomeUpper
+            );
             if (found) advId = found.id;
           }
-          const chave = advId || advNome || '?';
+          const chave = advId || advNomeUpper || '?';
           if (!advStats[chave]) {
             const jAdv = advId ? jogadores.find(jj=>jj.id===advId) : null;
             advStats[chave] = {
@@ -7867,7 +7942,27 @@ function _renderRankJogos() {
           advStats[chave].gs += j.advGol||0;
         }
       });
-      const linhas = Object.values(advStats).sort((a,b)=>b.v-a.v||(b.gf-b.gs)-(a.gf-a.gs));
+      // Merge any remaining duplicates by canonical player name (handles legacy data with different IDs)
+      const byNome = {};
+      Object.values(advStats).forEach(s => {
+        const nomeKey = s.nome.toUpperCase().trim();
+        if (!byNome[nomeKey]) {
+          byNome[nomeKey] = { ...s };
+        } else {
+          byNome[nomeKey].j += s.j;
+          byNome[nomeKey].v += s.v;
+          byNome[nomeKey].e += s.e;
+          byNome[nomeKey].d += s.d;
+          byNome[nomeKey].gf += s.gf;
+          byNome[nomeKey].gs += s.gs;
+          // Prefer entry with a valid current ID
+          if (s.id && jogadores.some(jj => jj.id === s.id) && !jogadores.some(jj => jj.id === byNome[nomeKey].id)) {
+            byNome[nomeKey].id = s.id;
+            byNome[nomeKey].fotoUrl = s.fotoUrl || byNome[nomeKey].fotoUrl;
+          }
+        }
+      });
+      const linhas = Object.values(byNome).sort((a,b)=>b.v-a.v||(b.gf-b.gs)-(a.gf-a.gs));
       if (linhas.length) {
         const tituloFiltros = _rankState.filtrosRes.length === 0 ? '' : `<p style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">(baseado nos jogos filtrados)</p>`;
         confrontosSec.style.display = '';
@@ -7945,12 +8040,11 @@ function _renderRankJogos() {
       const empate = j.g1 === j.g2;
       return `<div class="match-card" style="margin-bottom:10px;">
         <div style="margin:-14px -14px 0 -14px;padding:10px 14px 8px;background:transparent;border-bottom:1px solid var(--card-border);border-radius:18px 18px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-          <span class="tag tag-purple">TORNEIO</span>
+          <span style="font-size:16px;font-weight:900;color:#FCD34D;letter-spacing:0.05em;">${(j.torneio||'TORNEIO').toUpperCase()}</span>
         </div>
         <div style="margin-bottom:10px;"></div>
         <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:10px;">
           <span class="tag tag-gray">${j.isSel?'SELECOES':'CLUBES'}</span>
-          ${j.torneio?`<span class="tag tag-yellow" style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${j.torneio.toUpperCase()}</span>`:''}
           <span class="tag tag-red">FINALIZADO</span>
           ${data?`<span class="tag tag-gray" style="margin-left:auto;">${data}</span>`:''}
         </div>
@@ -7991,12 +8085,11 @@ function _renderRankJogos() {
       const nomeAdvTime = j.advTimeNome || j.advTime || '?';
       return `<div class="match-card" style="margin-bottom:10px;">
         <div style="margin:-14px -14px 0 -14px;padding:10px 14px 8px;background:transparent;border-bottom:1px solid var(--card-border);border-radius:18px 18px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-          <span class="tag tag-purple">TORNEIO</span>
+          <span style="font-size:16px;font-weight:900;color:#FCD34D;letter-spacing:0.05em;">${(j.torneio||'TORNEIO').toUpperCase()}</span>
         </div>
         <div style="margin-bottom:10px;"></div>
         <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:10px;">
           <span class="tag tag-gray">${isSel ? 'SELECOES' : 'CLUBES'}</span>
-          ${j.torneio?`<span class="tag tag-yellow" style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${j.torneio.toUpperCase()}</span>`:''}
           <span class="tag tag-red">FINALIZADO</span>
           ${data?`<span class="tag tag-gray" style="margin-left:auto;">${data}</span>`:''}
         </div>
@@ -8035,8 +8128,10 @@ function _coletarJogosJogador(jogadorId, dataIni, dataFim) {
   const jogos = [];
   amistosos.forEach(a => {
     if (!a.resultado) return;
-    const isT1 = (a.time1?.jogadoresIds||[]).includes(jogadorId);
-    const isT2 = (a.time2?.jogadoresIds||[]).includes(jogadorId);
+    const t1Ids = _resolveTimeIds(a.time1);
+    const t2Ids = _resolveTimeIds(a.time2);
+    const isT1 = t1Ids.includes(jogadorId);
+    const isT2 = t2Ids.includes(jogadorId);
     if (!isT1 && !isT2) return;
     const ts = a.criadoEm?.seconds ? a.criadoEm.seconds * 1000 : null;
     if (dIni && (!ts || ts < dIni)) return;
@@ -8045,7 +8140,7 @@ function _coletarJogosJogador(jogadorId, dataIni, dataFim) {
     const advGol = isT1 ? a.resultado.g2 : a.resultado.g1;
     const res = meuGol > advGol ? 'V' : meuGol < advGol ? 'D' : 'E';
     const advJogadores = isT1 ? _nomesTime(a.time2) : _nomesTime(a.time1);
-    const advJogadoresIds = isT1 ? (a.time2?.jogadoresIds||[]) : (a.time1?.jogadoresIds||[]);
+    const advJogadoresIds = isT1 ? t2Ids : t1Ids;
     jogos.push({
       tipo:'AMISTOSO', tipoTime: a.tipo==='selecoes'?'SELECAO':'CLUBE',
       meuTime: isT1?a.time1?.nome:a.time2?.nome,

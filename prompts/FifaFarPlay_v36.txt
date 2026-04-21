@@ -1,0 +1,14 @@
+# FIFA FAR PLAY - Prompts de Features v36
+# FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
+# O agente deve marcar o hash do commit ao concluir cada item.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v36.txt e um novo é criado.
+
+## MELHORIAS ##
+
+- [x] Item 1: Menu dos cards finalizados de torneio igual ao em andamento - usar classe grad no nome do torneio, mesma cor e tamanho (hash: 86821ca)
+- [x] Item 2: Cards finalizados de amistosos - colocar quebra de linha (separador visual) acima dos componentes de tags (hash: 86821ca)
+- [x] Item 3: Cards de jogos amistoso e torneio em modo dupla - cores das tags dos jogadores da mesma dupla devem ser iguais (hash: 86821ca)
+- [x] Item 4: Cards de jogos remover imagem dos jogadores, deixar apenas o nome (hash: 86821ca)
+- [x] Item 5: Pagina de ranking remover painel (wrapper) de filtros e deixar os componentes de filtro direto na pagina (hash: 86821ca)
+- [x] Item 6: Pagina de home - nomes dos jogadores no ranking com cor igual ao titulo principal do menu do app (classe grad) (hash: 86821ca)
+- [x] Item 7: Pagina de ranking - texto do nome do jogador com mesma cor do titulo principal do menu do app (classe grad) (hash: 86821ca)
