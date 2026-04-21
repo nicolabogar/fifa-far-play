@@ -12,4 +12,9 @@
 - [x] Colocar uma quebra a cima do card do jogo amistoso na página de amistoso. (hash: 7c6208c)
 - [x] Remover a label que indica os times do jogador dentro da tabela. (hash: 7c6208c)
 - [x] No card de times dos jogadores o texto do nome do jogador cada um deve ter uma cor, e essa cor deve refletir nos cards em andamento e finalizados e também essa aplicação deve ser alocada na página da home no card de torneio em andamento. (hash: 7c6208c)
+- [ ] Na página de torneios a label DATA INÍCIO deve ter a mesma cor e tamanho que o label NOME DO TORNEIO.
+- [ ] Nos cards de jogos tanto em andamento quanto finalizados, nas páginas de amistosos, torneio, home e ranking, o nome do jogador deve ter apenas a imagem e o nome colorido sem preenchimento de background de tag.
+- [ ] Para os cards de torneio e amistoso em andamento a tag de vitória deve estar em cima junto às outras tags do card.
+- [ ] Colocar uma tag de finalizado para os cards de jogos finalizados, ela deve ter a cor em vermelho.
+- [ ] No card de times do jogador do torneio deixar sempre aparecendo 3 times na tela, e caso tiver mais que 3 times deve arrastar para o lado para ver o restante dos times, essa alteração deve ser refletida tanto na página de torneio quanto na página de home dos cards em andamento.
 
