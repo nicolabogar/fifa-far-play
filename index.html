@@ -7215,8 +7215,12 @@ window.salvarPartidaDireta = async (cid, gi, j1Id, j2Id, timeIndex, btnEl, turno
     if (idx!==gi) return gr;
     const membros = gr.membros.map(m => {
       const mm={...m};
-      if (m.jogadorId===m1.jogadorId) { mm.gp+=g1;mm.gc+=g2;mm.vit+=g1>g2?1:0;mm.emp+=g1===g2?1:0;mm.der+=g1<g2?1:0;mm.pts+=g1>g2?3:g1===g2?1:0; }
-      else if (m.jogadorId===m2.jogadorId) { mm.gp+=g2;mm.gc+=g1;mm.vit+=g2>g1?1:0;mm.emp+=g1===g2?1:0;mm.der+=g2<g1?1:0;mm.pts+=g2>g1?3:g1===g2?1:0; }
+      const duplaIdxM1 = c.modoDupla ? m1.duplaIndex : undefined;
+      const duplaIdxM2 = c.modoDupla ? m2.duplaIndex : undefined;
+      const isM1 = m.jogadorId===m1.jogadorId || (duplaIdxM1 != null && m.duplaIndex === duplaIdxM1);
+      const isM2 = !isM1 && (m.jogadorId===m2.jogadorId || (duplaIdxM2 != null && m.duplaIndex === duplaIdxM2));
+      if (isM1) { mm.gp+=g1;mm.gc+=g2;mm.vit+=g1>g2?1:0;mm.emp+=g1===g2?1:0;mm.der+=g1<g2?1:0;mm.pts+=g1>g2?3:g1===g2?1:0; }
+      else if (isM2) { mm.gp+=g2;mm.gc+=g1;mm.vit+=g2>g1?1:0;mm.emp+=g1===g2?1:0;mm.der+=g2<g1?1:0;mm.pts+=g2>g1?3:g1===g2?1:0; }
       return mm;
     });
     return {...gr,membros,partidas:[...(gr.partidas||[]),{j1Id:m1.jogadorId,j1Nome:m1.nome,j2Id:m2.jogadorId,j2Nome:m2.nome,g1,g2,timeIndex,turno,jogoEm:Date.now()}]};
@@ -7437,8 +7441,12 @@ window.salvarPartida = async (cid, gi) => {
     if (idx!==gi) return g;
     const membros = g.membros.map(m => {
       const mm={...m};
-      if (m.jogadorId===m1.jogadorId) { mm.gp+=g1;mm.gc+=g2;mm.vit+=g1>g2?1:0;mm.emp+=g1===g2?1:0;mm.der+=g1<g2?1:0;mm.pts+=g1>g2?3:g1===g2?1:0; }
-      else if (m.jogadorId===m2.jogadorId) { mm.gp+=g2;mm.gc+=g1;mm.vit+=g2>g1?1:0;mm.emp+=g1===g2?1:0;mm.der+=g2<g1?1:0;mm.pts+=g2>g1?3:g1===g2?1:0; }
+      const duplaIdxM1 = c.modoDupla ? m1.duplaIndex : undefined;
+      const duplaIdxM2 = c.modoDupla ? m2.duplaIndex : undefined;
+      const isM1 = m.jogadorId===m1.jogadorId || (duplaIdxM1 != null && m.duplaIndex === duplaIdxM1);
+      const isM2 = !isM1 && (m.jogadorId===m2.jogadorId || (duplaIdxM2 != null && m.duplaIndex === duplaIdxM2));
+      if (isM1) { mm.gp+=g1;mm.gc+=g2;mm.vit+=g1>g2?1:0;mm.emp+=g1===g2?1:0;mm.der+=g1<g2?1:0;mm.pts+=g1>g2?3:g1===g2?1:0; }
+      else if (isM2) { mm.gp+=g2;mm.gc+=g1;mm.vit+=g2>g1?1:0;mm.emp+=g1===g2?1:0;mm.der+=g2<g1?1:0;mm.pts+=g2>g1?3:g1===g2?1:0; }
       return mm;
     });
     return {...g,membros,partidas:[...(g.partidas||[]),{j1Id:m1.jogadorId,j1Nome:m1.nome,j2Id:m2.jogadorId,j2Nome:m2.nome,g1,g2,turno}]};
@@ -7508,6 +7516,15 @@ function calcularRankingAmistosos(jogIds, dataIni, dataFim, modoJogo, adversario
   return Object.values(s).filter(x=>x.j>0||x.titulos>0).sort((a,b)=>b.pts!==a.pts?b.pts-a.pts:(b.gp-b.gc)!==(a.gp-a.gc)?(b.gp-b.gc)-(a.gp-a.gc):b.gp-a.gp);
 }
 
+// Retorna todos os IDs da dupla de um jogador em um campeonato (inclui o próprio ID + parceiro)
+function _resolverDuplaIds(campeonato, jogadorId) {
+  if (!jogadorId) return [];
+  const partic = campeonato.participantes || [];
+  const ref = partic.find(p => p.jogadorId === jogadorId);
+  if (!ref || ref.duplaIndex == null) return [jogadorId];
+  return partic.filter(p => p.duplaIndex === ref.duplaIndex).map(p => p.jogadorId);
+}
+
 function calcularRankingTorneios(jogIds, torneioNomes, dataIni, dataFim, modoJogo, adversarioId) {
   const ids = jogIds || [];
   const tnomes = Array.isArray(torneioNomes) ? torneioNomes : (torneioNomes ? [torneioNomes] : []);
@@ -7564,21 +7581,25 @@ function calcularRankingTorneios(jogIds, torneioNomes, dataIni, dataFim, modoJog
       (c.fasesEliminatorias||[]).forEach(fase=>(fase.confrontos||[]).forEach(cf=>{
         if(cf.vencedor===null||cf.g1===null||cf.g2===null)return;
         if(cf.mesmoJogador)return; // jogo entre times do mesmo jogador nao conta no ranking
-        if(s[cf.j1Id]){s[cf.j1Id].gp+=cf.g1;s[cf.j1Id].gc+=cf.g2;s[cf.j1Id].j++;}
-        if(s[cf.j2Id]){s[cf.j2Id].gp+=cf.g2;s[cf.j2Id].gc+=cf.g1;s[cf.j2Id].j++;}
+        const j1Ids = c.modoDupla ? _resolverDuplaIds(c, cf.j1Id) : (cf.j1Id ? [cf.j1Id] : []);
+        const j2Ids = c.modoDupla ? _resolverDuplaIds(c, cf.j2Id) : (cf.j2Id ? [cf.j2Id] : []);
+        j1Ids.forEach(id=>{if(s[id]){s[id].gp+=cf.g1;s[id].gc+=cf.g2;s[id].j++;}});
+        j2Ids.forEach(id=>{if(s[id]){s[id].gp+=cf.g2;s[id].gc+=cf.g1;s[id].j++;}});
       }));
       if(c.status==='finalizado'){
         const finalFase=(c.fasesEliminatorias||[]).find(f=>f.fase==='final');
         if(finalFase){
           const cf=(finalFase.confrontos||[])[0];
           if(cf&&cf.vencedor!==null){
-            const campeaoId=cf.vencedor;
-            const viceId=cf.vencedor===cf.j1Id?cf.j2Id:cf.j1Id;
-            if(s[campeaoId])s[campeaoId].titulos++;
-            if(s[viceId]&&!cf.mesmoJogador)s[viceId].vices++;
+            const campeaoIds=c.modoDupla?_resolverDuplaIds(c,cf.vencedor):[cf.vencedor];
+            const viceOriginalId=cf.vencedor===cf.j1Id?cf.j2Id:cf.j1Id;
+            const viceIds=c.modoDupla?_resolverDuplaIds(c,viceOriginalId):[viceOriginalId];
+            campeaoIds.forEach(id=>{if(s[id])s[id].titulos++;});
+            if(!cf.mesmoJogador)viceIds.forEach(id=>{if(s[id])s[id].vices++;});
           }
         } else if(c.campeaoPorDefault){
-          if(s[c.campeaoPorDefault])s[c.campeaoPorDefault].titulos++;
+          const campIds=c.modoDupla?_resolverDuplaIds(c,c.campeaoPorDefault):[c.campeaoPorDefault];
+          campIds.forEach(id=>{if(s[id])s[id].titulos++;});
         }
       }
     }
