@@ -6857,8 +6857,8 @@ window.abrirCampeonato = (id) => {
       ${c.modoDupla ? `<span class="tag tag-cyan">DUPLA</span><span class="tag tag-cyan">CASA</span>` : ''}
       ${qtdTimes > 1 ? `<span class="tag tag-yellow">${qtdTimes}X TIMES</span>` : ''}
       <span class="tag tag-gray">${isSel?'SELECOES':'CLUBES'}</span>
-      <span class="tag tag-gray">${c.participantes?.length||0} PARTICIPANTES</span>
-      <span class="tag tag-gray">${totalJogosReg} JOGOS REGISTRADOS</span>
+      <span class="tag tag-purple">${c.participantes?.length||0} PARTICIPANTES</span>
+      <span class="tag tag-yellow">${totalJogosReg} JOGOS REGISTRADOS</span>
     </div>
 
     ${_dataInicioFS ? `<label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;" class="grad">DATA INICIO</label><div style="background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:12px 14px;margin-bottom:16px;"><p class="grad" style="font-size:14px;font-weight:700;margin:0;">${_dataInicioFS}</p></div>` : ''}
@@ -8439,8 +8439,8 @@ function cardCampHome(c, modoLista=false) {
   const cardHtml = `<div ${idAttr}class="match-card" style="margin-bottom:${modoLista?'0':'10px'};padding:12px;cursor:pointer;overflow:hidden;" onclick="abrirCampeonato('${c.id}')">
     <div style="margin:-12px -12px 10px -12px;padding:10px 16px 8px;background:transparent;border-bottom:1px solid var(--card-border);border-radius:18px 18px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">
       <div style="display:flex;flex-direction:column;align-items:center;text-align:center;max-width:calc(100% - 40px);">
-        <div style="font-weight:900;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:${finalizado?'#94A3B8':'#FBBF24'};letter-spacing:0.05em;">${c.nome.toUpperCase()}</div>
-        ${!finalizado && dataInicio ? `<div style="font-size:11px;font-weight:600;color:rgba(251,191,36,0.7);margin-top:2px;">${dataInicio}</div>` : ''}
+        <div class="${finalizado?'':'grad'}" style="font-weight:900;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${finalizado?'color:#94A3B8;':''}letter-spacing:0.05em;">${c.nome.toUpperCase()}</div>
+        ${!finalizado && dataInicio ? `<div class="grad" style="font-size:11px;font-weight:600;margin-top:2px;">${dataInicio}</div>` : ''}
       </div>
       ${!finalizado && podeMudar ? _iconExcluirCard(`event.stopPropagation();excluirCampeonato('${c.id}')`) : ''}
     </div>
@@ -8452,8 +8452,8 @@ function cardCampHome(c, modoLista=false) {
         ${c.modoDupla ? `<span class="tag tag-cyan">DUPLA</span><span class="tag tag-cyan">CASA</span>` : ''}
         ${qtdTimes > 1 ? `<span class="tag tag-yellow">${qtdTimes}X TIMES</span>` : ''}
         <span class="tag tag-gray">${isSel?'SELECOES':'CLUBES'}</span>
-        <span class="tag tag-gray">${c.participantes?.length||0} PARTICIPANTES</span>
-        <span class="tag tag-gray">${totalParts} JOGOS REGISTRADOS</span>
+        <span class="tag tag-purple">${c.participantes?.length||0} PARTICIPANTES</span>
+        <span class="tag tag-yellow">${totalParts} JOGOS REGISTRADOS</span>
       </div>
     </div>` : ''}
     ${datasHtml}
