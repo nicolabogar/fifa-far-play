@@ -3152,6 +3152,14 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
     : `<div id="${cardId}" style="margin-bottom:10px;">`;
   const swipeClose = `</div>`;
   const swipeBg = useSwipe ? `<div class="swipe-bg"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg><span class="swipe-bg-label">EXCLUIR</span></div>` : '';
+  const _g1Ami = a.resultado?.g1, _g2Ami = a.resultado?.g2;
+  const _winnerTimeAmi = temRes && _g1Ami > _g2Ami ? a.time1 : temRes && _g2Ami > _g1Ami ? a.time2 : null;
+  const _winnerPlayersAmi = _winnerTimeAmi
+    ? (_winnerTimeAmi.jogadoresIds?.length
+        ? _winnerTimeAmi.jogadoresIds.map((id, i) => ({ id, nome: _nomeTag(_nomeJogPorId(id, (_winnerTimeAmi.jogadores || [])[i] || '')) }))
+        : (_winnerTimeAmi.jogadores || []).map(n => ({ id: null, nome: _nomeTag(n) })))
+    : [];
+  const secaoVencedorAmi = _winnerPlayersAmi.length ? _htmlSecaoVencedor(_winnerPlayersAmi, a._playerColors || null) : '';
   return `${swipeOuter}${swipeBg}
   <div id="${cardId}" class="match-card" style="${compact?'padding:12px;':''}overflow:hidden;" ${readonly || a.resultado || !master ? '' : `onclick="editarAmistoso('${a.id}')" style="cursor:pointer;"`}>
     ${!temRes && !compact ? `<div style="margin:-14px -14px 0 -14px;padding:10px 14px 8px;background:transparent;border-bottom:1px solid var(--card-border);border-radius:18px 18px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">${master && !noSwipe ? _iconExcluirCard(`event.stopPropagation();confirmarExcluirAmistoso('${a.id}')`) : ''}<span style="font-size:16px;font-weight:900;color:#6EE7B7;letter-spacing:0.05em;">AMISTOSO</span>${criadoEmFmt ? `<span style="font-size:11px;color:rgba(110,231,183,0.7);font-weight:600;margin-top:2px;">${criadoEmFmt}</span>` : ''}</div><div style="margin-bottom:10px;"></div>` : `<div style="text-align:center;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);border-radius:12px;padding:6px 12px;margin-bottom:10px;"><span style="font-size:15px;font-weight:800;color:#6EE7B7;letter-spacing:0.05em;text-transform:uppercase;">AMISTOSO</span></div>`}
@@ -3163,7 +3171,7 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
       <span class="tag tag-gray">${a.tipo === 'selecoes' ? 'SELECOES' : 'CLUBES'}</span>
       ${a.modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
       ${!isRanking && !temRes ? `<span class="tag tag-green">EM ANDAMENTO</span>` : ''}
-      ${temRes ? _tagVitoriaAmistoso(a) : ''}
+      ${temRes && a.resultado.g1 === a.resultado.g2 ? '<span class="tag tag-yellow">EMPATE</span>' : ''}
       ${temRes ? `<span class="tag tag-red">FINALIZADO</span>` : ''}
     </div>`}
     ${compact ? `
@@ -3223,6 +3231,7 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
     const dataAmi = a.criadoEm?.seconds ? new Date(a.criadoEm.seconds * 1000).toLocaleDateString('pt-BR') : '';
     return dataAmi ? `<div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);"><span class="tag tag-gray">${dataAmi}</span></div>` : '';
   })() : ''}
+  ${secaoVencedorAmi}
   ${!temRes && !compact ? `
   <div style="margin-top:12px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px;">
     <button onclick="event.stopPropagation();compartilharWhatsApp(${JSON.stringify({tipo:a.tipo,modoDupla:a.modoDupla||false,time1:a.time1,time2:a.time2}).replace(/"/g,'&quot;')})" style="width:100%;background:var(--card);border:none;color:var(--green);padding:10px;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
@@ -3444,6 +3453,27 @@ function _jogadorBg(playerId, playerColors) {
     idx = _jogadorPaletteIdx(playerId);
   }
   return _PLAYER_TAG_PALETTE[idx].bg;
+}
+
+/** Retorna HTML da seção de vencedor na parte inferior do card de jogo finalizado.
+ * @param {Array<{id:string|null, nome:string}>} jogadores - jogadores vencedores
+ * @param {object|null} playerColors - mapa playerId→paletteIndex
+ */
+function _htmlSecaoVencedor(jogadores, playerColors) {
+  if (!jogadores || !jogadores.length) return '';
+  const tags = jogadores.map(({ id, nome }) => {
+    let idx;
+    if (playerColors && id && playerColors[id] !== undefined) {
+      idx = playerColors[id] % _PLAYER_TAG_PALETTE.length;
+    } else if (id && _playerTagColorIdx.has(id)) {
+      idx = _playerTagColorIdx.get(id) % _PLAYER_TAG_PALETTE.length;
+    } else {
+      idx = id ? _jogadorPaletteIdx(id) : 0;
+    }
+    const p = _PLAYER_TAG_PALETTE[idx];
+    return `<span style="background:${p.bg};border:1px solid ${p.border};border-radius:6px;padding:2px 10px;font-size:11px;font-weight:800;color:${p.color};text-transform:uppercase;letter-spacing:0.04em;">${nome}</span>`;
+  });
+  return `<div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;"><span style="font-size:16px;">🏆</span>${tags.join('')}</div>`;
 }
 
 function _syncJcMaps() {
@@ -6546,12 +6576,15 @@ function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar, fase
   const lpKo2 = (!temRes && master && !isMesmoJogador)
     ? `<div style="display:flex;justify-content:center;margin-bottom:4px;cursor:pointer;user-select:none;-webkit-touch-callout:none;" title="Segure para editar o time" onpointerdown="_lpTornStart('${cid}','${t2?.id||''}','${t2nom}','${tipo2}')" onpointerup="_lpTornEnd()" onpointercancel="_lpTornEnd()" oncontextmenu="return false;" onclick="if(window._lpTornTriggered){window._lpTornTriggered=false;event.stopPropagation();}">${badgeTimeIcon(t2?.id||'', t2?.nome||'', tipo2)}</div>`
     : `<div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(t2?.id||'', t2?.nome||'', tipo2)}</div>`;
+  const secaoVencedorKo = temRes && !isMesmoJogador
+    ? _htmlSecaoVencedor([{ id: vit1 ? cf.j1Id : cf.j2Id, nome: vit1 ? nome1 : nome2 }], null)
+    : '';
   return `<div class="match-card" data-match-key="${cid}-ko-${faseIdx}-${confrontoIdx}" style="margin-bottom:10px;${cardBorder}">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
       <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;">
         <span class="tag tag-purple">TORNEIO</span>
         ${tagFase}
-        ${temRes ? (isMesmoJogador ? `<span class="tag" style="background:rgba(139,92,246,0.2);color:#C4B5FD;font-weight:800;">AVANCA: ${vit1 ? nome1 : nome2}</span>` : (vit1 ? `<span class="tag tag-green">VITORIA: ${nome1}</span>` : `<span class="tag tag-green">VITORIA: ${nome2}</span>`)) : ''}
+        ${temRes && isMesmoJogador ? `<span class="tag" style="background:rgba(139,92,246,0.2);color:#C4B5FD;font-weight:800;">AVANCA: ${vit1 ? nome1 : nome2}</span>` : ''}
         ${temRes ? `<span class="tag tag-red">FINALIZADO</span>` : ''}
       </div>
       ${!temRes ? `<span class="tag tag-green">EM ANDAMENTO</span>` : ''}
@@ -6575,6 +6608,7 @@ function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar, fase
         ${vit2 ? `<div style="margin-top:4px;font-size:18px;">${winnerEmoji}</div>` : ''}
       </div>
     </div>
+    ${secaoVencedorKo}
   </div>`;
 }
 window.cardJogoKnockout = cardJogoKnockout;
@@ -6608,6 +6642,10 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
   const b2 = badgeTime(t2?.id||'', t2?.nome||'', tipo2);
   const nome1 = _nomeJogPorId(m1.jogadorId, m1.nome);
   const nome2 = _nomeJogPorId(m2.jogadorId, m2.nome);
+  const _winnerPlayerTorn = temRes && g1r !== g2r
+    ? (g1r > g2r ? { id: m1.jogadorId, nome: nome1 } : { id: m2.jogadorId, nome: nome2 })
+    : null;
+  const secaoVencedorTorn = _winnerPlayerTorn ? _htmlSecaoVencedor([_winnerPlayerTorn], null) : '';
 
   const placarArea = temRes
     ? `<div class="grad" style="font-size:29px;font-weight:900;letter-spacing:1px;">${g1r}<span style="font-size:13px;"> × </span>${g2r}</div>`
@@ -6650,7 +6688,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
       ${modoDupla ? `<span class="tag tag-cyan">DUPLA</span>` : ''}
       ${temIdaVolta && turno === 1 ? `<span class="tag tag-green">TURNO</span>` : ''}
       ${temIdaVolta && turno === 2 ? `<span class="tag tag-yellow">RETURNO</span>` : ''}
-      ${g1r > g2r ? `<span class="tag tag-green">VITÓRIA: ${nome1}</span>` : g2r > g1r ? `<span class="tag tag-green">VITÓRIA: ${nome2}</span>` : `<span class="tag tag-yellow">EMPATE</span>`}
+      ${g1r === g2r ? `<span class="tag tag-yellow">EMPATE</span>` : ''}
       <span class="tag tag-red">FINALIZADO</span>
     </div>`}
     <div style="display:grid;grid-template-columns:1fr auto 1fr;column-gap:16px;align-items:center;">
@@ -6673,6 +6711,7 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
       </div>
     </div>
     ${temRes && played?.jogoEm ? `<div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);"><span class="tag tag-gray">${new Date(played.jogoEm).toLocaleDateString('pt-BR')}</span></div>` : ''}
+    ${secaoVencedorTorn}
     ${!temRes ? `<div style="margin-top:12px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px;"><button onclick="event.stopPropagation();compartilharWhatsAppTorneio('${t1?.id||''}','${t1nom}','${nome1Esc}','${t2?.id||''}','${t2nom}','${nome2Esc}','${tipo1}','${tipo2}')" style="width:100%;background:var(--card);border:none;color:var(--green);padding:10px;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>COMPARTILHAR NO WHATSAPP</button></div>` : ''}
   </div>`;
 }
@@ -7940,9 +7979,10 @@ function _renderRankJogos() {
           </div>
         </div>
         <div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);">
-          ${empate?`<span class="tag tag-yellow">EMPATE</span>`:`<span class="tag tag-green">VITORIA: ${j.g1>j.g2?(j.j1Nome||'J1'):(j.j2Nome||'J2')}</span>`}
+          ${empate?`<span class="tag tag-yellow">EMPATE</span>`:''}
           ${data?`<span style="font-size:10px;color:var(--text-muted);">${data}</span>`:''}
         </div>
+        ${!empate?_htmlSecaoVencedor([{id:j.g1>j.g2?j.j1Id:j.j2Id,nome:j.g1>j.g2?(j.j1Nome||'J1'):(j.j2Nome||'J2')}],null):''}
       </div>`;
     }
     // Jogo de torneio com perspectiva de jogador (vindo de _coletarJogosJogador)
@@ -7983,9 +8023,10 @@ function _renderRankJogos() {
           </div>
         </div>
         <div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);">
-          ${j.res==='E'?`<span class="tag tag-yellow">EMPATE</span>`:`<span class="tag tag-green">VITORIA: ${j.res==='V'?(nome1||'?'):(nome2||'?')}</span>`}
+          ${j.res==='E'?`<span class="tag tag-yellow">EMPATE</span>`:''}
           ${data?`<span style="font-size:10px;color:var(--text-muted);">${data}</span>`:''}
         </div>
+        ${j.res!=='E'?_htmlSecaoVencedor([{id:j.res==='V'?j.meuJogadorId:(j.advJogadoresIds||[])[0]||null,nome:j.res==='V'?(nome1||'?'):(nome2||'?')}],null):''}
       </div>`;
     }
     return '';
