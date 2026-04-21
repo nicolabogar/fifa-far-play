@@ -231,7 +231,7 @@
     .nav-btn { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 2px 10px; cursor: pointer; background: none; border: none; color: var(--text-muted); transition: color 0.2s; gap: 5px; position: relative; }
     .nav-btn .nav-ico { width: 44px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
     .nav-btn .nav-ico svg { display: block; width: 26px; height: 26px; }
-    .nav-btn .nav-lbl { font-size: 10px; font-weight: 700; letter-spacing: 0.01em; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+    .nav-btn .nav-lbl { font-size: 10px; font-weight: 700; letter-spacing: 0.01em; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; background: linear-gradient(135deg, var(--purple), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .nav-btn.ativo { color: #E9D5FF; }
     .nav-btn.ativo .nav-ico { background: linear-gradient(135deg, rgba(139,92,246,0.35), rgba(6,182,212,0.25)); box-shadow: 0 4px 14px rgba(139,92,246,0.35); }
 
@@ -651,9 +651,9 @@
     <!-- ── JOGADORES ── -->
     <div id="view-jogadores" class="view">
       <div class="breadcrumb">
-        <span class="breadcrumb-item" onclick="irParaHome()">HOME</span>
+        <span class="breadcrumb-item" onclick="irParaHome()"><span class="grad">HOME</span></span>
         <span class="breadcrumb-sep">›</span>
-        <span class="breadcrumb-item active">JOGADORES</span>
+        <span class="breadcrumb-item active"><span class="grad">JOGADORES</span></span>
       </div>
       <div style="display:flex; align-items:center; justify-content:space-between; padding:0 0 16px;">
         <h2 style="font-size:22px; font-weight:900;" class="grad">JOGADORES</h2>
@@ -670,9 +670,9 @@
     <!-- ── PARTIDAS ── -->
     <div id="view-amistosos" class="view">
       <div class="breadcrumb">
-        <span class="breadcrumb-item" onclick="irParaHome()">HOME</span>
+        <span class="breadcrumb-item" onclick="irParaHome()"><span class="grad">HOME</span></span>
         <span class="breadcrumb-sep">›</span>
-        <span class="breadcrumb-item active">AMISTOSOS</span>
+        <span class="breadcrumb-item active"><span class="grad">AMISTOSOS</span></span>
       </div>
       <div style="display:flex; align-items:center; justify-content:space-between; padding:0 0 20px;">
         <h2 style="font-size:22px; font-weight:900;" class="grad">AMISTOSOS</h2>
@@ -686,9 +686,9 @@
     <!-- ── CAMPEONATOS ── -->
     <div id="view-campeonatos" class="view">
       <div class="breadcrumb">
-        <span class="breadcrumb-item" onclick="irParaHome()">HOME</span>
+        <span class="breadcrumb-item" onclick="irParaHome()"><span class="grad">HOME</span></span>
         <span class="breadcrumb-sep">›</span>
-        <span class="breadcrumb-item active">TORNEIOS</span>
+        <span class="breadcrumb-item active"><span class="grad">TORNEIOS</span></span>
       </div>
       <div style="display:flex; align-items:center; justify-content:space-between; padding:0 0 16px;">
         <h2 style="font-size:22px; font-weight:900;" class="grad">TORNEIOS</h2>
@@ -702,9 +702,9 @@
     <!-- ── RANKING ── -->
     <div id="view-ranking" class="view">
       <div class="breadcrumb">
-        <span class="breadcrumb-item" onclick="irParaHome()">HOME</span>
+        <span class="breadcrumb-item" onclick="irParaHome()"><span class="grad">HOME</span></span>
         <span class="breadcrumb-sep">›</span>
-        <span class="breadcrumb-item active">RANKING</span>
+        <span class="breadcrumb-item active"><span class="grad">RANKING</span></span>
       </div>
       <div style="display:flex; align-items:center; justify-content:space-between; padding:0 0 16px;">
         <h2 style="font-size:22px; font-weight:900;" class="grad">RANKING</h2>
@@ -739,9 +739,9 @@
     <!-- ── TIMES ── -->
     <div id="view-times" class="view">
       <div class="breadcrumb">
-        <span class="breadcrumb-item" onclick="irParaHome()">HOME</span>
+        <span class="breadcrumb-item" onclick="irParaHome()"><span class="grad">HOME</span></span>
         <span class="breadcrumb-sep">›</span>
-        <span class="breadcrumb-item active">TIMES</span>
+        <span class="breadcrumb-item active"><span class="grad">TIMES</span></span>
       </div>
       <div style="display:flex; align-items:center; justify-content:space-between; padding:0 0 16px;">
         <h2 style="font-size:22px; font-weight:900;" class="grad">TIMES</h2>
@@ -818,7 +818,7 @@
 <div id="fullscreen-overlay" style="display:none;position:fixed;top:var(--header-h);left:0;right:0;bottom:0;background:var(--bg);z-index:29;overflow-y:auto;">
   <div style="position:sticky;top:0;z-index:30;background:rgba(8,8,15,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--card-border);padding:0 16px;height:56px;display:flex;align-items:center;justify-content:flex-start;">
     <nav id="fullscreen-breadcrumb" class="breadcrumb">
-      <span class="breadcrumb-item" onclick="irParaHome()">HOME</span>
+      <span class="breadcrumb-item" onclick="irParaHome()"><span class="grad">HOME</span></span>
       <span class="breadcrumb-sep">›</span>
       <span id="fullscreen-mid" class="breadcrumb-item" style="display:none;cursor:pointer;"></span>
       <span id="fullscreen-mid-sep" class="breadcrumb-sep" style="display:none;">›</span>
@@ -1855,7 +1855,7 @@ function fullscreen(title, html, secao, secaoView) {
     }
   }
   if (secao) {
-    mid.textContent = secao;
+    mid.innerHTML = `<span class="grad">${_escHtml(secao)}</span>`;
     mid.style.display = '';
     midSep.style.display = '';
     mid.onclick = () => { fecharFullscreen(); if (secaoView) irPara(secaoView); };
@@ -1863,7 +1863,7 @@ function fullscreen(title, html, secao, secaoView) {
     mid.style.display = 'none';
     midSep.style.display = 'none';
   }
-  document.getElementById('fullscreen-title').textContent = title;
+  document.getElementById('fullscreen-title').innerHTML = `<span class="grad">${_escHtml(title)}</span>`;
   document.getElementById('fullscreen-title').style.color = '';
   document.getElementById('fullscreen-body').innerHTML = html;
   document.getElementById('fullscreen-overlay').style.display = 'block';
@@ -3612,8 +3612,8 @@ function _htmlNovoAmistoso() {
     <div id="ami-manual-times-section" style="display:none;margin-bottom:16px;"></div>
     <div id="ami-dupla-result-panel" style="display:none;margin-bottom:8px;"></div>
     </div>
-    <div id="ami-btn-limpar-row" style="display:none;margin-bottom:8px;">
-      <button id="btn-ami-limpar" class="btn-primary" style="background:var(--card);border:1px solid var(--card-border);border-radius:18px;width:100%;" onclick="limparJogadoresJC()"><span class="grad">LIMPAR JOGADORES</span></button>
+    <div style="margin-bottom:8px;">
+      <button class="btn-primary" style="width:100%;background:var(--card);border:1px solid var(--card-border);border-radius:18px;" onclick="limparJogadoresJC()"><span class="grad">LIMPAR JOGADORES</span></button>
     </div>
     <div id="ami-btn-sortear-row" style="display:flex;gap:8px;margin-bottom:8px;">
       <button id="btn-ami-proximo" class="btn-primary" style="background:var(--card);border:1px solid var(--card-border);border-radius:18px;flex:1;" onclick="sortearAmistoso()"><span class="grad">SORTEAR</span></button>
@@ -5564,7 +5564,7 @@ function abrirModalCriarCamp(secao, secaoView) {
   fullscreen('NOVO', `
     <div style="display:flex;flex-direction:column;gap:14px;">
       <div>
-        <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">NOME DO TORNEIO</label>
+        <label style="display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;" class="grad">NOME DO TORNEIO</label>
         <span style="display:block;font-size:11px;color:var(--text-muted);margin-bottom:6px;">TITULO OFICIAL QUE IDENTIFICARA O TORNEIO</span>
         <input class="input" id="cn" placeholder="NOME DO TORNEIO" autocomplete="off" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
       </div>
@@ -5573,7 +5573,7 @@ function abrirModalCriarCamp(secao, secaoView) {
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
           ${Object.entries(CAMP_META).map(([k,v]) => {
             return `<div class="tipo-btn" data-ct="${k}" onclick="selCampTipo('${k}',this)" style="font-size:11px;padding:10px 6px;">
-              <div style="font-weight:700;line-height:1.2;font-size:10px;">${v.nome.toUpperCase()}</div>
+              <div class="grad" style="font-weight:700;line-height:1.2;font-size:10px;">${v.nome.toUpperCase()}</div>
             </div>`;
           }).join('')}
         </div>
@@ -5583,8 +5583,8 @@ function abrirModalCriarCamp(secao, secaoView) {
       <div>
         <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">TIPO</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
-          <div class="tipo-btn sel" id="cc-tp-clubes" onclick="toggleTipoCC('clubes')"><span style="font-size:12px;font-weight:700;">CLUBES</span></div>
-          <div class="tipo-btn sel" id="cc-tp-selecoes" onclick="toggleTipoCC('selecoes')"><span style="font-size:12px;font-weight:700;">SELECOES</span></div>
+          <div class="tipo-btn sel" id="cc-tp-clubes" onclick="toggleTipoCC('clubes')"><span class="grad" style="font-size:12px;font-weight:700;">CLUBES</span></div>
+          <div class="tipo-btn sel" id="cc-tp-selecoes" onclick="toggleTipoCC('selecoes')"><span class="grad" style="font-size:12px;font-weight:700;">SELECOES</span></div>
         </div>
       </div>
       <div>
@@ -6754,7 +6754,7 @@ window.abrirCampeonato = (id) => {
     const timesExtras = times.length > 1 ? `<div style="font-size:9px;color:var(--text-muted);margin-top:2px;">${times.map(t=>t?.nome||'').filter(Boolean).join(' · ')}</div>` : '';
     return `<div style="flex:1;text-align:center;min-width:0;">
       <div style="display:flex;justify-content:center;margin-bottom:4px;">${bc}</div>
-      <div style="font-size:13px;font-weight:800;line-height:1.2;">${primTime?.nome||'?'}</div>
+      <div class="grad" style="font-size:13px;font-weight:800;line-height:1.2;">${primTime?.nome||'?'}</div>
       ${timesExtras}
       <div style="margin-top:3px;">${eficBadge(eficienciaAtual(primTime?.id))}</div>
       <div style="font-size:11px;color:#67E8F9;margin-top:3px;font-weight:700;">${_nomeJogPorId(m.jogadorId, m.nome)}</div>
@@ -6825,7 +6825,7 @@ window.abrirCampeonato = (id) => {
           <td style="padding:6px 8px;font-weight:800;color:${i===0?'var(--yellow)':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text-muted)'};">${i+1}°</td>
           <td style="padding:6px 4px;">
             <div style="font-weight:700;font-size:11px;">${_nomeJogPorId(m.jogadorId, m.nome)}</div>
-            <div style="font-size:9px;color:var(--text-muted);">${timesStr}</div>
+            <div class="grad" style="font-size:9px;">${timesStr}</div>
           </td>
           <td style="text-align:center;padding:6px 4px;">${m.vit+m.emp+m.der}</td>
           <td style="text-align:center;padding:6px 4px;">${m.vit}</td>
@@ -6861,22 +6861,22 @@ window.abrirCampeonato = (id) => {
       <span class="tag tag-gray">${totalJogosReg} JOGOS REGISTRADOS</span>
     </div>
 
-    ${_dataInicioFS ? `<label style="display:block;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">DATA INICIO</label><div style="background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:12px 14px;margin-bottom:16px;"><p style="font-size:14px;font-weight:700;margin:0;"><span class="grad">${_dataInicioFS}</span></p></div>` : ''}
+    ${_dataInicioFS ? `<label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;" class="grad">DATA INICIO</label><div style="background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:12px 14px;margin-bottom:16px;"><p class="grad" style="font-size:14px;font-weight:700;margin:0;">${_dataInicioFS}</p></div>` : ''}
 
     ${_dataFimFS ? `<div style="font-size:11px;color:var(--text-muted);margin-bottom:16px;"><span>🏁 FIM: <strong>${_dataFimFS}</strong></span></div>` : ''}
 
     ${_cardCampeao(c)}
 
-    ${podeMudar ? `<label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">NOME DO TORNEIO</label><input id="torneio-nome-inline-${c.id}" class="input" value="${c.nome.toUpperCase().replace(/"/g,'&quot;')}" style="text-transform:uppercase;margin-bottom:8px;width:100%;box-sizing:border-box;color:var(--purple);" autocomplete="off" oninput="this.value=this.value.toUpperCase()" onblur="_autoSalvarNomeTorneio('${c.id}',this.value)">` : ''}
+    ${podeMudar ? `<label style="display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;" class="grad">NOME DO TORNEIO</label><input id="torneio-nome-inline-${c.id}" class="input" value="${c.nome.toUpperCase().replace(/"/g,'&quot;')}" style="text-transform:uppercase;margin-bottom:8px;width:100%;box-sizing:border-box;color:var(--purple);font-weight:700;" autocomplete="off" oninput="this.value=this.value.toUpperCase()" onblur="_autoSalvarNomeTorneio('${c.id}',this.value)">` : ''}
     ${podeMudar ? `
-      <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">FORMATO</label>
+      <label style="display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;" class="grad">FORMATO</label>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
         ${Object.entries(CAMP_META).map(([k,v]) => {
           const isSelected = k === c.tipo;
           if (naoIniciado) {
-            return `<div class="tipo-btn${isSelected?' sel':''}" data-ct-view="${k}" onclick="_salvarTipoTorneio('${c.id}','${k}')" style="font-size:11px;padding:10px 6px;"><div style="font-weight:700;line-height:1.2;font-size:10px;">${v.nome.toUpperCase()}</div></div>`;
+            return `<div class="tipo-btn${isSelected?' sel':''}" data-ct-view="${k}" onclick="_salvarTipoTorneio('${c.id}','${k}')" style="font-size:11px;padding:10px 6px;"><div class="grad" style="font-weight:700;line-height:1.2;font-size:10px;">${v.nome.toUpperCase()}</div></div>`;
           } else {
-            return `<div class="tipo-btn${isSelected?' sel':''}" data-ct-view="${k}" style="font-size:11px;padding:10px 6px;pointer-events:none;cursor:not-allowed;${isSelected?'':'opacity:0.4;'}"><div style="font-weight:700;line-height:1.2;font-size:10px;">${v.nome.toUpperCase()}</div></div>`;
+            return `<div class="tipo-btn${isSelected?' sel':''}" data-ct-view="${k}" style="font-size:11px;padding:10px 6px;pointer-events:none;cursor:not-allowed;${isSelected?'':'opacity:0.4;'}"><div class="grad" style="font-weight:700;line-height:1.2;font-size:10px;">${v.nome.toUpperCase()}</div></div>`;
           }
         }).join('')}
       </div>` : ''}
@@ -6917,7 +6917,7 @@ window.abrirCampeonato = (id) => {
           const tt = selecoes.some(s => s.id === t?.id) ? 'selecoes' : 'clubes';
           return `<div style="background:transparent;border:none;border-radius:10px;padding:6px;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:60px;">
             ${_htmlCountryRow(t?.id, t?.nome, tt)}
-            <div style="font-weight:900;font-size:11px;text-transform:uppercase;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70px;">${_nomeAbrevTime(t?.id, t?.nome||'?')}</div>
+            <div class="grad" style="font-weight:900;font-size:11px;text-transform:uppercase;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70px;">${_nomeAbrevTime(t?.id, t?.nome||'?')}</div>
             ${badgeTimeIcon(t?.id, t?.nome, tt)}
             ${eficBadge(eficienciaAtual(t?.id))}
           </div>`;
@@ -6972,7 +6972,6 @@ window.abrirCampeonato = (id) => {
       return `<p class="sec-title" style="margin-bottom:10px;margin-top:16px;">FASE ELIMINATORIA</p>${fasesHTML}`;
     })()}
   `, 'TORNEIOS', 'campeonatos');
-  document.getElementById('fullscreen-title').style.color = c.status === 'finalizado' ? '#94A3B8' : '#6EE7B7';
   // Restaurar placares digitados mas ainda nao salvos
   Object.entries(_savedScores).forEach(([key, vals]) => {
     const card = document.querySelector(`.match-card[data-match-key="${CSS.escape(key)}"]`);
