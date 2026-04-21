@@ -3121,8 +3121,8 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
     const t1Ids = a.time1?.jogadoresIds || [];
     const t2Ids = a.time2?.jogadoresIds || [];
     const duplaColors = {..._playerColorsForCard};
-    if (t1Ids.length > 0) { const firstIdx = duplaColors[t1Ids[0]] ?? 0; t1Ids.forEach(pid => { duplaColors[pid] = firstIdx; }); }
-    if (t2Ids.length > 0) { const firstIdx = duplaColors[t2Ids[0]] ?? 1; t2Ids.forEach(pid => { duplaColors[pid] = firstIdx; }); }
+    if (t1Ids.length > 0) { const team1ColorIdx = duplaColors[t1Ids[0]] ?? 0; t1Ids.forEach(pid => { duplaColors[pid] = team1ColorIdx; }); }
+    if (t2Ids.length > 0) { const team2ColorIdx = duplaColors[t2Ids[0]] ?? 1; t2Ids.forEach(pid => { duplaColors[pid] = team2ColorIdx; }); }
     _playerColorsForCard = duplaColors;
   }
   const t1nom = (a.time1?.nome||'').replace(/'/g,"\\'");
