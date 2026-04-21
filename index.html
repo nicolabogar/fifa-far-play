@@ -2204,14 +2204,126 @@ async function _migrarJogadorParaUid(jogadorAntigo, uid) {
         });
         return { ...g, membros, partidas };
       });
+      const fasesEliminatorias = (c.fasesEliminatorias || []).map(fase => {
+        const confrontos = (fase.confrontos || []).map(cf => {
+          let cm = { ...cf };
+          if (cf.j1Id === oldId) { cm.j1Id = uid; mudou = true; }
+          if (cf.j2Id === oldId) { cm.j2Id = uid; mudou = true; }
+          if (cf.vencedor === oldId) { cm.vencedor = uid; mudou = true; }
+          return cm;
+        });
+        return { ...fase, confrontos };
+      });
       if (mudou) {
-        batch.update(doc(db, 'campeonatos', c.id), { participantes: parts, grupos });
+        batch.update(doc(db, 'campeonatos', c.id), { participantes: parts, grupos, fasesEliminatorias });
       }
     }
   }
   await batch.commit();
   await carregarJogadores();
 }
+
+// RG4-MERGE: mescla um jogador legado (doc antigo com ID aleatório) no jogador destino (uid-keyed)
+// Atualiza todas as referências em amistosos e campeonatos, incluindo fasesEliminatorias
+// Preserva apelido/celular/fotoUrl do legado caso o destino não os tenha
+async function _mesclarJogadorLegado(idDestino, idOrigem) {
+  const dest = jogadores.find(j => j.id === idDestino);
+  const orig = jogadores.find(j => j.id === idOrigem);
+  if (!dest || !orig) return;
+  // Copiar campos do legado para o destino se destino não os tiver
+  const update = {};
+  if (!dest.apelido && orig.apelido) update.apelido = orig.apelido;
+  if (!dest.celular && orig.celular) update.celular = orig.celular;
+  if (!dest.fotoUrl && orig.fotoUrl) update.fotoUrl = orig.fotoUrl;
+  if (Object.keys(update).length > 0) {
+    await updateDoc(doc(db, 'jogadores', idDestino), update);
+  }
+  const batch = writeBatch(db);
+  batch.delete(doc(db, 'jogadores', idOrigem));
+  // Atualizar referências em amistosos
+  for (const a of amistosos) {
+    let mudou = false;
+    const upd = {};
+    if (a.time1?.jogadoresIds?.includes(idOrigem)) {
+      upd['time1.jogadoresIds'] = a.time1.jogadoresIds.map(x => x === idOrigem ? idDestino : x);
+      mudou = true;
+    }
+    if (a.time2?.jogadoresIds?.includes(idOrigem)) {
+      upd['time2.jogadoresIds'] = a.time2.jogadoresIds.map(x => x === idOrigem ? idDestino : x);
+      mudou = true;
+    }
+    if (mudou) batch.update(doc(db, 'amistosos', a.id), upd);
+  }
+  // Atualizar referências em campeonatos
+  for (const c of campeonatos) {
+    let mudou = false;
+    const parts = (c.participantes || []).map(p => {
+      if (p.jogadorId === idOrigem) { mudou = true; return { ...p, jogadorId: idDestino }; }
+      return p;
+    });
+    const grupos = (c.grupos || []).map(g => {
+      const membros = (g.membros || []).map(m => {
+        if (m.jogadorId === idOrigem) { mudou = true; return { ...m, jogadorId: idDestino }; }
+        return m;
+      });
+      const partidas = (g.partidas || []).map(p => {
+        let pm = { ...p };
+        if (p.j1Id === idOrigem) { pm.j1Id = idDestino; mudou = true; }
+        if (p.j2Id === idOrigem) { pm.j2Id = idDestino; mudou = true; }
+        return pm;
+      });
+      return { ...g, membros, partidas };
+    });
+    const fasesEliminatorias = (c.fasesEliminatorias || []).map(fase => {
+      const confrontos = (fase.confrontos || []).map(cf => {
+        let cm = { ...cf };
+        if (cf.j1Id === idOrigem) { cm.j1Id = idDestino; mudou = true; }
+        if (cf.j2Id === idOrigem) { cm.j2Id = idDestino; mudou = true; }
+        if (cf.vencedor === idOrigem) { cm.vencedor = idDestino; mudou = true; }
+        return cm;
+      });
+      return { ...fase, confrontos };
+    });
+    if (mudou) {
+      batch.update(doc(db, 'campeonatos', c.id), { participantes: parts, grupos, fasesEliminatorias });
+    }
+  }
+  await batch.commit();
+  await carregarJogadores();
+  await carregarDados();
+}
+
+window.abrirModalMesclarLegado = (idDestino) => {
+  const dest = jogadores.find(j => j.id === idDestino);
+  if (!dest) return;
+  const outros = jogadores.filter(j => j.id !== idDestino);
+  if (!outros.length) { toast('NENHUM OUTRO JOGADOR DISPONIVEL', 'erro'); return; }
+  const opts = outros.map(j => `<option value="${j.id}">${_escHtml(_nomeExibicao(j).toUpperCase())}${j.email ? ' (' + _escHtml(j.email) + ')' : ' (SEM EMAIL)'}</option>`).join('');
+  modal(`<p class="modal-title">VINCULAR JOGADOR LEGADO</p>
+    <p style="color:var(--text-muted);font-size:13px;line-height:1.5;margin-bottom:14px;">Selecione o jogador legado (com os jogos antigos) para mesclar em <strong style="color:var(--text);">${_escHtml(_nomeExibicao(dest).toUpperCase())}</strong>.<br><br>Todos os jogos e referências do jogador legado serão transferidos. O jogador legado será excluído.</p>
+    <select id="sel-mesclar-origem" style="width:100%;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 10px;font-size:13px;font-weight:700;text-transform:uppercase;cursor:pointer;outline:none;margin-bottom:14px;">${opts}</select>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
+      <button class="btn-primary" onclick="confirmarMesclarLegado('${idDestino}')">MESCLAR</button>
+    </div>`);
+};
+
+window.confirmarMesclarLegado = async (idDestino) => {
+  const idOrigem = document.getElementById('sel-mesclar-origem')?.value;
+  if (!idOrigem) { toast('SELECIONE O JOGADOR LEGADO', 'erro'); return; }
+  const orig = jogadores.find(j => j.id === idOrigem);
+  const dest = jogadores.find(j => j.id === idDestino);
+  if (!orig || !dest) return;
+  fecharModal();
+  try {
+    await _mesclarJogadorLegado(idDestino, idOrigem);
+    fecharFullscreen();
+    toast('JOGADOR MESCLADO COM SUCESSO', 'ok');
+  } catch(e) {
+    console.error(e);
+    toast('ERRO AO MESCLAR JOGADOR', 'erro');
+  }
+};
 
 // RG4-CEL: exibe modal bloqueante solicitando o celular no primeiro cadastro
 function _solicitarCelularNovoCadastro(u) {
@@ -2659,6 +2771,7 @@ window.editarJogador = (id) => {
         <select id="i-simular-edit" style="width:100%;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;text-transform:uppercase;cursor:pointer;outline:none;">${opcoesSimulacao}</select>
         <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">SELECIONE UM JOGADOR PARA VER O APP COMO ELE</div>
       </div>` : ''}
+      ${isMasterUser ? `<button class="btn-ghost" onclick="abrirModalMesclarLegado('${id}')" style="margin-top:6px;border-color:rgba(245,158,11,0.4);color:rgba(245,158,11,0.9);">VINCULAR JOGADOR LEGADO</button>` : ''}
       <button class="btn-primary" id="btn-salvar-edit" onclick="salvarEdicaoJogador('${id}')" style="margin-top:10px;">SALVAR</button>
       <button class="btn-ghost" onclick="fecharFullscreen()" style="margin-top:8px;">CANCELAR</button>
     </div>`);
