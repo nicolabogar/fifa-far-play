@@ -6546,10 +6546,7 @@ function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar, fase
   const lpKo2 = (!temRes && master && !isMesmoJogador)
     ? `<div style="display:flex;justify-content:center;margin-bottom:4px;cursor:pointer;user-select:none;-webkit-touch-callout:none;" title="Segure para editar o time" onpointerdown="_lpTornStart('${cid}','${t2?.id||''}','${t2nom}','${tipo2}')" onpointerup="_lpTornEnd()" onpointercancel="_lpTornEnd()" oncontextmenu="return false;" onclick="if(window._lpTornTriggered){window._lpTornTriggered=false;event.stopPropagation();}">${badgeTimeIcon(t2?.id||'', t2?.nome||'', tipo2)}</div>`
     : `<div style="display:flex;justify-content:center;margin-bottom:4px;">${badgeTimeIcon(t2?.id||'', t2?.nome||'', tipo2)}</div>`;
-  const resultRow = '';
   return `<div class="match-card" data-match-key="${cid}-ko-${faseIdx}-${confrontoIdx}" style="margin-bottom:10px;${cardBorder}">
-    ${finalBanner}
-    ${mesmoJogadorBanner}
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
       <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;">
         <span class="tag tag-purple">TORNEIO</span>
@@ -6578,7 +6575,6 @@ function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar, fase
         ${vit2 ? `<div style="margin-top:4px;font-size:18px;">${winnerEmoji}</div>` : ''}
       </div>
     </div>
-    ${resultRow}
   </div>`;
 }
 window.cardJogoKnockout = cardJogoKnockout;
@@ -6937,7 +6933,7 @@ window.abrirCampeonato = (id) => {
         <div style="border-top:1px solid rgba(255,255,255,0.1);margin:0 -4px 10px -4px;"></div>` : '';
         const teamCard = (t) => {
           const tt = selecoes.some(s => s.id === t?.id) ? 'selecoes' : 'clubes';
-          return `<div style="background:transparent;border:none;border-radius:10px;padding:6px;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:calc(calc(100% - 16px) / 3);flex-shrink:0;">
+          return `<div style="background:transparent;border:none;border-radius:10px;padding:6px;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:calc((100% - 16px) / 3);flex-shrink:0;">
             ${_htmlCountryRow(t?.id, t?.nome, tt)}
             <div class="grad" style="font-weight:900;font-size:11px;text-transform:uppercase;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70px;">${_nomeAbrevTime(t?.id, t?.nome||'?')}</div>
             ${badgeTimeIcon(t?.id, t?.nome, tt)}
@@ -8334,7 +8330,7 @@ function cardCampHome(c, modoLista=false) {
         <div style="border-top:1px solid rgba(255,255,255,0.1);margin:0 -4px 10px -4px;"></div>` : '';
       const teamCard = (t) => {
         const tt = selecoes.some(s => s.id === t?.id) ? 'selecoes' : 'clubes';
-        return `<div style="background:transparent;border:none;border-radius:10px;padding:6px;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:calc(calc(100% - 16px) / 3);flex-shrink:0;">
+        return `<div style="background:transparent;border:none;border-radius:10px;padding:6px;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:calc((100% - 16px) / 3);flex-shrink:0;">
           ${_htmlCountryRow(t?.id||'', t?.nome||'', tt)}
           <div style="font-weight:900;font-size:11px;text-transform:uppercase;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70px;">${_nomeAbrevTime(t?.id, t?.nome||'?')}</div>
           ${badgeTimeIcon(t?.id||'', t?.nome||'', tt)}
