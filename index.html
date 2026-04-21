@@ -79,6 +79,8 @@
 
     /* Gradient text */
     .grad { background: linear-gradient(135deg, var(--purple), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    /* Placeholder color for new-team form inputs (inactive/empty state) */
+    #nt-clube-nome::placeholder, #nt-clube-nomeAbrev::placeholder, #nt-busca::placeholder { -webkit-text-fill-color: rgba(139,92,246,0.5); color: rgba(139,92,246,0.5); }
 
     /* Gradient border glow */
     .glow-border { box-shadow: 0 0 0 1px var(--purple), 0 0 20px rgba(139,92,246,0.2); }
@@ -120,8 +122,8 @@
     }
     .input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(139,92,246,0.15); }
     .input::placeholder { color: var(--text-muted); }
-    .input-nt { color: var(--purple); }
-    .input-nt::placeholder { color: rgba(139, 92, 246, 0.5); }
+    /* Gradient text for inputs (typed value) in new-team form — placed after .input for specificity */
+    .input.input-grad { background: linear-gradient(135deg, var(--purple), var(--cyan)), rgba(255,255,255,0.05); -webkit-background-clip: text, padding-box; background-clip: text, padding-box; -webkit-text-fill-color: transparent; }
 
     select.input option { background: #1E1E35; color: var(--text); }
 
@@ -9041,7 +9043,7 @@ function abrirModalAddTime(tipoInicial) {
           <label style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;" class="grad">PAÍS</label>
           <input type="hidden" id="nt-clube-pais" value="">
           <div id="nt-clube-pais-display" class="input" style="cursor:pointer;display:flex;align-items:center;gap:8px;min-height:42px;" onclick="_ntTogglePaisDropdown()">
-            <span style="color:var(--text-muted);font-size:14px;" id="nt-clube-pais-label">Selecione o país...</span>
+            <span style="font-size:14px;" class="grad" id="nt-clube-pais-label">Selecione o país...</span>
           </div>
           <div id="nt-clube-pais-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;background:var(--card-bg,#1a1a2e);border:1px solid var(--card-border);border-radius:12px;margin-top:4px;max-height:240px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.5);">
             <div style="padding:8px;border-bottom:1px solid var(--card-border);">
@@ -9052,11 +9054,11 @@ function abrirModalAddTime(tipoInicial) {
         </div>
         <div>
           <label style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;" class="grad">NOME DO CLUBE</label>
-          <input class="input input-nt" id="nt-clube-nome" placeholder="Nome do clube..." autocomplete="off" oninput="_ntClubePreview()" style="text-transform:uppercase;">
+          <input class="input input-grad" id="nt-clube-nome" placeholder="Nome do clube..." autocomplete="off" oninput="_ntClubePreview()" style="text-transform:uppercase;">
         </div>
         <div>
           <label style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;" class="grad">NOME ABREVIADO (OPCIONAL)</label>
-          <input class="input input-nt" id="nt-clube-nomeAbrev" placeholder="Ex: MAN. UTD" autocomplete="off" style="text-transform:uppercase;">
+          <input class="input input-grad" id="nt-clube-nomeAbrev" placeholder="Ex: MAN. UTD" autocomplete="off" style="text-transform:uppercase;">
         </div>
         <div>
           <label style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;" class="grad">BRASÃO (OPCIONAL)</label>
@@ -9086,8 +9088,8 @@ function abrirModalAddTime(tipoInicial) {
         <div id="nt-clube-live-preview" style="display:none;background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.18);border-radius:14px;padding:16px;"></div>
 
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
-          <button class="btn-primary" onclick="salvarNovoTime()" id="btn-salvar-time" disabled style="opacity:0.4;background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;"><span class="grad">CRIAR</span></button>
-          <button class="btn-primary" onclick="fecharFullscreen()" style="background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;"><span class="grad">CANCELAR</span></button>
+          <button id="btn-salvar-time" class="btn-primary" onclick="salvarNovoTime()" disabled style="opacity:0.4;background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;"><span class="grad">CRIAR</span></button>
+          <button class="btn-primary" style="background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;" onclick="fecharFullscreen()"><span class="grad">CANCELAR</span></button>
         </div>
       </div>
 
@@ -9095,7 +9097,7 @@ function abrirModalAddTime(tipoInicial) {
       <div id="nt-selecao-section" style="display:${tipoInicial==='selecao'?'flex':'none'};flex-direction:column;gap:14px;">
         <div>
           <label style="display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;" class="grad">BUSCAR SELEÇÃO</label>
-          <input class="input" id="nt-busca" placeholder="Buscar país..." autocomplete="off" oninput="filtrarListaAddTime()">
+          <input class="input input-grad" id="nt-busca" placeholder="Buscar país..." autocomplete="off" oninput="filtrarListaAddTime()">
         </div>
         <div id="nt-lista" style="max-height:280px;overflow-y:auto;border-radius:12px;border:1px solid var(--card-border);background:rgba(0,0,0,0.2);padding:8px;"></div>
 
@@ -9114,8 +9116,8 @@ function abrirModalAddTime(tipoInicial) {
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
-          <button class="btn-primary" onclick="salvarNovoTimeSel()" id="btn-salvar-time-sel" disabled style="opacity:0.4;background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;"><span class="grad">CRIAR</span></button>
-          <button class="btn-primary" onclick="fecharFullscreen()" style="background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;"><span class="grad">CANCELAR</span></button>
+          <button id="btn-salvar-time-sel" class="btn-primary" onclick="salvarNovoTimeSel()" disabled style="opacity:0.4;background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;"><span class="grad">CRIAR</span></button>
+          <button class="btn-primary" style="background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;" onclick="fecharFullscreen()"><span class="grad">CANCELAR</span></button>
         </div>
       </div>
     </div>`);
