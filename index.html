@@ -6926,9 +6926,10 @@ window.abrirCampeonato = (id) => {
         const jog = jogadores.find(x => x.id === p.jogadorId);
         const jogNome = _nomeJogPorId(p.jogadorId, p.nome);
         const times = p.times || [p.time].filter(Boolean);
-        const playerHeader = jogNome ? `<div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-bottom:6px;">
+        const playerHeader = jogNome ? `<div style="position:relative;display:flex;justify-content:center;align-items:center;gap:6px;margin-bottom:6px;">
           ${avatarJogador({fotoUrl: jog?.fotoUrl||''}, 24)}
           <div style="font-size:12px;font-weight:700;color:${_jogadorColor(p.jogadorId)};text-transform:uppercase;">${jogNome.toUpperCase()}</div>
+          <div style="position:absolute;right:0;font-size:10px;font-weight:800;color:var(--text-muted);background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:2px 8px;white-space:nowrap;">${times.length} TIME${times.length !== 1 ? 'S' : ''}</div>
         </div>
         <div style="border-top:1px solid rgba(255,255,255,0.1);margin:0 -4px 10px -4px;"></div>` : '';
         const teamCard = (t) => {
@@ -6942,7 +6943,10 @@ window.abrirCampeonato = (id) => {
         };
         return `<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:8px;">
           ${playerHeader}
-          <div class="teams-scroll" style="display:flex;gap:8px;">${times.map(t => teamCard(t)).join('')}</div>
+          <div style="position:relative;">
+            <div class="teams-scroll" style="display:flex;gap:8px;">${times.map(t => teamCard(t)).join('')}</div>
+            ${times.length > 3 ? `<div style="position:absolute;right:0;top:0;bottom:0;width:40px;background:linear-gradient(to right,transparent,rgba(8,8,15,0.92));border-radius:0 10px 10px 0;pointer-events:none;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;"><span style="color:rgba(255,255,255,0.55);font-size:18px;font-weight:300;line-height:1;">›</span></div>` : ''}
+          </div>
         </div>`;
       };
       if (c.modoDupla) {
@@ -8323,9 +8327,10 @@ function cardCampHome(c, modoLista=false) {
       const jog = jogadores.find(x => x.id === p.jogadorId);
       const jogNome = _nomeJogPorId(p.jogadorId, p.nome);
       const times = (p.times?.length ? p.times : [p.time]).filter(Boolean);
-      const playerHeader = jogNome ? `<div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-bottom:6px;">
+      const playerHeader = jogNome ? `<div style="position:relative;display:flex;justify-content:center;align-items:center;gap:6px;margin-bottom:6px;">
           ${avatarJogador({fotoUrl: jog?.fotoUrl||''}, 24)}
           <div style="font-size:12px;font-weight:700;color:${_jogadorColor(p.jogadorId)};text-transform:uppercase;">${jogNome.toUpperCase()}</div>
+          <div style="position:absolute;right:0;font-size:10px;font-weight:800;color:var(--text-muted);background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:2px 8px;white-space:nowrap;">${times.length} TIME${times.length !== 1 ? 'S' : ''}</div>
         </div>
         <div style="border-top:1px solid rgba(255,255,255,0.1);margin:0 -4px 10px -4px;"></div>` : '';
       const teamCard = (t) => {
@@ -8339,7 +8344,10 @@ function cardCampHome(c, modoLista=false) {
       };
       return `<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px;margin-bottom:8px;">
         ${playerHeader}
-        <div class="teams-scroll" style="display:flex;gap:8px;">${times.map(t => teamCard(t)).join('')}</div>
+        <div style="position:relative;">
+          <div class="teams-scroll" style="display:flex;gap:8px;">${times.map(t => teamCard(t)).join('')}</div>
+          ${times.length > 3 ? `<div style="position:absolute;right:0;top:0;bottom:0;width:40px;background:linear-gradient(to right,transparent,rgba(8,8,15,0.92));border-radius:0 10px 10px 0;pointer-events:none;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;"><span style="color:rgba(255,255,255,0.55);font-size:18px;font-weight:300;line-height:1;">›</span></div>` : ''}
+        </div>
       </div>`;
     };
     if (c.modoDupla) {
