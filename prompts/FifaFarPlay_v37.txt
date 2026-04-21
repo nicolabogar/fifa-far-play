@@ -1,0 +1,12 @@
+# FIFA FAR PLAY - Prompts de Features v37
+# FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
+# O agente deve marcar o hash do commit ao concluir cada item.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v37.txt e um novo é criado.
+
+## MELHORIAS ##
+
+- [x] Item 1: Pagina de ranking - incluir dropdown de adversário (hash: e3a775a)
+- [x] Item 2: Pagina de ranking - corrigir computação da tabela: jogos de dupla devem ser contabilizados corretamente (hash: e3a775a)
+- [x] Item 3: Pagina de ranking - colocar filtros de data início e data fim em linhas separadas (hash: e3a775a)
+- [x] Item 4: Cards de jogos de torneio finalizados - header deve mostrar nome do torneio em amarelo 16px (hash: e3a775a)
+- [x] Item 5: Corrigir adversário sendo listado duas vezes na tabela de confrontos do ranking (hash: e3a775a)

@@ -394,9 +394,11 @@
     .efic-tag[data-efic="Ruim"]     { background: rgba(239,68,68,0.12);  color: #ef4444; border-color: rgba(239,68,68,0.25); }
     .efic-tag[data-efic="Moderado"] { background: rgba(234,179,8,0.12);  color: #eab308; border-color: rgba(234,179,8,0.25); }
     .efic-tag[data-efic="Bom"]      { background: rgba(34,197,94,0.12);  color: #22c55e; border-color: rgba(34,197,94,0.25); }
+    .efic-tag[data-efic="Super"]    { background: rgba(139,92,246,0.12); color: #A78BFA; border-color: rgba(139,92,246,0.25); }
     .efic-tag.selecionado[data-efic="Ruim"]     { background: rgba(239,68,68,0.3);  border-color: #ef4444; }
     .efic-tag.selecionado[data-efic="Moderado"] { background: rgba(234,179,8,0.3);  border-color: #eab308; }
     .efic-tag.selecionado[data-efic="Bom"]      { background: rgba(34,197,94,0.3);  border-color: #22c55e; }
+    .efic-tag.selecionado[data-efic="Super"]    { background: rgba(139,92,246,0.3); border-color: #A78BFA; }
     .efic-tag.selecionado::after { content:' ×'; font-size:13px; font-weight:900; opacity:0.8; }
 
     /* Multi-select dropdown */
@@ -748,13 +750,13 @@
       </div>
       <div style="display:flex; align-items:center; justify-content:space-between; padding:0 0 16px;">
         <h2 style="font-size:22px; font-weight:900;" class="grad">TIMES</h2>
-        <button class="btn-primary" id="btn-add-time" style="width:auto; padding:10px 18px; font-size:14px;">+ CRIAR</button>
+        <button class="btn-primary" id="btn-add-time" style="width:auto;padding:10px 18px;font-size:14px;background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;"><span class="grad">+ CRIAR</span></button>
       </div>
 
       <!-- Tabs -->
       <div style="display:flex; gap:8px; margin-bottom:16px; background:var(--card); border:1px solid var(--card-border); border-radius:14px; padding:4px;">
-        <button id="tab-clubes" onclick="filtrarTimes('clubes')" style="flex:1; padding:9px; border-radius:10px; border:none; background:var(--purple); color:#fff; font-weight:700; font-size:13px; cursor:pointer;">CLUBES</button>
-        <button id="tab-selecoes" onclick="filtrarTimes('selecoes')" style="flex:1; padding:9px; border-radius:10px; border:none; background:none; color:var(--text-muted); font-weight:700; font-size:13px; cursor:pointer;">SELECOES</button>
+        <button id="tab-clubes" onclick="filtrarTimes('clubes')" style="flex:1; padding:9px; border-radius:10px; border:2px solid var(--purple); background:rgba(139,92,246,0.15); font-weight:700; font-size:13px; cursor:pointer;"><span class="grad">CLUBES</span></button>
+        <button id="tab-selecoes" onclick="filtrarTimes('selecoes')" style="flex:1; padding:9px; border-radius:10px; border:2px solid transparent; background:none; font-weight:700; font-size:13px; cursor:pointer;"><span class="grad">SELECOES</span></button>
       </div>
 
       <div id="filtro-pais-times" style="display:none; margin-bottom:14px;"></div>
@@ -1054,7 +1056,8 @@ const PAISES_FIFA = [
   {code:'ie',nome:'Irlanda'},{code:'gb-sct',nome:'Escócia'},{code:'gb-wls',nome:'País de Gales'},{code:'gb-nir',nome:'Irlanda do Norte'},
   {code:'ba',nome:'Bósnia'},{code:'al',nome:'Albânia'},{code:'me',nome:'Montenegro'},{code:'mk',nome:'Macedônia'},
   {code:'bg',nome:'Bulgária'},{code:'cy',nome:'Chipre'},{code:'il',nome:'Israel'},{code:'ge',nome:'Geórgia'},
-  {code:'am',nome:'Armênia'},{code:'az',nome:'Azerbaijão'},{code:'uz',nome:'Uzbequistão'},{code:'kz',nome:'Cazaquistão'}
+  {code:'am',nome:'Armênia'},{code:'az',nome:'Azerbaijão'},{code:'uz',nome:'Uzbequistão'},{code:'kz',nome:'Cazaquistão'},
+  {code:'resto-mundo',nome:'RESTO DO MUNDO',flagUrl:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTpI-bm0SsmGjfEaqTuh6ussgECOlwCZk6wLGGQ278tgw&s=10'}
 ];
 
 // ─── ICONES SVG (inline, herdam currentColor) ────────────────────────
@@ -1090,7 +1093,7 @@ function _teamDataOuFallback(timeId, nomeTime) {
   let h = 0; for (let i = 0; i < s.length; i++) h = ((h << 5) - h) + s.charCodeAt(i);
   h = Math.abs(h);
   const hue = h % 360;
-  return { abrev: (nomeTime || '?').slice(0, 3).toUpperCase(), fundo: `hsl(${hue},40%,18%)`, cor: `hsl(${(hue + 180) % 360},60%,80%)`, pais: '', paisNome: '', crest: '' };
+  return { abrev: (nomeTime || '?').slice(0, 3).toUpperCase(), fundo: `hsl(${hue},40%,18%)`, cor: `hsl(${(hue + 180) % 360},60%,80%)`, pais: '', paisNome: '', crest: '', icone: '', flagUrl: '' };
 }
 /** Retry de crest — tenta recarregar até 3x com cache-bust; em caso de falha permanente mostra o fallback */
 window._crestError = function(img) {
@@ -1301,7 +1304,7 @@ function _pararListeners() {
 }
 
 // ─── FILTRO DE EFICIÊNCIA ─────────────────────────────────────────────
-const EFIC_TODAS = ['Ruim','Moderado','Bom'];
+const EFIC_TODAS = ['Ruim','Moderado','Bom','Super'];
 _eficFiltroTimesSet = new Set([...EFIC_TODAS, '']); // inicializa após EFIC_TODAS
 function _eficKey() { return `efic_filtro_${usuario?.uid || 'default'}`; }
 function carregarEficFiltro() {
@@ -1342,7 +1345,7 @@ window.toggleEficFiltro = (val) => {
 function htmlEficFiltro(containerId, showLabel = true) {
   const sel = carregarEficFiltro();
   return `<div>
-    ${showLabel ? `<label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">EFICIENCIA DOS TIMES</label>` : ''}
+    ${showLabel ? `<label style="display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;" class="grad">EFICIENCIA DOS TIMES</label>` : ''}
     <div class="efic-tags" id="${containerId}">
       ${EFIC_TODAS.map(e=>`<span class="efic-tag${sel.has(e)?' selecionado':''}" data-efic="${e}" onclick="toggleEficFiltro('${e}')">${e}</span>`).join('')}
     </div>
@@ -1451,8 +1454,8 @@ function htmlEficFiltroTimes() {
 /** Badge de eficiência — substitui forcaBadge na UI */
 function eficBadge(efic) {
   const e = efic || 'Bom';
-  const cor = e==='Ruim'?'#ef4444':e==='Moderado'?'#eab308':'#22c55e';
-  const bg = e==='Ruim'?'rgba(239,68,68,0.15)':e==='Moderado'?'rgba(234,179,8,0.15)':'rgba(34,197,94,0.15)';
+  const cor = e==='Ruim'?'#ef4444':e==='Moderado'?'#eab308':e==='Super'?'#A78BFA':'#22c55e';
+  const bg = e==='Ruim'?'rgba(239,68,68,0.15)':e==='Moderado'?'rgba(234,179,8,0.15)':e==='Super'?'rgba(139,92,246,0.15)':'rgba(34,197,94,0.15)';
   return `<span class="tag" style="background:${bg};color:${cor};border:1px solid ${cor}33;">${e.toUpperCase()}</span>`;
 }
 window.eficBadge = eficBadge;
@@ -2405,13 +2408,15 @@ async function carregarTimes() {
   // Hidrata TEAM_DATA e SELECAO_PAIS para times customizados adicionados pelo usuário
   adicionados.forEach(t => {
     if (t.tipo === 'selecao' && t.bandeira && !SELECAO_PAIS[t.id]) {
-      SELECAO_PAIS[t.id] = { pais: t.bandeira, paisNome: t.paisNome || t.nome };
+      const paisObj = PAISES_FIFA.find(p => p.code === t.bandeira);
+      SELECAO_PAIS[t.id] = { pais: t.bandeira, paisNome: t.paisNome || t.nome, flagUrl: paisObj?.flagUrl || '' };
     }
     if (t.tipo === 'clube' && !TEAM_DATA[t.id]) {
       const fb = _teamDataOuFallback(t.id, t.nome);
-      TEAM_DATA[t.id] = { ...fb, pais:t.bandeira||fb.pais||'eu', paisNome:t.paisNome||fb.paisNome||'', crest:t.crest||'' };
-    } else if (t.tipo === 'clube' && TEAM_DATA[t.id] && t.crest) {
-      TEAM_DATA[t.id] = { ...TEAM_DATA[t.id], crest: t.crest };
+      const paisObj = PAISES_FIFA.find(p => p.code === t.bandeira);
+      TEAM_DATA[t.id] = { ...fb, pais:t.bandeira||fb.pais||'eu', paisNome:t.paisNome||fb.paisNome||'', crest:t.crest||'', icone:t.icone||'', flagUrl:paisObj?.flagUrl||'' };
+    } else if (t.tipo === 'clube' && TEAM_DATA[t.id] && (t.crest || t.icone)) {
+      TEAM_DATA[t.id] = { ...TEAM_DATA[t.id], crest: t.crest||TEAM_DATA[t.id].crest, icone: t.icone||TEAM_DATA[t.id].icone||'' };
     }
   });
   _eficienciaCache = null;
@@ -8890,10 +8895,10 @@ window.filtrarTimes = tipo => {
   _nomeFiltroTimes = '';
   const inputEl = document.getElementById('filtro-nome-times');
   if (inputEl) inputEl.value = '';
-  document.getElementById('tab-clubes').style.background = tipo==='clubes'?'var(--purple)':'none';
-  document.getElementById('tab-clubes').style.color = tipo==='clubes'?'#fff':'var(--text-muted)';
-  document.getElementById('tab-selecoes').style.background = tipo==='selecoes'?'var(--purple)':'none';
-  document.getElementById('tab-selecoes').style.color = tipo==='selecoes'?'#fff':'var(--text-muted)';
+  document.getElementById('tab-clubes').style.borderColor = tipo==='clubes'?'var(--purple)':'transparent';
+  document.getElementById('tab-clubes').style.background = tipo==='clubes'?'rgba(139,92,246,0.15)':'none';
+  document.getElementById('tab-selecoes').style.borderColor = tipo==='selecoes'?'var(--purple)':'transparent';
+  document.getElementById('tab-selecoes').style.background = tipo==='selecoes'?'rgba(139,92,246,0.15)':'none';
   renderTimesEdit();
 };
 
@@ -8940,19 +8945,21 @@ function _renderTimesLista() {
     let inner;
     if (isSel) {
       const d = SELECAO_PAIS[t.id] || { pais:'', paisNome: t.nome };
-      const flagIcone = `<div style="width:57px;height:57px;border-radius:12px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.pais?`<img src="https://flagcdn.com/w80/${d.pais}.png" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=\\'font-size:22px;\\'>🌍</span>'">`: '<span style="font-size:22px;">🌍</span>'}</div>`;
+      const _selFlagSrc = d.flagUrl || (d.pais ? `https://flagcdn.com/w80/${d.pais}.png` : '');
+      const flagIcone = `<div style="width:57px;height:57px;border-radius:12px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${_selFlagSrc?`<img src="${_selFlagSrc}" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=\\'font-size:22px;\\'>🌍</span>'">`: '<span style="font-size:22px;">🌍</span>'}</div>`;
       inner = `<div class="entity-card" style="cursor:pointer;${ativoStyle}" onclick="editarTime('${t.id}')">
           ${flagIcone}
           <div style="flex:1;min-width:0;">
-            <div style="font-weight:800;font-size:14px;text-transform:uppercase;display:flex;align-items:center;gap:5px;flex-wrap:wrap;">${t.nome}${tagInativo}</div>
+            <div style="font-weight:800;font-size:14px;text-transform:uppercase;display:flex;align-items:center;gap:5px;flex-wrap:wrap;" class="grad">${t.nome}${tagInativo}</div>
             ${t.nomeAbreviado ? `<div style="margin-top:2px;font-size:11px;color:var(--text-muted);font-weight:600;">ABREV: ${t.nomeAbreviado.toUpperCase()}</div>` : ''}
             ${eficTag ? `<div style="margin-top:4px;">${eficTag}</div>` : ''}
           </div>
         </div>`;
     } else {
       const d = _teamDataOuFallback(t.id, t.nome);
-      const inlineFlag = d.pais
-        ? `<img src="https://flagcdn.com/w40/${d.pais}.png" loading="lazy" style="width:18px;height:auto;border-radius:2px;vertical-align:middle;flex-shrink:0;" onerror="this.style.display='none'">`
+      const _flagSrc = d.flagUrl || (d.pais ? `https://flagcdn.com/w40/${d.pais}.png` : '');
+      const inlineFlag = _flagSrc
+        ? `<img src="${_flagSrc}" loading="lazy" style="width:18px;height:auto;border-radius:2px;vertical-align:middle;flex-shrink:0;" onerror="this.style.display='none'">`
         : `<span style="font-size:10px;line-height:1;">🏳</span>`;
       const countryDescr = `<span style="font-size:10px;color:var(--text-muted);font-weight:600;">${d.paisNome||''}</span>`;
       const shieldIcone = d.crest
@@ -8960,12 +8967,14 @@ function _renderTimesLista() {
             <span class="crest-fallback">${d.abrev}</span>
             <img src="${d.crest}" alt="" loading="eager" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='';this.previousElementSibling.style.display='none';this.parentElement.style.background='transparent';this.parentElement.style.border='none';" onerror="window._crestError(this)">
           </div>`
+        : d.icone
+        ? `<div style="width:57px;height:57px;border-radius:12px;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.icone}</div>`
         : `<div style="width:57px;height:57px;border-radius:12px;background:${d.fundo};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:${d.cor};letter-spacing:-0.3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.12);box-shadow:0 2px 6px rgba(0,0,0,0.3);">${d.abrev}</div>`;
       inner = `<div class="entity-card" style="cursor:pointer;${ativoStyle}" onclick="editarTime('${t.id}')">
           ${shieldIcone}
           <div style="flex:1;min-width:0;">
             <div style="margin-bottom:2px;display:flex;align-items:center;gap:4px;">${inlineFlag}${countryDescr}</div>
-            <div style="font-weight:800;font-size:14px;text-transform:uppercase;display:flex;align-items:center;gap:5px;flex-wrap:wrap;">${t.nome}${tagInativo}</div>
+            <div style="font-weight:800;font-size:14px;text-transform:uppercase;display:flex;align-items:center;gap:5px;flex-wrap:wrap;" class="grad">${t.nome}${tagInativo}</div>
             ${t.nomeAbreviado ? `<div style="margin-top:2px;font-size:11px;color:var(--text-muted);font-weight:600;">ABREV: ${t.nomeAbreviado.toUpperCase()}</div>` : ''}
             ${eficTag ? `<div style="margin-top:4px;">${eficTag}</div>` : ''}
           </div>
@@ -8999,7 +9008,7 @@ function renderTimesEdit() {
       return d.paisNome ? { nome: d.paisNome, code: d.pais || '' } : null;
     }).filter(Boolean).map(x => JSON.stringify(x)))].map(s => JSON.parse(s)).sort((a,b) => a.nome.localeCompare(b.nome));
     filtroEl.style.display = paises.length ? 'block' : 'none';
-    filtroEl.innerHTML = paises.length ? `<div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">FILTRAR POR PAIS</label>${htmlMsDropPaisTimes(paises)}</div>` : '';
+    filtroEl.innerHTML = paises.length ? `<div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;" class="grad">FILTRAR POR PAIS</label>${htmlMsDropPaisTimes(paises)}</div>` : '';
   } else {
     filtroEl.style.display = 'none';
   }
@@ -9014,19 +9023,20 @@ document.getElementById('btn-add-time').addEventListener('click', () => {
 function abrirModalAddTime(tipoInicial) {
   _eficienciaNT = 'Bom';
   window._ntClubeCrest = null;
+  window._ntClubeIcone = null;
   fullscreen('NOVO', `
     <div style="display:flex;flex-direction:column;gap:14px;max-width:400px;margin:0 auto;">
       <div>
         <h2 style="font-size:22px;font-weight:900;margin-bottom:16px;" class="grad">NOVO TIME</h2>
-        <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">TIPO</label>
+        <label style="display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;" class="grad">TIPO</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
           <div class="tipo-btn ${tipoInicial==='clube'?'sel':''}" id="nt-c" onclick="selTipoTime('clube')">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2.5l-8 2.5v6c0 5 3.5 9.4 8 10.5 4.5-1.1 8-5.5 8-10.5V5z"/></svg>
-            <span style="font-size:12px;font-weight:700;display:block;margin-top:4px;">CLUBE</span>
+            <span style="font-size:12px;font-weight:700;display:block;margin-top:4px;" class="grad">CLUBE</span>
           </div>
           <div class="tipo-btn ${tipoInicial==='selecao'?'sel':''}" id="nt-s" onclick="selTipoTime('selecao')">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>
-            <span style="font-size:12px;font-weight:700;display:block;margin-top:4px;">SELEÇÃO</span>
+            <span style="font-size:12px;font-weight:700;display:block;margin-top:4px;" class="grad">SELEÇÃO</span>
           </div>
         </div>
       </div>
@@ -9035,7 +9045,7 @@ function abrirModalAddTime(tipoInicial) {
       <!-- CLUBE: formulário do zero -->
       <div id="nt-clube-section" style="display:${tipoInicial==='clube'?'flex':'none'};flex-direction:column;gap:14px;">
         <div style="position:relative;">
-          <label style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">PAÍS</label>
+          <label style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;" class="grad">PAÍS</label>
           <input type="hidden" id="nt-clube-pais" value="">
           <div id="nt-clube-pais-display" class="input" style="cursor:pointer;display:flex;align-items:center;gap:8px;min-height:42px;" onclick="_ntTogglePaisDropdown()">
             <span style="color:var(--text-muted);font-size:14px;" id="nt-clube-pais-label">Selecione o país...</span>
@@ -9048,15 +9058,15 @@ function abrirModalAddTime(tipoInicial) {
           </div>
         </div>
         <div>
-          <label style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">NOME DO CLUBE</label>
+          <label style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;" class="grad">NOME DO CLUBE</label>
           <input class="input" id="nt-clube-nome" placeholder="Nome do clube..." autocomplete="off" oninput="_ntClubePreview()" style="text-transform:uppercase;">
         </div>
         <div>
-          <label style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">NOME ABREVIADO (OPCIONAL)</label>
+          <label style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;" class="grad">NOME ABREVIADO (OPCIONAL)</label>
           <input class="input" id="nt-clube-nomeAbrev" placeholder="Ex: MAN. UTD" autocomplete="off" style="text-transform:uppercase;">
         </div>
         <div>
-          <label style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">BRASÃO (OPCIONAL)</label>
+          <label style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;" class="grad">BRASÃO (OPCIONAL)</label>
           <div style="display:flex;flex-direction:column;gap:10px;">
             <label style="cursor:pointer;">
               <div class="btn-ghost" style="text-align:center;pointer-events:none;font-size:13px;padding:10px;">ESCOLHER IMAGEM</div>
@@ -9065,21 +9075,25 @@ function abrirModalAddTime(tipoInicial) {
             <div id="nt-clube-crest-preview" style="width:52px;height:52px;border-radius:10px;background:rgba(255,255,255,0.05);border:1.5px dashed rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">
               <span style="font-size:22px;color:var(--text-muted);">🛡️</span>
             </div>
+            <div id="nt-clube-icon-select" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;">
+              ${['⚽','🏆','⭐','🔴','🔵','🟡','🟢','⚫','⚪','🦁','🦅','🐉','🌟','💎','🔥','🛡️','⚔️','🎯','🌈','👑'].map(ico=>`<button type="button" onclick="_ntSelecionarIcone('${ico}')" style="font-size:20px;width:36px;height:36px;border-radius:8px;border:1.5px solid var(--card-border);background:rgba(255,255,255,0.04);cursor:pointer;display:flex;align-items:center;justify-content:center;" title="${ico}">${ico}</button>`).join('')}
+            </div>
           </div>
         </div>
         <div class="efic-panel">
-          <label style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">EFICIÊNCIA</label>
+          <label style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;" class="grad">EFICIÊNCIA</label>
           <div class="efic-tags" id="nt-efic-tags">
             <span class="efic-tag${_eficienciaNT==='Ruim'?' selecionado':''}" data-efic="Ruim"     onclick="selecionarEficienciaNT('Ruim')">Ruim</span>
             <span class="efic-tag${_eficienciaNT==='Moderado'?' selecionado':''}" data-efic="Moderado" onclick="selecionarEficienciaNT('Moderado')">Moderado</span>
             <span class="efic-tag${_eficienciaNT==='Bom'?' selecionado':''}" data-efic="Bom"      onclick="selecionarEficienciaNT('Bom')">Bom</span>
+            <span class="efic-tag${_eficienciaNT==='Super'?' selecionado':''}" data-efic="Super"   onclick="selecionarEficienciaNT('Super')">Super</span>
           </div>
         </div>
         <!-- Preview ao vivo do time -->
         <div id="nt-clube-live-preview" style="display:none;background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.18);border-radius:14px;padding:16px;"></div>
 
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
-          <button id="btn-salvar-time" class="btn-primary" onclick="salvarNovoTime()" disabled style="opacity:0.4;">CRIAR</button>
+          <button id="btn-salvar-time" class="btn-primary" onclick="salvarNovoTime()" disabled style="opacity:0.4;background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;"><span class="grad">CRIAR</span></button>
           <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
         </div>
       </div>
@@ -9087,26 +9101,27 @@ function abrirModalAddTime(tipoInicial) {
       <!-- SELEÇÃO: busca existente -->
       <div id="nt-selecao-section" style="display:${tipoInicial==='selecao'?'flex':'none'};flex-direction:column;gap:14px;">
         <div>
-          <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">BUSCAR SELEÇÃO</label>
+          <label style="display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;" class="grad">BUSCAR SELEÇÃO</label>
           <input class="input" id="nt-busca" placeholder="Buscar país..." autocomplete="off" oninput="filtrarListaAddTime()">
         </div>
         <div id="nt-lista" style="max-height:280px;overflow-y:auto;border-radius:12px;border:1px solid var(--card-border);background:rgba(0,0,0,0.2);padding:8px;"></div>
 
         <div id="nt-form" style="display:none;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);border-radius:14px;padding:14px;">
-          <p style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">SELEÇÃO ESCOLHIDA</p>
+          <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;" class="grad">SELEÇÃO ESCOLHIDA</p>
           <div id="nt-preview" style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"></div>
         </div>
 
         <div class="efic-panel">
-          <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">EFICIÊNCIA</label>
+          <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;" class="grad">EFICIÊNCIA</label>
           <div class="efic-tags" id="nt-efic-tags-sel">
             <span class="efic-tag${_eficienciaNT==='Ruim'?' selecionado':''}" data-efic="Ruim"     onclick="selecionarEficienciaNTSel('Ruim')">Ruim</span>
             <span class="efic-tag${_eficienciaNT==='Moderado'?' selecionado':''}" data-efic="Moderado" onclick="selecionarEficienciaNTSel('Moderado')">Moderado</span>
             <span class="efic-tag${_eficienciaNT==='Bom'?' selecionado':''}" data-efic="Bom"      onclick="selecionarEficienciaNTSel('Bom')">Bom</span>
+            <span class="efic-tag${_eficienciaNT==='Super'?' selecionado':''}" data-efic="Super"   onclick="selecionarEficienciaNTSel('Super')">Super</span>
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
-          <button id="btn-salvar-time-sel" class="btn-primary" onclick="salvarNovoTimeSel()" disabled style="opacity:0.4;">CRIAR</button>
+          <button id="btn-salvar-time-sel" class="btn-primary" onclick="salvarNovoTimeSel()" disabled style="opacity:0.4;background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;"><span class="grad">CRIAR</span></button>
           <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
         </div>
       </div>
@@ -9211,22 +9226,38 @@ window._ntFiltrarPaises = () => {
   const opcoes = PAISES_FIFA.filter(p => !filtro || p.nome.toLowerCase().includes(filtro) || p.code.includes(filtro));
   if (!opcoes.length) { lista.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:16px;font-size:12px;">NENHUM PAÍS ENCONTRADO</p>'; return; }
   const paisSel = document.getElementById('nt-clube-pais')?.value || '';
-  lista.innerHTML = opcoes.map(p => `
+  lista.innerHTML = opcoes.map(p => {
+    const flagSrc = p.flagUrl || `https://flagcdn.com/w40/${p.code}.png`;
+    return `
     <button type="button" onclick="_ntSelecionarPais('${p.code}')" style="background:${paisSel===p.code?'rgba(139,92,246,0.2)':'rgba(255,255,255,0.03)'};border:1.5px solid ${paisSel===p.code?'var(--purple)':'transparent'};border-radius:10px;padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;">
-      <img src="https://flagcdn.com/w40/${p.code}.png" alt="" style="width:30px;height:22px;object-fit:cover;border-radius:4px;flex-shrink:0;" onerror="this.style.display='none'">
+      <img src="${flagSrc}" alt="" style="width:30px;height:22px;object-fit:cover;border-radius:4px;flex-shrink:0;" onerror="this.style.display='none'">
       <span style="font-size:13px;font-weight:700;color:var(--text);flex:1;">${_escHtml(p.nome)}</span>
-    </button>`).join('');
+    </button>`}).join('');
 };
 
 window._ntSelecionarPais = (code) => {
   const paisObj = PAISES_FIFA.find(p => p.code === code);
   const nome = paisObj?.nome || code;
+  const flagSrc = paisObj?.flagUrl || `https://flagcdn.com/w40/${code}.png`;
   const hidden = document.getElementById('nt-clube-pais');
   if (hidden) hidden.value = code;
   const label = document.getElementById('nt-clube-pais-label');
-  if (label) label.innerHTML = `<img src="https://flagcdn.com/w40/${code}.png" alt="" style="width:24px;height:18px;object-fit:cover;border-radius:3px;vertical-align:middle;"> <span style="font-weight:700;font-size:14px;">${_escHtml(nome)}</span>`;
+  if (label) label.innerHTML = `<img src="${flagSrc}" alt="" style="width:24px;height:18px;object-fit:cover;border-radius:3px;vertical-align:middle;"> <span style="font-weight:700;font-size:14px;">${_escHtml(nome)}</span>`;
   const dd = document.getElementById('nt-clube-pais-dropdown');
   if (dd) dd.style.display = 'none';
+  _ntClubePreview();
+};
+
+window._ntSelecionarIcone = (ico) => {
+  window._ntClubeCrest = null;
+  window._ntClubeIcone = ico;
+  const prev = document.getElementById('nt-clube-crest-preview');
+  if (prev) prev.innerHTML = `<span style="font-size:32px;">${ico}</span>`;
+  // Highlight selected icon
+  document.querySelectorAll('#nt-clube-icon-select button').forEach(btn => {
+    btn.style.borderColor = btn.textContent === ico ? 'var(--purple)' : 'var(--card-border)';
+    btn.style.background = btn.textContent === ico ? 'rgba(139,92,246,0.2)' : 'rgba(255,255,255,0.04)';
+  });
   _ntClubePreview();
 };
 
@@ -9237,6 +9268,7 @@ window._ntClubeCarregarCrest = (input) => {
   reader.onload = e => {
     const dataUrl = e.target.result;
     window._ntClubeCrest = dataUrl;
+    window._ntClubeIcone = null;
     const prev = document.getElementById('nt-clube-crest-preview');
     if (prev) prev.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:contain;">`;
     _ntClubePreview();
@@ -9264,11 +9296,13 @@ window.renderListaAddTime = () => {
       .filter(p => !jaTemNomes.has(p.nome.toLowerCase()))
       .filter(p => !filtro || p.nome.toLowerCase().includes(filtro) || p.code.includes(filtro));
     if (!opcoes.length) { el.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:24px;font-size:12px;">NENHUM PAÍS DISPONÍVEL</p>'; return; }
-    el.innerHTML = `<div style="display:flex;flex-direction:column;gap:4px;">${opcoes.map(p => `
+    el.innerHTML = `<div style="display:flex;flex-direction:column;gap:4px;">${opcoes.map(p => {
+      const flagSrc = p.flagUrl || `https://flagcdn.com/w40/${p.code}.png`;
+      return `
       <button type="button" onclick="escolherSelecaoAdd('${p.code}','${p.nome.replace(/'/g,"")}')" style="background:${_selNovoTime===p.code?'rgba(139,92,246,0.2)':'rgba(255,255,255,0.03)'};border:1.5px solid ${_selNovoTime===p.code?'var(--purple)':'transparent'};border-radius:10px;padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;">
-        <img src="https://flagcdn.com/w40/${p.code}.png" alt="" style="width:30px;height:22px;object-fit:cover;border-radius:4px;flex-shrink:0;" onerror="this.style.display='none'">
+        <img src="${flagSrc}" alt="" style="width:30px;height:22px;object-fit:cover;border-radius:4px;flex-shrink:0;" onerror="this.style.display='none'">
         <span style="font-size:13px;font-weight:700;color:var(--text);flex:1;">${p.nome}</span>
-      </button>`).join('')}</div>`;
+      </button>`}).join('')}</div>`;
   }
 };
 
@@ -9293,9 +9327,11 @@ window.escolherSelecaoAdd = (code, nome) => {
   const formEl = document.getElementById('nt-form');
   if (formEl) { formEl.style.display = ''; }
   const prev = document.getElementById('nt-preview');
+  const paisObj = PAISES_FIFA.find(p => p.code === code);
+  const flagSrc = paisObj?.flagUrl || `https://flagcdn.com/w80/${code}.png`;
   if (prev) prev.innerHTML = `
-    <div style="width:44px;height:34px;border-radius:6px;overflow:hidden;flex-shrink:0;"><img src="https://flagcdn.com/w80/${code}.png" alt="" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"></div>
-    <div style="flex:1;"><div style="font-weight:800;font-size:15px;">${nome}</div><div style="font-size:11px;color:var(--text-muted);">Seleção</div></div>`;
+    <div style="width:44px;height:34px;border-radius:6px;overflow:hidden;flex-shrink:0;"><img src="${flagSrc}" alt="" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"></div>
+    <div style="flex:1;"><div style="font-weight:800;font-size:15px;" class="grad">${nome}</div><div style="font-size:11px;color:var(--text-muted);">Seleção</div></div>`;
   const btn = document.getElementById('btn-salvar-time-sel');
   if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
   renderListaAddTime();
@@ -9310,6 +9346,7 @@ window.selTipoTime = tipo => {
   _selNovoTime = null;
   _eficienciaNT = null;
   window._ntClubeCrest = null;
+  window._ntClubeIcone = null;
   if (tipo === 'selecao') {
     const nt = document.getElementById('nt-form');
     if (nt) nt.style.display = 'none';
@@ -9328,12 +9365,13 @@ window.salvarNovoTime = async () => {
   const paisNome = paisObj?.nome || '';
   const eficiencia = _eficienciaNT || '';
   const crest = window._ntClubeCrest || '';
+  const icone = window._ntClubeIcone || '';
   const nomeAbreviado = document.getElementById('nt-clube-nomeAbrev')?.value.trim() || '';
   const id = 'clube-' + nome.toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'') + '-' + Date.now();
-  const novoTime = { id, nome, tipo:'clube', bandeira:pais, paisNome, liga:'', forca:75, eficiencia, crest, nomeAbreviado };
+  const novoTime = { id, nome, tipo:'clube', bandeira:pais, paisNome, liga:'', forca:75, eficiencia, crest, icone, nomeAbreviado };
   await setDoc(doc(db, 'times', id), novoTime);
   await carregarTimes();
-  _selNovoTime = null; _eficienciaNT = null; window._ntClubeCrest = null;
+  _selNovoTime = null; _eficienciaNT = null; window._ntClubeCrest = null; window._ntClubeIcone = null;
   fecharFullscreen(); renderTimesEdit();
 };
 
@@ -9393,7 +9431,7 @@ window.editarTime = (id) => {
       <div class="efic-panel">
         <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">EFICIÊNCIA DO TIME</label>
         <div class="efic-tags" id="et-efic-tags" data-selected="${t.eficiencia||'Bom'}">
-          ${['Ruim','Moderado','Bom'].map(e=>`<span class="efic-tag${(t.eficiencia||'Bom')===e?' selecionado':''}" data-efic="${e}" onclick="selecionarEficienciaET('${e}')">${e}</span>`).join('')}
+          ${['Ruim','Moderado','Bom','Super'].map(e=>`<span class="efic-tag${(t.eficiencia||'Bom')===e?' selecionado':''}" data-efic="${e}" onclick="selecionarEficienciaET('${e}')">${e}</span>`).join('')}
         </div>
       </div>
       <label class="check-row">

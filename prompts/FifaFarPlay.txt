@@ -1,12 +1,16 @@
-# FIFA FAR PLAY - Prompts de Features v37
+# FIFA FAR PLAY - Prompts de Features v38
 # FORMATO: Cada feature tem status: [ ] pendente | [x] concluído (hash: XXXXXXX)
 # O agente deve marcar o hash do commit ao concluir cada item.
-# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v37.txt e um novo é criado.
+# Ao finalizar tudo, este arquivo é renomeado para FifaFarPlay_v38.txt e um novo é criado.
 
 ## MELHORIAS ##
 
-- [x] Item 1: Pagina de ranking - incluir dropdown de adversário (hash: e3a775a)
-- [x] Item 2: Pagina de ranking - corrigir computação da tabela: jogos de dupla devem ser contabilizados corretamente (hash: e3a775a)
-- [x] Item 3: Pagina de ranking - colocar filtros de data início e data fim em linhas separadas (hash: e3a775a)
-- [x] Item 4: Cards de jogos de torneio finalizados - header deve mostrar nome do torneio em amarelo 16px (hash: e3a775a)
-- [x] Item 5: Corrigir adversário sendo listado duas vezes na tabela de confrontos do ranking (hash: e3a775a)
+- [x] Item 1: Pagina de cadastro de times - o botão criar deve ter o mesmo estilo do botão criar da página home (hash: dd8d444)
+- [x] Item 2: Pagina de cadastro de times - o texto dos botões de seleção e clubes deve ter o mesmo estilo do botão criar da home, e quando selecionado deve ter as bordas em roxo (hash: dd8d444)
+- [x] Item 3: Pagina de cadastro de times - o texto do combo filtrar por país deve ter o mesmo estilo do título no menu do app (hash: dd8d444)
+- [x] Item 4: Pagina de cadastro de times - o componente de filtrar times deve estar em upper case e a cor deve ser a mesma que o título do menu do aplicativo (hash: dd8d444)
+- [x] Item 5: Criar uma nova tag chamada super e colocando em todos os lugares que tem a eficiência do time (hash: dd8d444)
+- [x] Item 6: Na listagem de times o nome do time deve estar com o estilo igual ao texto do título do menu do aplicativo (hash: dd8d444)
+- [x] Item 7: Quando criado novo time, no componente de selecionar seleção ou clubes a cor deve estar igual o estilo do título do menu do aplicativo (hash: dd8d444)
+- [x] Item 8: Na listagem de países, acrescente um país chamado RESTO DO MUNDO com a bandeira customizada, e para os clubes colocar alguns ícones aleatórios de brasão de times (hash: dd8d444)
+- [x] Item 9: Quando for criar novo time todos os textos dos componentes em branco deve ter o mesmo estilo do título do menu principal do app, e os botões devem ter o mesmo estilo do botão criar da home (hash: dd8d444)
