@@ -3632,9 +3632,9 @@ function _renderPlayersPanel() {
     const tags = allPlayers.map(([id, nome]) => {
       const cidx = (_playerTagColorIdx.get(id) ?? 0) % _PLAYER_TAG_PALETTE.length;
       const c = _PLAYER_TAG_PALETTE[cidx];
-      return `<div style="display:inline-flex;align-items:center;background:${c.bg};border:1px solid ${c.border};border-radius:20px;padding:5px 10px;font-size:12px;font-weight:700;color:${c.color};margin:2px;">
+      return `<div onclick="removerJogJC('${id}',0)" style="display:inline-flex;align-items:center;background:${c.bg};border:1px solid ${c.border};border-radius:20px;padding:5px 10px;font-size:12px;font-weight:700;color:${c.color};margin:2px;cursor:pointer;">
         ${_nomeTag(nome)}
-        <span onclick="removerJogJC('${id}',0)" style="cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;margin-left:auto;padding-left:6px;">×</span>
+        <span style="color:var(--text-muted);font-size:16px;line-height:1;margin-left:auto;padding-left:6px;">×</span>
       </div>`;
     }).join('');
     container.innerHTML = `<div style="background:rgba(255,255,255,0.03);border:1px solid var(--card-border);border-radius:12px;padding:10px;margin-bottom:4px;">
@@ -3799,19 +3799,19 @@ function _htmlNovoAmistoso() {
     <div id="ami-efic-filtro-box" class="efic-panel" style="margin-bottom:16px;">${htmlEficFiltro('ami-efic-filtro', false)}</div>
     <div id="ami-jogadores-auto-section">
     <label style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">JOGADORES</label>
-    <div style="position:relative;margin-bottom:12px;">
-      <input id="jc-search" type="text" class="input" placeholder="BUSCAR JOGADOR..." autocomplete="off"
-        oninput="filtrarJogsJC()" onfocus="this.value='';filtrarJogsJC()"
-        onblur="setTimeout(()=>{const d=document.getElementById('jc-dropdown');if(d)d.style.display='none';},200)"
-        style="margin-bottom:0;">
-      <div id="jc-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:20;background:var(--bg);border:1px solid var(--card-border);border-radius:12px;max-height:200px;overflow-y:auto;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,0.5);"></div>
+    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:12px;">
+      <div style="position:relative;flex:1;">
+        <input id="jc-search" type="text" class="input" placeholder="BUSCAR JOGADOR..." autocomplete="off"
+          oninput="filtrarJogsJC()" onfocus="this.value='';filtrarJogsJC()"
+          onblur="setTimeout(()=>{const d=document.getElementById('jc-dropdown');if(d)d.style.display='none';},200)"
+          style="margin-bottom:0;">
+        <div id="jc-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:20;background:var(--bg);border:1px solid var(--card-border);border-radius:12px;max-height:200px;overflow-y:auto;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,0.5);"></div>
+      </div>
+      <button onclick="limparJogadoresJC()" title="REMOVER TODOS" style="flex-shrink:0;background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:0 14px;height:44px;cursor:pointer;color:var(--text-muted);font-size:20px;line-height:1;">×</button>
     </div>
     <div id="jc-players-panel" style="margin-bottom:8px;"></div>
     <div id="ami-manual-times-section" style="display:none;margin-bottom:16px;"></div>
     <div id="ami-dupla-result-panel" style="display:none;margin-bottom:8px;"></div>
-    </div>
-    <div style="margin-bottom:8px;">
-      <button class="btn-primary" style="width:100%;background:var(--card);border:1px solid var(--card-border);border-radius:18px;" onclick="limparJogadoresJC()"><span class="grad">LIMPAR JOGADORES</span></button>
     </div>
     <div id="ami-btn-sortear-row" style="display:flex;gap:8px;margin-bottom:8px;">
       <button id="btn-ami-proximo" class="btn-primary" style="background:var(--card);border:1px solid var(--card-border);border-radius:18px;flex:1;" onclick="sortearAmistoso()"><span class="grad">SORTEAR</span></button>
