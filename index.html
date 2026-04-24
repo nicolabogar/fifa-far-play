@@ -87,13 +87,21 @@
 
     /* Buttons */
     .btn-primary {
-      background: linear-gradient(135deg, var(--purple), var(--cyan));
-      border: none; color: white; font-weight: 700; cursor: pointer;
+      background: var(--card); border: 1px solid var(--card-border);
+      color: var(--text); font-weight: 700; cursor: pointer;
       border-radius: 14px; padding: 14px 20px; font-size: 15px;
       transition: opacity 0.15s, transform 0.1s; width: 100%; display: block; text-align: center;
     }
     .btn-primary:active { opacity: 0.85; transform: scale(0.98); }
     .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-danger {
+      background: linear-gradient(135deg, #EF4444, #DC2626);
+      border: none; color: #fff; font-weight: 700; cursor: pointer;
+      border-radius: 14px; padding: 14px 20px; font-size: 15px;
+      transition: opacity 0.15s, transform 0.1s; width: 100%; display: block; text-align: center;
+    }
+    .btn-danger:active { opacity: 0.85; transform: scale(0.98); }
+    .btn-danger:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
     .btn-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -607,7 +615,7 @@
     <div id="view-home" class="view active">
       <!-- Botao + CRIAR com dropdown -->
       <div id="wrap-btn-criar-home" style="margin-bottom:16px;">
-        <button id="btn-criar-home" onclick="toggleCriarMenu()" class="btn-primary" style="width:100%;font-size:16px;padding:14px 18px;text-transform:uppercase;font-weight:800;background:var(--card);border:1px solid var(--card-border);border-radius:18px;"><span class="grad">+ CRIAR</span></button>
+        <button id="btn-criar-home" onclick="toggleCriarMenu()" class="btn-primary" style="width:100%;font-size:16px;padding:14px 18px;text-transform:uppercase;font-weight:800;"><span class="grad">+ CRIAR</span></button>
       </div>
       <div id="criar-menu-dropdown" style="display:none;margin:0 -16px 24px;background:var(--bg2);border-top:1px solid var(--card-border);border-bottom:1px solid var(--card-border);box-shadow:0 8px 32px rgba(0,0,0,0.5);">
         <button class="criar-opt" onclick="abrirCriarJogador();fecharCriarMenu()">
@@ -681,7 +689,7 @@
         <span class="breadcrumb-item" onclick="irParaHome()"><span class="grad">HOME</span></span>
         <span class="breadcrumb-sep">›</span>
         <span class="breadcrumb-item active"><span class="grad">JOGADORES</span></span>
-        <button class="btn-primary" id="btn-add-jog" style="width:auto;padding:10px 18px;font-size:14px;margin-left:auto;">+ CRIAR</button>
+        <button class="btn-primary" id="btn-add-jog" style="width:auto;padding:10px 18px;font-size:14px;margin-left:auto;"><span class="grad">+ CRIAR</span></button>
       </div>
       <h2 style="font-size:22px; font-weight:900; padding:0 0 16px;" class="grad">JOGADORES</h2>
       <div id="lista-jog">
@@ -698,7 +706,7 @@
         <span class="breadcrumb-item" onclick="irParaHome()"><span class="grad">HOME</span></span>
         <span class="breadcrumb-sep">›</span>
         <span class="breadcrumb-item active"><span class="grad">AMISTOSOS</span></span>
-        <button class="btn-primary" id="btn-criar-ami" style="width:auto;padding:10px 18px;font-size:14px;margin-left:auto;">+ CRIAR</button>
+        <button class="btn-primary" id="btn-criar-ami" style="width:auto;padding:10px 18px;font-size:14px;margin-left:auto;"><span class="grad">+ CRIAR</span></button>
       </div>
       <h2 style="font-size:22px; font-weight:900; padding:0 0 20px;" class="grad">AMISTOSOS</h2>
       <div id="lista-ami">
@@ -712,7 +720,7 @@
         <span class="breadcrumb-item" onclick="irParaHome()"><span class="grad">HOME</span></span>
         <span class="breadcrumb-sep">›</span>
         <span class="breadcrumb-item active"><span class="grad">TORNEIOS</span></span>
-        <button id="btn-criar-camp" class="btn-primary" style="width:auto;padding:10px 18px;font-size:14px;margin-left:auto;">+ CRIAR</button>
+        <button id="btn-criar-camp" class="btn-primary" style="width:auto;padding:10px 18px;font-size:14px;margin-left:auto;"><span class="grad">+ CRIAR</span></button>
       </div>
       <h2 style="font-size:22px; font-weight:900; padding:0 0 16px;" class="grad">TORNEIOS</h2>
       <div id="lista-camp">
@@ -759,7 +767,7 @@
         <span class="breadcrumb-item" onclick="irParaHome()"><span class="grad">HOME</span></span>
         <span class="breadcrumb-sep">›</span>
         <span class="breadcrumb-item active"><span class="grad">TIMES</span></span>
-        <button class="btn-primary" id="btn-add-time" style="width:auto;padding:10px 18px;font-size:14px;background:var(--card);border:1px solid var(--card-border);border-radius:18px;font-weight:800;margin-left:auto;"><span class="grad">+ CRIAR</span></button>
+        <button class="btn-primary" id="btn-add-time" style="width:auto;padding:10px 18px;font-size:14px;font-weight:800;margin-left:auto;"><span class="grad">+ CRIAR</span></button>
       </div>
 
       <!-- Tabs -->
@@ -2322,7 +2330,7 @@ window.abrirModalMesclarLegado = (idDestino) => {
     <select id="sel-mesclar-origem" style="width:100%;background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:10px;padding:8px 10px;font-size:13px;font-weight:700;text-transform:uppercase;cursor:pointer;outline:none;margin-bottom:14px;">${opts}</select>
     <div style="display:flex;gap:10px;">
       <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
-      <button class="btn-primary" onclick="confirmarMesclarLegado('${idDestino}')">MESCLAR</button>
+      <button class="btn-primary" onclick="confirmarMesclarLegado('${idDestino}')"><span class="grad">MESCLAR</span></button>
     </div>`);
 };
 
@@ -2359,7 +2367,7 @@ function _solicitarCelularNovoCadastro(u) {
           <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">CELULAR <span style="color:#F87171;">*</span></label>
           <input class="input" id="i-celular-cadastro" type="tel" placeholder="(11) 99999-9999" autocomplete="tel">
         </div>
-        <button class="btn-primary" id="btn-confirmar-celular" onclick="window._confirmarCelularCadastro()">CONFIRMAR</button>
+        <button class="btn-primary" id="btn-confirmar-celular" onclick="window._confirmarCelularCadastro()"><span class="grad">CONFIRMAR</span></button>
       </div>
     `);
     let inp = null;
@@ -2692,7 +2700,6 @@ function renderJogadores() {
   c.innerHTML = sorted.map(j => {
     const isPendente = j.aprovado === false && !j.master;
     const cardContent = `
-        ${avatarJogador(j, 46)}
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
             <span style="font-weight:700;font-size:15px;text-transform:uppercase;">${_escHtml(j.nome||'')}</span>
@@ -2702,7 +2709,7 @@ function renderJogadores() {
           ${j.apelido ? `<div style="color:var(--cyan);font-size:11px;font-weight:700;margin-top:2px;text-transform:uppercase;">APELIDO: ${_escHtml(j.apelido)}</div>` : ''}
           <div style="color:var(--text-muted);font-size:11px;margin-top:2px;">${j.email||'SEM E-MAIL VINCULADO'}</div>
           ${j.celular ? `<div style="color:var(--text-muted);font-size:11px;margin-top:1px;">${j.celular}</div>` : ''}
-          ${isPendente && podeMudar ? `<button onclick="event.stopPropagation();aprovarJogador('${j.id}')" style="margin-top:8px;background:rgba(34,197,94,0.15);color:#4ADE80;border:1px solid rgba(34,197,94,0.35);font-weight:700;font-size:11px;padding:5px 12px;border-radius:8px;cursor:pointer;text-transform:uppercase;letter-spacing:0.04em;">APROVAR ACESSO</button>` : ''}
+          ${isPendente && podeMudar ? `<button onclick="event.stopPropagation();aprovarJogador('${j.id}')" class="btn-primary" style="margin-top:8px;font-size:11px;padding:5px 12px;border-radius:8px;"><span class="grad">APROVAR ACESSO</span></button>` : ''}
         </div>`;
     if (podeMudar) {
       return `
@@ -2791,7 +2798,7 @@ window.editarJogador = (id) => {
         <select id="i-simular-edit" style="width:100%;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;text-transform:uppercase;cursor:pointer;outline:none;">${opcoesSimulacao}</select>
         <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">SELECIONE UM JOGADOR PARA VER O APP COMO ELE</div>
       </div>` : ''}
-      <button class="btn-primary" id="btn-salvar-edit" onclick="salvarEdicaoJogador('${id}')" style="margin-top:10px;">SALVAR</button>
+      <button class="btn-primary" id="btn-salvar-edit" onclick="salvarEdicaoJogador('${id}')" style="margin-top:10px;"><span class="grad">SALVAR</span></button>
       <button class="btn-ghost" onclick="fecharFullscreen()" style="margin-top:8px;">CANCELAR</button>
     </div>`);
   setTimeout(() => document.getElementById('i-nome-edit')?.focus(), 100);
@@ -2853,7 +2860,7 @@ window.excluirJogador = (id, nome, onCancel) => {
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn-ghost" onclick="fecharModal();(window._swipeCancelCb&&window._swipeCancelCb())">CANCELAR</button>
-      <button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);" onclick="confirmarExcluirJog('${id}')">CONFIRMAR</button>
+      <button class="btn-danger" onclick="confirmarExcluirJog('${id}')">CONFIRMAR</button>
     </div>`);
   if (onCancel) window._swipeCancelCb = onCancel;
 };
@@ -2917,7 +2924,7 @@ document.getElementById('btn-add-jog').addEventListener('click', () => {
           <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">PERMISSAO PARA GERENCIAR O APP</div>
         </div>
       </label>` : ''}
-      <button class="btn-primary" id="btn-salvar-jog" onclick="salvarJogador()" style="margin-top:10px;">SALVAR</button>
+      <button class="btn-primary" id="btn-salvar-jog" onclick="salvarJogador()" style="margin-top:10px;"><span class="grad">SALVAR</span></button>
       <button class="btn-ghost" onclick="fecharFullscreen();irParaHome()" style="margin-top:8px;">CANCELAR</button>
     </div>`);
   setTimeout(() => document.getElementById('i-nome')?.focus(), 100);
@@ -3290,13 +3297,13 @@ function cardAmistoso(a, compact=false, readonly=false, noSwipe=false, isRanking
           <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
           <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-pdc="2" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--purple);-moz-appearance:textfield;">
         </div>
-        <button onclick="event.stopPropagation();salvarPlacarDireto('${a.id}',this)" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:var(--card);border:1px solid var(--card-border);border-radius:8px;cursor:pointer;"><span class="grad">FIM</span></button>`
+        <button onclick="event.stopPropagation();salvarPlacarDireto('${a.id}',this)" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;border-radius:8px;cursor:pointer;"><span class="grad">FIM</span></button>`
       : `<div style="display:flex;align-items:center;gap:4px;opacity:0.4;">
           <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-pdc="1" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--purple);-moz-appearance:textfield;cursor:not-allowed;">
           <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
           <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-pdc="2" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--purple);-moz-appearance:textfield;cursor:not-allowed;">
         </div>
-        <button disabled onclick="event.stopPropagation()" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:var(--card);border:1px solid var(--card-border);border-radius:8px;cursor:not-allowed;opacity:0.4;"><span class="grad">FIM</span></button>`;
+        <button disabled onclick="event.stopPropagation()" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;border-radius:8px;cursor:not-allowed;opacity:0.4;"><span class="grad">FIM</span></button>`;
   const cardId = `ami-card-${a.id}`;
   const useSwipe = (master && !noSwipe && temRes);
   const swipeOuter = useSwipe
@@ -3402,7 +3409,7 @@ window.confirmarExcluirAmistoso = (id, onCancel) => {
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn-ghost" onclick="fecharModal();(window._swipeCancelCb&&window._swipeCancelCb())">CANCELAR</button>
-      <button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);" onclick="confirmarExcluirAmi('${id}')">CONFIRMAR</button>
+      <button class="btn-danger" onclick="confirmarExcluirAmi('${id}')">CONFIRMAR</button>
     </div>`);
   if (onCancel) window._swipeCancelCb = onCancel;
 };
@@ -3833,16 +3840,17 @@ function _htmlNovoAmistoso() {
     <div id="ami-manual-times-section" style="display:none;margin-bottom:16px;"></div>
     <div id="ami-dupla-result-panel" style="display:none;margin-bottom:8px;"></div>
     </div>
+
     <div id="ami-btn-sortear-row" style="display:flex;gap:8px;margin-bottom:8px;">
-      <button id="btn-ami-proximo" class="btn-primary" style="background:var(--card);border:1px solid var(--card-border);border-radius:18px;flex:1;" onclick="sortearAmistoso()"><span class="grad">SORTEAR</span></button>
+      <button id="btn-ami-proximo" class="btn-primary" style="flex:1;" onclick="sortearAmistoso()"><span class="grad">SORTEAR</span></button>
     </div>
     <div id="ami-sorteio" style="display:none;margin-bottom:16px;"></div>
     <div style="margin-top:12px;">
       <div style="display:flex;gap:8px;margin-bottom:8px;">
-        <button id="btn-ami-excluir" class="btn-primary" style="display:none;flex:1;background:var(--card);border:1px solid var(--card-border);border-radius:18px;" onclick=""><span class="grad">EXCLUIR</span></button>
-        <button id="btn-ami-salvar" style="display:none;flex:1;background:var(--card);border:1px solid var(--card-border);border-radius:18px;" class="btn-primary" onclick="salvarAmistoso()"><span class="grad">SALVAR</span></button>
+        <button id="btn-ami-excluir" class="btn-danger" style="display:none;flex:1;" onclick="">EXCLUIR</button>
+        <button id="btn-ami-salvar" style="display:none;flex:1;" class="btn-primary" onclick="salvarAmistoso()"><span class="grad">SALVAR</span></button>
       </div>
-      <button class="btn-primary" onclick="fecharFullscreen()" style="width:100%;background:var(--card);border:1px solid var(--card-border);border-radius:18px;"><span class="grad">CANCELAR</span></button>
+      <button class="btn-ghost" onclick="fecharFullscreen()" style="width:100%;">CANCELAR</button>
     </div>`;
 }
 
@@ -4927,7 +4935,7 @@ window.editarTimeRapido = (timeId, timeNome, tipoT) => {
     </label>
     <div style="display:flex;gap:10px;">
       <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
-      <button class="btn-primary" onclick="salvarTimeRapido('${timeId}','${tipoT}')">SALVAR</button>
+      <button class="btn-primary" onclick="salvarTimeRapido('${timeId}','${tipoT}')"><span class="grad">SALVAR</span></button>
     </div>`);
 };
 window.selecionarEficienciaETR = (val) => {
@@ -4976,7 +4984,7 @@ window.inativarTimeSorteio = (timeId, timeNome, tipo) => {
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
-      <button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);" onclick="confirmarInativarTimeSorteio('${timeId}','${tipo}')">INATIVAR E RESSORTEAR</button>
+      <button class="btn-danger" onclick="confirmarInativarTimeSorteio('${timeId}','${tipo}')">INATIVAR E RESSORTEAR</button>
     </div>`);
 };
 
@@ -5020,7 +5028,7 @@ window.editarTimeAmistoso = (amiId, timeId, timeNome, tipoT) => {
     </label>
     <div style="display:flex;gap:10px;">
       <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
-      <button class="btn-primary" onclick="salvarTimeAmistoso('${amiId}','${timeId}','${tipoT}')">SALVAR</button>
+      <button class="btn-primary" onclick="salvarTimeAmistoso('${amiId}','${timeId}','${tipoT}')"><span class="grad">SALVAR</span></button>
     </div>`);
 };
 window.selecionarEficienciaETAmi = (val) => {
@@ -5094,7 +5102,7 @@ window.editarTimeTorneio = (cid, timeId, timeNome, tipoT) => {
     </label>
     <div style="display:flex;gap:10px;">
       <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
-      <button class="btn-primary" onclick="salvarTimeTorneio('${cid}','${timeId}','${tipoT}')">SALVAR</button>
+      <button class="btn-primary" onclick="salvarTimeTorneio('${cid}','${timeId}','${tipoT}')"><span class="grad">SALVAR</span></button>
     </div>`);
 };
 window.selecionarEficienciaETorn = (val) => {
@@ -5182,7 +5190,7 @@ window.abrirPlacar = id => {
       </div>
     </div>
     <div style="display:flex;gap:10px;align-items:center;justify-content:center;">
-      <button class="btn-primary" onclick="salvarPlacar('${id}')" style="max-width:200px;background:var(--card);border:1px solid var(--card-border);"><span class="grad">FIM</span></button>
+      <button class="btn-primary" onclick="salvarPlacar('${id}')" style="max-width:200px;"><span class="grad">FIM</span></button>
     </div>`);
 };
 window.salvarPlacar = async id => {
@@ -5291,7 +5299,7 @@ window.editarAmistoso = (id) => {
           </div>
         </div>
         <div style="display:flex;gap:10px;">
-          <button class="btn-primary" style="background:var(--card);border:1px solid var(--card-border);border-radius:18px;" onclick="salvarEdicaoAmistoso('${id}')"><span class="grad">SALVAR</span></button>
+          <button class="btn-primary" onclick="salvarEdicaoAmistoso('${id}')"><span class="grad">SALVAR</span></button>
         </div>
       </div>`);
     return;
@@ -5458,7 +5466,7 @@ function _perguntarNovoJogo(a) {
     <p style="color:var(--text-muted);font-size:13px;line-height:1.5;margin-bottom:20px;">DESEJA CRIAR UM NOVO JOGO COM OS MESMOS PARAMETROS?</p>
     <div style="display:flex;gap:10px;">
       <button class="btn-ghost" onclick="fecharModal()">NAO</button>
-      <button class="btn-primary" onclick="fecharModal();_criarNovoJogoMesmosParams()">SIM</button>
+      <button class="btn-primary" onclick="fecharModal();_criarNovoJogoMesmosParams()"><span class="grad">SIM</span></button>
     </div>`);
 }
 
@@ -5847,7 +5855,7 @@ function abrirModalCriarCamp(secao, secaoView) {
           <span style="color:var(--text-muted);font-size:12px;align-self:center;padding:4px 0;">NENHUM JOGADOR SELECIONADO</span>
         </div>
         <div style="display:flex;justify-content:center;margin-bottom:4px;">
-          <button onclick="limparJogsCC()" class="btn-ghost" style="font-size:13px;padding:10px 24px;width:100%;">LIMPAR JOGADORES</button>
+          <button onclick="limparJogsCC()" class="btn-primary" style="font-size:13px;padding:10px 24px;width:100%;"><span class="grad">LIMPAR JOGADORES</span></button>
         </div>
       </div>
       <div id="cc-times-escolha-section">
@@ -5864,7 +5872,7 @@ function abrirModalCriarCamp(secao, secaoView) {
     </div>
     <div id="cc-efic-filtro-box" class="efic-panel" style="margin-bottom:16px;">${htmlEficFiltro('cc-efic-filtro')}</div>
     <div style="display:flex;flex-direction:column;gap:8px;margin-top:20px;">
-      <button id="btn-camp-salvar" class="btn-primary" onclick="criarCampeonato()">SALVAR</button>
+      <button id="btn-camp-salvar" class="btn-primary" onclick="criarCampeonato()"><span class="grad">SALVAR</span></button>
       <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
     </div>`, secao, secaoView);
   setTimeout(() => {
@@ -6192,7 +6200,6 @@ function _renderTimesManualCC() {
         : slotsHtml;
       return `<div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.25);border-radius:12px;padding:10px;margin-bottom:8px;">
         <div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-bottom:6px;">
-          ${avatarJogador({fotoUrl: jog?.fotoUrl||''}, 22)}
           <div style="font-size:11px;font-weight:700;color:#C4B5FD;text-transform:uppercase;">${j.nome.toUpperCase()}</div>
         </div>
         <div style="border-top:1px solid rgba(139,92,246,0.3);margin:0 -2px 8px -2px;"></div>
@@ -6658,9 +6665,7 @@ function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar, fase
   const vit1 = temRes && cf.vencedor === cf.j1Id;
   const vit2 = temRes && cf.vencedor === cf.j2Id;
   const placarColor = isFinal ? '#FCD34D' : 'var(--yellow)';
-  const btnStyle = isFinal
-    ? 'margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:linear-gradient(135deg,#B45309,#F59E0B);border:none;color:#fff;border-radius:8px;cursor:pointer;'
-    : 'margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:var(--card);border:1px solid var(--card-border);border-radius:8px;cursor:pointer;';
+  const btnStyle = 'margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;border-radius:8px;cursor:pointer;';
   const escolhaStyle = 'padding:7px 10px;font-size:11px;font-weight:800;background:linear-gradient(135deg,rgba(139,92,246,0.4),rgba(6,182,212,0.4));border:1px solid rgba(139,92,246,0.5);color:#C4B5FD;border-radius:8px;cursor:pointer;width:100%;margin-top:4px;letter-spacing:0.04em;';
   let placarArea;
   if (temRes && isMesmoJogador) {
@@ -6688,14 +6693,14 @@ function cardJogoKnockout(cf, cid, faseIdx, confrontoIdx, isSel, podeMudar, fase
            <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
            <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="2" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--purple);-moz-appearance:textfield;">
          </div>
-         <button onclick="event.stopPropagation();salvarPartidaKnockout('${cid}',${faseIdx},${confrontoIdx},this)" class="btn-primary" style="${btnStyle}">${isFinal ? 'FIM' : '<span class="grad">FIM</span>'}</button>`;
+         <button onclick="event.stopPropagation();salvarPartidaKnockout('${cid}',${faseIdx},${confrontoIdx},this)" class="btn-primary" style="${btnStyle}"><span class="grad">FIM</span></button>`;
   } else {
     placarArea = `<div style="display:flex;align-items:center;gap:4px;opacity:0.4;">
            <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="1" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--purple);-moz-appearance:textfield;cursor:not-allowed;">
            <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
            <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="2" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--purple);-moz-appearance:textfield;cursor:not-allowed;">
          </div>
-         <button disabled onclick="event.stopPropagation()" class="btn-primary" style="${btnStyle}opacity:0.4;cursor:not-allowed;">${isFinal ? 'FIM' : '<span class="grad">FIM</span>'}</button>`;
+         <button disabled onclick="event.stopPropagation()" class="btn-primary" style="${btnStyle}opacity:0.4;cursor:not-allowed;"><span class="grad">FIM</span></button>`;
   }
   const cardBorder = isMesmoJogador
     ? (temRes ? 'border-color:rgba(139,92,246,0.4);' : 'border-color:rgba(139,92,246,0.35);box-shadow:0 0 10px rgba(139,92,246,0.12);')
@@ -6804,13 +6809,13 @@ function cardJogoTorneio(m1, m2, played, confKey, cid, gi, isSel, podeMudar=true
             <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="2" class="placar-input" onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--purple);-moz-appearance:textfield;">
           </div>
-          <button onclick="event.stopPropagation();salvarPartidaDireta('${cid}',${gi},'${m1.jogadorId}','${m2.jogadorId}',${timeIndex},this,${turno})" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:var(--card);border:1px solid var(--card-border);border-radius:8px;cursor:pointer;"><span class="grad">FIM</span></button>`
+          <button onclick="event.stopPropagation();salvarPartidaDireta('${cid}',${gi},'${m1.jogadorId}','${m2.jogadorId}',${timeIndex},this,${turno})" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;border-radius:8px;cursor:pointer;"><span class="grad">FIM</span></button>`
       : `<div style="display:flex;align-items:center;gap:4px;opacity:0.4;">
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="1" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--purple);-moz-appearance:textfield;cursor:not-allowed;">
             <span style="color:var(--text-muted);font-size:13px;font-weight:900;">×</span>
             <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" value="0" data-tpdc="2" class="placar-input" disabled onclick="event.stopPropagation()" style="width:40px;text-align:center;font-size:22px;font-weight:900;padding:6px 2px;background:rgba(255,255,255,0.06);border:1px solid var(--card-border);border-radius:8px;color:var(--purple);-moz-appearance:textfield;cursor:not-allowed;">
           </div>
-          <button disabled onclick="event.stopPropagation()" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;background:var(--card);border:1px solid var(--card-border);border-radius:8px;cursor:not-allowed;opacity:0.4;"><span class="grad">FIM</span></button>`;
+          <button disabled onclick="event.stopPropagation()" class="btn-primary" style="margin-top:20px;padding:8px 18px;font-size:13px;font-weight:800;border-radius:8px;cursor:not-allowed;opacity:0.4;"><span class="grad">FIM</span></button>`;
 
   const t1nom = (t1?.nome||'').replace(/'/g,"\\'");
   const t2nom = (t2?.nome||'').replace(/'/g,"\\'");
@@ -6915,12 +6920,7 @@ function _cardCampeao(c) {
 
   const renderMembro = (p) => {
     const jogNome = _nomeJogPorId(p.jogadorId, p.nome);
-    const foto = jogadores.find(j => j.id === p.jogadorId)?.fotoUrl;
-    const avatar = foto
-      ? `<img src="${foto}" style="width:64px;height:64px;border-radius:16px;object-fit:cover;border:3px solid rgba(252,211,77,0.7);flex-shrink:0;box-shadow:0 0 20px rgba(252,211,77,0.3);" onerror="this.outerHTML=window.avatarSvg(64)">`
-      : avatarSvg(64);
     return `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;min-width:0;">
-      ${avatar}
       ${jogNome ? `<div style="font-size:15px;font-weight:900;color:#FCD34D;text-transform:uppercase;text-align:center;letter-spacing:0.06em;text-shadow:0 0 16px rgba(252,211,77,0.4);">${jogNome}</div>` : ''}
     </div>`;
   };
@@ -7108,11 +7108,11 @@ window.abrirCampeonato = (id) => {
         ${[1,2,3,4,5].map(n => `<div class="tipo-btn${n===qtdTimes?' sel':''}" onclick="_salvarQtdTimesTorneio('${c.id}',${n})" style="font-size:12px;padding:8px 12px;flex:1;text-align:center;cursor:pointer;">${n}</div>`).join('')}
       </div>` : ''}
     ${podeMudar && c.status !== 'finalizado' ? (naoIniciado
-      ? `<button onclick="ressortearCampeonato('${c.id}')" style="width:100%;background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(6,182,212,0.2));border:1px solid rgba(139,92,246,0.4);color:#C4B5FD;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:16px;">SORTEAR TIMES / ADICIONAR JOGADORES</button>`
+      ? `<button onclick="ressortearCampeonato('${c.id}')" class="btn-primary" style="width:100%;margin-bottom:16px;"><span class="grad">SORTEAR TIMES / ADICIONAR JOGADORES</span></button>`
       : `<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:12px;margin-bottom:16px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:18px;">⚠️</span><span style="font-size:13px;color:#FCD34D;font-weight:700;">TORNEIO EM ANDAMENTO</span></div><span style="font-size:12px;color:#FCD34D;">NÃO É POSSÍVEL SORTEAR OU ADICIONAR JOGADORES</span></div>`)
     : ''}
-    ${podeMudar && naoIniciado ? `<button onclick="reiniciarTorneio('${c.id}')" style="width:100%;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);color:#FCD34D;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px;">REINICIAR TORNEIO</button>` : ''}
-    ${podeMudar ? `<button onclick="excluirCampeonato('${c.id}')" style="width:100%;background:linear-gradient(135deg,#EF4444,#DC2626);border:none;color:#fff;border-radius:12px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:16px;">EXCLUIR TORNEIO</button>` : ''}
+    ${podeMudar && naoIniciado ? `<button onclick="reiniciarTorneio('${c.id}')" class="btn-primary" style="width:100%;margin-bottom:8px;"><span class="grad">REINICIAR TORNEIO</span></button>` : ''}
+    ${podeMudar ? `<button onclick="excluirCampeonato('${c.id}')" class="btn-danger" style="width:100%;margin-bottom:16px;">EXCLUIR TORNEIO</button>` : ''}
 
     <p class="sec-title" style="margin-bottom:10px;">JOGADORES</p>
     ${(() => {
@@ -7123,7 +7123,6 @@ window.abrirCampeonato = (id) => {
         const jogNome = _nomeJogPorId(p.jogadorId, p.nome);
         const times = p.times || [p.time].filter(Boolean);
         const playerHeader = jogNome ? `<div style="position:relative;display:flex;justify-content:center;align-items:center;gap:6px;margin-bottom:6px;">
-          ${avatarJogador({fotoUrl: jog?.fotoUrl||''}, 24)}
           <div style="font-size:12px;font-weight:700;color:${_jogadorColor(p.jogadorId)};text-transform:uppercase;">${jogNome.toUpperCase()}</div>
           <div style="position:absolute;right:0;font-size:10px;font-weight:800;color:var(--text-muted);background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:2px 8px;white-space:nowrap;">${times.length} TIME${times.length !== 1 ? 'S' : ''}</div>
         </div>
@@ -7277,7 +7276,7 @@ window.reiniciarTorneio = (id) => {
       <p style="color:var(--text-muted);font-size:12px;line-height:1.5;">Reiniciar <strong style="color:var(--text)">${c.nome}</strong> vai apagar todos os resultados registrados. Os times e participantes serão mantidos. Esta ação não pode ser desfeita.</p>
     </div>
     <div style="display:flex;gap:10px;">
-      <button class="btn-primary" style="background:linear-gradient(135deg,#F59E0B,#D97706);" onclick="confirmarReiniciarTorneio('${id}')">REINICIAR</button>
+      <button class="btn-primary" onclick="confirmarReiniciarTorneio('${id}')"><span class="grad">REINICIAR</span></button>
     </div>`);
 };
 window.confirmarReiniciarTorneio = async (id) => {
@@ -7305,7 +7304,7 @@ window.excluirCampeonato = (id) => {
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn-ghost" onclick="fecharModal();(window._swipeCancelCb&&window._swipeCancelCb())">CANCELAR</button>
-      <button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);" onclick="confirmarExcluirCamp('${id}')">CONFIRMAR</button>
+      <button class="btn-danger" onclick="confirmarExcluirCamp('${id}')">CONFIRMAR</button>
     </div>`);
 };
 window.confirmarExcluirCamp = async (id) => {
@@ -7380,7 +7379,7 @@ window.ressortearCampeonato = (id) => {
       ${jogadores.map(j => `<label class="check-row"><input type="checkbox" class="rsc" value="${j.id}" data-nome="${_nomeExibicao(j).replace(/"/g,'&quot;')}" ${selecionados.has(j.id)?'checked':''}>${SVG_USER_CHIP}<span style="font-weight:700;">${_nomeExibicao(j)}</span></label>`).join('')}
     </div>
     <div style="display:flex;gap:10px;">
-      <button class="btn-primary" onclick="confirmarRessortear('${id}')">SORTEAR</button>
+      <button class="btn-primary" onclick="confirmarRessortear('${id}')"><span class="grad">SORTEAR</span></button>
     </div>`);
 };
 
@@ -7446,8 +7445,8 @@ window.regPartida = (cid, gi, j1Id, j2Id) => {
       </div>
     </div>
     <div style="display:flex;gap:10px;">
-      <button class="btn-ghost" onclick="abrirCampeonato('${cid}')">Voltar</button>
-      <button class="btn-primary" onclick="salvarPartida('${cid}',${gi})">Salvar Resultado ✓</button>
+      <button class="btn-ghost" onclick="abrirCampeonato('${cid}')">VOLTAR</button>
+      <button class="btn-primary" onclick="salvarPartida('${cid}',${gi})"><span class="grad">SALVAR RESULTADO ✓</span></button>
     </div>`);
 };
 
@@ -7629,14 +7628,12 @@ function calcularRankingTorneios(jogIds, torneioNomes, dataIni, dataFim, modoJog
 }
 
 function renderRankRow(p, i, fromHome) {
-  const foto = p.fotoUrl ? `<img src="${p.fotoUrl}" style="width:36px;height:36px;border-radius:10px;object-fit:cover;flex-shrink:0;" onerror="this.outerHTML=window.avatarSvg(36)">`  : avatarSvg(36);
   const clickHandler = fromHome
     ? `irParaRankingComJogador('${p.id}')` 
     : `_setRankJogFiltro('${p.id}')`;
   const titulosHtml = (p.titulos||0) > 0 ? `<span title="TITULOS TORNEIOS" style="color:var(--yellow);">🏆${p.titulos}</span>` : '';
   return `<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:12px;margin-bottom:8px;cursor:pointer;" onclick="${clickHandler}">
     <div class="rank-pos" style="color:${i===0?'var(--yellow)':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text-muted)'};font-weight:900;">${i+1}°</div>
-    ${foto}
     <div style="flex:1;min-width:0;">
       <div class="grad" style="font-weight:800;font-size:14px;text-transform:uppercase;">${p.nome}</div>
     </div>
@@ -7653,13 +7650,11 @@ function renderRankRow(p, i, fromHome) {
 }
 
 function renderRankRowTorneio(p, i, fromHome) {
-  const foto = p.fotoUrl ? `<img src="${p.fotoUrl}" style="width:36px;height:36px;border-radius:10px;object-fit:cover;flex-shrink:0;" onerror="this.outerHTML=window.avatarSvg(36)">` : avatarSvg(36);
   const clickHandler = fromHome
     ? `irParaRankingComJogador('${p.id}')`
     : `_setRankJogFiltro('${p.id}')`;
   return `<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:12px;margin-bottom:8px;cursor:pointer;" onclick="${clickHandler}">
     <div class="rank-pos" style="color:${i===0?'var(--yellow)':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text-muted)'};font-weight:900;">${i+1}°</div>
-    ${foto}
     <div style="flex:1;min-width:0;">
       <div class="grad" style="font-weight:800;font-size:14px;text-transform:uppercase;">${p.nome}</div>
     </div>
@@ -8074,7 +8069,7 @@ function _renderRankFiltros() {
 
   // Botão limpar filtros (dentro do painel)
   const limparBtn = temFiltros
-    ? `<button onclick="_rankLimparFiltros()" class="btn-primary" style="width:100%;margin-top:12px;font-size:14px;background:var(--card);border:1px solid var(--card-border);border-radius:18px;"><span class="grad">LIMPAR FILTROS</span></button>`
+    ? `<button onclick="_rankLimparFiltros()" class="btn-primary" style="width:100%;margin-top:12px;font-size:14px;"><span class="grad">LIMPAR FILTROS</span></button>`
     : '';
 
   el.innerHTML = `
@@ -8281,13 +8276,10 @@ function _renderRankJogos() {
           <th style="color:var(--red);">GS</th>
           <th>SG</th>
         </tr></thead><tbody>${linhas.map(r=>{
-          const foto = r.fotoUrl
-            ? `<img src="${r.fotoUrl}" class="rank-mdrop-item-foto" style="width:28px;height:28px;" onerror="this.outerHTML=window.avatarSvg(28)">`
-            : avatarSvg(28);
           const sg = r.gf - r.gs;
           const sgColor = sg > 0 ? 'color:var(--green);' : sg < 0 ? 'color:var(--red);' : '';
           return `<tr>
-            <td><div style="display:flex;align-items:center;gap:8px;">${foto}<span class="grad" style="text-transform:uppercase;">${r.nome}</span></div></td>
+            <td><div style="display:flex;align-items:center;gap:8px;"><span class="grad" style="text-transform:uppercase;">${r.nome}</span></div></td>
             <td>${r.j}</td>
             <td style="color:var(--green);">${r.v}</td>
             <td>${r.e}</td>
@@ -8815,7 +8807,6 @@ function cardCampHome(c, modoLista=false) {
       const jogNome = _nomeJogPorId(p.jogadorId, p.nome);
       const times = (p.times?.length ? p.times : [p.time]).filter(Boolean);
       const playerHeader = jogNome ? `<div style="position:relative;display:flex;justify-content:center;align-items:center;gap:6px;margin-bottom:6px;">
-          ${avatarJogador({fotoUrl: jog?.fotoUrl||''}, 24)}
           <div style="font-size:12px;font-weight:700;color:${_jogadorColor(p.jogadorId)};text-transform:uppercase;">${jogNome.toUpperCase()}</div>
           <div style="position:absolute;right:0;font-size:10px;font-weight:800;color:var(--text-muted);background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:2px 8px;white-space:nowrap;">${times.length} TIME${times.length !== 1 ? 'S' : ''}</div>
         </div>
@@ -8910,14 +8901,6 @@ function cardCampHome(c, modoLista=false) {
     const timesAll = membrosCard.flatMap(p => p.times || [p.time].filter(Boolean));
     const timesNomes = timesAll.map(t => t?.nome || '').filter(Boolean);
 
-    const jogAvatars = membrosCard.map(p => {
-      const jog = jogadores.find(j => j.id === p.jogadorId);
-      const foto = jog?.fotoUrl;
-      return foto
-        ? `<img src="${foto}" style="width:32px;height:32px;border-radius:10px;object-fit:cover;border:2px solid rgba(252,211,77,0.5);flex-shrink:0;" onerror="this.outerHTML=window.avatarSvg(32)">`
-        : avatarSvg(32);
-    }).join('');
-
     const timesBadges = timesAll.slice(0, 3).map(t => {
       const tt = selecoes.some(s => s.id === t?.id) ? 'selecoes' : 'clubes';
       return badgeTimeCompact(t?.id||'', t?.nome||'', tt);
@@ -8926,7 +8909,6 @@ function cardCampHome(c, modoLista=false) {
     const tituloMini = isDupla ? 'DUPLA CAMPEA' : 'CAMPEAO';
     return `<div style="margin-top:10px;padding:10px 12px;background:linear-gradient(135deg,rgba(252,211,77,0.15),rgba(245,158,11,0.1));border:1.5px solid rgba(252,211,77,0.5);border-radius:14px;display:flex;align-items:center;gap:10px;">
       <div style="font-size:24px;line-height:1;">🏆</div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">${jogAvatars}</div>
       <div style="flex:1;min-width:0;">
         <div style="font-size:9px;font-weight:900;color:rgba(252,211,77,0.7);text-transform:uppercase;letter-spacing:0.12em;">${tituloMini}</div>
         <div style="font-size:12px;font-weight:900;color:#FCD34D;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${nomesJogs.join(' & ')}</div>
@@ -9195,7 +9177,7 @@ function abrirModalAddTime(tipoInicial) {
         <div id="nt-clube-live-preview" style="display:none;background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.18);border-radius:14px;padding:16px;"></div>
 
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:20px;">
-          <button id="btn-salvar-time" class="btn-primary" onclick="salvarNovoTime()" disabled>SALVAR</button>
+          <button id="btn-salvar-time" class="btn-primary" onclick="salvarNovoTime()" disabled><span class="grad">SALVAR</span></button>
           <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
         </div>
       </div>
@@ -9223,7 +9205,7 @@ function abrirModalAddTime(tipoInicial) {
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:20px;">
-          <button id="btn-salvar-time-sel" class="btn-primary" onclick="salvarNovoTimeSel()" disabled>SALVAR</button>
+          <button id="btn-salvar-time-sel" class="btn-primary" onclick="salvarNovoTimeSel()" disabled><span class="grad">SALVAR</span></button>
           <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
         </div>
       </div>
@@ -9542,7 +9524,7 @@ window.editarTime = (id) => {
       </label>
       <div style="display:flex;gap:10px;margin-top:8px;">
         <button class="btn-ghost" onclick="fecharFullscreen()">CANCELAR</button>
-        <button class="btn-primary" onclick="salvarEdicaoTime('${id}')">SALVAR</button>
+        <button class="btn-primary" onclick="salvarEdicaoTime('${id}')"><span class="grad">SALVAR</span></button>
       </div>
     </div>`);
 };
@@ -9570,7 +9552,7 @@ window.excluirTime = async id => {
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
-      <button class="btn-primary" style="background:linear-gradient(135deg,#EF4444,#DC2626);" onclick="confirmarExcluirTime('${id}')">CONFIRMAR</button>
+      <button class="btn-danger" onclick="confirmarExcluirTime('${id}')">CONFIRMAR</button>
     </div>`);
 };
 
@@ -9601,7 +9583,6 @@ window.mostrarModalInativoTime = (id, nome, inativo) => {
   const acao = inativo ? 'REATIVAR' : 'INATIVAR';
   const msgCor = inativo ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)';
   const bordCor = inativo ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)';
-  const btnCor = inativo ? 'linear-gradient(135deg,#16a34a,#22c55e)' : 'linear-gradient(135deg,#EF4444,#DC2626)';
   const msg = inativo
     ? `Reativar <strong style="color:var(--text)">${nome}</strong>? Ele voltará a aparecer nos sorteios.`
     : `Marcar <strong style="color:var(--text)">${nome}</strong> como inativo? Ele não sairá nos próximos sorteios.`;
@@ -9611,7 +9592,7 @@ window.mostrarModalInativoTime = (id, nome, inativo) => {
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn-ghost" onclick="fecharModal()">CANCELAR</button>
-      <button class="btn-primary" style="background:${btnCor};" onclick="fecharModal();toggleInativoTime('${id}',${!inativo})">${acao}</button>
+      <button class="btn-primary" onclick="fecharModal();toggleInativoTime('${id}',${!inativo})"><span class="grad">${acao}</span></button>
     </div>`);
 };
 

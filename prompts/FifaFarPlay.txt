@@ -14,3 +14,5 @@
 - [x] Item 7: Quando criado novo time, no componente de selecionar seleção ou clubes a cor deve estar igual o estilo do título do menu do aplicativo (hash: dd8d444)
 - [x] Item 8: Na listagem de países, acrescente um país chamado RESTO DO MUNDO com a bandeira customizada, e para os clubes colocar alguns ícones aleatórios de brasão de times (hash: dd8d444)
 - [x] Item 9: Quando for criar novo time todos os textos dos componentes em branco deve ter o mesmo estilo do título do menu principal do app, e os botões devem ter o mesmo estilo do botão criar da home (hash: dd8d444)
+- [x] Item 10: Remover a imagem do jogador em todos os lugares que tem referência do nome do jogador, deixar a imagem apenas no cadastro do jogador (hash: b86821b)
+- [x] Item 11: Padronizar todos os botões: botões de excluir com cor vermelha, botões de cancelar com cor de card e texto cinza, demais botões com cor de card e texto com o degradê do título do menu principal (hash: b86821b)
