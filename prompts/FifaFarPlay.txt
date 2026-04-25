@@ -5,4 +5,6 @@
 
 ## MELHORIAS ##
 
-- [ ] [Descreva aqui a próxima melhoria desejada]
+- [ ] Card de jogos: data do jogo no menu do card e como tag (todos os cards: amistosos pendentes, finalizados e partidas de torneio no ranking)
+- [ ] Cards finalizados: remover quebra de linha e tag do vencedor, adicionar ícone de taça à esquerda do nome do jogador abaixo da eficiência do time
+- [ ] Ranking: textos e estilos iguais à tela de amistoso (cor dos botões filtro, tipo de botão modo de jogo, título das seções com grad)
